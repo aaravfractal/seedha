@@ -1,5 +1,7 @@
 # Seedha
 
+**Live prototype:** https://seedha.vercel.app
+
 **Know what you really keep.** Net revenue by channel for India's small hill hotels, and the tools to win guests back direct.
 
 Track D6: Channel Mix and Distribution Cost Optimisation · AI-Tourism Hackathon, TBI GEU, Dehradun, 13 to 14 Oct 2026
