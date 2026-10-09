@@ -75,4 +75,61 @@ bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
 **Simulated (missing keys)**: Claude, WhatsApp, Razorpay, Polygon Amoy (all
 reported by `/health`).
 
-**Commit**: see `git log` (M1 commit "M1 Foundation").
+**Commit**: e733e4c
+
+---
+
+## M2 Statement upload and parser — passed
+
+**Built**
+- `POST /statements` (one file per request, real progress), `GET /statements`,
+  `GET /statements/samples`, `POST /statements/samples/{i}` ("Use sample
+  statements"), `POST /statements/rows/{id}/review` (keep out / count it).
+- Parser recognises five layouts by their content, not file name: MakeMyTrip
+  payout PDF (pdfplumber tables), Booking.com payouts (xlsx), Agoda statement
+  (csv), travel agent register (xlsx), hotel register (xlsx, walk-in and
+  direct). Amounts like "4,200.00", "₹ 4,200", "(802.00)" become paise.
+- Unknown layouts go to Claude (`claude-opus-5` via `CLAUDE_MODEL`, streamed,
+  strict JSON schema, amounts copied as printed). Every returned amount must
+  appear in the file or the row is flagged `not_in_source` (D-019). Without a
+  key the owner sees a clear "needs Claude (simulated mode)" message.
+- Ingest: duplicate file (same SHA-256) is "already read"; duplicate lines
+  (same channel + reference) are skipped; one shared booking builder for seed
+  and upload (D-024). Guards: 10 MB, type checked against bytes, xlsx unpacked
+  size limit (zip bombs), PDF page limit.
+- Six deterministic sample files written from the canonical rows; a test
+  regenerates them and requires byte-for-byte equality.
+- Web Upload screen as in the prototype: drop zone, sample button, choose
+  files, per-file progress and row counts, "1,500 rows matched. 3 need a
+  look." with each flagged row's reason and review buttons, "See my real
+  money". Empty, loading and error states. Checked in a browser at 1440 px
+  (light) and 390 px (dark): no console errors, no horizontal scroll.
+
+**Tests**: API 135 passed, 0 failed. Web unit 12 passed, 0 failed.
+
+**Code quality**: ruff 0 · pylint 10.00 · mypy 0 · coverage 99% (money 100%) ·
+bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
+(dev allowlist D-012) · e2e n/a until M6
+
+**Numbers checked**
+- Six sample files through the real upload path: 410 + 412 + 214 + 96 + 180
+  + 188 = 1,500 rows; 3 flagged: MM48213 ("Payout ₹3,120, but list minus
+  deductions is ₹3,240"), BK55320 ("GST on commission line missing"),
+  AG77102 ("Commission charged on a cancelled stay")
+- After upload the ledger reads paid to channels ₹10,39,108, net ₹47,33,012,
+  1,500 room nights (identical to the seed path)
+- Every one of the 1,500 parsed lines equals its canonical row field by field
+- Accepting AG77102 adds exactly ₹802 to paid to channels
+- Uploading the same file twice, or the same lines in a re-saved file, adds 0
+
+**Issues found in self-review and fixed**
+- Grounding merged adjacent CSV cells into one number and wrongly flagged a
+  correct Claude row; tables are now grounded per cell, PDFs with a
+  grouping-aware regex (1,23,456 and 123,456).
+- Decimal normalisation treated 123456.50 and 123456.5 as different.
+- Zip-bomb and huge-PDF inputs were not bounded; both now refused with tests.
+- Excel sample files changed hash on every run (openpyxl save time); pinned.
+- Make dev restarted the API without reload; now `--reload` in dev only.
+
+**Simulated (missing keys)**: Claude (unknown layouts only), WhatsApp,
+Razorpay, Polygon Amoy.

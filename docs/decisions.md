@@ -99,3 +99,40 @@ before first paint. No analytics or advertising cookies exist.
 revenue lost to channels" becomes "of list revenue paid to channels"
 (Rs 10,39,108 / Rs 63,05,000 = 16.5%), because the bare word "lost" is not
 allowed.
+
+## M2 Statement upload and parser
+
+**D-018 Known PDF layouts are read by plain code.** CLAUDE.md sends PDFs to
+Claude. The MakeMyTrip payout PDF is a fixed table, so it is read with
+pdfplumber tables first; Claude is used for any PDF, Excel or CSV whose layout
+Seedha does not recognise. This keeps every sample number exact, keeps the
+demo working without keys, and is closer to rule 1. Layouts are recognised by
+their headers, never by file name.
+
+**D-019 Claude output is grounded.** Claude copies amounts as printed (strict
+JSON schema, strings). Every non-zero amount it returns must appear in the
+source file (per cell for tables, grouping-aware for PDF text) or the row is
+flagged `not_in_source` and kept out of the flip. Grounded rows still pass the
+same payout check as any other row.
+
+**D-020 Upload limits.** One file per request so the progress shown is real;
+10 MB per file; Excel refused if it unpacks to more than 100 MB (zip bombs);
+PDFs over 300 pages refused; file type checked against the bytes.
+
+**D-021 Duplicates never double-count.** Same bytes again: "already read",
+nothing stored. Same (channel, reference) in another file: skipped and
+reported as "already counted".
+
+**D-022 Owner review of flagged rows.** Each flagged row offers "Keep it out"
+(excluded) or "Count it anyway" (accepted). Only accepted rows join the
+ledger (rule 3).
+
+**D-023 Claude model and failures.** `CLAUDE_MODEL` defaults to
+`claude-opus-5` in .env.example. Server-side refusal fallbacks (a beta
+feature) are not enabled: a refusal, timeout or API error simply means the
+file is reported as unreadable and the owner can export it as CSV. Money is
+unaffected either way.
+
+**D-024 One booking builder.** The seed loader and statement upload both
+build bookings through `services/rows.to_booking` and `ingest.BookingWriter`,
+so checks and money lines can never drift between the two paths.

@@ -77,14 +77,14 @@ check-web:
 	cd $(WEB) && node scripts/audit-check.mjs
 
 api: env
-	$(LOAD_ENV) && cd $(API) && $(VENV)/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
+	$(LOAD_ENV) && cd $(API) && $(VENV)/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 $(API_FLAGS)
 
 web: env
 	$(LOAD_ENV) && cd $(WEB) && npx next dev --port 3000
 
 dev: env
 	@echo "API on http://localhost:8000, web on http://localhost:3000"
-	trap 'kill 0' EXIT INT TERM; $(MAKE) api & $(MAKE) web & wait
+	trap 'kill 0' EXIT INT TERM; $(MAKE) api API_FLAGS=--reload & $(MAKE) web & wait
 
 build-web:
 	$(LOAD_ENV) && cd $(WEB) && npx next build

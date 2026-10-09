@@ -13,7 +13,6 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
-from collections.abc import Iterable
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -32,9 +31,12 @@ from app.models import (
     Room,
     StatementFile,
 )
-from app.money import LineItems, rupees
-from app.services.checks import RawRow, check_row
+from app.money import rupees
+from app.services.checks import RawRow
+from app.services.ingest import BookingWriter
 from app.services.ledger import DEFAULT_END
+from app.services.parser import ParseResult
+from app.services.rows import ParsedRow
 from seed.spec import CHANNELS, HISTORY_FILE, PROPERTY, ROOM_TYPES, ROOMS
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
@@ -101,91 +103,49 @@ def file_record(session: Session, prop: Property, name: str, method: str) -> Sta
     return record
 
 
-def booking_from_row(
-    row: dict[str, str],
-    prop: Property,
-    channels: dict[str, Channel],
-    rooms: dict[int, Room],
-    gst_applies: dict[str, bool],
-    source: str,
-) -> Booking:
-    """Convert one CSV row (rupees) into a checked Booking (paise)."""
-    raw = RawRow(
-        status=row["status"],
-        list_amount=rupees(int(row["list_amount"])),
-        discount=rupees(int(row["discount"])),
-        commission=rupees(int(row["commission"])),
-        gst_on_commission=rupees(int(row["gst"])),
-        fees=rupees(int(row["fees"])),
-        tds=rupees(int(row["tds"])),
-        gst_tcs=rupees(int(row["tcs"])),
-        payout_reported=rupees(int(row["payout"])),
-    )
-    result = check_row(raw, gst_applies[row["channel"]])
-    lines = LineItems(raw.list_amount, raw.discount, raw.commission,
-                      raw.gst_on_commission, raw.fees)  # fmt: skip
-    room = rooms.get(int(row["room"])) if row["room"] else None
-    return Booking(
-        property_id=prop.id,
-        channel_id=channels[row["channel"]].id,
-        room_id=room.id if room else None,
+def parsed_from_csv(row: dict[str, str]) -> ParsedRow:
+    """One canonical CSV row (whole rupees) as a ParsedRow (paise)."""
+    return ParsedRow(
+        channel=row["channel"],
         external_ref=row["external_ref"],
-        source=source,
         status=row["status"],
         check_in=date.fromisoformat(row["check_in"]),
         nights=int(row["nights"]),
         guest_name=row["guest_name"],
         guest_city=row["guest_city"] or None,
-        list_amount=raw.list_amount,
-        discount=raw.discount,
-        commission=raw.commission,
-        gst_on_commission=raw.gst_on_commission,
-        fees=raw.fees,
-        net_kept=lines.net_kept,
-        tds=raw.tds,
-        gst_tcs=raw.gst_tcs,
-        payout_reported=raw.payout_reported,
-        math_check_passed=result.passed,
-        flag_reason=result.reason,
-        flag_detail=result.detail,
-        review_status="none" if result.passed else "pending",
+        room=int(row["room"]) if row["room"] else None,
+        money=RawRow(
+            status=row["status"],
+            list_amount=rupees(int(row["list_amount"])),
+            discount=rupees(int(row["discount"])),
+            commission=rupees(int(row["commission"])),
+            gst_on_commission=rupees(int(row["gst"])),
+            fees=rupees(int(row["fees"])),
+            tds=rupees(int(row["tds"])),
+            gst_tcs=rupees(int(row["tcs"])),
+            payout_reported=rupees(int(row["payout"])),
+        ),
     )
 
 
 class RowLoader:
-    """Turns CSV rows into bookings for one property."""
+    """Turns canonical CSV rows into bookings, one statement_file per file name."""
 
     def __init__(self, session: Session, prop: Property) -> None:
         self.session = session
         self.prop = prop
-        channels = session.scalars(select(Channel).where(Channel.property_id == prop.id))
-        self.channels = {c.key: c for c in channels}
-        rooms = session.scalars(select(Room).where(Room.property_id == prop.id))
-        self.rooms = {r.number: r for r in rooms}
-        contracts = session.scalars(select(ChannelContract)).all()
-        key_by_id = {c.id: c.key for c in self.channels.values()}
-        self.gst_applies = {
-            key_by_id[c.channel_id]: c.gst_applies for c in contracts if c.channel_id in key_by_id
-        }
+        self.writer = BookingWriter(session, prop.id)
 
-    def load(self, rows: Iterable[dict[str, str]], source: str) -> list[Booking]:
-        """Add every row under one statement_file per file name."""
-        files: dict[str, StatementFile] = {}
+    def load(self, rows: list[dict[str, str]], source: str) -> list[Booking]:
+        """Add every row through the same writer statement upload uses."""
         bookings: list[Booking] = []
-        for row in rows:
-            name = row["file"]
-            if name not in files:
-                files[name] = file_record(self.session, self.prop, name, "seed")
-            booking = booking_from_row(row, self.prop, self.channels, self.rooms,
-                                       self.gst_applies, source)  # fmt: skip
-            booking.statement_file_id = files[name].id
-            bookings.append(booking)
-        self.session.add_all(bookings)
-        self.session.flush()
-        for record in files.values():
-            mine = [b for b in bookings if b.statement_file_id == record.id]
-            record.row_count = len(mine)
-            record.flagged_count = sum(1 for b in mine if not b.math_check_passed)
+        for name in dict.fromkeys(row["file"] for row in rows):
+            record = file_record(self.session, self.prop, name, "seed")
+            mine = [parsed_from_csv(r) for r in rows if r["file"] == name]
+            added, _ = self.writer.write(ParseResult("seed", "seed", mine), record.id, source)
+            record.row_count = len(added)
+            record.flagged_count = sum(1 for b in added if not b.math_check_passed)
+            bookings.extend(added)
         return bookings
 
 

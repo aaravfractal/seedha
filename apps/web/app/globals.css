@@ -631,3 +631,42 @@ label.fl {
     transition: none !important;
   }
 }
+
+/* upload */
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: 22px;
+  padding: 36px 20px;
+  text-align: center;
+  background: var(--card);
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.drop.over {
+  border-color: var(--accent);
+  background: var(--accentSoft);
+}
+.file {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+.file:last-child {
+  border: 0;
+}
+.progress i.busy {
+  width: 60%;
+  animation: busy 1.2s ease-in-out infinite alternate;
+}
+@keyframes busy {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
