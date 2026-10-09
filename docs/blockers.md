@@ -18,7 +18,7 @@ To unblock: provide `PROOF_RPC_URL` and a funded Amoy test key, and allow a
 web3 dependency (eth-account or web3.py) on a machine where it installs; the
 chain step is isolated in `app/services/proof.py` (`ChainWriter`).
 
-## B-002 ESP32 device build (M8) — PlatformIO registry download failing
+## B-002 ESP32 device build (M8) — resolved in M11
 
 `pio run -e seedha_desk` needs the `platformio/espressif32 @ 6.10.0`
 platform (several hundred MB). Three attempts failed on the same download:
@@ -42,6 +42,13 @@ toolchain (`espressif/toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5`, 92 MB)
 then stalled at "Downloading 0%" twice for over 15 minutes each. The same
 file downloads fine with curl (about 400 KB/s from the registry's mirror),
 so the stall is in PlatformIO's downloader, not the network.
+
+Resolved: with the PlatformIO core moved into the repo (B-003) the platform
+and toolchain downloaded on the next attempt. The build then failed once on
+TFT_eSPI's "TOUCH_CS not defined" `#warning` (our -Werror applies because
+main.cpp includes the header); the board has no touch panel, so
+`-DDISABLE_ALL_LIBRARY_WARNINGS=1` turns off that library's setup notices.
+`pio run -e seedha_desk`: SUCCESS, zero warnings, RAM 14.5%, flash 74.8%.
 
 ## B-003 Files written outside the repo (M8) — needs Aarav
 

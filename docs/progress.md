@@ -3,6 +3,39 @@
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-aarav.md.
 
+## Final summary (10 October 2026)
+
+**All 11 milestones passed.** `make check` is green end to end: API, web,
+e2e, history secret scan, firmware native tests and the ESP32 build.
+
+ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.98% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7
+
+- Tests: API 300, web unit 18, Playwright 7 (green 3 runs in a row),
+  firmware native 5.
+- All locked numbers hold in tests, the API and the browser: ₹10,39,108
+  paid to channels; ₹15,71,988 lost vs list price; ₹47,33,012 net;
+  MakeMyTrip 1st to 5th (₹2,737); 10.7% and 16.7%; 1,500 rows with 3
+  flagged; 12 repeat guests ₹41,800; Neha's slip ₹2,678; DEODAR-RS26 →
+  ₹2,233 avoided, ₹2,199 net; September MMT ₹1,09,542.
+- `make demo` works from a fresh clone with only `.env.example` copied
+  (about 3.5 minutes); the 8-step loop passed against it. How to run it and
+  the demo script are in `README-dev.md`.
+- Simulated and labelled until keys arrive: Claude, WhatsApp, Razorpay UPI,
+  the Polygon proof write.
+
+**Needs Aarav** (docs/needs-from-aarav.md): confirm D-001 (agent GST); keys
+for Claude, WhatsApp (plus an approved template), Razorpay and Amoy; Desk
+hardware; the teammate's name and the legal emails; a call on guessable perk
+codes (item 9); and whether to delete `~/.platformio` and
+`~/.cache/pre-commit` (item 10).
+
+**Rule breach to know about** (B-003): during M8, PlatformIO wrote about
+20 MB to `~/.platformio`, outside the repo. Builds now stay inside the repo.
+I have not deleted that folder.
+
+**Still blocked**: B-001, the testnet write (`eth-account` will not install
+here). The fallback stores the Merkle root locally and says so in the UI.
+
 ---
 
 ## M1 Foundation — passed
@@ -380,7 +413,7 @@ bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
 
 ---
 
-## M8 Desk firmware — in progress (checkpoint)
+## M8 Desk firmware — checkpoint (see completion below)
 
 Done and tested:
 - `firmware/seedha-desk`: PlatformIO project (ESP32, Arduino). Core library
@@ -431,10 +464,12 @@ stale CSS and layouts (dev only; cleared on `make dev`).
 
 **Commit**: 1cc4f46 (checkpoint) and the combined M9/M10 commit below.
 
-## M8 note
-The device build is blocked by PlatformIO downloads (B-002). The platform
-itself installed on the fourth attempt; the Xtensa toolchain download then
-stalled at 0%. Retried in M11.
+## M8 Desk firmware — passed (completed in M11)
+The device build was blocked by PlatformIO downloads (B-002). In M11 it
+downloaded into a repo-local PlatformIO folder, and after turning off
+TFT_eSPI's touch-pin notice (the board has no touch panel) `pio run -e
+seedha_desk` succeeded with zero warnings: RAM 14.5%, flash 74.8%. The 5
+native tests pass. Not tested on real hardware (needs-from-aarav item 6).
 
 ---
 
@@ -468,7 +503,7 @@ hospitality teammate name (needs-from-aarav.md items 7 and 8).
 
 **Commit**: combined "M9 completion and M10" commit (see git log).
 
-## M11 Final hardening — passed (firmware device build still blocked, B-002)
+## M11 Final hardening — passed
 
 **Security**
 - Route auth sweep: every operation in the API schema is classified; all
@@ -513,7 +548,8 @@ simulated, layout, quality gates, security notes, troubleshooting.
 axe sweep, keyboard, flip speed): the full suite passed 3 runs in a row
 (7/7 each, about 2.1 minutes per run).
 
-**Firmware**: native tests pass; the ESP32 build retried in M11, and the
-Xtensa toolchain download stalled at 0% again (B-002).
+**Firmware**: the ESP32 device build now succeeds with zero warnings (M8
+closed, B-002 resolved). PlatformIO is kept inside the repo from now on;
+it had written to `~/.platformio` during M8 (B-003).
 
 ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.98% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7
