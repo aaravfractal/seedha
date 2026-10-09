@@ -9,8 +9,9 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Booking, Consent
+from app.models import Booking, Consent, SiteConfig
 from app.money import rupees
+from app.services.site import get_config
 
 
 def site(client: TestClient, owner: dict[str, str]) -> dict[str, Any]:
@@ -97,3 +98,21 @@ def test_site_and_pro_need_owner(client: TestClient) -> None:
     assert client.patch("/site", json={"mood": "sky"}).status_code == 401
     assert client.post("/site/publish").status_code == 401
     assert client.get("/pro").status_code == 401
+
+
+def test_site_config_survives_a_create_race(
+    sample: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The first lookup misses (another request is inserting), the insert
+    then conflicts, and get_config returns the row that won."""
+    existing = sample.scalars(select(SiteConfig)).one()
+    original = Session.scalar
+    calls = {"n": 0}
+
+    def first_lookup_misses(self: Session, *args: Any, **kwargs: Any) -> Any:
+        calls["n"] += 1
+        return None if calls["n"] == 1 else original(self, *args, **kwargs)
+
+    monkeypatch.setattr(Session, "scalar", first_lookup_misses)
+    assert get_config(sample, 1).id == existing.id
+    assert calls["n"] == 2

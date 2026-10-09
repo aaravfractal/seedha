@@ -267,7 +267,7 @@ h2.title {
   margin: 0 0 8px;
   font-weight: 700;
 }
-h3.sub-title {
+.sub-title {
   font-size: 20px;
   letter-spacing: -0.02em;
   margin: 0 0 4px;
@@ -1297,4 +1297,47 @@ label.fl {
   body {
     background: #fff;
   }
+}
+
+/* legal and static pages */
+.legal {
+  max-width: 760px;
+  margin: 0 auto;
+}
+.legal h2.section {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 28px 0 8px;
+}
+.legal p,
+.legal li {
+  color: var(--ink);
+}
+.legal ul {
+  padding-left: 22px;
+  list-style: disc;
+}
+.legal li {
+  margin: 4px 0;
+}
+.notice {
+  background: var(--accentSoft);
+  color: var(--accent);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.placeholder {
+  font-family: var(--mono);
+  background: var(--bg2);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+.site-footer a {
+  color: var(--ink2);
+}
+.site-footer a:hover {
+  color: var(--ink);
 }

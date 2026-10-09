@@ -11,6 +11,8 @@ PY := $(VENV)/bin/python
 PIO := $(FW)/.venv/bin/pio
 PYTHON ?= $(shell command -v python3.12 || command -v python3.13 || command -v python3.11 || echo python3)
 LOAD_ENV := set -a && { [ ! -f $(ROOT)/.env ] || . $(ROOT)/.env; } && set +a
+# Rebuild the schema in place (never delete the file: a running API would keep the old one).
+RESET_DB := $(VENV)/bin/alembic downgrade base && $(VENV)/bin/alembic upgrade head
 MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py,app/services/savings.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
@@ -42,10 +44,10 @@ setup-web:
 	cd $(WEB) && npm ci --no-audit --no-fund
 
 seed: env
-	$(LOAD_ENV) && cd $(API) && rm -f seedha.db && $(VENV)/bin/alembic upgrade head && $(PY) -m seed.load
+	$(LOAD_ENV) && cd $(API) && $(RESET_DB) && $(PY) -m seed.load
 
 seed-full: env
-	$(LOAD_ENV) && cd $(API) && rm -f seedha.db && $(VENV)/bin/alembic upgrade head && $(PY) -m seed.load --with-statements
+	$(LOAD_ENV) && cd $(API) && $(RESET_DB) && $(PY) -m seed.load --with-statements
 
 reset: seed
 
@@ -57,7 +59,7 @@ test-api:
 test-web:
 	cd $(WEB) && node --test lib/*.test.ts
 
-check: check-api check-web check-firmware check-e2e
+check: check-api check-web check-e2e check-firmware
 	@echo "All quality gates passed."
 
 check-api:
@@ -92,7 +94,7 @@ api: env
 	$(LOAD_ENV) && cd $(API) && $(VENV)/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 $(API_FLAGS)
 
 web: env
-	$(LOAD_ENV) && cd $(WEB) && npx next dev --port 3000
+	rm -rf $(WEB)/.next/dev && $(LOAD_ENV) && cd $(WEB) && npx next dev --port 3000
 
 dev: env
 	@echo "API on http://localhost:8000, web on http://localhost:3000"

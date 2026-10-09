@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 
 from sqlalchemy import or_, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import Booking, Property, SiteConfig
@@ -88,12 +89,23 @@ class Package:
 
 
 def get_config(session: Session, property_id: int) -> SiteConfig:
-    """The property's site settings, created on first use."""
-    config = session.scalar(select(SiteConfig).where(SiteConfig.property_id == property_id))
-    if config is None:
-        config = SiteConfig(property_id=property_id)
-        session.add(config)
-        session.flush()
+    """The property's site settings, created on first use.
+
+    Two first requests can race; the loser's insert is rolled back to a
+    savepoint and it reads the row the winner created.
+    """
+    query = select(SiteConfig).where(SiteConfig.property_id == property_id)
+    config = session.scalar(query)
+    if config is not None:
+        return config
+    try:
+        with session.begin_nested():
+            config = SiteConfig(property_id=property_id)
+            session.add(config)
+    except IntegrityError:
+        config = session.scalar(query)
+        if config is None:  # pragma: no cover - the conflicting row must exist
+            raise
     return config
 
 

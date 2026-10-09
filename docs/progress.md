@@ -406,16 +406,64 @@ Not yet done: the ESP32 device build has not completed. The espressif32
 Mac slept). Next step: retry `pio run -e seedha_desk`, fix any compile
 warnings in Seedha code, then commit M8.
 
-## M9 Polish for demo — in progress (checkpoint)
+## M9 Polish for demo — passed
 
-Done: API `/site` (setup stage, Pine/Stone/Sky, EN/HI, package approval,
-publish), package prices computed from rack rates + extras (₹9,400 /
-₹4,300 / ₹11,900) with reasons from the data, `/pro` (audit claim from
-flagged lines: ₹802; consents), `/demo/reset` (sample hotel only); migration
-0005; tests pass. Web: Website screen (setup chat, review, preview,
-publish, share, rate card page), Pro cards (sample labels where outside
-data is needed), Plans with yearly/monthly (unit-tested prices), Settings
-(connections, reset, log out), proxy allowlist for `pro` (tested).
+**Built**
+- Seedha Site: API `/site` (stage, Pine/Stone/Sky, EN/HI, package approval,
+  publish) with computed package prices and data-based reasons; web setup
+  chat, review with live phone preview, publish, share on WhatsApp, and a
+  printable rate card (`/rate-card`).
+- Pro cards from `/pro` (audit claim computed, samples labelled), Plans with
+  yearly/monthly (unit-tested), Settings (connections, demo reset, log out).
+- Every owner screen has loading, empty and error states; guest pages have
+  their own header; sidebar and nav highlight correctly.
 
-Not yet done: browser check of the M9 screens, empty/loading/error audit of
-every screen, `make demo` fresh-clone run, then the M9 commit.
+**Tests**: API passing (see M10 for the count after both). Web unit 15.
+
+**Numbers checked**: packages ₹9,400 / ₹4,300 / ₹11,900; plans ₹1,249,
+₹2,083, ₹3,333 yearly per month and ₹1,499, ₹2,499, ₹3,999 monthly; Pro
+audit ₹802 (AG77102) and +₹118 when a line is ₹100 over contract.
+
+**Issues found in self-review and fixed**: create-on-read race on site
+settings (500 on first load); `make seed` deleting the database under a
+running API; `.sub-title` applying only to h3; Turbopack dev cache serving
+stale CSS and layouts (dev only; cleared on `make dev`).
+
+**Commit**: 1cc4f46 (checkpoint) and the combined M9/M10 commit below.
+
+## M8 note
+The device build is blocked by PlatformIO downloads (B-002). The platform
+itself installed on the fourth attempt; the Xtensa toolchain download then
+stalled at 0%. Retried in M11.
+
+---
+
+## M10 Static and legal pages — passed
+
+**Built**
+- Pages: /about (D6, team with the [Hospitality teammate] placeholder),
+  /privacy (DPDP Act 2023 / Rules 2025: data, purposes, legal basis,
+  retention, rights incl. STOP and erasure, OTA contacts never used, only
+  fingerprints public, processors, [grievance officer name] and
+  [contact email]), /terms (subscription, owner approves every message, no
+  lower public rates, acceptable use, liability, Indian law, Dehradun
+  courts), /cookies (two necessary cookies, no banner and why),
+  /data-deletion (working form), /security ([security email]), /contact
+  (plan noted from Plans), /faq (10 answers from CLAUDE.md facts), custom
+  404, 500 and global error pages.
+- Draft notice and last-updated date on every legal page; Hindi key points
+  toggle on Privacy, Terms and Delete my data; footer on every page.
+- API `POST /public/data-deletion` with erasure via the M7 service, same
+  answer whether or not it matched, request log without personal data
+  (migration 0006).
+
+**Checked in a browser** at 1440 px (light) and 390 px (dark): every page
+200 (404 page returns 404), notice present on the six legal pages, footer
+with 8 links, no horizontal scroll, deletion form round trip works.
+
+**Tests**: API 283 passed. Web unit 15 passed.
+
+**Simulated / placeholders**: contact, grievance and security emails;
+hospitality teammate name (needs-from-aarav.md items 7 and 8).
+
+**Commit**: combined "M9 completion and M10" commit (see git log).

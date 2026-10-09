@@ -31,6 +31,7 @@ from app.models import (
     Guest,
     Property,
     Room,
+    SiteConfig,
     StatementFile,
 )
 from app.money import rupees
@@ -70,6 +71,7 @@ def load_base(session: Session) -> Property:
     prop = Property(is_sample=True, **PROPERTY)
     session.add(prop)
     session.flush()
+    session.add(SiteConfig(property_id=prop.id))
     for number, room_type in ROOMS:
         session.add(Room(property_id=prop.id, number=number, room_type=room_type,
                          rack_rate=rupees(ROOM_TYPES[room_type])))  # fmt: skip

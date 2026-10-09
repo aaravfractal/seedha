@@ -322,3 +322,76 @@ fingerprints; the Proof screen has the same "Write tonight's proof" button.
 
 **D-057 Nav matching.** A path matches a screen only exactly or as a prefix
 followed by "/" (so /proof no longer lights up /pro).
+
+## M8 Desk firmware
+
+**D-058 Firmware split.** All logic that does not touch hardware (command
+dispatch, dedupe of re-sent commands, a bounded offline ack queue, ESC/POS
+framing, UTF-8 to ASCII) is in `lib/desk_core`, plain C++17, unit-tested on
+the laptop with Unity (`pio test -e native`). `src/main.cpp` only drives the
+TFT, QR, ring, printer, buzzer, button and HTTPS.
+
+**D-059 Contract test.** `apps/api/tests/test_firmware_contract.py` records a
+real `/desk/poll` sequence into `firmware/seedha-desk/test/fixtures/poll.json`;
+the firmware tests replay it, so API and box cannot drift. The bench mock
+server serves the same file.
+
+**D-060 Printer and screen text are ASCII.** Thermal printers use a
+single-byte code page and TFT_eSPI's built-in fonts are ASCII, so the API's
+slip text spells out ₹ as "Rs", − and · as "-", folds accents, and the
+firmware replaces anything else with "?".
+
+**D-061 TLS.** The box verifies the API's certificate against the root CA in
+`secrets.h`; plain HTTP is used only if `SEEDHA_API_BASE` starts with
+`http://` (bench testing against the mock server). The button reprints the
+last slip. Libraries pinned: espressif32 6.10.0 (Arduino 2.x, which TFT_eSPI
+2.5.43 supports), ArduinoJson 7.4.3, Adafruit NeoPixel 1.15.5, ricmoo/QRCode
+0.0.1.
+
+## M9 Polish for demo
+
+**D-062 Site prices are computed.** Package price = public room rate x nights
++ listed extras (breakfast for two Rs 400 a day, late checkout Rs 500):
+Weekend Rs 9,400, Char Dham Rs 4,300, Monsoon midweek Rs 11,900. Reasons
+come from the data where possible ("July and August are your emptiest
+months"). The setup chat replays the sample hotel's answers and says so;
+the site address is labelled a sample.
+
+**D-063 Pro cards.** Audit is computed (commission + GST on flagged
+cancelled stays, plus excess over the contract rate on any stay). Pulse and
+Rate Watch need outside data (event calendar, OTA screenshots), so they keep
+the prototype's examples with a visible "Sample" tag.
+
+**D-064 Plans.** Yearly = 10 x monthly, shown per month rounded half-up
+(Rs 1,249 / 2,083 / 3,333; Rs 14,990 / 24,990 / 39,990 a year). "Start with
+X" goes to the contact page with the plan noted (no fake sign-up).
+
+**D-065 Demo reset.** Settings has "Reset demo data" (confirm step), allowed
+only for a property marked as sample; it deletes every row and reloads the
+sample hotel. Settings also shows which connections are live or simulated.
+
+**D-066 No create-on-read races.** Site settings are created with the
+property, and `get_config` recovers if two first requests race (savepoint,
+then re-read). Found when two screens loaded at once (same lesson as D-043).
+
+**D-067 `make seed` rebuilds the schema in place** (alembic downgrade base,
+upgrade head) instead of deleting the file, so a running API immediately
+sees the fresh database. `make dev` clears Turbopack's dev cache on start.
+
+## M10 Static and legal pages
+
+**D-068 Legal pages.** About, Privacy (DPDP Act 2023 / Rules 2025), Terms,
+Cookies, Delete my data, Security, Contact and FAQ, each with the required
+draft notice and last-updated date, key points switchable to Hindi
+(Hinglish), and only the placeholders Aarav named. Facts come from CLAUDE.md
+and the built behaviour. Points a lawyer must settle (fiduciary roles, legal
+basis per activity, retention periods) are stated as open, not invented.
+
+**D-069 Data deletion.** `POST /public/data-deletion` (booking reference +
+WhatsApp number) erases a matching active consent with the M7 erasure
+service and records only that a request arrived and whether it matched. The
+answer is identical either way, so the page cannot be used to learn who
+stayed at a hotel.
+
+**D-070 Cookies.** Two strictly necessary cookies (owner session, theme
+choice); no analytics or advertising, so no banner. Guest pages set none.

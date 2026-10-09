@@ -6,18 +6,22 @@ from datetime import datetime
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
+from sqlalchemy import func, select
 
 from app.deps import PropertyDep, SessionDep, SettingsDep, WordingDep
 from app.errors import ApiError
+from app.models import Booking, Consent, ErasureRequest
 from app.services.consent import (
     CONSENT_WORDING,
     WORDING_VERSION,
     ConsentError,
+    normalise_mobile,
     record_consent,
     resolve_token,
 )
 from app.services.desk import enqueue, property_device, utc_now
 from app.services.messages import draft_for_booking
+from app.services.proof import erase_consent
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -95,3 +99,50 @@ def give_consent(
     enqueue(session, device, "set_ring", {"color": "green"})
     enqueue(session, device, "beep", {"pattern": "chime"})
     return ConsentOut(ok=True, guest_short_name=short, already_subscribed=not result.created)
+
+
+class DeletionIn(BaseModel):
+    """A guest asks for their consent record to be erased."""
+
+    booking_ref: str = Field(min_length=3, max_length=40)
+    phone: str = Field(min_length=10, max_length=20)
+
+
+class DeletionOut(BaseModel):
+    """The same answer whether or not a record matched (no probing)."""
+
+    received: bool
+    request_id: int
+    message: str
+
+
+DELETION_MESSAGE = (
+    "Request received. If we hold a consent record matching this booking reference and "
+    "number, its number, salt and links to you are now erased and no more messages will be "
+    "sent. The anonymous fingerprint stays in the proof record but can no longer be linked to you."
+)
+
+
+@router.post("/data-deletion", response_model=DeletionOut)
+def data_deletion(body: DeletionIn, session: SessionDep) -> DeletionOut:
+    """Erase the consent that matches booking reference and phone (DPDP)."""
+    now = utc_now()
+    try:
+        number = normalise_mobile(body.phone)
+    except ConsentError as exc:
+        raise ApiError(422, exc.code, exc.message) from exc
+    consent = session.scalar(
+        select(Consent)
+        .join(Booking, Booking.id == Consent.booking_id)
+        .where(
+            func.upper(Booking.external_ref) == body.booking_ref.strip().upper(),
+            Consent.whatsapp_number == number,
+            Consent.erased_at.is_(None),
+        )
+    )
+    if consent is not None:
+        erase_consent(session, consent, now)
+    request = ErasureRequest(received_at=now, outcome="erased" if consent else "no_match")
+    session.add(request)
+    session.flush()
+    return DeletionOut(received=True, request_id=request.id, message=DELETION_MESSAGE)

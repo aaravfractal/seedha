@@ -35,6 +35,7 @@ __all__ = [
     "DeskCommand",
     "DeskDevice",
     "DirectBooking",
+    "ErasureRequest",
     "OptOutEvent",
     "Guest",
     "Message",
@@ -500,3 +501,14 @@ class SiteConfig(Base):
     lang: Mapped[str] = mapped_column(String(2), default="en")
     approved_packages: Mapped[str] = mapped_column(String(200), default="")
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ErasureRequest(Base):
+    """A guest's data-deletion request. Stores no phone number or reference,
+    only whether it matched a consent and when."""
+
+    __tablename__ = "erasure_request"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    outcome: Mapped[str] = mapped_column(String(12))
