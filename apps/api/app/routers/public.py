@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 
 from app.deps import PropertyDep, SessionDep, SettingsDep, WordingDep
 from app.errors import ApiError
 from app.models import Booking, Consent, ErasureRequest
+from app.ratelimit import rate_limited
 from app.services.consent import (
     CONSENT_WORDING,
     WORDING_VERSION,
@@ -59,7 +60,11 @@ def consent_error(exc: ConsentError) -> ApiError:
     return ApiError(status, exc.code, exc.message)
 
 
-@router.get("/consent/{token}", response_model=ConsentPageOut)
+@router.get(
+    "/consent/{token}",
+    response_model=ConsentPageOut,
+    dependencies=[Depends(rate_limited("consent"))],
+)
 def consent_page(token: str, session: SessionDep, prop: PropertyDep) -> ConsentPageOut:
     """Details for the guest's consent page."""
     try:
@@ -78,7 +83,11 @@ def consent_page(token: str, session: SessionDep, prop: PropertyDep) -> ConsentP
     )
 
 
-@router.post("/consent/{token}", response_model=ConsentOut)
+@router.post(
+    "/consent/{token}",
+    response_model=ConsentOut,
+    dependencies=[Depends(rate_limited("consent"))],
+)
 def give_consent(
     token: str, body: ConsentIn, session: SessionDep, prop: PropertyDep,
     settings: SettingsDep, wording: WordingDep,
@@ -123,7 +132,11 @@ DELETION_MESSAGE = (
 )
 
 
-@router.post("/data-deletion", response_model=DeletionOut)
+@router.post(
+    "/data-deletion",
+    response_model=DeletionOut,
+    dependencies=[Depends(rate_limited("data_deletion"))],
+)
 def data_deletion(body: DeletionIn, session: SessionDep) -> DeletionOut:
     """Erase the consent that matches booking reference and phone (DPDP)."""
     now = utc_now()

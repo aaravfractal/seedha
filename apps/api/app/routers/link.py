@@ -6,13 +6,14 @@ import secrets
 from datetime import date, datetime
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.deps import OwnerDep, PropertyDep, SessionDep
 from app.errors import ApiError
 from app.models import Channel, DirectBooking, Saving
+from app.ratelimit import rate_limited
 from app.services.desk import business_date, utc_now
 from app.services.link import BookingRequest, LinkError, book, code_status, date_options, room_rates
 
@@ -82,7 +83,7 @@ def stay_label(start: date, nights: int) -> str:
     )
 
 
-@public_router.get("", response_model=LinkPageOut)
+@public_router.get("", response_model=LinkPageOut, dependencies=[Depends(rate_limited("link"))])
 def link_page(
     session: SessionDep,
     prop: PropertyDep,
@@ -105,7 +106,9 @@ def link_page(
     )
 
 
-@public_router.post("/book", response_model=BookOut)
+@public_router.post(
+    "/book", response_model=BookOut, dependencies=[Depends(rate_limited("link_book"))]
+)
 def link_book(body: BookIn, session: SessionDep, prop: PropertyDep) -> BookOut:
     """Book directly. A valid code is redeemed once and its saving recorded."""
     now = utc_now()

@@ -1,9 +1,12 @@
 /** Owner login (POST) and logout (DELETE). Sets an httpOnly signed cookie. */
 import type { NextRequest } from "next/server";
+import { LOGIN_LIMIT, RateLimiter, clientAddress } from "@/lib/ratelimit";
 import { SESSION_COOKIE, SESSION_TTL_SECONDS, nowSeconds, safeEqual, signSession } from "@/lib/session";
 
-function error(status: number, code: string, message: string): Response {
-  return Response.json({ error: { code, message } }, { status });
+const loginAttempts = new RateLimiter();
+
+function error(status: number, code: string, message: string, headers?: HeadersInit): Response {
+  return Response.json({ error: { code, message } }, { status, headers });
 }
 
 export async function POST(request: NextRequest): Promise<Response> {
@@ -11,6 +14,16 @@ export async function POST(request: NextRequest): Promise<Response> {
   const secret = process.env.SESSION_SECRET ?? "";
   if (!passcode || !secret) {
     return error(503, "login_not_configured", "OWNER_PASSCODE or SESSION_SECRET is not set");
+  }
+  const wait = loginAttempts.check(clientAddress(request.headers), LOGIN_LIMIT);
+  if (wait > 0) {
+    const minutes = Math.ceil(wait / 60);
+    return error(
+      429,
+      "too_many_requests",
+      `Too many tries. Wait ${minutes} minute${minutes === 1 ? "" : "s"} and try again.`,
+      { "retry-after": String(wait) },
+    );
   }
   let body: unknown;
   try {

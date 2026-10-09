@@ -32,6 +32,10 @@ def verify(
     return challenge
 
 
+# Meta batches small JSON events; anything bigger is not from Meta.
+MAX_WEBHOOK_BYTES = 256 * 1024
+
+
 @router.post("/whatsapp")
 async def inbound(
     request: Request,
@@ -42,8 +46,12 @@ async def inbound(
     """Signed inbound messages. STOP withdraws consent (rule 5)."""
     if not settings.whatsapp_app_secret:
         raise ApiError(503, "webhook_not_configured", "WHATSAPP_APP_SECRET is not set")
-    raw = await request.body()
-    if not valid_signature(settings.whatsapp_app_secret, raw, signature):
+    raw = bytearray()
+    async for chunk in request.stream():
+        raw += chunk
+        if len(raw) > MAX_WEBHOOK_BYTES:
+            raise ApiError(413, "body_too_large", "Webhook body is too large")
+    if not valid_signature(settings.whatsapp_app_secret, bytes(raw), signature):
         raise ApiError(401, "bad_signature", "Signature missing or wrong")
     try:
         payload = json.loads(raw)

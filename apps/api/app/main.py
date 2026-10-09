@@ -13,6 +13,7 @@ from app.config import Settings, load_settings
 from app.db import make_engine, make_session_factory
 from app.deps import OwnerDep, PropertyDep
 from app.errors import install_error_handlers
+from app.ratelimit import RateLimiter
 from app.routers import (
     ask,
     desk,
@@ -69,6 +70,7 @@ def create_app(
     app = FastAPI(title="Seedha API", version="0.1.0")
     app.state.settings = settings
     app.state.session_factory = session_factory
+    app.state.rate_limiter = RateLimiter()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.web_origin],

@@ -20,6 +20,7 @@ from app.config import Settings
 from app.main import create_app
 from app.models import Consent, Message, OptOutEvent
 from app.money import rupees
+from app.routers.webhooks import MAX_WEBHOOK_BYTES
 from app.services.whatsapp import SendResult
 
 APP_SECRET = "app-secret"  # pragma: allowlist secret (test value)
@@ -283,3 +284,10 @@ def test_consent_after_checkout_still_drafts_once(
     body = client.get("/messages", headers=owner).json()
     assert body["pending"] == 1
     assert len(body["messages"]) == 1
+
+
+def test_webhook_refuses_an_oversized_body_before_checking_it(hooked: TestClient) -> None:
+    raw = b'{"x": "' + b"a" * (MAX_WEBHOOK_BYTES + 1) + b'"}'
+    res = hooked.post("/webhooks/whatsapp", content=raw, headers=signed(raw))
+    assert res.status_code == 413
+    assert res.json()["error"]["code"] == "body_too_large"

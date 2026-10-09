@@ -16,7 +16,7 @@ RESET_DB := $(VENV)/bin/alembic downgrade base && $(VENV)/bin/alembic upgrade he
 MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py,app/services/savings.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
-        check check-api check-web check-e2e dev api web demo build-web e2e firmware check-firmware setup-firmware proof-nightly clean
+        check check-api check-web check-e2e dev api web demo build-web e2e firmware check-firmware setup-firmware proof-nightly secrets-history clean
 
 help:
 	@echo "make demo       - first run: .env, install, seed, build and start everything"
@@ -25,6 +25,7 @@ help:
 	@echo "make seed-full  - same, plus the 1,500 statement lines already loaded"
 	@echo "make test       - API and web unit tests"
 	@echo "make check      - every quality gate (lint, types, tests, coverage, audits)"
+	@echo "make secrets-history - scan every commit in git history for secrets"
 
 env:
 	@if [ ! -f $(ROOT)/.env ]; then cp $(ROOT)/.env.example $(ROOT)/.env; echo "Created .env from .env.example (all integrations SIMULATED)"; fi
@@ -59,7 +60,7 @@ test-api:
 test-web:
 	cd $(WEB) && node --test lib/*.test.ts
 
-check: check-api check-web check-e2e check-firmware
+check: check-api check-web check-e2e secrets-history check-firmware
 	@echo "All quality gates passed."
 
 check-api:
@@ -109,6 +110,9 @@ demo: setup seed build-web
 
 e2e:
 	$(LOAD_ENV) && cd $(WEB) && npx playwright test
+
+secrets-history:
+	$(PY) $(ROOT)/scripts/scan_history.py
 
 proof-nightly: env
 	$(LOAD_ENV) && cd $(API) && $(PY) -m app.jobs nightly-proof

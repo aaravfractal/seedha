@@ -10,11 +10,14 @@ from fastapi.responses import JSONResponse
 class ApiError(Exception):
     """An error the client should see, with an HTTP status and a short code."""
 
-    def __init__(self, status: int, code: str, message: str) -> None:
+    def __init__(
+        self, status: int, code: str, message: str, headers: dict[str, str] | None = None
+    ) -> None:
         super().__init__(message)
         self.status = status
         self.code = code
         self.message = message
+        self.headers = headers
 
 
 def _body(code: str, message: str, details: object = None) -> dict[str, object]:
@@ -29,7 +32,9 @@ def install_error_handlers(app: FastAPI) -> None:
 
     async def api_error(_request: Request, exc: Exception) -> JSONResponse:
         assert isinstance(exc, ApiError)  # noqa: S101  (registered for ApiError only)
-        return JSONResponse(status_code=exc.status, content=_body(exc.code, exc.message))
+        return JSONResponse(
+            status_code=exc.status, content=_body(exc.code, exc.message), headers=exc.headers
+        )
 
     async def validation_error(_request: Request, exc: Exception) -> JSONResponse:
         assert isinstance(exc, RequestValidationError)  # noqa: S101

@@ -395,3 +395,23 @@ stayed at a hotel.
 
 **D-070 Cookies.** Two strictly necessary cookies (owner session, theme
 choice); no analytics or advertising, so no banner. Guest pages set none.
+
+## M11 Final hardening
+
+**D-071 Rate limits.** No new dependency: an in-memory sliding window, one per
+process. API public routes, per client address per minute: consent 20 (GET
+and POST share a bucket), link page 30, link booking 10, data deletion 5;
+each also has a ceiling across all clients of 20 times that. Owner login in
+the web app: 10 attempts per 15 minutes per address. Over the limit the
+answer is 429 `too_many_requests` with `Retry-After`. The BFF forwards the
+caller's address in `X-Forwarded-For`; uvicorn trusts it from loopback
+(FORWARDED_ALLOW_IPS). `next start` only fills that header when absent, so in
+production a proxy in front of the web app must overwrite it, otherwise a
+client can rotate addresses and only the global ceiling applies. Several
+processes need a shared store (Redis) instead.
+
+**D-072 Route auth sweep.** A test reads every operation from the OpenAPI
+schema, so a new route is covered automatically: anything not in the known
+public or device set must answer 401 with no token, a wrong token, or the
+device key. (FastAPI 0.143 nests included routers, so `app.routes` alone does
+not list them.)
