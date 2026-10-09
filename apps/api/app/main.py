@@ -13,7 +13,7 @@ from app.config import Settings, load_settings
 from app.db import make_engine, make_session_factory
 from app.deps import OwnerDep, PropertyDep
 from app.errors import install_error_handlers
-from app.routers import ledger, pipeline, repeat, scenario, statements
+from app.routers import desk, ledger, pipeline, public, repeat, scenario, statements
 
 logger = logging.getLogger("seedha")
 
@@ -90,4 +90,6 @@ def create_app(
     app.include_router(ledger.router)
     app.include_router(repeat.router)
     app.include_router(scenario.router)
+    app.include_router(desk.router)
+    app.include_router(public.router)
     return app

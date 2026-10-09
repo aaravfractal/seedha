@@ -19,6 +19,7 @@ from app.models import Base
 from seed.load import load_sample
 
 OWNER_TOKEN = "test-owner-token"
+DEVICE_KEY = "test-desk-key"  # pragma: allowlist secret (test value)
 DEMO_DATE = date(2026, 10, 13)
 
 
@@ -54,7 +55,7 @@ def fixture_session(factory: sessionmaker[Session]) -> Iterator[Session]:
 @pytest.fixture(name="sample")
 def fixture_sample(session: Session) -> Session:
     """The sample hotel with all 1,500 statement lines loaded."""
-    load_sample(session, DEMO_DATE, with_statements=True)
+    load_sample(session, DEMO_DATE, with_statements=True, device_key=DEVICE_KEY)
     session.commit()
     return session
 
@@ -62,7 +63,7 @@ def fixture_sample(session: Session) -> Session:
 @pytest.fixture(name="base_sample")
 def fixture_base_sample(session: Session) -> Session:
     """The sample hotel as `make seed` loads it (no statements yet)."""
-    load_sample(session, DEMO_DATE, with_statements=False)
+    load_sample(session, DEMO_DATE, with_statements=False, device_key=DEVICE_KEY)
     session.commit()
     return session
 
@@ -82,3 +83,8 @@ def fixture_client(settings: Settings, factory: sessionmaker[Session]) -> Iterat
 @pytest.fixture(name="owner")
 def fixture_owner() -> dict[str, str]:
     return {"Authorization": f"Bearer {OWNER_TOKEN}"}
+
+
+@pytest.fixture(name="device")
+def fixture_device() -> dict[str, str]:
+    return {"X-Device-Key": DEVICE_KEY}

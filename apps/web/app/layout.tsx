@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { TopNav } from "@/components/TopNav";
 import { ToastProvider } from "@/components/Toast";
@@ -28,8 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body>
         <ToastProvider>
-          <TopNav />
-          <main className="page">{children}</main>
+          <Suspense fallback={<header className="site-header" style={{ height: 61 }} />}>
+            <TopNav />
+          </Suspense>
+          <main className="page">
+            <Suspense fallback={null}>{children}</Suspense>
+          </main>
         </ToastProvider>
       </body>
     </html>

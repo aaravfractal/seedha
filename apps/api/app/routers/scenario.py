@@ -20,18 +20,24 @@ DEFAULT_ROOMS = 6
 
 
 class SaturdayOut(BaseModel):
-    """The Saturday move for N rooms. Money in paise."""
+    """The Saturday move for N rooms. Money in paise.
 
+    `available` is false (with a reason) until there are OTA and direct sales
+    to compare; the numbers are then null.
+    """
+
+    available: bool
+    reason: str | None = None
     rooms: int
     max_rooms: int
-    channel_key: str
-    channel_name: str
-    channel_net_adr: int
-    direct_net_adr: int
-    extra_per_room: int
-    extra_per_saturday: int
-    decision: str | None
-    decided_at: datetime | None
+    channel_key: str | None = None
+    channel_name: str | None = None
+    channel_net_adr: int | None = None
+    direct_net_adr: int | None = None
+    extra_per_room: int | None = None
+    extra_per_saturday: int | None = None
+    decision: str | None = None
+    decided_at: datetime | None = None
 
 
 class DecisionIn(BaseModel):
@@ -41,13 +47,15 @@ class DecisionIn(BaseModel):
     rooms: int = Field(ge=1, le=100)
 
 
+def check_rooms(rooms: int, max_rooms: int) -> None:
+    """Rooms to hold must be within the hotel's room count."""
+    if not 1 <= rooms <= max_rooms:
+        raise ApiError(422, "invalid_rooms", f"Rooms must be between 1 and {max_rooms}")
+
+
 def compute(session: SessionDep, property_id: int, rooms: int) -> SaturdayMove:
-    """The move for the default ledger range, with clear errors."""
-    ledger = load_ledger(session, property_id)
-    try:
-        return saturday_move(ledger, rooms)
-    except ScenarioError as exc:
-        raise ApiError(422, "no_saturday_move", str(exc)) from exc
+    """The move for the default ledger range; ScenarioError if not computable."""
+    return saturday_move(load_ledger(session, property_id), rooms)
 
 
 def latest_decision(session: SessionDep, property_id: int) -> ScenarioDecision | None:
@@ -63,7 +71,7 @@ def latest_decision(session: SessionDep, property_id: int) -> ScenarioDecision |
 def saturday_out(move: SaturdayMove, max_rooms: int, last: ScenarioDecision | None) -> SaturdayOut:
     """Shape the card."""
     return SaturdayOut(
-        rooms=move.rooms, max_rooms=max_rooms, channel_key=move.channel_key,
+        available=True, rooms=move.rooms, max_rooms=max_rooms, channel_key=move.channel_key,
         channel_name=move.channel_name, channel_net_adr=move.channel_net_adr,
         direct_net_adr=move.direct_net_adr, extra_per_room=move.extra_per_room,
         extra_per_saturday=move.extra_per_saturday,
@@ -81,7 +89,14 @@ def get_saturday(
     """Extra kept per Saturday if N rooms sell direct instead of the lowest OTA."""
     last = latest_decision(session, prop.id)
     count = rooms or (last.rooms if last else DEFAULT_ROOMS)
-    return saturday_out(compute(session, prop.id, count), prop.rooms_count, last)
+    check_rooms(count, prop.rooms_count)
+    try:
+        move = compute(session, prop.id, count)
+    except ScenarioError as exc:
+        return SaturdayOut(
+            available=False, reason=str(exc), rooms=count, max_rooms=prop.rooms_count
+        )
+    return saturday_out(move, prop.rooms_count, last)
 
 
 @router.post("/saturday", response_model=SaturdayOut)
@@ -89,7 +104,11 @@ def decide_saturday(
     body: DecisionIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
 ) -> SaturdayOut:
     """Record Accept or Not now. Seedha does not change OTA settings itself."""
-    move = compute(session, prop.id, body.rooms)
+    check_rooms(body.rooms, prop.rooms_count)
+    try:
+        move = compute(session, prop.id, body.rooms)
+    except ScenarioError as exc:
+        raise ApiError(422, "no_saturday_move", str(exc)) from exc
     session.add(
         ScenarioDecision(
             property_id=prop.id,

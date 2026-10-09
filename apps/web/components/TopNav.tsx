@@ -17,9 +17,29 @@ const TABS = [
   { label: "Plans", href: "/plans", match: (p: string) => p.startsWith("/plans") },
 ];
 
+/** Pages a guest opens on their own phone: no owner navigation. */
+export function isGuestPage(pathname: string): boolean {
+  return pathname.startsWith("/consent/") || /^\/link\/[^/]+/.test(pathname);
+}
+
 /** Sticky glass header with the five sections from the prototype. */
 export function TopNav() {
   const pathname = usePathname();
+  if (isGuestPage(pathname)) {
+    return (
+      <header className="site-header">
+        <div className="bar">
+          <span className="brand">
+            <i aria-hidden="true" />
+            Seedha
+          </span>
+          <span className="meta" style={{ marginLeft: "auto" }}>
+            Booking directly with the hotel
+          </span>
+        </div>
+      </header>
+    );
+  }
   return (
     <header className="site-header">
       <div className="bar">

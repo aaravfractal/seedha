@@ -36,7 +36,7 @@ export default function ScenarioPage() {
   }
 
   const title = <h2 className="title">One move for Saturday.</h2>;
-  if (move.error && move.error.code === "no_saturday_move") {
+  if (move.data && !move.data.available) {
     return (
       <>
         {title}
@@ -48,7 +48,7 @@ export default function ScenarioPage() {
             </Link>
           }
         >
-          {move.error.message}. The move compares what an OTA and a direct guest leave you per room.
+          {move.data.reason}. The move compares what an OTA and a direct guest leave you per room.
         </EmptyState>
       </>
     );
@@ -61,7 +61,7 @@ export default function ScenarioPage() {
       </>
     );
   }
-  if (!data) {
+  if (!data || data.channel_net_adr === null || data.direct_net_adr === null) {
     return (
       <>
         {title}
@@ -122,11 +122,11 @@ export default function ScenarioPage() {
           </div>
           <div className="stat">
             <b className="num" style={{ color: "var(--gain)" }}>
-              +{inr(data.extra_per_saturday)}
+              +{inr(data.extra_per_saturday ?? 0)}
             </b>
             <span>extra kept per Saturday if they sell direct</span>
             <small>
-              {current} rooms × {inr(data.extra_per_room)}
+              {current} rooms × {inr(data.extra_per_room ?? 0)}
             </small>
           </div>
         </div>

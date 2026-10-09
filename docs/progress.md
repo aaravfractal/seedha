@@ -227,3 +227,52 @@ now including scenario) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm a
 - Repeat list was cramped at 390 px; stacks on phones.
 
 **Simulated (missing keys)**: Claude tie-break (score alone is used).
+
+**Commit**: fb9b55a
+
+---
+
+## M5 Desk, consent and slips — passed
+
+**Built**
+- Migration 0003: `desk_command` queue, `consent_token` (hash only),
+  `booking.checked_out_at`. Seed registers the front-desk box from
+  `DESK_DEVICE_KEY` (hash only).
+- Owner desk API: `GET /desk/state`, `POST /desk/checkin {room}` (10-minute
+  one-use consent link, QR command), `POST /desk/checkout {room}` (perk code,
+  slip, print command), `GET|POST /desk/close-slip`.
+- Device API (X-Device-Key): `GET /desk/poll`, `POST /desk/ack`.
+- Public consent: `GET|POST /public/consent/{token}`; explicit `agree: true`
+  only (rule 5), Indian mobile check, salted SHA-256 fingerprint, proof
+  pending, Desk turns green with a chime.
+- Slips from stored lines (ruling 4): Neha ₹4,000 − 600 − 612 − 110 =
+  ₹2,678; walk-in "Booked directly. Hotel kept ₹3,400"; 9 PM close slip.
+- Web: Desk simulator that is a real device client (polls every 2 s, QR via
+  `qrcode`, ring, OK screen, printer paper animation), guest phone showing
+  the real consent page, `/consent/[token]` page (number + unticked box,
+  button disabled until both), brand-only header on guest pages.
+
+**Tests**: API 214 passed, 0 failed. Web unit 13 passed, 0 failed.
+
+**Code quality**: ruff 0 · pylint 10.00 · mypy 0 · coverage 99% (money 100%,
+now money.py, ledger.py, scenario.py, slips.py) · bandit 0 · pip-audit 0 ·
+tsc 0 · eslint 0 · npm audit 0 high in production (dev allowlist D-012) ·
+e2e n/a until M6
+
+**Numbers checked**
+- Neha's slip (API and printed paper in the browser): Room (via Booking.com)
+  ₹4,000, Discount −₹600, Commission −₹612, GST on commission −₹110, Hotel kept
+  ₹2,678, code DEODAR-NG26
+- Arjun walk-in slip: no commission or GST lines, code DEODAR-AM26
+- Close slip: 14 rooms sold, gross ₹58,800, direct bookings 21%
+- Locked ledger totals unchanged after check-in, consent and checkout
+
+**Issues found in self-review and fixed**
+- First close-slip code had a broken savings query; rewritten and tested.
+- Next 16 prerender errors on the consent route; Suspense boundaries added.
+- "No data yet" on the Saturday move logged a console 422; now a 200 with
+  `available: false`.
+- Money coverage dropped below 100% when slips joined the set; tests added.
+
+**Simulated (missing keys)**: none needed; the Desk box is simulated in the
+browser until hardware exists (M8).

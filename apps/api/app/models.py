@@ -31,6 +31,8 @@ __all__ = [
     "Channel",
     "ChannelContract",
     "Consent",
+    "ConsentToken",
+    "DeskCommand",
     "DeskDevice",
     "DirectBooking",
     "Guest",
@@ -222,6 +224,7 @@ class Booking(Base):
     flag_reason: Mapped[str | None] = mapped_column(String(40), nullable=True)
     flag_detail: Mapped[str | None] = mapped_column(String(200), nullable=True)
     review_status: Mapped[str] = mapped_column(String(10), default="none")
+    checked_out_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     channel: Mapped[Channel] = relationship()
     guest: Mapped[Guest | None] = relationship()
@@ -430,3 +433,39 @@ class ScenarioDecision(Base):
     channel_key: Mapped[str] = mapped_column(String(20))
     decision: Mapped[str] = mapped_column(String(10))
     decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class ConsentToken(Base):
+    """A one-booking consent link shown as the Desk QR. Only its hash is stored.
+
+    Expires 10 minutes after check-in and works once.
+    """
+
+    __tablename__ = "consent_token"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    booking: Mapped[Booking] = relationship()
+
+
+DESK_COMMANDS = ("show_qr", "show_ok", "show_idle", "show_text", "set_ring", "print_slip", "beep")
+
+
+class DeskCommand(Base):
+    """A command for the Desk box, fetched by polling and acknowledged."""
+
+    __tablename__ = "desk_command"
+    __table_args__ = (CheckConstraint(f"kind IN {DESK_COMMANDS}", name="desk_command_kind"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    device_id: Mapped[int] = mapped_column(ForeignKey("desk_device.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(12))
+    payload: Mapped[str] = mapped_column(Text, default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    acked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

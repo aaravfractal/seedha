@@ -191,3 +191,43 @@ disappear and are not suggested again.
 Rs 10,110. No forecast of how many Saturdays fill. The owner can change the
 room count (1 to 22), and Accept records the decision only: Seedha does not
 change OTA settings, and the card says so.
+
+## M5 Desk, consent and slips
+
+**D-034 The guest types their own WhatsApp number.** The prototype's consent
+screen has no number field, but a message needs one, and rule 4 forbids using
+OTA contacts. The consent page asks the guest for it next to the unticked box;
+it is stored only on the consent row and never logged (tested).
+
+**D-035 Perk code at checkout for every guest.** The slip in hand carries the
+code (e.g. DEODAR-NG26) whether or not the guest said yes to messages; a
+WhatsApp draft still requires an active consent (M6). Checking out twice
+returns the same code.
+
+**D-036 The desk's business date** is the latest Desk check-in date, so the
+demo works on any day after `make seed`, not only the seeding day.
+
+**D-037 The Desk simulator is a real device client.** It polls
+`GET /desk/poll` every 2 s with the device key (added server-side by the web
+proxy), runs `show_qr`, `show_ok`, `show_text`, `show_idle`, `set_ring`,
+`beep`, `print_slip`, then `POST /desk/ack`. The firmware (M8) speaks the same
+protocol. The box never receives guest contact data.
+
+**D-038 Consent links.** 32 random bytes (urlsafe), only the SHA-256 stored,
+valid 10 minutes, single use; a new QR for the same booking revokes the old
+one. Expired or used links answer 410, unknown ones 404. The API refuses
+anything but `agree: true`.
+
+**D-039 New dependency: `qrcode` (npm, MIT)** renders the Desk QR as SVG in
+the simulator, as the prototype did with qrcodejs from a CDN.
+
+**D-040 Guest pages have no owner navigation.** `/consent/*` and
+`/link/<code>` show only the brand, because guests open them on their phones.
+
+**D-041 "Nothing to compute yet" is not an error.** `GET /scenario/saturday`
+returns 200 with `available: false` and a reason before statements exist;
+recording a decision then is still a 422.
+
+**D-042 Next 16 Cache Components.** The header and page content sit inside
+`<Suspense>` in the root layout so dynamic routes (consent links) stream
+without prerender errors.

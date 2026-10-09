@@ -12,7 +12,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 from app.errors import ApiError
-from app.models import Property
+from app.models import DeskDevice, Property
+from app.services.desk import device_for_key
 
 
 def get_settings(request: Request) -> Settings:
@@ -68,3 +69,17 @@ def get_property(session: SessionDep) -> Property:
 
 
 PropertyDep = Annotated[Property, Depends(get_property)]
+
+
+def require_device(
+    session: SessionDep,
+    x_device_key: Annotated[str | None, Header()] = None,
+) -> DeskDevice:
+    """Device routes need `X-Device-Key`; only its SHA-256 is stored."""
+    device = device_for_key(session, x_device_key or "")
+    if device is None:
+        raise ApiError(401, "unknown_device", "Device key missing or not registered")
+    return device
+
+
+DeviceDep = Annotated[DeskDevice, Depends(require_device)]

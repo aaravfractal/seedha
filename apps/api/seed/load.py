@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
+import os
 from datetime import date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -26,6 +27,7 @@ from app.models import (
     Booking,
     Channel,
     ChannelContract,
+    DeskDevice,
     Guest,
     Property,
     Room,
@@ -33,6 +35,7 @@ from app.models import (
 )
 from app.money import rupees
 from app.services.checks import RawRow
+from app.services.desk import hash_device_key
 from app.services.ingest import BookingWriter
 from app.services.ledger import DEFAULT_END
 from app.services.parser import ParseResult
@@ -163,8 +166,13 @@ def load_today(loader: RowLoader, demo_date: date) -> None:
         booking.guest_id = guest.id
 
 
-def load_sample(session: Session, demo_date: date, with_statements: bool) -> Property:
-    """Load the whole sample hotel into an empty database."""
+def load_sample(
+    session: Session, demo_date: date, with_statements: bool, device_key: str = ""
+) -> Property:
+    """Load the whole sample hotel into an empty database.
+
+    With a device key, also registers the front-desk box (only its hash).
+    """
     if session.scalar(select(Property.id).limit(1)) is not None:
         raise SeedError("database already has data; run make reset first")
     prop = load_base(session)
@@ -173,6 +181,10 @@ def load_sample(session: Session, demo_date: date, with_statements: bool) -> Pro
     load_today(loader, demo_date)
     if with_statements:
         loader.load(read_csv("window_rows.csv"), "statement")
+    if device_key:
+        session.add(DeskDevice(property_id=prop.id, name="Front desk",
+                               device_key_hash=hash_device_key(device_key)))  # fmt: skip
+        session.flush()
     return prop
 
 
@@ -185,7 +197,8 @@ def main() -> None:
     engine = make_engine(settings.database_url)
     demo_date = resolve_demo_date(settings.demo_date)
     with session_scope(make_session_factory(engine)) as session:
-        prop = load_sample(session, demo_date, args.with_statements)
+        device_key = os.environ.get("DESK_DEVICE_KEY", "").strip()
+        prop = load_sample(session, demo_date, args.with_statements, device_key)
         print(f"Loaded sample hotel {prop.name} (demo date {demo_date})")  # noqa: T201
 
 

@@ -205,6 +205,7 @@ def test_claude_tie_breaker_can_drop_a_borderline_match(
 @pytest.mark.usefixtures("sample")
 def test_saturday_move_numbers(client: TestClient, owner: dict[str, str]) -> None:
     body = client.get("/scenario/saturday", headers=owner).json()
+    assert body["available"] is True
     assert body["rooms"] == 6
     assert body["channel_name"] == "Agoda"
     assert body["channel_net_adr"] == rupees(2_598)
@@ -235,8 +236,14 @@ def test_saturday_bad_rooms(client: TestClient, owner: dict[str, str], rooms: st
 @pytest.mark.usefixtures("base_sample")
 def test_saturday_without_statements(client: TestClient, owner: dict[str, str]) -> None:
     res = client.get("/scenario/saturday", headers=owner)
-    assert res.status_code == 422
-    assert res.json()["error"]["code"] == "no_saturday_move"
+    assert res.status_code == 200
+    assert res.json()["available"] is False
+    assert res.json()["reason"] == "No OTA sales in this period yet"
+    assert res.json()["extra_per_saturday"] is None
+    blocked = client.post(
+        "/scenario/saturday", headers=owner, json={"decision": "accepted", "rooms": 6}
+    )
+    assert (blocked.status_code, blocked.json()["error"]["code"]) == (422, "no_saturday_move")
     assert client.get("/scenario/saturday").status_code == 401
     bad = client.post(
         "/scenario/saturday", headers=owner, json={"decision": "accepted", "rooms": 0}

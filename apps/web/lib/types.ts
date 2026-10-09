@@ -124,14 +124,48 @@ export type RepeatMatch = {
 export type Repeats = { count: number; confirmed: number; paid_twice_total: number; matches: RepeatMatch[] };
 
 export type SaturdayMove = {
+  available: boolean;
+  reason: string | null;
   rooms: number;
   max_rooms: number;
-  channel_key: string;
-  channel_name: string;
-  channel_net_adr: number;
-  direct_net_adr: number;
-  extra_per_room: number;
-  extra_per_saturday: number;
+  channel_key: string | null;
+  channel_name: string | null;
+  channel_net_adr: number | null;
+  direct_net_adr: number | null;
+  extra_per_room: number | null;
+  extra_per_saturday: number | null;
   decision: "accepted" | "later" | null;
   decided_at: string | null;
+};
+
+export type DeskGuest = {
+  booking_id: number;
+  name: string;
+  short_name: string;
+  room: number | null;
+  channel: string;
+  consent: boolean;
+  checked_out: boolean;
+  perk_code: string | null;
+};
+
+export type DeskState = {
+  business_date: string;
+  device: { registered: boolean; name: string | null; online: boolean; last_seen: string | null };
+  guests: DeskGuest[];
+};
+
+export type SlipLine = { label: string; amount: number | null; bold: boolean };
+export type Slip = { title: string; subtitle: string; lines: SlipLine[]; footer: string[]; text: string };
+
+export type DeskCommand = { id: number; kind: string; payload: Record<string, unknown> };
+
+export type ConsentPage = {
+  hotel: string;
+  city: string;
+  guest_short_name: string;
+  perk: string;
+  wording: string;
+  wording_version: string;
+  expires_at: string;
 };
