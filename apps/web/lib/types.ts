@@ -57,3 +57,51 @@ export type IngestOutcome = {
 };
 
 export type SampleFile = { index: number; filename: string };
+
+export type LedgerChannel = {
+  key: string;
+  name: string;
+  kind: string;
+  room_nights: number;
+  stays: number;
+  list_revenue: number;
+  discount: number;
+  commission: number;
+  gst_on_commission: number;
+  fees: number;
+  net_kept: number;
+  paid_to_channels: number;
+  lost_vs_list_price: number;
+  list_adr: number | null;
+  net_adr: number | null;
+  kept_share_tenths: number | null;
+};
+
+export type Ledger = {
+  start: string;
+  end: string;
+  days: number;
+  rooms_count: number;
+  counted_rows: number;
+  excluded_rows: number;
+  channels: LedgerChannel[];
+  totals: {
+    room_nights: number;
+    list_revenue: number;
+    discount: number;
+    commission: number;
+    gst_on_commission: number;
+    fees: number;
+    net_kept: number;
+    paid_to_channels: number;
+    lost_vs_list_price: number;
+  };
+  paid_to_channels_share_tenths: number | null;
+  direct_bookings_tenths: number | null;
+  commission_free_share_tenths: number | null;
+  revpar_list: number;
+  revpar_net: number;
+  rank_by_bookings: string[];
+  rank_by_money_kept: string[];
+  insight: { en: string; hi: string; channel: string; rank_by_money_kept: number; move_en: string } | null;
+};

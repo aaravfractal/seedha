@@ -670,3 +670,133 @@ label.fl {
     opacity: 1;
   }
 }
+
+/* flip */
+.toggle {
+  display: inline-flex;
+  background: var(--bg2);
+  border-radius: 12px;
+  padding: 3px;
+  margin: 4px 0 20px;
+}
+.toggle button {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink2);
+  transition: all 0.3s var(--spring);
+}
+.toggle button[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.row {
+  display: grid;
+  grid-template-columns: 40px 1.3fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  transition:
+    border-color 0.4s,
+    box-shadow 0.4s;
+}
+.rank {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink3);
+}
+.row .nm {
+  font-weight: 600;
+}
+.row .meta {
+  font-size: 14px;
+  color: var(--ink2);
+}
+.kv {
+  text-align: right;
+}
+.kv b {
+  display: block;
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+.kv small {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.split {
+  height: 6px;
+  border-radius: 6px;
+  background: var(--lossSoft);
+  overflow: hidden;
+  margin-top: 8px;
+  grid-column: 2 / -1;
+}
+.split i {
+  display: block;
+  height: 100%;
+  background: var(--gain);
+  border-radius: 6px;
+}
+.row.hl {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accentSoft);
+}
+.row .more {
+  grid-column: 2 / -1;
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  justify-self: start;
+  padding: 2px 0;
+}
+.breakdown {
+  grid-column: 2 / -1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 16px;
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 0;
+}
+.breakdown dd {
+  margin: 0;
+  text-align: right;
+}
+.breakdown .net {
+  color: var(--ink);
+  font-weight: 600;
+}
+@media (max-width: 620px) {
+  .row {
+    grid-template-columns: 30px 1fr 1fr;
+  }
+  .row .hide-s {
+    display: none;
+  }
+}
+.insight {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  margin: 0 0 6px;
+}
+.stat small {
+  display: block;
+  font-size: 13px;
+  color: var(--ink2);
+  margin-top: 2px;
+}

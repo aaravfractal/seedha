@@ -136,3 +136,29 @@ unaffected either way.
 **D-024 One booking builder.** The seed loader and statement upload both
 build bookings through `services/rows.to_booking` and `ingest.BookingWriter`,
 so checks and money lines can never drift between the two paths.
+
+## M3 Ledger and the flip
+
+**D-025 The flip insight must be true.** The prototype says MakeMyTrip "left
+you the least per room", but on the locked data Agoda (Rs 2,598) is below
+MakeMyTrip (Rs 2,737). The sentence is built from the computed ranks: "MakeMyTrip
+brought the most bookings, but 4 channels left you more per room." (Hindi:
+"... par 4 channels ne har room par zyada paisa chhoda."). It contains no rupee
+figure. The toast "MakeMyTrip drops from 1st to 5th" is computed the same way.
+Templates, not Claude, so it works without a key and can never be wrong.
+
+**D-026 Highlight colour.** The prototype rings the MakeMyTrip row in gold
+after the flip. Gold is reserved for money saved, so the ring is pine.
+
+**D-027 "Show the maths".** Each flip row can expand to show list revenue,
+discount, commission, GST, fees, net kept and net per room, so every number
+on the hero screen is auditable in place.
+
+**D-028 Flip stats.** Four stats as in the prototype; "Lost vs list price
+Rs 15,71,988" is the named sub-line under "paid to channels" (ruling 2), and
+"Commission-free share 16.7%" is the sub-line under "Direct bookings 10.7%"
+(ruling 3).
+
+**D-029 Ledger range.** `start`/`end` query parameters (inclusive check-in
+dates), default 1 Apr to 30 Sep 2026, at most 366 days. `/ledger/monthly`
+gives per-channel month figures by check-in month for Ask (M7).

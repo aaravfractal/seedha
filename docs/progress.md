@@ -133,3 +133,50 @@ bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
 
 **Simulated (missing keys)**: Claude (unknown layouts only), WhatsApp,
 Razorpay, Polygon Amoy.
+**Commit**: 5886448
+
+---
+
+## M3 Ledger and the flip — passed
+
+**Built**
+- `GET /ledger/channels?start&end`: per channel room nights, stays, list
+  revenue, discount, commission, GST, fees, net kept, paid to channels, lost
+  vs list price, list and net ADR, kept share; totals; direct bookings %,
+  commission-free share %, share paid to channels, RevPAR list and net, both
+  rankings, counted and excluded rows, and a true Hindi/English insight
+  (D-025). `GET /ledger/monthly` (per channel per check-in month).
+- Flip screen: Hindi insight with "Show in English" toggle; "By bookings / By
+  money kept" with a measured FLIP reorder (Web Animations, 700 ms spring,
+  reduced-motion respected); rank, room nights, lost vs list price, kept per
+  room, kept-share bar; pine ring on the busiest channel after the flip;
+  computed toast; "Show the maths" per row (D-027); four stats with ruling 2
+  and 3 sub-lines; footnote with counted/excluded rows. Empty state before
+  upload, loading and error states. Marks pipeline step "flip".
+
+**Tests**: API 148 passed, 0 failed. Web unit 12 passed, 0 failed.
+
+**Code quality**: ruff 0 · pylint 10.00 · mypy 0 · coverage 99% (money 100%) ·
+bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
+(dev allowlist D-012) · e2e n/a until M6
+
+**Numbers checked** (API, tests and browser)
+- Paid to channels ₹10,39,108; lost vs list price ₹15,71,988; net ₹47,33,012
+- MakeMyTrip ₹2,737 and Direct ₹4,283 per room; MakeMyTrip 1st by bookings,
+  5th by money kept (browser order after toggle: Walk-in, Direct, Travel
+  agents, Booking.com, MakeMyTrip, Agoda)
+- Direct bookings 10.7%, commission-free share 16.7%, 16.5% paid, RevPAR
+  ₹1,566 → ₹1,176; 1,497 rows counted, 3 kept out
+- Monthly sums equal totals; July 150 room nights; MakeMyTrip September paid
+  ₹1,09,542
+- Flip interactive 0.27 to 0.51 s after navigation (dev server)
+
+**Issues found in self-review and fixed**
+- The prototype's insight sentence is false for the data; replaced by a
+  computed one (D-025).
+- Gold highlight conflicted with "gold only for money saved" (D-026).
+- A fifth stat broke the four-stat grid; folded into a named sub-line.
+- Monthly endpoint duplicated the paid-to-channels formula; now reuses the
+  ledger's line items.
+
+**Simulated (missing keys)**: none used by M3.
