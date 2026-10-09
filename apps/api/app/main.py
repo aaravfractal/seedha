@@ -14,11 +14,13 @@ from app.db import make_engine, make_session_factory
 from app.deps import OwnerDep, PropertyDep
 from app.errors import install_error_handlers
 from app.routers import (
+    ask,
     desk,
     ledger,
     link,
     messages,
     pipeline,
+    proof,
     public,
     repeat,
     scenario,
@@ -107,4 +109,6 @@ def create_app(
     app.include_router(webhooks.router)
     app.include_router(link.public_router)
     app.include_router(link.savings_router)
+    app.include_router(proof.router)
+    app.include_router(ask.router)
     return app

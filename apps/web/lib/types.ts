@@ -172,6 +172,7 @@ export type ConsentPage = {
 
 export type WinbackMessage = {
   id: number;
+  consent_id: number;
   guest_name: string;
   short_name: string;
   perk_code: string;
@@ -224,3 +225,42 @@ export type SavingItem = {
 };
 
 export type Savings = { total_net_saving: number; total_avoided: number; count: number; items: SavingItem[] };
+
+export type ProofBundle = {
+  id: number;
+  created_at: string;
+  item_count: number;
+  merkle_root: string;
+  chain_status: string;
+  chain_tx: string | null;
+  explorer_url: string | null;
+};
+
+export type ProofOverview = {
+  consents_this_month: number;
+  proven: number;
+  pending: number;
+  chain_live: boolean;
+  bundles: ProofBundle[];
+};
+
+export type ConsentProof = {
+  consent_id: number;
+  guest_name: string;
+  given_at: string;
+  fingerprint: string;
+  status: string;
+  bundle: ProofBundle | null;
+  path: { side: string; hash: string }[];
+  matches: boolean | null;
+};
+
+export type AskQuestion = { key: string; hi: string; en: string };
+export type AskAnswer = {
+  key: string;
+  question: string;
+  answer: string;
+  answer_en: string;
+  figures: string[];
+  source: string;
+};

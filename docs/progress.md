@@ -331,3 +331,47 @@ eslint 0 · npm audit 0 high in production (dev allowlist D-012) · e2e 2/2
 
 **Simulated (missing keys)**: WhatsApp sends and inbound (labelled), UPI
 payment (labelled), Claude wording (template used).
+
+**Commit**: 4d76701
+
+---
+
+## M7 Proof and Ask — passed
+
+**Built**
+- Proof: Merkle tree over consent fingerprints (root, path, verify),
+  `POST /proof/bundle` ("Write tonight's proof"), `make proof-nightly` /
+  `python -m app.jobs nightly-proof` for cron, `GET /proof` overview,
+  `GET /proof/consents/{id}` re-verifying the path against the root on every
+  view. Chain write is simulated (B-001), labelled in the UI.
+- Erasure service: salt and number removed, published fingerprint kept but
+  unlinked, message texts blanked (used by the M10 data-deletion page).
+- Ask: six fixed questions computed by code (ledger, repeats, savings, close,
+  recent OTA payouts with sample payout terms); Claude may only reword with
+  identical numbers; Hindi with an English toggle.
+- Web: Proof screen (stats, write button, bundles, check a consent) and proof
+  dialog (timeline, live "Matches. Not changed.", copy fingerprint),
+  opened also from the Approvals proof chip; Ask chat with six chips.
+
+**Tests**: API 271 passed, 0 failed. Web unit 13 passed. e2e 2/2.
+
+**Code quality**: ruff 0 · pylint 10.00 · mypy 0 · coverage 99% (money 100%) ·
+bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
+(dev allowlist D-012) · e2e 2/2
+
+**Numbers checked** (Ask equals the ledger)
+- "Pichle mahine MakeMyTrip ko kitna diya?" → September ₹1,09,542, equal to
+  the ledger for 1 to 30 Sep
+- "Sabse accha channel kaunsa?" → Walk-in ₹4,500, online Direct ₹4,283
+- "Kitne guest do baar..." → 12 guests, ₹41,800
+- "Aaj ka close" → 14 rooms, gross ₹58,800, direct bookings 21%
+- "Direct se kitna bacha?" → ₹2,199 after Rahul's coded booking
+- Merkle: every leaf of 1 to 5-leaf trees verifies; a swapped fingerprint fails
+
+**Issues found in self-review and fixed**
+- First Ask phrasing check had a broken boolean; rewritten as one rule.
+- /proof highlighted both Proof and Pro in the sidebar and top nav.
+- Appended CSS not picked up by the dev cache (again); CSS is now rewritten,
+  not appended.
+
+**Simulated (missing keys)**: public chain write (B-001), Claude phrasing.

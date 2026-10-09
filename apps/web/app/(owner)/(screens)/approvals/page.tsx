@@ -6,6 +6,7 @@ import { ApiError, postJson, useApi } from "@/lib/api";
 import type { Messages, WinbackMessage } from "@/lib/types";
 import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
+import { ProofDialog } from "@/components/ProofDialog";
 
 function deskTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-IN", {
@@ -26,6 +27,7 @@ export default function ApprovalsPage() {
   const messages = useApi<Messages>("messages");
   const toast = useToast();
   const [busy, setBusy] = useState<number | null>(null);
+  const [proofFor, setProofFor] = useState<number | null>(null);
 
   async function act(m: WinbackMessage, action: "approve" | "reject" | "simulate-reply", note: string) {
     setBusy(m.id);
@@ -162,6 +164,7 @@ export default function ApprovalsPage() {
       <p className="calc">
         Only guests who ticked yes at the Desk appear here. Guests found through OTA data are never messaged.
       </p>
+      {proofFor !== null ? <ProofDialog consentId={proofFor} onClose={() => setProofFor(null)} /> : null}
     </>
   );
 }

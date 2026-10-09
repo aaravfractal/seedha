@@ -288,3 +288,37 @@ the "SIMULATED" warnings.
 **Note on dev caching.** If CSS changes do not show in `next dev`, delete
 `apps/web/.next/dev` (Turbopack's persistent cache missed appended rules once;
 production builds were unaffected). `make clean` removes it.
+
+## M7 Proof and Ask
+
+**D-052 Merkle tree.** Leaf = SHA-256(fingerprint bytes), parent =
+SHA-256(left || right), odd node paired with itself, leaves in consent order.
+The proof dialog recomputes the root from the fingerprint and its path on
+every view, so "Matches. Not changed." is a live check, not a stored flag.
+
+**D-053 Chain write not built (B-001).** Roots are stored and verified in
+Seedha; the UI says "Stored by Seedha. Not yet on a public chain
+(simulated)". `eth-account` would not install here.
+
+**D-054 Erasure.** Removes salt and WhatsApp number, sets erased/withdrawn,
+replaces the consent row's fingerprint with a random value, unlinks the
+bundle item (consent_id = NULL) and blanks message texts. The published
+fingerprint and root stay valid but point to no one (CLAUDE.md M7).
+
+**D-055 Ask.** Six fixed questions computed by the same services as the
+screens: last month's MakeMyTrip "paid" from the ledger for the previous
+calendar month of the desk's business date (September: Rs 1,09,542), best
+channel overall and best online channel by net per room, repeat guests and
+commission paid twice, payouts for OTA/agent stays from the last 7 days with
+sample payout terms (MakeMyTrip on Friday, Booking.com virtual card, Agoda
+month end, agents directly), savings this month, tonight's close. Claude may
+reword the Hindi sentence only if it carries exactly the same numbers and
+the same count of rupee amounts; otherwise the template is shown. English is
+available with a toggle.
+
+**D-056 Nightly proof job.** `make proof-nightly` (or `python -m app.jobs
+nightly-proof` from cron at midnight) bundles every property's pending
+fingerprints; the Proof screen has the same "Write tonight's proof" button.
+
+**D-057 Nav matching.** A path matches a screen only exactly or as a prefix
+followed by "/" (so /proof no longer lights up /pro).

@@ -29,6 +29,7 @@ class MessageOut(BaseModel):
     """A win-back message as the owner sees it."""
 
     id: int
+    consent_id: int
     guest_name: str
     short_name: str
     perk_code: str
@@ -71,6 +72,7 @@ def message_out(m: Message) -> MessageOut:
     consent = m.consent
     return MessageOut(
         id=m.id,
+        consent_id=consent.id,
         guest_name=consent.guest.display_name,
         short_name=consent.guest.short_name,
         perk_code=m.perk_code.code,

@@ -10,7 +10,7 @@ const TABS = [
   {
     label: "Owner",
     href: "/upload",
-    match: (p: string) => OWNER_SCREENS.some((s) => p.startsWith(s.href)),
+    match: (p: string) => OWNER_SCREENS.some((s) => p === s.href || p.startsWith(`${s.href}/`)),
   },
   { label: "Desk", href: "/desk", match: (p: string) => p.startsWith("/desk") },
   { label: "Guest", href: "/link", match: (p: string) => p.startsWith("/link") || p.startsWith("/consent") },

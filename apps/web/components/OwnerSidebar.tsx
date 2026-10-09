@@ -17,7 +17,9 @@ export function OwnerSidebar() {
         <Link
           key={screen.key}
           href={screen.href}
-          aria-current={pathname.startsWith(screen.href) ? "page" : undefined}
+          aria-current={
+            pathname === screen.href || pathname.startsWith(`${screen.href}/`) ? "page" : undefined
+          }
         >
           <span>{screen.label}</span>
           {screen.pro ? <span className="tag pro">Pro</span> : null}

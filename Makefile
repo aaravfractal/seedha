@@ -13,7 +13,7 @@ LOAD_ENV := set -a && { [ ! -f $(ROOT)/.env ] || . $(ROOT)/.env; } && set +a
 MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py,app/services/savings.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
-        check check-api check-web check-e2e dev api web demo build-web e2e firmware clean
+        check check-api check-web check-e2e dev api web demo build-web e2e firmware proof-nightly clean
 
 help:
 	@echo "make demo       - first run: .env, install, seed, build and start everything"
@@ -98,6 +98,9 @@ demo: setup seed build-web
 
 e2e:
 	$(LOAD_ENV) && cd $(WEB) && npx playwright test
+
+proof-nightly: env
+	$(LOAD_ENV) && cd $(API) && $(PY) -m app.jobs nightly-proof
 
 clean:
 	rm -rf $(API)/seedha.db $(WEB)/.next
