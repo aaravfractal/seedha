@@ -66,7 +66,7 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q --strict-markers"
-filterwarnings = ["error::DeprecationWarning:app.*"]
+filterwarnings = ["error::DeprecationWarning:app.*", "error::sqlalchemy.exc.SAWarning"]
 
 [tool.coverage.run]
 source = ["app", "seed"]

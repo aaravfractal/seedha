@@ -12,6 +12,7 @@ export const OWNER_SCREENS: OwnerScreen[] = [
   { key: "site", label: "Website", href: "/site" },
   { key: "proof", label: "Proof", href: "/proof", pro: true },
   { key: "pro", label: "Pro", href: "/pro", pro: true },
+  { key: "settings", label: "Settings", href: "/settings" },
 ];
 
 /** The 8-step demo loop on the Pipeline home. */

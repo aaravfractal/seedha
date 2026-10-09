@@ -34,5 +34,6 @@ export const config = {
     "/pro",
     "/settings",
     "/desk",
+    "/rate-card",
   ],
 };

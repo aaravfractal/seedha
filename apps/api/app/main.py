@@ -24,6 +24,7 @@ from app.routers import (
     public,
     repeat,
     scenario,
+    site,
     statements,
     webhooks,
 )
@@ -111,4 +112,7 @@ def create_app(
     app.include_router(link.savings_router)
     app.include_router(proof.router)
     app.include_router(ask.router)
+    app.include_router(site.site_router)
+    app.include_router(site.pro_router)
+    app.include_router(site.demo_router)
     return app

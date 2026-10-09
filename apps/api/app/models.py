@@ -47,6 +47,7 @@ __all__ = [
     "Property",
     "Room",
     "Saving",
+    "SiteConfig",
     "StatementFile",
 ]
 
@@ -485,3 +486,17 @@ class OptOutEvent(Base):
     consent_id: Mapped[int] = mapped_column(ForeignKey("consent.id"))
     source: Mapped[str] = mapped_column(String(12))
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SiteConfig(Base):
+    """Seedha Site settings for a property. Nothing is live until published."""
+
+    __tablename__ = "site_config"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), unique=True)
+    stage: Mapped[str] = mapped_column(String(10), default="empty")
+    mood: Mapped[str] = mapped_column(String(10), default="pine")
+    lang: Mapped[str] = mapped_column(String(2), default="en")
+    approved_packages: Mapped[str] = mapped_column(String(200), default="")
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

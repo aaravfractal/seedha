@@ -375,3 +375,47 @@ bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
   not appended.
 
 **Simulated (missing keys)**: public chain write (B-001), Claude phrasing.
+
+**Commit**: d5967a3
+
+---
+
+## M8 Desk firmware — in progress (checkpoint)
+
+Done and tested:
+- `firmware/seedha-desk`: PlatformIO project (ESP32, Arduino). Core library
+  `lib/desk_core` (command dispatch, dedupe of re-sent commands, bounded
+  offline ack queue, ESC/POS framing, UTF-8 to ASCII for screen and printer)
+  with 5 native Unity tests under `-Wall -Wextra -Werror`: all pass.
+- Contract: `apps/api/tests/test_firmware_contract.py` records a real
+  `/desk/poll` sequence (check-in, consent, checkout) into
+  `test/fixtures/poll.json`; the native tests replay it.
+- `tools/mock_server.py` bench server, tested by
+  `apps/api/tests/test_firmware_mock_server.py` (drives show_qr, set_ring,
+  print_slip; refuses a wrong key).
+- `src/main.cpp`: TFT (ILI9488 via TFT_eSPI flags on CLAUDE.md pins), QR,
+  NeoPixel ring, ESC/POS on UART2, buzzer, debounced reprint button,
+  HTTPS polling every 2 s with CA verification (plain HTTP only for a bench
+  `http://` base), acks retried after outages. `secrets.h` gitignored,
+  `.example` committed. API slip text is now ASCII-only for the printer.
+- Makefile: `setup-firmware`, `check-firmware` (native tests + device build),
+  `firmware`.
+
+Not yet done: the ESP32 device build has not completed. The espressif32
+6.10.0 platform download broke mid-way (BrokenPipe, then stalled while the
+Mac slept). Next step: retry `pio run -e seedha_desk`, fix any compile
+warnings in Seedha code, then commit M8.
+
+## M9 Polish for demo — in progress (checkpoint)
+
+Done: API `/site` (setup stage, Pine/Stone/Sky, EN/HI, package approval,
+publish), package prices computed from rack rates + extras (₹9,400 /
+₹4,300 / ₹11,900) with reasons from the data, `/pro` (audit claim from
+flagged lines: ₹802; consents), `/demo/reset` (sample hotel only); migration
+0005; tests pass. Web: Website screen (setup chat, review, preview,
+publish, share, rate card page), Pro cards (sample labels where outside
+data is needed), Plans with yearly/monthly (unit-tested prices), Settings
+(connections, reset, log out), proxy allowlist for `pro` (tested).
+
+Not yet done: browser check of the M9 screens, empty/loading/error audit of
+every screen, `make demo` fresh-clone run, then the M9 commit.

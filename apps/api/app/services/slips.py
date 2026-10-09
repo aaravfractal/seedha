@@ -8,12 +8,24 @@ rounded line items (ruling 1), so a slip always agrees with the ledger.
 
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass, field
 from datetime import date
 
 from app.money import LineItems, format_inr, share_tenths_of_percent
 
 COMMISSION_FREE_KINDS = frozenset({"walkin", "direct"})
+
+
+PRINTER_REPLACEMENTS = {"\u20b9": "Rs ", "\u2212": "-", "\u00b7": "-", "\u2014": "-", "\u2013": "-"}
+
+
+def to_ascii(text: str) -> str:
+    """Printer-safe text: known symbols spelled out, accents folded, rest '?'."""
+    for symbol, plain in PRINTER_REPLACEMENTS.items():
+        text = text.replace(symbol, plain)
+    folded = unicodedata.normalize("NFKD", text)
+    return "".join(c if c.isascii() else ("" if unicodedata.combining(c) else "?") for c in folded)
 
 
 @dataclass(frozen=True, slots=True)
@@ -35,7 +47,11 @@ class Slip:
     footer: list[str] = field(default_factory=list)
 
     def as_text(self, width: int = 32) -> str:
-        """Plain monospaced text, as an ESC/POS printer receives it."""
+        """Plain ASCII monospaced text, as an ESC/POS printer receives it.
+
+        Thermal printers use a single-byte code page, so rupee signs, minus
+        signs, middle dots and accents are written in ASCII.
+        """
         out = [self.title, self.subtitle, "-" * width]
         for line in self.lines:
             if line.amount is None:
@@ -47,7 +63,7 @@ class Slip:
         if self.footer:
             out.append("-" * width)
             out.extend(self.footer)
-        return "\n".join(out)
+        return to_ascii("\n".join(out))
 
 
 @dataclass(frozen=True, slots=True)

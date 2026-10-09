@@ -264,3 +264,30 @@ export type AskAnswer = {
   figures: string[];
   source: string;
 };
+
+export type SiteData = {
+  stage: "empty" | "chat" | "review";
+  mood: "pine" | "stone" | "sky";
+  lang: "en" | "hi";
+  live: boolean;
+  published_at: string | null;
+  address: string;
+  hotel: string;
+  location: string;
+  welcome: { en: string; hi: string };
+  nearby: string;
+  setup_chat: [string, string][];
+  rooms: { room_type: string; nightly_rate: number }[];
+  packages: { key: string; name: string; includes: string; price: number; why: string; approved: boolean }[];
+};
+
+export type ProData = {
+  audit_claim: number;
+  audit_cancelled_lines: number;
+  audit_over_rate_lines: number;
+  consents: number;
+  pulse_sample: boolean;
+  rate_watch_sample: boolean;
+};
+
+export type Health = { status: string; llm: string; whatsapp: string; payments: string; proof_chain: string };

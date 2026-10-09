@@ -8,12 +8,13 @@ WEB := $(ROOT)/apps/web
 FW := $(ROOT)/firmware/seedha-desk
 VENV := $(API)/.venv
 PY := $(VENV)/bin/python
+PIO := $(FW)/.venv/bin/pio
 PYTHON ?= $(shell command -v python3.12 || command -v python3.13 || command -v python3.11 || echo python3)
 LOAD_ENV := set -a && { [ ! -f $(ROOT)/.env ] || . $(ROOT)/.env; } && set +a
 MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py,app/services/savings.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
-        check check-api check-web check-e2e dev api web demo build-web e2e firmware proof-nightly clean
+        check check-api check-web check-e2e dev api web demo build-web e2e firmware check-firmware setup-firmware proof-nightly clean
 
 help:
 	@echo "make demo       - first run: .env, install, seed, build and start everything"
@@ -27,6 +28,9 @@ env:
 	@if [ ! -f $(ROOT)/.env ]; then cp $(ROOT)/.env.example $(ROOT)/.env; echo "Created .env from .env.example (all integrations SIMULATED)"; fi
 
 setup: env setup-api setup-web
+
+setup-firmware:
+	@if [ ! -x $(PIO) ]; then $(PYTHON) -m venv $(FW)/.venv && $(FW)/.venv/bin/pip install -q platformio; fi
 
 setup-api:
 	@if [ ! -x $(PY) ]; then $(PYTHON) -m venv $(VENV); fi
@@ -53,7 +57,7 @@ test-api:
 test-web:
 	cd $(WEB) && node --test lib/*.test.ts
 
-check: check-api check-web check-e2e
+check: check-api check-web check-firmware check-e2e
 	@echo "All quality gates passed."
 
 check-api:
@@ -75,6 +79,11 @@ check-web:
 	cd $(WEB) && npx prettier --check . --log-level warn
 	cd $(WEB) && node --test lib/*.test.ts
 	cd $(WEB) && node scripts/audit-check.mjs
+
+check-firmware: setup-firmware
+	@if [ ! -f $(FW)/include/secrets.h ]; then cp $(FW)/include/secrets.h.example $(FW)/include/secrets.h; fi
+	cd $(FW) && $(PIO) test -e native
+	cd $(FW) && $(PIO) run -e seedha_desk
 
 check-e2e:
 	cd $(WEB) && npx playwright test
@@ -101,6 +110,9 @@ e2e:
 
 proof-nightly: env
 	$(LOAD_ENV) && cd $(API) && $(PY) -m app.jobs nightly-proof
+
+firmware: setup-firmware
+	cd $(FW) && $(PIO) run -e seedha_desk
 
 clean:
 	rm -rf $(API)/seedha.db $(WEB)/.next

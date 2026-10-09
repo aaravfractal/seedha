@@ -1,0 +1,63 @@
+{
+  "commands": [
+    {
+      "id": 1,
+      "kind": "set_ring",
+      "payload": {
+        "color": "off"
+      }
+    },
+    {
+      "id": 2,
+      "kind": "show_qr",
+      "payload": {
+        "url": "http://localhost:3000/consent/TOKEN",
+        "text": "Room 104 · Scan for your perk",
+        "expires_at": "2026-10-13T09:10:00+00:00"
+      }
+    },
+    {
+      "id": 3,
+      "kind": "show_ok",
+      "payload": {
+        "text": "Thank you, Neha ji",
+        "sub": "Consent saved"
+      }
+    },
+    {
+      "id": 4,
+      "kind": "set_ring",
+      "payload": {
+        "color": "green"
+      }
+    },
+    {
+      "id": 5,
+      "kind": "beep",
+      "payload": {
+        "pattern": "chime"
+      }
+    },
+    {
+      "id": 6,
+      "kind": "show_text",
+      "payload": {
+        "text": "Printing slip",
+        "sub": "Please take your receipt"
+      }
+    },
+    {
+      "id": 7,
+      "kind": "print_slip",
+      "payload": {
+        "text": "DEODAR VIEW, MUSSOORIE\nNeha Gupta - Room 104\n--------------------------------\nRoom (via Booking.com)  Rs 4,000\nDiscount                 -Rs 600\nCommission               -Rs 612\nGST on commission        -Rs 110\nHotel kept              Rs 2,678\n--------------------------------\nBook direct next time and the hotel keeps it all.\nFree breakfast with code\nDEODAR-NG26"
+      }
+    },
+    {
+      "id": 8,
+      "kind": "show_idle",
+      "payload": {}
+    }
+  ],
+  "server_time": "2026-10-13T09:00:00+00:00"
+}

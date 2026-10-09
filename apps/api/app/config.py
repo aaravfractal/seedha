@@ -38,6 +38,7 @@ class Settings:
     proof_rpc_url: str
     proof_private_key: str
     demo_date: date | None
+    desk_device_key: str
 
     @property
     def llm_enabled(self) -> bool:
@@ -79,4 +80,5 @@ def load_settings() -> Settings:
         proof_rpc_url=_env("PROOF_RPC_URL"),
         proof_private_key=_env("PROOF_PRIVATE_KEY"),
         demo_date=date.fromisoformat(raw_demo_date) if raw_demo_date else None,
+        desk_device_key=_env("DESK_DEVICE_KEY"),
     )

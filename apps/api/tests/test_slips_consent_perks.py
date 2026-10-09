@@ -173,3 +173,15 @@ def test_perk_codes_can_run_out(monkeypatch: pytest.MonkeyPatch, sample: Session
     other.guest.display_name = booking.guest.display_name
     with pytest.raises(RuntimeError, match="No perk code left"):
         issue_perk(sample, "DEODAR", "perk", other.guest, other, datetime(2026, 10, 13, tzinfo=UTC))
+
+
+def test_printer_text_is_ascii() -> None:
+    from app.services.slips import to_ascii  # noqa: PLC0415
+
+    assert (
+        to_ascii("\u20b92,678 \u00b7 \u2212\u20b9600 Caf\u00e9 \u0928")
+        == "Rs 2,678 - -Rs 600 Cafe ?"
+    )
+    text = checkout_slip(neha_input()).as_text()
+    assert text.isascii()
+    assert "Neha Gupta - Room 104" in text
