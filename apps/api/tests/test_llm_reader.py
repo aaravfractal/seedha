@@ -11,7 +11,13 @@ import httpx2
 import pytest
 
 from app.config import load_settings
-from app.services.llm import ClaudeStatementReader, statement_reader
+from app.services.llm import (
+    ClaudeStatementReader,
+    ClaudeTieBreaker,
+    statement_reader,
+    tie_breaker,
+)
+from app.services.matcher import GuestKey
 from app.services.parser import ReaderUnavailableError
 
 TEST_KEY = "test-key"  # pragma: allowlist secret (dummy value, never sent)
@@ -119,3 +125,48 @@ def test_reader_is_none_without_key() -> None:
     assert statement_reader(settings) is None
     with_key = replace(settings, anthropic_api_key=TEST_KEY)
     assert isinstance(statement_reader(with_key), ClaudeStatementReader)
+
+
+class FakeCreate:
+    """Stands in for client.messages with a non-streaming create()."""
+
+    def __init__(self, message: FakeMessage | None = None, error: Exception | None = None) -> None:
+        self.message = message
+        self.error = error
+
+    def create(self, **kwargs: Any) -> FakeMessage:
+        assert kwargs["output_config"]["format"]["schema"]["required"] == ["answer"]
+        if self.error:
+            raise self.error
+        assert self.message is not None
+        return self.message
+
+
+def breaker_with(messages: FakeCreate) -> ClaudeTieBreaker:
+    fake_client = cast(anthropic.Anthropic, type("C", (), {"messages": messages})())
+    return ClaudeTieBreaker(api_key=TEST_KEY, model="claude-opus-5", client=fake_client)
+
+
+A = GuestKey("A. Verma", "Lucknow")
+B = GuestKey("Anil Verma", None)
+
+
+@pytest.mark.parametrize(
+    ("text", "answer"),
+    [('{"answer": "same"}', "same"), ('{"answer": "different"}', "different"),
+     ('{"answer": "maybe"}', "unsure"), ("not json", "unsure"), ("[]", "unsure")],
+)  # fmt: skip
+def test_tie_breaker_answers(text: str, answer: str) -> None:
+    breaker = breaker_with(FakeCreate(FakeMessage("end_turn", [Block("text", text)])))
+    assert breaker.same_person(A, B) == answer
+
+
+def test_tie_breaker_failure_is_unsure() -> None:
+    error = anthropic.APIConnectionError(request=REQUEST)
+    assert breaker_with(FakeCreate(error=error)).same_person(A, B) == "unsure"
+
+
+def test_tie_breaker_is_none_without_key() -> None:
+    settings = replace(load_settings(), anthropic_api_key="", claude_model="claude-opus-5")
+    assert tie_breaker(settings) is None
+    assert isinstance(tie_breaker(replace(settings, anthropic_api_key=TEST_KEY)), ClaudeTieBreaker)

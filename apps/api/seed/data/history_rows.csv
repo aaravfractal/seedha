@@ -1,7 +1,7 @@
 file,external_ref,channel,status,check_in,nights,room,guest_name,guest_city,list_amount,discount,commission,gst,fees,tds,tcs,payout
 Past stays 2025 (sample),MM89847,mmt,stay,2025-05-16,1,209,Rahul S.,Delhi,6200,930,1159,209,0,5,0,3897
-Past stays 2025 (sample),BK20343,bcom,stay,2025-10-10,1,209,Neha Gupta,Gurugram,6200,620,1004,181,0,6,0,4389
-Past stays 2025 (sample),AG11633,agoda,stay,2025-12-26,2,110,Anil Verma,Lucknow,8600,1290,1462,263,0,7,0,5578
+Past stays 2025 (sample),BK20343,bcom,stay,2025-10-10,1,209,Neha Gupta,Delhi,6200,620,1004,181,0,6,0,4389
+Past stays 2025 (sample),AG11633,agoda,stay,2025-12-26,2,110,Anil Verma,Kanpur,8600,1290,1462,263,0,7,0,5578
 Past stays 2025 (sample),MM80419,mmt,stay,2025-06-06,2,202,Priya Nair,Bengaluru,6800,816,1316,237,0,6,0,4425
 Past stays 2025 (sample),BK94509,bcom,stay,2025-09-19,1,209,Vikram Chauhan,Chandigarh,6200,620,1004,181,0,6,0,4389
 Past stays 2025 (sample),BK14443,bcom,stay,2025-11-14,2,101,Sana Qureshi,Noida,8600,1290,1316,237,0,7,0,5750

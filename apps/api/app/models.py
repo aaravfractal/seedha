@@ -37,6 +37,8 @@ __all__ = [
     "Message",
     "PerkCode",
     "PipelineStep",
+    "RepeatMatch",
+    "ScenarioDecision",
     "ProofBundle",
     "ProofBundleItem",
     "Property",
@@ -385,3 +387,46 @@ class PipelineStep(Base):
 
     key: Mapped[str] = mapped_column(String(10), primary_key=True)
     done_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+MATCH_STATUSES = ("suggested", "confirmed", "dismissed")
+
+
+class RepeatMatch(Base):
+    """A returning guest found in OTA data. Confirmed only by the owner (ruling 7).
+
+    Deliberately unrelated to consent: a match never makes a guest messageable.
+    """
+
+    __tablename__ = "repeat_match"
+    __table_args__ = (
+        UniqueConstraint("return_booking_id", "earlier_booking_id"),
+        CheckConstraint(f"status IN {MATCH_STATUSES}", name="match_status"),
+        CheckConstraint("confidence BETWEEN 0 AND 100", name="match_confidence"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"))
+    return_booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"))
+    earlier_booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"))
+    confidence: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(10), default="suggested")
+    llm_opinion: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    return_booking: Mapped[Booking] = relationship(foreign_keys=[return_booking_id])
+    earlier_booking: Mapped[Booking] = relationship(foreign_keys=[earlier_booking_id])
+
+
+class ScenarioDecision(Base):
+    """The owner's answer to a suggested move, such as the Saturday hold."""
+
+    __tablename__ = "scenario_decision"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"))
+    kind: Mapped[str] = mapped_column(String(20))
+    rooms: Mapped[int] = mapped_column(Integer)
+    channel_key: Mapped[str] = mapped_column(String(20))
+    decision: Mapped[str] = mapped_column(String(10))
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

@@ -268,15 +268,16 @@ class RepeatGuest:
     first_name: str
     first_channel: str
     first_date: date
+    first_city: str | None = None
 
 
 REPEAT_GUESTS: tuple[RepeatGuest, ...] = (
     RepeatGuest("Rahul S.", "Delhi", "mmt", 5, 3, 3480,
                 "Rahul S.", "mmt", date(2025, 5, 16)),
     RepeatGuest("Neha Gupta", "Gurugram", "bcom", 6, 3, 3120,
-                "Neha Gupta", "bcom", date(2025, 10, 10)),
+                "Neha Gupta", "bcom", date(2025, 10, 10), "Delhi"),
     RepeatGuest("A. Verma family", "Lucknow", "mmt", 4, 3, 4060,
-                "Anil Verma", "agoda", date(2025, 12, 26)),
+                "Anil Verma", "agoda", date(2025, 12, 26), "Kanpur"),
     RepeatGuest("Priya Nair", "Bengaluru", "agoda", 7, 3, 2980,
                 "Priya Nair", "mmt", date(2025, 6, 6)),
     RepeatGuest("Vikram Chauhan", "Chandigarh", "mmt", 6, 3, 3650,
@@ -697,7 +698,7 @@ def history_rows(gen: Generator) -> list[Row]:
     rows: list[Row] = []
     for guest in REPEAT_GUESTS:
         rows.append(_history_row(gen, guest.first_channel, guest.first_date,
-                                 guest.first_name, guest.city))  # fmt: skip
+                                 guest.first_name, guest.first_city or guest.city))  # fmt: skip
     start = date(2025, 4, 1)
     for _ in range(140):
         name, city = gen.history_names.pop()

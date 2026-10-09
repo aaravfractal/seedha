@@ -162,3 +162,32 @@ Rs 15,71,988" is the named sub-line under "paid to channels" (ruling 2), and
 **D-029 Ledger range.** `start`/`end` query parameters (inclusive check-in
 dates), default 1 Apr to 30 Sep 2026, at most 366 days. `/ledger/monthly`
 gives per-channel month figures by check-in month for Ask (M7).
+
+## M4 Repeat guests and Saturday move
+
+**D-030 Matching rules.** Names are normalised (honorifics, "family",
+punctuation removed; Gurgaon = Gurugram). Surname weighs 0.6 and first name
+0.4 (Jaro-Winkler). Two spelled-out surnames must be at least 0.90 alike and
+two spelled-out first names at least 0.92 alike, otherwise they are different
+people (this keeps Srivastava/Shrivastava and Neha/Neeha, and rejects
+Mathur/Marwah and Manish/Mansi). An initial matches its full name at reduced
+weight (S. = 0.7, A. = 0.5). Same city +0.10, different city -0.15.
+Suggestions start at 0.60; Claude is asked only between 0.60 and 0.80 and can
+only remove a suggestion ("different") or annotate it. On the sample data the
+matcher finds exactly the 12 planted pairs and nothing else (tested against
+the answer key).
+
+**D-031 Sample confidence spread.** Two planted first stays carry another
+city (Neha: Delhi, Verma family: Kanpur) so the demo shows 85% and 65%
+matches that genuinely need the owner, not a wall of 100%. Only two history
+rows changed; no money moved.
+
+**D-032 Order of repeat guests.** Unconfirmed first, least certain first, so
+the owner's attention goes where judgement is needed. Dismissed matches
+disappear and are not suggested again.
+
+**D-033 The Saturday move is computation.** Extra per Saturday = rooms x
+(direct net per room - lowest OTA net per room) = 6 x (4,283 - 2,598) =
+Rs 10,110. No forecast of how many Saturdays fill. The owner can change the
+room count (1 to 22), and Accept records the decision only: Seedha does not
+change OTA settings, and the card says so.

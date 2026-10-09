@@ -800,3 +800,15 @@ label.fl {
   color: var(--ink2);
   margin-top: 2px;
 }
+
+@media (max-width: 620px) {
+  .item.stack-s {
+    grid-template-columns: 1fr;
+  }
+  .item.stack-s > :last-child {
+    text-align: left !important;
+  }
+  .item.stack-s > :last-child > div {
+    justify-content: flex-start !important;
+  }
+}

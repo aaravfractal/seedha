@@ -43,3 +43,11 @@ export function pctTenths(tenths: number): string {
 export function count(n: number): string {
   return groupIndian(BigInt(Math.trunc(n)));
 }
+
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "2025-05-16" -> "May 2025". */
+export function monthYear(iso: string): string {
+  const [year, month] = iso.split("-");
+  return `${MONTH_NAMES[Number(month) - 1] ?? ""} ${year ?? ""}`.trim();
+}

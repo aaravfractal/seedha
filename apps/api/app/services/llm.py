@@ -14,6 +14,7 @@ import logging
 import anthropic
 
 from app.config import Settings
+from app.services.matcher import GuestKey
 from app.services.parser import ReaderUnavailableError, StatementReader
 
 logger = logging.getLogger("seedha.llm")
@@ -124,3 +125,55 @@ def statement_reader(settings: Settings) -> StatementReader | None:
     if not settings.llm_enabled:
         return None
     return ClaudeStatementReader(settings.anthropic_api_key, settings.claude_model)
+
+
+TIE_BREAK_SCHEMA: dict[str, object] = {
+    "type": "object",
+    "properties": {"answer": {"type": "string", "enum": ["same", "different", "unsure"]}},
+    "required": ["answer"],
+    "additionalProperties": False,
+}
+TIE_BREAK_SYSTEM = (
+    "You compare two hotel guest records from booking statements and say whether they are "
+    "probably the same person. Consider initials, spelling variants and city. Answer 'unsure' "
+    "when the records do not give enough to tell."
+)
+
+
+class ClaudeTieBreaker:
+    """Asks Claude same/different/unsure for borderline matches only."""
+
+    def __init__(self, api_key: str, model: str, client: anthropic.Anthropic | None = None) -> None:
+        self._client = client or anthropic.Anthropic(api_key=api_key, timeout=60.0, max_retries=2)
+        self._model = model
+
+    def same_person(self, a: GuestKey, b: GuestKey) -> str:
+        """Claude's opinion, or 'unsure' on any failure (the owner decides anyway)."""
+        prompt = (
+            f"Record A: name {a.name!r}, city {a.city or 'unknown'!r}\n"
+            f"Record B: name {b.name!r}, city {b.city or 'unknown'!r}"
+        )
+        try:
+            message = self._client.messages.create(
+                model=self._model,
+                max_tokens=1_000,
+                system=TIE_BREAK_SYSTEM,
+                messages=[{"role": "user", "content": prompt}],
+                output_config={"format": {"type": "json_schema", "schema": TIE_BREAK_SCHEMA}},
+            )
+        except anthropic.APIError:
+            logger.warning("Claude tie-break unavailable; keeping the score alone")
+            return "unsure"
+        text = next((b.text for b in message.content if b.type == "text"), "")
+        try:
+            answer = json.loads(text).get("answer")
+        except (json.JSONDecodeError, AttributeError):
+            return "unsure"
+        return answer if answer in {"same", "different", "unsure"} else "unsure"
+
+
+def tie_breaker(settings: Settings) -> ClaudeTieBreaker | None:
+    """The configured tie-breaker, or None in simulated mode."""
+    if not settings.llm_enabled:
+        return None
+    return ClaudeTieBreaker(settings.anthropic_api_key, settings.claude_model)

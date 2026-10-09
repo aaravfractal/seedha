@@ -180,3 +180,50 @@ bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high in production
   ledger's line items.
 
 **Simulated (missing keys)**: none used by M3.
+
+**Commit**: 38d7634
+
+---
+
+## M4 Repeat guests and Saturday move — passed
+
+**Built**
+- Matcher (`services/matcher.py`): normalised names and cities, rapidfuzz
+  Jaro-Winkler with surname/first-name gates (D-030), blocking by surname
+  initial, Claude tie-break only between 0.60 and 0.80 (simulated without a
+  key). Stored as `repeat_match` (migration 0002); scanning is idempotent and
+  keeps owner decisions.
+- `GET /repeat` (scan + list), `POST /repeat/{id}` confirm/dismiss. A match is
+  confirmed only by the owner (ruling 7) and never touches consent.
+- Saturday move (`services/scenario.py`, in the 100%-coverage money set):
+  `GET /scenario/saturday?rooms=N`, `POST /scenario/saturday` to record
+  Accept / Not now (`scenario_decision`).
+- Screens: Repeat guests (stats, list with "x% sure", "Not new demand",
+  Confirm / Not them, "Showing 3 of 12" with "Show all 12", for-your-eyes-only
+  note) and Saturday move (computed channel, room stepper, three stats,
+  Accept / Not now, honest "Seedha does not change your OTA settings" note).
+
+**Tests**: API 187 passed, 0 failed. Web unit 13 passed, 0 failed.
+
+**Code quality**: ruff 0 · pylint 10.00 · mypy 0 · coverage 99% (money 100%,
+now including scenario) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit
+0 high in production (dev allowlist D-012) · e2e n/a until M6
+
+**Numbers checked**
+- 12 repeat guests, ₹41,800 commission paid twice (API, browser)
+- Matches equal the planted answer key exactly; no false positives among
+  1,500 statement lines and 152 history stays
+- Rahul S. ₹3,480 at 92%; Neha Gupta ₹3,120; A. Verma family ₹4,060 (65%,
+  in the tie-break band)
+- Saturday move: Agoda ₹2,598 vs direct ₹4,283 per room; 6 rooms = +₹10,110;
+  4 rooms = +₹6,740
+- Matching leaves the consent table empty (ruling 7)
+
+**Issues found in self-review and fixed**
+- First matcher version suggested 823 false pairs (same surname, different
+  person); added surname and first-name gates measured on real name pairs.
+- Most-recent-first ordering buried the matches needing judgement; now
+  least certain first.
+- Repeat list was cramped at 390 px; stacks on phones.
+
+**Simulated (missing keys)**: Claude tie-break (score alone is used).

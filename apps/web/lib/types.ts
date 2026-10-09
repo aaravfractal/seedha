@@ -105,3 +105,33 @@ export type Ledger = {
   rank_by_money_kept: string[];
   insight: { en: string; hi: string; channel: string; rank_by_money_kept: number; move_en: string } | null;
 };
+
+export type RepeatStay = { channel: string; check_in: string; guest_name: string; city: string | null };
+
+export type RepeatMatch = {
+  id: number;
+  guest_name: string;
+  city: string | null;
+  first: RepeatStay;
+  returned: RepeatStay;
+  confidence: number;
+  status: "suggested" | "confirmed";
+  llm_opinion: string | null;
+  paid_twice: number;
+  not_new_demand: boolean;
+};
+
+export type Repeats = { count: number; confirmed: number; paid_twice_total: number; matches: RepeatMatch[] };
+
+export type SaturdayMove = {
+  rooms: number;
+  max_rooms: number;
+  channel_key: string;
+  channel_name: string;
+  channel_net_adr: number;
+  direct_net_adr: number;
+  extra_per_room: number;
+  extra_per_saturday: number;
+  decision: "accepted" | "later" | null;
+  decided_at: string | null;
+};

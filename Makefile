@@ -10,7 +10,7 @@ VENV := $(API)/.venv
 PY := $(VENV)/bin/python
 PYTHON ?= $(shell command -v python3.12 || command -v python3.13 || command -v python3.11 || echo python3)
 LOAD_ENV := set -a && { [ ! -f $(ROOT)/.env ] || . $(ROOT)/.env; } && set +a
-MONEY_CODE := app/money.py,app/services/ledger.py
+MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
         check check-api check-web dev api web demo build-web e2e firmware clean

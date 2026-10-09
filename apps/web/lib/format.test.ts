@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { count, inr, pctTenths } from "./format.ts";
+import { count, inr, monthYear, pctTenths } from "./format.ts";
 
 test("inr uses Indian grouping on paise", () => {
   assert.equal(inr(0), "₹0");
@@ -28,4 +28,9 @@ test("pctTenths", () => {
 test("count", () => {
   assert.equal(count(1500), "1,500");
   assert.equal(count(12), "12");
+});
+
+test("monthYear", () => {
+  assert.equal(monthYear("2025-05-16"), "May 2025");
+  assert.equal(monthYear("2026-12-01"), "Dec 2026");
 });
