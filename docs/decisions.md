@@ -427,3 +427,11 @@ Tab inside, close on Escape and hand focus back (`useDialogFocus`).
 from navigation start to ranked rows with a working toggle, under 1,000 ms
 (about 190 ms cold, 85 ms warm locally); re-ranking under 300 ms (about
 5 ms), timed inside the page so Playwright's own checks are not counted.
+
+**D-075 Perk code guessability (open, for Aarav).** Codes follow the
+prototype's format, hotel prefix + guest initials + year (DEODAR-RS26), so a
+hotel has about 676 per year. The public link page shows the guest's short
+name for a valid code, and a valid code gives one perk. Rate limits (D-071)
+slow guessing but do not stop it. Not changed unilaterally because the
+format and the named greeting are part of the demo; options are listed in
+needs-from-aarav item 9.

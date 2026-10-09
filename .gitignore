@@ -41,3 +41,4 @@ test-results/
 
 # Uploaded files at runtime
 apps/api/uploads/
+firmware/seedha-desk/.pio-core/

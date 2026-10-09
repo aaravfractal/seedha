@@ -467,3 +467,53 @@ with 8 links, no horizontal scroll, deletion form round trip works.
 hospitality teammate name (needs-from-aarav.md items 7 and 8).
 
 **Commit**: combined "M9 completion and M10" commit (see git log).
+
+## M11 Final hardening — passed (firmware device build still blocked, B-002)
+
+**Security**
+- Route auth sweep: every operation in the API schema is classified; all
+  owner routes answer 401 with no token, a wrong token or the device key;
+  Desk routes need the device key (D-072).
+- Rate limits (D-071): consent 20/min, link page 30/min, link booking
+  10/min, data deletion 5/min per client, each with a ceiling across all
+  clients; owner login 10 per 15 min. 429 with Retry-After. Checked live:
+  the 11th wrong passcode and the 6th deletion request are refused.
+- Body caps: WhatsApp webhook 256 KB before the signature check; the BFF
+  refuses bodies over 11 MB before buffering (statement limit is 10 MB).
+- Web security headers: CSP (no eval in production), frame-ancestors self
+  (the Desk simulator frames the consent page), nosniff, referrer policy,
+  permissions policy, no X-Powered-By.
+- Input validation reviewed: every request body has bounded fields or
+  literals; consent tokens are length-checked by the service. CORS allows
+  only WEB_ORIGIN (the browser only talks to the BFF anyway).
+- Secret scan of history: `make secrets-history` checks all commits (0 found; scanner shown
+  to catch planted AWS and GitHub keys). `.env` never committed.
+- Audits: pip-audit 0; npm audit 0 high in production dependencies.
+- Residual risk recorded, not changed: guessable perk codes (D-075,
+  needs-from-aarav item 9).
+
+**Accessibility** (D-073): axe WCAG 2.1 A/AA on all 27 pages, light and
+dark, 1440 and 390 px: 0 violations after fixing the Pro tag contrast in the
+active phone nav pill (dark). Added a skip link; the UPI sheet and the proof
+dialog now take focus, keep Tab inside, close on Escape and return focus.
+
+**Speed** (D-074): flip interactive about 190 ms cold, 85 ms warm on the
+production build (limit 1,000 ms); re-rank 5 ms (limit 300 ms).
+
+**Fresh clone**: cloned to a temp folder, copied `.env.example` to `.env`,
+`make demo`: installed, seeded, built and served in about 3.5 minutes. The
+8-step loop spec passed against it (₹10,39,108; MakeMyTrip 1st to 5th;
+12 guests ₹41,800; DEODAR-RS26 → ₹2,233 avoided, +₹2,199 net) and Ask
+answered September ₹1,09,542.
+
+**README-dev.md**: how to run, commands, demo script, keys and what is
+simulated, layout, quality gates, security notes, troubleshooting.
+
+**Playwright**: 7 tests (loop, code reuse, security headers, login lockout,
+axe sweep, keyboard, flip speed): the full suite passed 3 runs in a row
+(7/7 each, about 2.1 minutes per run).
+
+**Firmware**: native tests pass; the ESP32 build retried in M11, and the
+Xtensa toolchain download stalled at 0% again (B-002).
+
+ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.98% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7

@@ -9,6 +9,9 @@ FW := $(ROOT)/firmware/seedha-desk
 VENV := $(API)/.venv
 PY := $(VENV)/bin/python
 PIO := $(FW)/.venv/bin/pio
+# Keep PlatformIO's platforms, toolchains and cache inside the repo (gitignored),
+# not in ~/.platformio.
+export PLATFORMIO_CORE_DIR := $(FW)/.pio-core
 PYTHON ?= $(shell command -v python3.12 || command -v python3.13 || command -v python3.11 || echo python3)
 LOAD_ENV := set -a && { [ ! -f $(ROOT)/.env ] || . $(ROOT)/.env; } && set +a
 # Rebuild the schema in place (never delete the file: a running API would keep the old one).

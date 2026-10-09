@@ -28,3 +28,13 @@ Everything below has a working simulated fallback today. Nothing is blocked.
 7. **Name of the hospitality teammate** for /about (placeholder until then).
 8. **Contact, grievance officer and security emails** for the legal pages
    (visible placeholders until then).
+9. **Perk code guessability** (decisions D-075). Codes like DEODAR-RS26 can
+   be guessed (about 676 per hotel per year), which would show a guest's short
+   name and could spend their one-time perk. Options: (a) add a random part
+   to new codes, e.g. DEODAR-RS26-K7Q (demo code unchanged); (b) ask for the
+   last 4 digits of the consented WhatsApp number before the perk applies;
+   (c) stop showing the name on the link page. I recommend (a) plus (c).
+10. **Files outside the repo** (blockers B-003). PlatformIO created
+    `~/.platformio` (about 20 MB) during M8 and pre-commit created
+    `~/.cache/pre-commit` (56 KB). The repo no longer uses either. Delete them
+    if you like; I have not, because deleting outside the repo is off-limits.

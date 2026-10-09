@@ -36,3 +36,26 @@ device build as part of `check-firmware`, so it stays red until this clears.
 
 To unblock: run `make firmware` on a stable connection (one-time download),
 then fix any warnings it reports in `src/main.cpp`. I will retry in M11.
+
+M11 update: the platform installed on the fourth attempt (M9); the Xtensa
+toolchain (`espressif/toolchain-xtensa-esp32 @ 8.4.0+2021r2-patch5`, 92 MB)
+then stalled at "Downloading 0%" twice for over 15 minutes each. The same
+file downloads fine with curl (about 400 KB/s from the registry's mirror),
+so the stall is in PlatformIO's downloader, not the network.
+
+## B-003 Files written outside the repo (M8) — needs Aarav
+
+PlatformIO stores platforms and toolchains in `~/.platformio` unless told
+otherwise, and I did not redirect it in M8. It created `~/.platformio`
+(about 20 MB: the espressif32 and native platforms, SCons, a download cache)
+on 9 Oct 2026 at 20:46. That breaks the rule against writing outside the
+repo folder. Setting up pre-commit also created `~/.cache/pre-commit` (56 KB).
+Installs also added entries to the npm, pip and Playwright caches, which
+already existed in the home folder before this project.
+
+Fixed for the future: the Makefile now sets `PLATFORMIO_CORE_DIR` to
+`firmware/seedha-desk/.pio-core` (gitignored), so firmware builds stay
+inside the repo. I have not deleted `~/.platformio` or `~/.cache/pre-commit`,
+because deleting outside the repo is also off-limits. Aarav: remove them
+if you want (`rm -rf ~/.platformio ~/.cache/pre-commit`); nothing in the
+repo needs them now.
