@@ -1,0 +1,41 @@
+# Local hooks only: they use the tools already installed by `make setup`, so
+# committing never needs network access. Ruff runs from apps/api so its
+# pyproject (excludes, per-file ignores) applies exactly as in `make check`.
+repos:
+  - repo: local
+    hooks:
+      - id: ruff
+        name: ruff
+        entry: bash -c 'cd apps/api && .venv/bin/ruff check .'
+        language: system
+        pass_filenames: false
+        files: ^apps/api/.*\.py$
+      - id: ruff-format
+        name: ruff format
+        entry: bash -c 'cd apps/api && .venv/bin/ruff format --check .'
+        language: system
+        pass_filenames: false
+        files: ^apps/api/.*\.py$
+      - id: mypy
+        name: mypy (strict)
+        entry: bash -c 'cd apps/api && .venv/bin/mypy app seed tests migrations/env.py'
+        language: system
+        pass_filenames: false
+        files: ^apps/api/.*\.py$
+      - id: prettier
+        name: prettier
+        entry: bash -c 'cd apps/web && npx prettier --check . --log-level warn'
+        language: system
+        pass_filenames: false
+        files: ^apps/web/
+      - id: eslint
+        name: eslint
+        entry: bash -c 'cd apps/web && npx eslint . --max-warnings=0'
+        language: system
+        pass_filenames: false
+        files: ^apps/web/.*\.(ts|tsx|mjs)$
+      - id: detect-secrets
+        name: detect-secrets
+        entry: apps/api/.venv/bin/detect-secrets-hook --baseline .secrets.baseline
+        language: system
+        exclude: (package-lock\.json|\.secrets\.baseline)$

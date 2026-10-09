@@ -1,0 +1,101 @@
+# Decisions made without Aarav
+
+Each entry: what was decided, why, and where it lives. Newest at the bottom.
+Binding inputs: CLAUDE.md, docs/rulings.md (rulings 1 to 7, answers A to D).
+
+## M1 Foundation
+
+**D-001 Travel-agent commission carries no GST.** The locked numbers include
+travel agents' commission Rs 68,400 with GST on commission Rs 0, and paid to
+channels Rs 10,39,108 only reconciles that way. Rule 2 ("GST = 18% of
+commission") is read as applying wherever GST is charged; small agents who
+are not GST-registered invoice commission without GST. Modelled as
+`channel_contract.gst_applies = false` for travel agents. The rule itself is
+unchanged: wherever GST applies it is exactly 18%, rounded per line.
+Flagged for confirmation in needs-from-aarav.md.
+
+**D-002 Statement lines (answer B).** 1,500 lines: MakeMyTrip Apr-Jun 410
+(330 stays, 79 cancellations, MM48213), MakeMyTrip Jul-Sep 412 (228 stays,
+184 cancellations, a monsoon-heavy cancellation story), Booking.com 214 (200
+stays, 13 cancellations, BK55320), Agoda 96 (88 stays, 7 cancellations,
+AG77102), travel agents 180 (165 stays, 15 cancellations), hotel register 188
+(75 walk-in and 113 direct stays). Cancellation lines carry zero money.
+
+**D-003 TDS and TCS are modelled as credits.** Booking rows have `tds` and
+`gst_tcs` columns. They are withheld from the payout, so they take part in the
+payout math check, but they are never part of net_kept (rule 2). The sample
+uses TDS u/s 194-O at 0.1% of the post-discount amount on OTA rows, TCS 0.
+Rates are illustrative sample data, not tax advice.
+
+**D-004 What "fails the math check" covers.** Rule 3's payout check (within
+Rs 1) plus three related row checks, all flagged and excluded until reviewed:
+commission on a cancelled stay, GST on commission missing, GST not 18% of
+commission. `booking.math_check_passed` means "every row check passed";
+`flag_reason` and `flag_detail` say which failed.
+
+**D-005 Repeat-guest planted amounts.** Commission + GST per return booking
+is computed from the contract with per-line rounding, so some integers are
+unreachable (e.g. Booking.com cannot produce exactly Rs 3,720). Targets
+3,719 / 3,921 / 3,409 / 3,761 were used; the prototype's visible three stay
+exactly Rs 3,480 (Rahul S.), Rs 3,120 (Neha Gupta), Rs 4,060 (A. Verma
+family) and the 12 still total exactly Rs 41,800.
+
+**D-006 Monthly breakdown (ruling 6).** Room nights by check-in month: Apr
+270, May 330, Jun 330, Jul 150, Aug 140, Sep 280 (monsoon dip), split per
+channel by largest remainder. Every channel line item sums exactly to its
+locked 6-month total. MakeMyTrip's real September "paid" figure (commission +
+GST) is Rs 1,09,542. A booking belongs to the month it checks in.
+
+**D-007 Today's in-house stays.** 14 rooms on the demo date, gross Rs 58,800
+as in the prototype close slip. Commission, GST and net are computed from the
+rows and are not forced to the prototype's Rs 10,900 / Rs 47,900, because
+Neha's own booking carries a Rs 600 hotel-funded promo (ruling 4).
+
+**D-008 Demo date.** DEMO_DATE in .env, or the day `make seed` runs. The
+loader refuses any date on or before 30 Sep 2026 so Desk activity can never
+fall inside the ledger window (answer D).
+
+**D-009 `make seed` loads no statements.** The demo starts at Upload exactly
+like the prototype (empty flip: "No statements yet"). `make seed-full` loads
+the 1,500 lines directly for tests and quick checks.
+
+**D-010 Owner authentication.** API owner routes require
+`Authorization: Bearer OWNER_API_TOKEN`. The browser never sees that token:
+the web server's /api/* proxy adds it after checking a signed, httpOnly owner
+session cookie (HMAC-SHA256 with SESSION_SECRET, 12 h). Owners log in with
+OWNER_PASSCODE. The proxy only forwards an allowlist of API paths. Desk device
+routes get DESK_DEVICE_KEY added server-side. `proxy.ts` (Next 16's renamed
+middleware) redirects owner pages to /login.
+
+**D-011 Contrast over exact prototype greys.** The prototype's #86868B grey,
+#1F8A55 green, #D7372B red and #E8A33D gold text fail 4.5:1 on its light
+background. Light mode uses #6E6E73, #1A7A4A, #C4312A and #9A6210 for text;
+gold #E8A33D is kept for fills and accents. Dark mode keeps prototype values,
+and buttons use dark text on the light-green dark-mode accent.
+
+**D-012 npm audit gate.** eslint-config-next pulls braces <= 3.0.3
+(GHSA-vfj7-8cjw-p6xm, regex DoS on hostile glob patterns) and no fixed
+version exists. It is a dev-only lint tool that only sees our own patterns.
+`scripts/audit-check.mjs` fails on any high/critical advisory except this one
+reviewed entry, which expires 31 Dec 2026, and fails on any high/critical in
+production dependencies. Downgrading eslint-config-next to 14 (npm's
+suggested fix) would break Next 16 linting.
+
+**D-013 Pylint on tests.** Tests are linted with every rule except
+missing-function-docstring; the test names state the behaviour. Application,
+seed and migration code is linted with all rules on.
+
+**D-014 Web unit tests** run on Node's built-in test runner (`node --test`,
+native TypeScript type stripping), so no extra test framework is added.
+
+**D-015 GNU Make 3.81.** macOS ships Make 3.81, which has no .ONESHELL, so
+recipe steps are chained with `&&`.
+
+**D-016 Theme preference cookie.** Light/dark choice is stored in a
+strictly necessary `seedha_theme` cookie and applied by an inline script
+before first paint. No analytics or advertising cookies exist.
+
+**D-017 Ruling 2 wording on the flip stats.** The prototype stat "of room
+revenue lost to channels" becomes "of list revenue paid to channels"
+(Rs 10,39,108 / Rs 63,05,000 = 16.5%), because the bare word "lost" is not
+allowed.

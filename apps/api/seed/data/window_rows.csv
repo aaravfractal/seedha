@@ -1,0 +1,1501 @@
+file,external_ref,channel,status,check_in,nights,room,guest_name,guest_city,list_amount,discount,commission,gst,fees,tds,tcs,payout
+Agoda statement.csv,AG38825,agoda,stay,2026-04-02,2,109,Shreya Oberoi,Noida,8000,1280,1344,242,0,7,0,5127
+Agoda statement.csv,AG49746,agoda,stay,2026-04-05,3,208,Alok Tiwari,Agra,16800,2557,2849,513,0,14,0,10867
+Agoda statement.csv,AG59778,agoda,stay,2026-04-07,2,105,Manish Upadhyay,Jaipur,7600,1140,1292,233,0,6,0,4929
+Agoda statement.csv,AG57315,agoda,stay,2026-04-11,1,102,Zoya Kulkarni,Gurugram,4200,840,672,121,0,3,0,2564
+Agoda statement.csv,AG65815,agoda,stay,2026-04-11,1,207,Simran Vohra,Kolkata,5600,840,952,171,0,5,0,3632
+Agoda statement.csv,AG98775,agoda,stay,2026-04-12,2,102,Aakash Mathur,Bengaluru,8000,798,1440,259,0,7,0,5496
+Agoda statement.csv,AG36847,agoda,stay,2026-04-14,1,207,Ishita Goel,Gurugram,5500,985,903,163,0,5,0,3444
+Agoda statement.csv,AG83073,agoda,stay,2026-04-14,1,109,Zoya Bisht,Pune,3800,570,646,116,0,3,0,2465
+Agoda statement.csv,AG34360,agoda,stay,2026-04-16,1,110,Kavya Tandon,Kolkata,4000,760,648,117,0,3,0,2472
+Agoda statement.csv,AG36610,agoda,stay,2026-04-16,1,102,Ritika Pandey,Faridabad,4100,860,648,117,0,3,0,2472
+Agoda statement.csv,AG12277,agoda,stay,2026-04-18,1,104,Bhavna Trivedi,Ludhiana,3900,665,647,116,0,3,0,2469
+Agoda statement.csv,AG93606,agoda,stay,2026-04-22,1,101,Alok Mathur,Ambala,4200,462,748,135,0,4,0,2851
+Agoda statement.csv,AG78989,agoda,stay,2026-04-25,1,204,Sakshi Thakur,Kolkata,3100,465,527,95,0,3,0,2010
+Agoda statement.csv,AG14272,agoda,stay,2026-04-26,2,201,Omkar Trivedi,Ludhiana,6200,700,1100,198,0,6,0,4196
+Agoda statement.csv,AG69096,agoda,cancelled,2026-04-26,1,,Omkar Garg,Lucknow,0,0,0,0,0,0,0,0
+Agoda statement.csv,AG99900,agoda,stay,2026-04-26,3,207,Omkar Kapoor,Dehradun,16500,1690,2962,533,0,15,0,11300
+Agoda statement.csv,AG70063,agoda,stay,2026-04-29,2,107,Kunal Wadhwa,Bengaluru,8200,1716,1297,233,0,6,0,4948
+Agoda statement.csv,AG87818,agoda,stay,2026-05-01,1,101,Siddharth Mathur,Kanpur,4300,685,723,130,0,4,0,2758
+Agoda statement.csv,AG19504,agoda,stay,2026-05-09,3,105,Abhinav Puri,Mumbai,12900,2616,2057,370,0,10,0,7847
+Agoda statement.csv,AG56242,agoda,cancelled,2026-05-15,1,,Akshay Ahuja,Ghaziabad,0,0,0,0,0,0,0,0
+Agoda statement.csv,AG64774,agoda,stay,2026-05-15,2,204,Ishita Sinha,Delhi,6600,986,1123,202,0,6,0,4283
+Agoda statement.csv,AG40598,agoda,stay,2026-05-16,2,106,Nidhi Dutta,Lucknow,8200,1234,1393,251,0,7,0,5315
+Agoda statement.csv,AG73158,agoda,stay,2026-05-16,1,202,Payal Dutta,Delhi,3300,660,528,95,0,3,0,2014
+Agoda statement.csv,AG99208,agoda,stay,2026-05-16,1,201,Amrita Ahuja,Bengaluru,3400,510,578,104,0,3,0,2205
+Agoda statement.csv,AG67872,agoda,stay,2026-05-17,1,103,Ankit Oberoi,Gurugram,4100,492,722,130,0,4,0,2752
+Agoda statement.csv,AG92719,agoda,cancelled,2026-05-18,1,,Alok Upadhyay,Noida,0,0,0,0,0,0,0,0
+Agoda statement.csv,AG25559,agoda,stay,2026-05-22,1,210,Harsh Ahuja,Kanpur,6300,1029,1054,190,0,5,0,4022
+Agoda statement.csv,AG74699,agoda,stay,2026-05-22,1,103,Manish Chopra,Noida,4500,755,749,135,0,4,0,2857
+Agoda statement.csv,AG34604,agoda,stay,2026-05-23,1,101,Ashish Thakur,Noida,4000,440,712,128,0,4,0,2716
+Agoda statement.csv,AG77623,agoda,stay,2026-05-24,2,102,Udit Oberoi,Gurugram,8600,1290,1462,263,0,7,0,5578
+Agoda statement.csv,AG22555,agoda,stay,2026-05-25,1,205,Akshay Sinha,Agra,3200,716,497,89,0,2,0,1896
+Agoda statement.csv,AG81708,agoda,stay,2026-05-25,2,201,Amrita Kapoor,Faridabad,6600,1030,1114,201,0,6,0,4249
+Agoda statement.csv,AG17631,agoda,stay,2026-05-26,1,202,Yash Sood,Dehradun,3500,747,551,99,0,3,0,2100
+Agoda statement.csv,AG20854,agoda,stay,2026-05-26,2,109,Sakshi Negi,Delhi,8400,1300,1420,256,0,7,0,5417
+Agoda statement.csv,AG65320,agoda,stay,2026-05-27,1,103,Ritika Lamba,Mumbai,4500,530,794,143,0,4,0,3029
+Agoda statement.csv,AG87456,agoda,stay,2026-05-28,3,105,Tarun Jain,Kolkata,12300,1882,2084,375,0,10,0,7949
+Agoda statement.csv,AG95828,agoda,stay,2026-05-28,2,108,Manish Tandon,Gurugram,8800,878,1584,285,0,8,0,6045
+Agoda statement.csv,AG59945,agoda,stay,2026-05-29,2,210,Mansi Marwah,Noida,12000,1922,2016,363,0,10,0,7689
+Agoda statement.csv,AG96614,agoda,stay,2026-05-29,1,203,Ashish Puri,Faridabad,3400,510,578,104,0,3,0,2205
+Agoda statement.csv,AG13938,agoda,stay,2026-06-02,1,108,Yash Pandey,Kanpur,4000,838,632,114,0,3,0,2413
+Agoda statement.csv,AG72787,agoda,stay,2026-06-05,1,202,Devansh Marwah,Gurugram,3100,469,526,95,0,3,0,2007
+Agoda statement.csv,AG21870,agoda,stay,2026-06-06,1,210,Aparna Agarwal,Kolkata,6200,1282,984,177,0,5,0,3752
+Agoda statement.csv,AG53065,agoda,stay,2026-06-06,2,205,Tarun Tiwari,Dehradun,6800,720,1216,219,0,6,0,4639
+Agoda statement.csv,AG79621,agoda,stay,2026-06-07,2,209,Zoya Mathur,Lucknow,12400,1900,2100,378,0,11,0,8011
+Agoda statement.csv,AG17738,agoda,stay,2026-06-10,2,108,Aditi Negi,Agra,8600,1370,1446,260,0,7,0,5517
+Agoda statement.csv,AG37619,agoda,cancelled,2026-06-10,1,,Varsha Bhatt,Pune,0,0,0,0,0,0,0,0
+Agoda statement.csv,AG41012,agoda,stay,2026-06-10,2,105,Kavya Shukla,Agra,8600,977,1525,275,0,8,0,5815
+Agoda statement.csv,AG24501,agoda,stay,2026-06-13,1,106,Anushka Bhatt,Ludhiana,4300,684,723,130,0,4,0,2759
+Agoda statement.csv,AG58096,agoda,stay,2026-06-13,1,205,Jatin Shukla,Bengaluru,3200,677,505,91,0,3,0,1924
+Agoda statement.csv,AG59983,agoda,stay,2026-06-13,1,202,Gaurav Khanna,Delhi,3400,510,578,104,0,3,0,2205
+Agoda statement.csv,AG27039,agoda,stay,2026-06-19,2,112,Simran Dutta,Noida,6800,1360,1088,196,0,5,0,4151
+Agoda statement.csv,AG94323,agoda,stay,2026-06-19,2,209,Bhavna Sethi,Dehradun,12200,1299,2180,392,0,11,0,8318
+Agoda statement.csv,AG15353,agoda,stay,2026-06-22,2,107,Tanvi Pandey,Gurugram,8200,1315,1377,248,0,7,0,5253
+Agoda statement.csv,AG75833,agoda,stay,2026-06-22,2,203,Kunal Vohra,Kolkata,6800,800,1200,216,0,6,0,4578
+Agoda statement.csv,AG69192,agoda,stay,2026-06-26,3,204,Aditi Puri,Pune,10200,1530,1734,312,0,9,0,6615
+Agoda statement.csv,AG82993,agoda,stay,2026-06-27,1,110,Amrita Wadhwa,Ghaziabad,4100,860,648,117,0,3,0,2472
+Agoda statement.csv,AG67270,agoda,stay,2026-06-29,2,109,Ankit Kulkarni,Pune,8800,1320,1496,269,0,7,0,5708
+Agoda statement.csv,AG76365,agoda,stay,2026-06-29,2,204,Gaurav Kohli,Delhi,7200,1159,1208,217,0,6,0,4610
+Agoda statement.csv,AG33480,agoda,stay,2026-06-30,1,104,Payal Tandon,Gurugram,4200,420,756,136,0,4,0,2884
+Agoda statement.csv,AG25683,agoda,stay,2026-07-10,1,103,Arnav Mathur,Noida,3400,668,546,98,0,3,0,2085
+Agoda statement.csv,AG37854,agoda,stay,2026-07-12,2,202,Abhinav Negi,Dehradun,5600,1160,888,160,0,4,0,3388
+Agoda statement.csv,AG27599,agoda,stay,2026-07-16,3,107,Priya Nair,Bengaluru,13800,1173,2525,455,0,13,0,9634
+Agoda statement.csv,AG31406,agoda,stay,2026-07-17,1,102,Omkar Kohli,Agra,3500,565,587,106,0,3,0,2239
+Agoda statement.csv,AG46922,agoda,stay,2026-07-17,1,205,Harsh Bhandari,Noida,2800,420,476,86,0,2,0,1816
+Agoda statement.csv,AG77102,agoda,cancelled,2026-07-18,1,,Sonal Bedi,Amritsar,0,0,680,122,0,0,0,-802
+Agoda statement.csv,AG11323,agoda,stay,2026-07-22,1,205,Harsh Trivedi,Noida,3000,296,541,97,0,3,0,2063
+Agoda statement.csv,AG44947,agoda,cancelled,2026-07-22,2,,Varsha Rastogi,Kolkata,0,0,0,0,0,0,0,0
+Agoda statement.csv,AG75281,agoda,stay,2026-07-22,1,207,Alok Pandey,Ambala,5200,1080,824,148,0,4,0,3144
+Agoda statement.csv,AG86930,agoda,stay,2026-07-26,1,111,Ritika Rastogi,Delhi,2800,500,460,83,0,2,0,1755
+Agoda statement.csv,AG63877,agoda,stay,2026-07-29,3,205,Nikhil Mathur,Gurugram,7800,1640,1232,222,0,6,0,4700
+Agoda statement.csv,AG74723,agoda,stay,2026-08-03,2,202,Saurabh Grover,Meerut,5800,870,986,177,0,5,0,3762
+Agoda statement.csv,AG46953,agoda,stay,2026-08-06,1,106,Pallavi Bhandari,Kanpur,3400,550,570,103,0,3,0,2174
+Agoda statement.csv,AG50017,agoda,stay,2026-08-07,2,104,Ashish Garg,Chandigarh,7600,1180,1284,231,0,6,0,4899
+Agoda statement.csv,AG88921,agoda,stay,2026-08-08,1,202,Zoya Pandey,Mumbai,2700,445,451,81,0,2,0,1721
+Agoda statement.csv,AG63222,agoda,stay,2026-08-10,1,206,Devansh Agarwal,Meerut,2900,515,477,86,0,2,0,1820
+Agoda statement.csv,AG24871,agoda,stay,2026-08-11,2,203,Pallavi Mathur,Gurugram,5600,880,944,170,0,5,0,3601
+Agoda statement.csv,AG29872,agoda,stay,2026-08-15,2,104,Nidhi Gill,Meerut,7400,1306,1219,219,0,6,0,4650
+Agoda statement.csv,AG48384,agoda,cancelled,2026-08-21,2,,Pallavi Upadhyay,Agra,0,0,0,0,0,0,0,0
+Agoda statement.csv,AG48741,agoda,stay,2026-08-21,2,111,Kunal Kohli,Pune,6000,638,1072,193,0,5,0,4092
+Agoda statement.csv,AG55627,agoda,stay,2026-09-01,1,112,Tanvi Lamba,Jaipur,3000,453,509,92,0,3,0,1943
+Agoda statement.csv,AG67923,agoda,stay,2026-09-04,2,206,Sahil Ahuja,Pune,6600,990,1122,202,0,6,0,4280
+Agoda statement.csv,AG67883,agoda,stay,2026-09-05,1,203,Chirag Puri,Faridabad,3200,520,536,96,0,3,0,2045
+Agoda statement.csv,AG20389,agoda,stay,2026-09-06,2,103,Yash Kulkarni,Delhi,7600,1560,1208,217,0,6,0,4609
+Agoda statement.csv,AG93742,agoda,stay,2026-09-10,2,101,Simran Tandon,Agra,7800,860,1388,250,0,7,0,5295
+Agoda statement.csv,AG69240,agoda,stay,2026-09-11,1,105,Kavya Srivastava,Bengaluru,3800,570,646,116,0,3,0,2465
+Agoda statement.csv,AG59158,agoda,stay,2026-09-13,3,205,Payal Agarwal,Dehradun,9600,1483,1623,292,0,8,0,6194
+Agoda statement.csv,AG68914,agoda,stay,2026-09-18,1,210,Harsh Goel,Meerut,5800,700,1020,184,0,5,0,3891
+Agoda statement.csv,AG23053,agoda,stay,2026-09-19,1,103,Gaurav Dhawan,Gurugram,4100,824,655,118,0,3,0,2500
+Agoda statement.csv,AG62770,agoda,stay,2026-09-20,1,208,Bhavna Bisht,Ambala,5600,560,1008,181,0,5,0,3846
+Agoda statement.csv,AG28677,agoda,stay,2026-09-22,1,203,Varsha Tandon,Kanpur,2900,477,485,87,0,2,0,1849
+Agoda statement.csv,AG85509,agoda,stay,2026-09-23,3,108,Ananya Joshi,Dehradun,17400,1463,3187,574,0,16,0,12160
+Agoda statement.csv,AG11447,agoda,stay,2026-09-26,3,109,Aakash Sood,Chandigarh,11400,1711,1938,349,0,10,0,7392
+Agoda statement.csv,AG44719,agoda,cancelled,2026-09-28,1,,Parth Pandey,Kanpur,0,0,0,0,0,0,0,0
+Agoda statement.csv,AG24390,agoda,stay,2026-09-29,2,202,Kavya Dutta,Chandigarh,6000,600,1080,194,0,5,0,4121
+Agoda statement.csv,AG40898,agoda,stay,2026-09-29,1,108,Simran Tiwari,Ambala,4200,670,706,127,0,4,0,2693
+Agoda statement.csv,AG51810,agoda,stay,2026-09-30,1,110,Vaibhav Dhawan,Chandigarh,4000,643,671,121,0,3,0,2562
+Booking.com payouts.xlsx,BK31658,bcom,stay,2026-04-01,1,201,Aakash Kohli,Meerut,3200,400,504,91,0,3,0,2202
+Booking.com payouts.xlsx,BK11187,bcom,stay,2026-04-02,1,206,Siddharth Thakur,Delhi,3300,0,594,107,0,3,0,2596
+Booking.com payouts.xlsx,BK40165,bcom,stay,2026-04-02,1,103,Devansh Puri,Agra,4400,480,706,127,0,4,0,3083
+Booking.com payouts.xlsx,BK51478,bcom,stay,2026-04-03,3,102,Tanvi Kapoor,Lucknow,12600,1970,1913,344,0,11,0,8362
+Booking.com payouts.xlsx,BK94145,bcom,stay,2026-04-03,2,207,Akshay Agarwal,Kolkata,12400,77,2218,399,0,12,0,9694
+Booking.com payouts.xlsx,BK27234,bcom,stay,2026-04-04,1,107,Pallavi Srivastava,Lucknow,4000,520,626,113,0,3,0,2738
+Booking.com payouts.xlsx,BK60769,bcom,stay,2026-04-04,2,210,Jatin Bhandari,Kanpur,12000,1240,1937,349,0,11,0,8463
+Booking.com payouts.xlsx,BK62888,bcom,stay,2026-04-04,1,105,Sahil Vohra,Pune,4200,460,673,121,0,4,0,2942
+Booking.com payouts.xlsx,BK16244,bcom,cancelled,2026-04-06,1,,Nidhi Jain,Pune,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK68175,bcom,stay,2026-04-06,3,102,Varsha Vohra,Pune,12000,1203,1943,350,0,11,0,8493
+Booking.com payouts.xlsx,BK89701,bcom,stay,2026-04-06,2,109,Aparna Gill,Bengaluru,8000,1240,1217,219,0,7,0,5317
+Booking.com payouts.xlsx,BK17036,bcom,stay,2026-04-08,1,101,Gaurav Puri,Bengaluru,4100,655,620,112,0,3,0,2710
+Booking.com payouts.xlsx,BK12215,bcom,stay,2026-04-09,1,108,Chirag Ahuja,Ambala,4000,400,648,117,0,4,0,2831
+Booking.com payouts.xlsx,BK33173,bcom,stay,2026-04-10,1,108,Aakash Gill,Agra,3800,420,608,109,0,3,0,2660
+Booking.com payouts.xlsx,BK62840,bcom,stay,2026-04-10,3,110,Tarun Rastogi,Delhi,11700,1790,1784,321,0,10,0,7795
+Booking.com payouts.xlsx,BK73345,bcom,stay,2026-04-10,1,104,Kavya Mittal,Kolkata,4400,444,712,128,0,4,0,3112
+Booking.com payouts.xlsx,BK82505,bcom,cancelled,2026-04-10,1,,Aparna Kohli,Meerut,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK77432,bcom,stay,2026-04-11,2,210,Nikhil Bhandari,Mumbai,12200,40,2189,394,0,12,0,9565
+Booking.com payouts.xlsx,BK28409,bcom,stay,2026-04-12,2,204,Tanvi Ahuja,Chandigarh,6400,640,1037,187,0,6,0,4530
+Booking.com payouts.xlsx,BK50356,bcom,stay,2026-04-12,2,107,Parth Jain,Lucknow,7800,860,1249,225,0,7,0,5459
+Booking.com payouts.xlsx,BK64236,bcom,stay,2026-04-14,1,103,Parth Rastogi,Ambala,3800,0,684,123,0,4,0,2989
+Booking.com payouts.xlsx,BK89872,bcom,stay,2026-04-15,1,101,Abhinav Bisht,Noida,4200,460,673,121,0,4,0,2942
+Booking.com payouts.xlsx,BK59884,bcom,stay,2026-04-16,1,101,Udit Dutta,Jaipur,4400,700,666,120,0,4,0,2910
+Booking.com payouts.xlsx,BK69530,bcom,stay,2026-04-17,2,205,Ritika Thakur,Pune,6000,600,972,175,0,5,0,4248
+Booking.com payouts.xlsx,BK78064,bcom,stay,2026-04-17,1,101,Harsh Chopra,Ambala,4100,450,657,118,0,4,0,2871
+Booking.com payouts.xlsx,BK83525,bcom,stay,2026-04-17,1,102,Siddharth Srivastava,Dehradun,4200,460,673,121,0,4,0,2942
+Booking.com payouts.xlsx,BK20939,bcom,stay,2026-04-22,3,105,Tarun Shukla,Kolkata,12600,1260,2041,367,0,11,0,8921
+Booking.com payouts.xlsx,BK26871,bcom,stay,2026-04-23,1,108,Kunal Pandey,Dehradun,4000,440,641,115,0,4,0,2800
+Booking.com payouts.xlsx,BK62218,bcom,stay,2026-04-23,1,208,Ashish Mittal,Noida,5900,593,955,172,0,5,0,4175
+Booking.com payouts.xlsx,BK52553,bcom,stay,2026-04-24,2,106,Abhinav Tiwari,Faridabad,7800,40,1397,251,0,8,0,6104
+Booking.com payouts.xlsx,BK76219,bcom,stay,2026-04-24,2,108,Devansh Mathur,Lucknow,8600,37,1541,277,0,9,0,6736
+Booking.com payouts.xlsx,BK11612,bcom,stay,2026-04-25,1,105,Nidhi Srivastava,Dehradun,4100,455,656,118,0,4,0,2867
+Booking.com payouts.xlsx,BK20484,bcom,stay,2026-04-26,2,109,Omkar Pandey,Meerut,8600,940,1379,248,0,8,0,6025
+Booking.com payouts.xlsx,BK97155,bcom,stay,2026-04-26,1,103,Pallavi Sood,Kanpur,3800,380,616,111,0,3,0,2690
+Booking.com payouts.xlsx,BK88335,bcom,stay,2026-04-27,2,111,Arnav Khanna,Faridabad,6800,1140,1019,183,0,6,0,4452
+Booking.com payouts.xlsx,BK51652,bcom,stay,2026-04-28,1,210,Manish Khanna,Meerut,6400,640,1037,187,0,6,0,4530
+Booking.com payouts.xlsx,BK83840,bcom,stay,2026-04-28,2,101,Ritika Goel,Noida,7800,1172,1193,215,0,7,0,5213
+Booking.com payouts.xlsx,BK60267,bcom,stay,2026-04-30,1,105,Sakshi Sinha,Lucknow,4100,0,738,133,0,4,0,3225
+Booking.com payouts.xlsx,BK17490,bcom,stay,2026-05-01,1,107,Anushka Kapoor,Kanpur,4600,540,731,132,0,4,0,3193
+Booking.com payouts.xlsx,BK50129,bcom,stay,2026-05-01,1,104,Mansi Tandon,Pune,4300,510,682,123,0,4,0,2981
+Booking.com payouts.xlsx,BK13631,bcom,stay,2026-05-02,1,102,Lavanya Kapoor,Chandigarh,4700,510,754,136,0,4,0,3296
+Booking.com payouts.xlsx,BK43363,bcom,stay,2026-05-02,3,104,Mansi Dhawan,Chandigarh,12900,1290,2090,376,0,12,0,9132
+Booking.com payouts.xlsx,BK88836,bcom,stay,2026-05-02,1,206,Zoya Rana,Agra,3500,390,560,101,0,3,0,2446
+Booking.com payouts.xlsx,BK57682,bcom,stay,2026-05-04,1,109,Sakshi Gill,Ludhiana,4400,480,706,127,0,4,0,3083
+Booking.com payouts.xlsx,BK78833,bcom,stay,2026-05-04,2,207,Simran Khanna,Ludhiana,12600,1300,2034,366,0,11,0,8889
+Booking.com payouts.xlsx,BK11212,bcom,stay,2026-05-05,1,105,Tanvi Bhandari,Lucknow,4500,490,722,130,0,4,0,3154
+Booking.com payouts.xlsx,BK25245,bcom,stay,2026-05-05,2,106,Parth Shukla,Pune,8200,900,1314,237,0,7,0,5742
+Booking.com payouts.xlsx,BK45001,bcom,stay,2026-05-05,1,103,Aditi Trivedi,Jaipur,4500,530,715,129,0,4,0,3122
+Booking.com payouts.xlsx,BK72407,bcom,stay,2026-05-05,2,110,Devansh Garg,Noida,8600,900,1386,249,0,8,0,6057
+Booking.com payouts.xlsx,BK94866,bcom,stay,2026-05-05,1,208,Nikhil Puri,Ludhiana,6000,680,958,172,0,5,0,4185
+Booking.com payouts.xlsx,BK98575,bcom,stay,2026-05-07,1,110,Lavanya Puri,Meerut,4400,660,673,121,0,4,0,2942
+Booking.com payouts.xlsx,BK13712,bcom,stay,2026-05-09,3,107,Kavya Trivedi,Dehradun,13800,0,2484,447,0,14,0,10855
+Booking.com payouts.xlsx,BK14670,bcom,stay,2026-05-09,3,106,Sana Qureshi,Noida,17700,1648,2889,520,0,16,0,12627
+Booking.com payouts.xlsx,BK27483,bcom,stay,2026-05-09,1,104,Lavanya Lamba,Meerut,4200,500,666,120,0,4,0,2910
+Booking.com payouts.xlsx,BK87767,bcom,stay,2026-05-09,1,208,Akshay Rastogi,Bengaluru,6100,653,980,176,0,5,0,4286
+Booking.com payouts.xlsx,BK50060,bcom,stay,2026-05-10,1,204,Aakash Srivastava,Delhi,3100,430,481,87,0,3,0,2099
+Booking.com payouts.xlsx,BK75906,bcom,stay,2026-05-12,1,210,Bhavna Mittal,Chandigarh,6100,690,974,175,0,5,0,4256
+Booking.com payouts.xlsx,BK69990,bcom,stay,2026-05-13,2,106,Ankit Gill,Meerut,8800,920,1418,255,0,8,0,6199
+Booking.com payouts.xlsx,BK51959,bcom,stay,2026-05-14,1,104,Arnav Agarwal,Agra,4500,535,714,129,0,4,0,3118
+Booking.com payouts.xlsx,BK92229,bcom,cancelled,2026-05-14,1,,Sakshi Upadhyay,Pune,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK15050,bcom,stay,2026-05-15,2,112,Pallavi Thakur,Bengaluru,6800,120,1202,216,0,7,0,5255
+Booking.com payouts.xlsx,BK92116,bcom,stay,2026-05-15,2,207,Anushka Sood,Noida,13000,1950,1989,358,0,11,0,8692
+Booking.com payouts.xlsx,BK23965,bcom,stay,2026-05-16,1,102,Pallavi Sethi,Gurugram,4400,700,666,120,0,4,0,2910
+Booking.com payouts.xlsx,BK50873,bcom,stay,2026-05-19,2,106,Akshay Tandon,Faridabad,9000,938,1451,261,0,8,0,6342
+Booking.com payouts.xlsx,BK96732,bcom,stay,2026-05-20,1,104,Nikhil Agarwal,Jaipur,4400,80,778,140,0,4,0,3398
+Booking.com payouts.xlsx,BK50742,bcom,stay,2026-05-21,2,108,Pallavi Agarwal,Bengaluru,8800,880,1426,257,0,8,0,6229
+Booking.com payouts.xlsx,BK19924,bcom,stay,2026-05-22,2,105,Omkar Shukla,Meerut,9000,980,1444,260,0,8,0,6308
+Booking.com payouts.xlsx,BK25014,bcom,stay,2026-05-22,1,209,Mansi Agarwal,Agra,6600,657,1070,193,0,6,0,4674
+Booking.com payouts.xlsx,BK25733,bcom,stay,2026-05-22,1,101,Shreya Puri,Jaipur,4500,490,722,130,0,4,0,3154
+Booking.com payouts.xlsx,BK41730,bcom,stay,2026-05-22,1,204,Yash Oberoi,Meerut,3600,540,551,99,0,3,0,2407
+Booking.com payouts.xlsx,BK41083,bcom,stay,2026-05-23,1,104,Tanvi Rastogi,Ambala,4300,550,675,122,0,4,0,2949
+Booking.com payouts.xlsx,BK52424,bcom,cancelled,2026-05-23,1,,Devansh Tiwari,Ghaziabad,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK95990,bcom,stay,2026-05-23,3,112,Omkar Wadhwa,Jaipur,10200,1020,1652,297,0,9,0,7222
+Booking.com payouts.xlsx,BK48038,bcom,stay,2026-05-24,2,108,Manish Sinha,Ambala,8800,920,1418,255,0,8,0,6199
+Booking.com payouts.xlsx,BK84818,bcom,stay,2026-05-24,3,103,Amrita Dutta,Jaipur,12600,1341,2027,365,0,11,0,8856
+Booking.com payouts.xlsx,BK95821,bcom,stay,2026-05-24,2,107,Ankit Dhawan,Meerut,8400,920,1346,242,0,7,0,5885
+Booking.com payouts.xlsx,BK64549,bcom,stay,2026-05-25,2,210,Ishita Agarwal,Agra,13200,0,2376,428,0,13,0,10383
+Booking.com payouts.xlsx,BK90745,bcom,stay,2026-05-25,1,207,Mansi Wadhwa,Pune,6700,672,1085,195,0,6,0,4742
+Booking.com payouts.xlsx,BK70001,bcom,cancelled,2026-05-26,1,,Ankit Lamba,Kanpur,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK70076,bcom,stay,2026-05-26,1,205,Tarun Oberoi,Ludhiana,3400,343,550,99,0,3,0,2405
+Booking.com payouts.xlsx,BK54670,bcom,stay,2026-05-29,1,201,Divya Sood,Lucknow,3500,395,559,101,0,3,0,2442
+Booking.com payouts.xlsx,BK66583,bcom,stay,2026-05-29,1,106,Tarun Kohli,Gurugram,4400,440,713,128,0,4,0,3115
+Booking.com payouts.xlsx,BK93692,bcom,stay,2026-05-29,1,112,Divya Goel,Dehradun,3700,370,599,108,0,3,0,2620
+Booking.com payouts.xlsx,BK69337,bcom,stay,2026-05-30,2,107,Akshay Garg,Faridabad,8800,40,1577,284,0,9,0,6890
+Booking.com payouts.xlsx,BK70106,bcom,stay,2026-05-30,2,208,Kavya Agarwal,Meerut,12200,1954,1844,332,0,10,0,8060
+Booking.com payouts.xlsx,BK76528,bcom,stay,2026-06-01,1,205,Ishita Jain,Noida,3400,380,544,98,0,3,0,2375
+Booking.com payouts.xlsx,BK14109,bcom,stay,2026-06-02,2,106,Sahil Garg,Agra,9000,980,1444,260,0,8,0,6308
+Booking.com payouts.xlsx,BK69286,bcom,stay,2026-06-02,2,203,Divya Rastogi,Faridabad,6800,1020,1040,187,0,6,0,4547
+Booking.com payouts.xlsx,BK76871,bcom,stay,2026-06-02,1,103,Harsh Sood,Faridabad,4400,0,792,143,0,4,0,3461
+Booking.com payouts.xlsx,BK58033,bcom,cancelled,2026-06-03,2,,Zoya Sood,Noida,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK93018,bcom,stay,2026-06-03,2,101,Arnav Dutta,Agra,8400,920,1346,242,0,7,0,5885
+Booking.com payouts.xlsx,BK16335,bcom,stay,2026-06-05,2,206,Arnav Dhawan,Noida,7000,1130,1057,190,0,6,0,4617
+Booking.com payouts.xlsx,BK68893,bcom,stay,2026-06-05,1,207,Simran Negi,Lucknow,6200,80,1102,198,0,6,0,4814
+Booking.com payouts.xlsx,BK23606,bcom,stay,2026-06-06,2,112,Ashish Rana,Jaipur,7200,800,1152,207,0,6,0,5035
+Booking.com payouts.xlsx,BK30450,bcom,stay,2026-06-06,3,208,Harsh Jain,Lucknow,20100,2050,3249,585,0,18,0,14198
+Booking.com payouts.xlsx,BK18727,bcom,stay,2026-06-07,1,102,Yash Dutta,Agra,4300,514,681,123,0,4,0,2978
+Booking.com payouts.xlsx,BK33252,bcom,stay,2026-06-07,2,210,Abhinav Pandey,Meerut,12600,0,2268,408,0,13,0,9911
+Booking.com payouts.xlsx,BK94637,bcom,stay,2026-06-07,2,111,Rajat Bisht,Chandigarh,6800,0,1224,220,0,7,0,5349
+Booking.com payouts.xlsx,BK26826,bcom,stay,2026-06-08,1,207,Kavya Bhandari,Agra,6600,740,1055,190,0,6,0,4609
+Booking.com payouts.xlsx,BK27074,bcom,stay,2026-06-08,1,101,Mansi Pandey,Meerut,4400,482,705,127,0,4,0,3082
+Booking.com payouts.xlsx,BK75911,bcom,stay,2026-06-08,3,107,Alok Kulkarni,Jaipur,13500,1390,2180,392,0,12,0,9526
+Booking.com payouts.xlsx,BK29010,bcom,cancelled,2026-06-10,1,,Kunal Jain,Chandigarh,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK45654,bcom,stay,2026-06-10,1,101,Parth Sood,Noida,4400,698,666,120,0,4,0,2912
+Booking.com payouts.xlsx,BK69995,bcom,stay,2026-06-10,1,104,Ritika Oberoi,Kanpur,4600,580,724,130,0,4,0,3162
+Booking.com payouts.xlsx,BK22469,bcom,stay,2026-06-12,2,103,Manish Kapoor,Bengaluru,8600,1450,1287,232,0,7,0,5624
+Booking.com payouts.xlsx,BK14360,bcom,stay,2026-06-13,2,208,Yash Jain,Kolkata,13200,1320,2138,385,0,12,0,9345
+Booking.com payouts.xlsx,BK74650,bcom,stay,2026-06-13,1,209,Sakshi Vohra,Ludhiana,6500,729,1039,187,0,6,0,4539
+Booking.com payouts.xlsx,BK33447,bcom,stay,2026-06-14,1,109,Ritika Ahuja,Delhi,4200,420,680,122,0,4,0,2974
+Booking.com payouts.xlsx,BK55320,bcom,stay,2026-06-14,1,110,Ritesh Kalra,Panipat,4400,440,713,0,0,4,0,3115
+Booking.com payouts.xlsx,BK87662,bcom,cancelled,2026-06-14,1,,Omkar Dutta,Dehradun,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK64938,bcom,stay,2026-06-15,1,206,Siddharth Agarwal,Ludhiana,3200,320,518,93,0,3,0,2266
+Booking.com payouts.xlsx,BK77368,bcom,stay,2026-06-15,2,108,Divya Upadhyay,Lucknow,9000,938,1451,261,0,8,0,6342
+Booking.com payouts.xlsx,BK95822,bcom,stay,2026-06-16,1,109,Yash Tiwari,Lucknow,4300,467,690,124,0,4,0,3015
+Booking.com payouts.xlsx,BK61959,bcom,stay,2026-06-19,3,103,Ritika Kulkarni,Lucknow,13500,1395,2179,392,0,12,0,9522
+Booking.com payouts.xlsx,BK94608,bcom,stay,2026-06-19,3,111,Devansh Ahuja,Delhi,10500,1050,1701,306,0,9,0,7434
+Booking.com payouts.xlsx,BK99689,bcom,stay,2026-06-19,1,104,Tarun Bhatt,Gurugram,4200,420,680,122,0,4,0,2974
+Booking.com payouts.xlsx,BK45668,bcom,stay,2026-06-20,1,107,Divya Trivedi,Pune,4200,460,673,121,0,4,0,2942
+Booking.com payouts.xlsx,BK81502,bcom,stay,2026-06-20,1,206,Chirag Sood,Dehradun,3400,380,544,98,0,3,0,2375
+Booking.com payouts.xlsx,BK14046,bcom,stay,2026-06-22,1,205,Abhinav Sinha,Mumbai,3300,450,513,92,0,3,0,2242
+Booking.com payouts.xlsx,BK38489,bcom,stay,2026-06-22,1,105,Pallavi Bisht,Delhi,4400,520,698,126,0,4,0,3052
+Booking.com payouts.xlsx,BK69009,bcom,stay,2026-06-22,3,109,Neha Gupta,Gurugram,16200,1509,2644,476,0,15,0,11556
+Booking.com payouts.xlsx,BK84771,bcom,stay,2026-06-22,1,102,Simran Chopra,Noida,4400,440,713,128,0,4,0,3115
+Booking.com payouts.xlsx,BK13953,bcom,stay,2026-06-23,2,108,Mansi Sinha,Noida,9200,1420,1400,252,0,8,0,6120
+Booking.com payouts.xlsx,BK26861,bcom,stay,2026-06-23,1,110,Parth Mathur,Ghaziabad,4400,520,698,126,0,4,0,3052
+Booking.com payouts.xlsx,BK58023,bcom,stay,2026-06-24,1,203,Kunal Dutta,Ludhiana,3600,400,576,104,0,3,0,2517
+Booking.com payouts.xlsx,BK72483,bcom,stay,2026-06-24,1,106,Akshay Pandey,Meerut,4500,715,681,123,0,4,0,2977
+Booking.com payouts.xlsx,BK82503,bcom,stay,2026-06-24,1,207,Kavya Wadhwa,Meerut,6400,40,1145,206,0,6,0,5003
+Booking.com payouts.xlsx,BK36000,bcom,stay,2026-06-26,2,102,Rajat Vohra,Delhi,8800,996,1405,253,0,8,0,6138
+Booking.com payouts.xlsx,BK85261,bcom,stay,2026-06-26,2,101,Nidhi Puri,Delhi,8400,880,1354,244,0,8,0,5914
+Booking.com payouts.xlsx,BK88638,bcom,stay,2026-06-26,1,108,Vaibhav Thakur,Agra,4400,0,792,143,0,4,0,3461
+Booking.com payouts.xlsx,BK88980,bcom,stay,2026-06-27,1,210,Akshay Marwah,Faridabad,6400,960,979,176,0,5,0,4280
+Booking.com payouts.xlsx,BK79389,bcom,stay,2026-06-28,1,109,Ashish Jain,Faridabad,4500,530,715,129,0,4,0,3122
+Booking.com payouts.xlsx,BK61104,bcom,stay,2026-06-29,2,108,Ankit Trivedi,Mumbai,8600,1290,1316,237,0,7,0,5750
+Booking.com payouts.xlsx,BK61037,bcom,stay,2026-07-02,1,101,Bhavna Dhawan,Gurugram,3800,380,616,111,0,3,0,2690
+Booking.com payouts.xlsx,BK57052,bcom,stay,2026-07-03,1,106,Varsha Chopra,Lucknow,3600,744,514,93,0,3,0,2246
+Booking.com payouts.xlsx,BK83373,bcom,stay,2026-07-03,3,108,Mansi Trivedi,Lucknow,10200,1565,1554,280,0,9,0,6792
+Booking.com payouts.xlsx,BK15306,bcom,stay,2026-07-04,1,105,Anushka Marwah,Jaipur,3800,420,608,109,0,3,0,2660
+Booking.com payouts.xlsx,BK53806,bcom,stay,2026-07-04,1,208,Abhinav Bhandari,Ambala,5100,550,819,147,0,5,0,3579
+Booking.com payouts.xlsx,BK60234,bcom,stay,2026-07-04,1,109,Parth Khanna,Ambala,3800,380,616,111,0,3,0,2690
+Booking.com payouts.xlsx,BK17309,bcom,stay,2026-07-11,1,204,Akshay Chopra,Jaipur,2900,370,455,82,0,3,0,1990
+Booking.com payouts.xlsx,BK50645,bcom,stay,2026-07-11,1,105,Simran Wadhwa,Kolkata,3700,489,578,104,0,3,0,2526
+Booking.com payouts.xlsx,BK25883,bcom,stay,2026-07-12,1,106,Ishita Kohli,Lucknow,3700,414,591,106,0,3,0,2586
+Booking.com payouts.xlsx,BK29824,bcom,stay,2026-07-16,2,204,Parth Grover,Ludhiana,6000,4,1079,194,0,6,0,4717
+Booking.com payouts.xlsx,BK34966,bcom,cancelled,2026-07-16,2,,Lavanya Bhatt,Noida,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK22164,bcom,stay,2026-07-17,2,104,Saurabh Dhawan,Dehradun,7800,1250,1179,212,0,7,0,5152
+Booking.com payouts.xlsx,BK98326,bcom,stay,2026-07-17,2,101,Sahil Kohli,Dehradun,7600,760,1231,222,0,7,0,5380
+Booking.com payouts.xlsx,BK75575,bcom,stay,2026-07-18,3,112,Ankit Khanna,Faridabad,9300,0,1674,301,0,9,0,7316
+Booking.com payouts.xlsx,BK43753,bcom,stay,2026-07-19,1,108,Aparna Grover,Chandigarh,3500,123,608,109,0,3,0,2657
+Booking.com payouts.xlsx,BK55815,bcom,stay,2026-07-21,2,203,Pallavi Kulkarni,Faridabad,5600,120,986,177,0,5,0,4312
+Booking.com payouts.xlsx,BK88100,bcom,stay,2026-07-21,1,107,Akshay Bhandari,Pune,3800,40,677,122,0,4,0,2957
+Booking.com payouts.xlsx,BK37577,bcom,stay,2026-07-25,2,202,Devansh Trivedi,Faridabad,6000,40,1073,193,0,6,0,4688
+Booking.com payouts.xlsx,BK69358,bcom,stay,2026-07-25,2,205,Lavanya Marwah,Agra,5400,41,965,174,0,5,0,4215
+Booking.com payouts.xlsx,BK99825,bcom,stay,2026-07-26,2,201,Harsh Agarwal,Dehradun,5600,600,900,162,0,5,0,3933
+Booking.com payouts.xlsx,BK84393,bcom,stay,2026-07-31,1,105,Payal Kapoor,Noida,3600,401,576,104,0,3,0,2516
+Booking.com payouts.xlsx,BK31503,bcom,stay,2026-08-01,1,209,Abhinav Vohra,Ambala,5600,839,857,154,0,5,0,3745
+Booking.com payouts.xlsx,BK97178,bcom,stay,2026-08-01,3,207,Siddharth Bhandari,Kanpur,16800,2516,2571,463,0,14,0,11236
+Booking.com payouts.xlsx,BK39513,bcom,stay,2026-08-03,3,102,Meera Iyer,Mumbai,20100,1637,3323,598,0,18,0,14524
+Booking.com payouts.xlsx,BK58915,bcom,stay,2026-08-06,2,110,Arnav Rastogi,Ambala,7000,700,1134,204,0,6,0,4956
+Booking.com payouts.xlsx,BK22834,bcom,stay,2026-08-08,1,106,Parth Tiwari,Faridabad,3800,380,616,111,0,3,0,2690
+Booking.com payouts.xlsx,BK53306,bcom,stay,2026-08-08,1,107,Aakash Rastogi,Mumbai,3400,510,520,94,0,3,0,2273
+Booking.com payouts.xlsx,BK87499,bcom,cancelled,2026-08-10,2,,Amrita Bhatt,Noida,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK75479,bcom,stay,2026-08-12,2,111,Ritika Rana,Faridabad,6000,640,965,174,0,5,0,4216
+Booking.com payouts.xlsx,BK56989,bcom,stay,2026-08-14,1,209,Payal Rana,Bengaluru,5600,600,900,162,0,5,0,3933
+Booking.com payouts.xlsx,BK62980,bcom,stay,2026-08-14,1,109,Aakash Kapoor,Delhi,3800,420,608,109,0,3,0,2660
+Booking.com payouts.xlsx,BK88282,bcom,stay,2026-08-18,1,210,Ritika Dutta,Bengaluru,5700,610,916,165,0,5,0,4004
+Booking.com payouts.xlsx,BK14684,bcom,stay,2026-08-20,1,105,Kavya Bisht,Agra,3400,590,506,91,0,3,0,2210
+Booking.com payouts.xlsx,BK85766,bcom,stay,2026-08-21,1,103,Nidhi Thakur,Bengaluru,3600,0,648,117,0,4,0,2831
+Booking.com payouts.xlsx,BK17153,bcom,stay,2026-08-22,1,105,Shreya Trivedi,Jaipur,3900,40,695,125,0,4,0,3036
+Booking.com payouts.xlsx,BK10279,bcom,stay,2026-08-23,2,107,Sahil Agarwal,Bengaluru,7200,876,1138,205,0,6,0,4975
+Booking.com payouts.xlsx,BK14447,bcom,stay,2026-08-25,2,109,Tarun Kapoor,Jaipur,7200,840,1145,206,0,6,0,5003
+Booking.com payouts.xlsx,BK34900,bcom,stay,2026-08-25,2,103,Ritika Grover,Agra,7400,739,1199,216,0,7,0,5239
+Booking.com payouts.xlsx,BK32940,bcom,stay,2026-08-26,1,110,Alok Vohra,Faridabad,3800,450,603,109,0,3,0,2635
+Booking.com payouts.xlsx,BK98122,bcom,stay,2026-08-28,1,105,Shreya Sethi,Mumbai,3700,410,592,107,0,3,0,2588
+Booking.com payouts.xlsx,BK14873,bcom,stay,2026-08-29,2,103,Ashish Chopra,Kolkata,6200,1089,920,166,0,5,0,4020
+Booking.com payouts.xlsx,BK65860,bcom,stay,2026-09-02,1,102,Zoya Grover,Ambala,4300,470,689,124,0,4,0,3013
+Booking.com payouts.xlsx,BK88874,bcom,stay,2026-09-02,1,101,Arnav Rana,Faridabad,4000,397,649,117,0,4,0,2833
+Booking.com payouts.xlsx,BK95971,bcom,stay,2026-09-03,1,110,Rajat Grover,Ghaziabad,4100,410,664,120,0,4,0,2902
+Booking.com payouts.xlsx,BK42627,bcom,stay,2026-09-04,2,106,Tanvi Bhatt,Noida,7800,820,1256,226,0,7,0,5491
+Booking.com payouts.xlsx,BK67048,bcom,stay,2026-09-05,1,102,Abhinav Thakur,Dehradun,3900,390,632,114,0,4,0,2760
+Booking.com payouts.xlsx,BK72256,bcom,stay,2026-09-05,1,110,Simran Jain,Dehradun,3900,466,618,111,0,3,0,2702
+Booking.com payouts.xlsx,BK76933,bcom,stay,2026-09-06,1,206,Sahil Gill,Faridabad,3500,525,536,96,0,3,0,2340
+Booking.com payouts.xlsx,BK94088,bcom,stay,2026-09-06,1,201,Aparna Negi,Meerut,3200,318,519,93,0,3,0,2267
+Booking.com payouts.xlsx,BK36490,bcom,stay,2026-09-07,1,207,Ankit Pandey,Lucknow,6100,650,981,177,0,5,0,4287
+Booking.com payouts.xlsx,BK93516,bcom,stay,2026-09-07,2,101,Siddharth Kohli,Bengaluru,8200,40,1469,264,0,8,0,6419
+Booking.com payouts.xlsx,BK56861,bcom,stay,2026-09-09,2,208,Jatin Oberoi,Lucknow,12000,1840,1829,329,0,10,0,7992
+Booking.com payouts.xlsx,BK69052,bcom,stay,2026-09-09,2,203,Tarun Khanna,Bengaluru,7000,695,1135,204,0,6,0,4960
+Booking.com payouts.xlsx,BK63604,bcom,cancelled,2026-09-11,1,,Saurabh Rastogi,Ghaziabad,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK13787,bcom,stay,2026-09-12,2,207,Anushka Vohra,Delhi,12000,1440,1901,342,0,11,0,8306
+Booking.com payouts.xlsx,BK29289,bcom,stay,2026-09-12,1,104,Parth Tandon,Bengaluru,4100,450,657,118,0,4,0,2871
+Booking.com payouts.xlsx,BK29906,bcom,stay,2026-09-12,1,209,Ankit Negi,Mumbai,5900,80,1048,189,0,6,0,4577
+Booking.com payouts.xlsx,BK47918,bcom,stay,2026-09-12,1,108,Anushka Oberoi,Kanpur,3900,665,582,105,0,3,0,2545
+Booking.com payouts.xlsx,BK73669,bcom,stay,2026-09-13,1,106,Mansi Rana,Agra,4200,462,673,121,0,4,0,2940
+Booking.com payouts.xlsx,BK79419,bcom,stay,2026-09-13,3,101,Pooja Arora,Jaipur,19200,1687,3152,567,0,18,0,13776
+Booking.com payouts.xlsx,BK45099,bcom,cancelled,2026-09-14,2,,Yash Agarwal,Ambala,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK85756,bcom,stay,2026-09-14,2,203,Akshay Vohra,Ambala,6400,640,1037,187,0,6,0,4530
+Booking.com payouts.xlsx,BK64641,bcom,stay,2026-09-15,1,209,Pallavi Wadhwa,Kanpur,6200,0,1116,201,0,6,0,4877
+Booking.com payouts.xlsx,BK93749,bcom,cancelled,2026-09-16,1,,Aditi Shukla,Lucknow,0,0,0,0,0,0,0,0
+Booking.com payouts.xlsx,BK60013,bcom,stay,2026-09-17,1,208,Sakshi Mittal,Ambala,6300,627,1021,184,0,6,0,4462
+Booking.com payouts.xlsx,BK16414,bcom,stay,2026-09-18,1,105,Pallavi Kohli,Delhi,3800,653,566,102,0,3,0,2476
+Booking.com payouts.xlsx,BK58581,bcom,stay,2026-09-18,2,106,Rajat Mittal,Delhi,8000,800,1296,233,0,7,0,5664
+Booking.com payouts.xlsx,BK14496,bcom,stay,2026-09-19,1,203,Kunal Ahuja,Gurugram,3000,300,486,87,0,3,0,2124
+Booking.com payouts.xlsx,BK62485,bcom,stay,2026-09-19,2,210,Varsha Puri,Ghaziabad,12200,1990,1838,331,0,10,0,8031
+Booking.com payouts.xlsx,BK92532,bcom,stay,2026-09-19,2,107,Varsha Jain,Chandigarh,8000,40,1433,258,0,8,0,6261
+Booking.com payouts.xlsx,BK48293,bcom,stay,2026-09-20,2,105,Manish Mathur,Gurugram,8000,801,1296,233,0,7,0,5663
+Booking.com payouts.xlsx,BK68178,bcom,stay,2026-09-20,2,204,Sakshi Chopra,Ambala,6400,682,1029,185,0,6,0,4498
+Booking.com payouts.xlsx,BK26655,bcom,stay,2026-09-22,1,207,Saurabh Wadhwa,Ambala,6200,660,997,179,0,6,0,4358
+Booking.com payouts.xlsx,BK11405,bcom,stay,2026-09-23,3,109,Tanvi Trivedi,Lucknow,12300,1845,1882,339,0,10,0,8224
+Booking.com payouts.xlsx,BK34363,bcom,stay,2026-09-23,2,210,Arnav Trivedi,Jaipur,12400,1280,2002,360,0,11,0,8747
+Booking.com payouts.xlsx,BK27666,bcom,stay,2026-09-24,3,104,Omkar Srivastava,Gurugram,12300,1885,1875,338,0,10,0,8192
+Booking.com payouts.xlsx,BK35989,bcom,stay,2026-09-25,2,207,Abhinav Mittal,Kanpur,12400,1280,2002,360,0,11,0,8747
+Booking.com payouts.xlsx,BK44019,bcom,stay,2026-09-25,1,105,Pallavi Saxena,Ambala,4200,537,659,119,0,4,0,2881
+Booking.com payouts.xlsx,BK45577,bcom,stay,2026-09-26,1,210,Kavya Upadhyay,Pune,5900,630,949,171,0,5,0,4145
+Booking.com payouts.xlsx,BK77925,bcom,stay,2026-09-26,2,103,Sahil Pandey,Bengaluru,8400,1343,1270,229,0,7,0,5551
+Booking.com payouts.xlsx,BK82122,bcom,stay,2026-09-27,2,106,Aditi Sood,Gurugram,7800,780,1264,228,0,7,0,5521
+Hotel register.xlsx,HR5108,direct,stay,2026-04-01,1,107,Chirag Dhawan,Noida,4200,0,0,0,17,0,0,4183
+Hotel register.xlsx,HR4105,walkin,stay,2026-04-02,1,201,Jatin Srivastava,Delhi,3300,0,0,0,0,0,0,3300
+Hotel register.xlsx,HR5458,direct,stay,2026-04-03,1,107,Ritika Upadhyay,Meerut,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR7977,direct,stay,2026-04-03,1,103,Amrita Rana,Dehradun,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR9197,walkin,stay,2026-04-03,2,204,Sakshi Pandey,Chandigarh,6200,0,0,0,0,0,0,6200
+Hotel register.xlsx,HR9916,walkin,stay,2026-04-03,1,110,Arnav Saxena,Noida,4200,0,0,0,0,0,0,4200
+Hotel register.xlsx,HR4791,direct,stay,2026-04-04,1,202,Tarun Gill,Faridabad,3200,0,0,0,13,0,0,3187
+Hotel register.xlsx,HR5899,direct,stay,2026-04-04,1,209,Devansh Khanna,Jaipur,6100,0,0,0,24,0,0,6076
+Hotel register.xlsx,HR2913,direct,stay,2026-04-05,2,110,Akshay Bisht,Ludhiana,8400,0,0,0,34,0,0,8366
+Hotel register.xlsx,HR9451,walkin,stay,2026-04-05,2,205,Amrita Trivedi,Dehradun,6400,0,0,0,0,0,0,6400
+Hotel register.xlsx,HR6875,direct,stay,2026-04-10,1,201,Divya Wadhwa,Lucknow,3400,0,0,0,14,0,0,3386
+Hotel register.xlsx,HR1968,direct,stay,2026-04-11,1,205,Udit Goel,Ghaziabad,3200,0,0,0,13,0,0,3187
+Hotel register.xlsx,HR3818,walkin,stay,2026-04-11,1,106,Vaibhav Upadhyay,Kanpur,3900,0,0,0,0,0,0,3900
+Hotel register.xlsx,HR5445,direct,stay,2026-04-13,1,104,Sakshi Shukla,Chandigarh,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR1239,direct,stay,2026-04-14,1,202,Varsha Thakur,Pune,3200,0,0,0,13,0,0,3187
+Hotel register.xlsx,HR8730,walkin,stay,2026-04-15,1,210,Gaurav Kapoor,Meerut,6100,0,0,0,0,0,0,6100
+Hotel register.xlsx,HR7806,direct,stay,2026-04-19,1,105,Ankit Goel,Ghaziabad,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR5544,direct,stay,2026-04-21,3,103,Abhinav Dhawan,Dehradun,12600,0,0,0,50,0,0,12550
+Hotel register.xlsx,HR5634,direct,stay,2026-04-21,1,109,Alok Trivedi,Agra,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR3251,direct,stay,2026-04-22,2,109,Chirag Trivedi,Agra,8600,0,0,0,34,0,0,8566
+Hotel register.xlsx,HR8281,direct,stay,2026-04-22,3,107,Ritika Kohli,Delhi,12600,0,0,0,50,0,0,12550
+Hotel register.xlsx,HR1839,direct,stay,2026-04-24,1,111,Aditi Chopra,Bengaluru,3400,0,0,0,14,0,0,3386
+Hotel register.xlsx,HR9721,direct,stay,2026-04-24,3,202,Nikhil Upadhyay,Bengaluru,10500,0,0,0,42,0,0,10458
+Hotel register.xlsx,HR1703,walkin,stay,2026-04-25,1,208,Manish Bhatt,Ambala,6100,0,0,0,0,0,0,6100
+Hotel register.xlsx,HR3085,walkin,stay,2026-04-25,1,207,Aditi Srivastava,Kolkata,6200,0,0,0,0,0,0,6200
+Hotel register.xlsx,HR3715,direct,stay,2026-04-25,1,210,Amrita Upadhyay,Ambala,6400,0,0,0,26,0,0,6374
+Hotel register.xlsx,HR3814,walkin,stay,2026-04-26,1,210,Jatin Kohli,Lucknow,6000,0,0,0,0,0,0,6000
+Hotel register.xlsx,HR4933,walkin,stay,2026-04-26,1,203,Akshay Mittal,Faridabad,3200,0,0,0,0,0,0,3200
+Hotel register.xlsx,HR5281,walkin,stay,2026-04-26,1,101,Mansi Mathur,Agra,4200,0,0,0,0,0,0,4200
+Hotel register.xlsx,HR4715,walkin,stay,2026-04-28,2,209,Aparna Lamba,Agra,11200,0,0,0,0,0,0,11200
+Hotel register.xlsx,HR8967,direct,stay,2026-04-28,1,102,Rajat Bhandari,Ludhiana,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR3472,direct,stay,2026-04-29,2,106,Gaurav Thakur,Meerut,8800,0,0,0,35,0,0,8765
+Hotel register.xlsx,HR9980,walkin,stay,2026-04-30,1,207,Zoya Mittal,Kanpur,6000,0,0,0,0,0,0,6000
+Hotel register.xlsx,HR2628,direct,stay,2026-05-01,1,207,Ishita Trivedi,Chandigarh,6800,0,0,0,27,0,0,6773
+Hotel register.xlsx,HR8284,direct,stay,2026-05-01,2,203,Ritika Trivedi,Jaipur,7000,0,0,0,28,0,0,6972
+Hotel register.xlsx,HR4341,direct,stay,2026-05-03,1,112,Aditi Kapoor,Faridabad,3500,0,0,0,14,0,0,3486
+Hotel register.xlsx,HR7585,walkin,stay,2026-05-03,2,111,Chirag Chopra,Ghaziabad,6600,0,0,0,0,0,0,6600
+Hotel register.xlsx,HR3422,walkin,stay,2026-05-06,1,105,Aakash Shukla,Pune,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR4427,direct,stay,2026-05-07,1,105,Payal Marwah,Pune,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR8318,direct,stay,2026-05-07,2,103,Alok Ahuja,Dehradun,8800,0,0,0,35,0,0,8765
+Hotel register.xlsx,HR6199,walkin,stay,2026-05-08,1,208,Rajat Rastogi,Faridabad,6100,0,0,0,0,0,0,6100
+Hotel register.xlsx,HR8377,direct,stay,2026-05-08,1,207,Amrita Dhawan,Mumbai,6400,0,0,0,26,0,0,6374
+Hotel register.xlsx,HR3885,walkin,stay,2026-05-09,1,209,Yash Shukla,Kolkata,6100,0,0,0,0,0,0,6100
+Hotel register.xlsx,HR6645,walkin,stay,2026-05-09,1,112,Pallavi Marwah,Bengaluru,3400,0,0,0,0,0,0,3400
+Hotel register.xlsx,HR9936,direct,stay,2026-05-09,2,110,Aditi Marwah,Kolkata,9400,0,0,0,38,0,0,9362
+Hotel register.xlsx,HR5723,direct,stay,2026-05-10,1,102,Harsh Kulkarni,Agra,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR2186,walkin,stay,2026-05-11,1,109,Chirag Kulkarni,Jaipur,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR3245,direct,stay,2026-05-11,2,201,Bhavna Gill,Dehradun,6800,0,0,0,27,0,0,6773
+Hotel register.xlsx,HR5372,direct,stay,2026-05-11,1,110,Arnav Goel,Lucknow,4400,0,0,0,18,0,0,4382
+Hotel register.xlsx,HR5966,walkin,stay,2026-05-11,1,209,Alok Dhawan,Faridabad,6100,0,0,0,0,0,0,6100
+Hotel register.xlsx,HR7787,walkin,stay,2026-05-11,1,101,Manish Kohli,Ambala,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR8041,walkin,stay,2026-05-11,1,104,Rajat Mathur,Ghaziabad,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR8679,walkin,stay,2026-05-11,1,108,Tarun Mathur,Gurugram,4300,0,0,0,0,0,0,4300
+Hotel register.xlsx,HR9279,direct,stay,2026-05-12,2,207,Divya Bhandari,Dehradun,13000,0,0,0,52,0,0,12948
+Hotel register.xlsx,HR1407,walkin,stay,2026-05-15,2,109,Mansi Khanna,Faridabad,8800,0,0,0,0,0,0,8800
+Hotel register.xlsx,HR6695,direct,stay,2026-05-15,1,102,Aakash Negi,Ludhiana,4600,0,0,0,18,0,0,4582
+Hotel register.xlsx,HR7383,direct,stay,2026-05-15,1,101,Ankit Sood,Lucknow,4700,0,0,0,19,0,0,4681
+Hotel register.xlsx,HR8374,direct,stay,2026-05-15,1,202,Jatin Sood,Kolkata,3400,0,0,0,14,0,0,3386
+Hotel register.xlsx,HR6065,walkin,stay,2026-05-16,1,208,Ashish Tiwari,Meerut,6300,0,0,0,0,0,0,6300
+Hotel register.xlsx,HR2435,walkin,stay,2026-05-17,1,107,Payal Saxena,Meerut,4100,0,0,0,0,0,0,4100
+Hotel register.xlsx,HR2248,walkin,stay,2026-05-20,1,207,Payal Rastogi,Dehradun,6600,0,0,0,0,0,0,6600
+Hotel register.xlsx,HR5961,walkin,stay,2026-05-20,2,105,Ishita Dhawan,Gurugram,8400,0,0,0,0,0,0,8400
+Hotel register.xlsx,HR5397,direct,stay,2026-05-21,2,107,Yash Sethi,Lucknow,9200,0,0,0,37,0,0,9163
+Hotel register.xlsx,HR1793,direct,stay,2026-05-23,1,111,Shreya Tandon,Mumbai,3700,0,0,0,15,0,0,3685
+Hotel register.xlsx,HR8220,walkin,stay,2026-05-23,1,206,Aakash Garg,Dehradun,3300,0,0,0,0,0,0,3300
+Hotel register.xlsx,HR5378,direct,stay,2026-05-24,2,110,Arnav Shukla,Dehradun,8800,0,0,0,35,0,0,8765
+Hotel register.xlsx,HR1979,direct,stay,2026-05-25,1,109,Saurabh Oberoi,Meerut,4600,0,0,0,18,0,0,4582
+Hotel register.xlsx,HR5454,direct,stay,2026-05-25,3,104,Bhavna Puri,Ludhiana,14100,0,0,0,56,0,0,14044
+Hotel register.xlsx,HR3491,direct,stay,2026-05-28,1,106,Udit Negi,Meerut,4400,0,0,0,18,0,0,4382
+Hotel register.xlsx,HR5077,direct,stay,2026-05-28,1,205,Bhavna Bhatt,Lucknow,3700,0,0,0,15,0,0,3685
+Hotel register.xlsx,HR2174,walkin,stay,2026-05-29,1,209,Chirag Kohli,Kanpur,6400,0,0,0,0,0,0,6400
+Hotel register.xlsx,HR1267,direct,stay,2026-05-30,1,106,Jatin Dutta,Pune,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR5052,direct,stay,2026-05-30,2,203,Kunal Agarwal,Mumbai,7200,0,0,0,29,0,0,7171
+Hotel register.xlsx,HR5794,direct,stay,2026-05-30,1,108,Devansh Bisht,Jaipur,4700,0,0,0,19,0,0,4681
+Hotel register.xlsx,HR6439,direct,stay,2026-05-30,1,201,Payal Khanna,Pune,3400,0,0,0,14,0,0,3386
+Hotel register.xlsx,HR3693,direct,stay,2026-06-03,2,107,Varsha Ahuja,Bengaluru,9200,0,0,0,37,0,0,9163
+Hotel register.xlsx,HR4154,walkin,stay,2026-06-04,1,210,Mansi Jain,Noida,6200,0,0,0,0,0,0,6200
+Hotel register.xlsx,HR7627,walkin,stay,2026-06-04,1,206,Yash Upadhyay,Ghaziabad,3400,0,0,0,0,0,0,3400
+Hotel register.xlsx,HR9032,walkin,stay,2026-06-05,1,105,Divya Bhatt,Ambala,4600,0,0,0,0,0,0,4600
+Hotel register.xlsx,HR9437,direct,stay,2026-06-05,1,205,Ankit Kapoor,Faridabad,3300,0,0,0,13,0,0,3287
+Hotel register.xlsx,HR9231,direct,stay,2026-06-06,1,104,Devansh Sood,Bengaluru,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR3272,direct,stay,2026-06-07,3,202,Aditi Kohli,Delhi,11100,0,0,0,44,0,0,11056
+Hotel register.xlsx,HR3724,walkin,stay,2026-06-07,1,106,Lavanya Rana,Jaipur,4500,0,0,0,0,0,0,4500
+Hotel register.xlsx,HR2147,direct,stay,2026-06-09,2,207,Kunal Shukla,Kolkata,12400,0,0,0,50,0,0,12350
+Hotel register.xlsx,HR3622,direct,stay,2026-06-09,2,110,Shreya Rana,Chandigarh,8600,0,0,0,34,0,0,8566
+Hotel register.xlsx,HR4179,direct,stay,2026-06-09,1,108,Vaibhav Khanna,Mumbai,4700,0,0,0,19,0,0,4681
+Hotel register.xlsx,HR6861,walkin,stay,2026-06-09,1,210,Aparna Rana,Kanpur,6400,0,0,0,0,0,0,6400
+Hotel register.xlsx,HR1742,walkin,stay,2026-06-11,1,106,Vaibhav Bisht,Ghaziabad,4100,0,0,0,0,0,0,4100
+Hotel register.xlsx,HR4099,direct,stay,2026-06-12,1,209,Sahil Dutta,Lucknow,6200,0,0,0,25,0,0,6175
+Hotel register.xlsx,HR5031,walkin,stay,2026-06-12,1,210,Varsha Kulkarni,Ambala,6500,0,0,0,0,0,0,6500
+Hotel register.xlsx,HR2559,walkin,stay,2026-06-13,1,110,Ashish Khanna,Jaipur,4600,0,0,0,0,0,0,4600
+Hotel register.xlsx,HR4147,direct,stay,2026-06-13,2,203,Gaurav Sood,Delhi,7400,0,0,0,30,0,0,7370
+Hotel register.xlsx,HR4672,walkin,stay,2026-06-13,1,101,Mansi Vohra,Meerut,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR6652,direct,stay,2026-06-13,1,102,Simran Trivedi,Chandigarh,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR1986,walkin,stay,2026-06-14,1,102,Rajat Agarwal,Bengaluru,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR1313,direct,stay,2026-06-15,1,102,Devansh Srivastava,Ambala,4700,0,0,0,19,0,0,4681
+Hotel register.xlsx,HR5450,direct,stay,2026-06-15,1,104,Sakshi Kulkarni,Pune,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR8288,direct,stay,2026-06-15,1,107,Pallavi Grover,Ghaziabad,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR9516,direct,stay,2026-06-15,2,201,Arnav Pandey,Pune,7200,0,0,0,29,0,0,7171
+Hotel register.xlsx,HR3232,walkin,stay,2026-06-16,1,101,Shreya Garg,Noida,4500,0,0,0,0,0,0,4500
+Hotel register.xlsx,HR7996,walkin,stay,2026-06-17,2,110,Saurabh Kohli,Gurugram,8600,0,0,0,0,0,0,8600
+Hotel register.xlsx,HR3257,walkin,stay,2026-06-19,1,109,Kavya Rastogi,Ludhiana,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR3309,walkin,stay,2026-06-19,2,102,Kunal Mathur,Pune,8800,0,0,0,0,0,0,8800
+Hotel register.xlsx,HR4421,direct,stay,2026-06-19,1,101,Nidhi Sinha,Delhi,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR4440,direct,stay,2026-06-19,1,202,Chirag Shukla,Chandigarh,3400,0,0,0,14,0,0,3386
+Hotel register.xlsx,HR4952,walkin,stay,2026-06-20,1,104,Kavya Dhawan,Jaipur,4500,0,0,0,0,0,0,4500
+Hotel register.xlsx,HR8049,direct,stay,2026-06-20,2,208,Vaibhav Sinha,Mumbai,13000,0,0,0,52,0,0,12948
+Hotel register.xlsx,HR9230,direct,stay,2026-06-20,1,108,Bhavna Chopra,Meerut,4700,0,0,0,19,0,0,4681
+Hotel register.xlsx,HR2322,direct,stay,2026-06-21,1,203,Sakshi Dutta,Gurugram,3600,0,0,0,14,0,0,3586
+Hotel register.xlsx,HR4733,direct,stay,2026-06-21,2,110,Bhavna Goel,Ghaziabad,9200,0,0,0,37,0,0,9163
+Hotel register.xlsx,HR6242,walkin,stay,2026-06-21,1,102,Divya Garg,Lucknow,4400,0,0,0,0,0,0,4400
+Hotel register.xlsx,HR2827,direct,stay,2026-06-23,1,104,Ishita Upadhyay,Gurugram,4400,0,0,0,18,0,0,4382
+Hotel register.xlsx,HR3704,direct,stay,2026-06-23,1,106,Anushka Ahuja,Meerut,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR7622,walkin,stay,2026-06-24,2,107,Nidhi Marwah,Agra,8800,0,0,0,0,0,0,8800
+Hotel register.xlsx,HR5598,direct,stay,2026-06-25,2,104,Jatin Mittal,Chandigarh,9000,0,0,0,36,0,0,8964
+Hotel register.xlsx,HR6008,direct,stay,2026-06-25,1,112,Saurabh Puri,Delhi,3500,0,0,0,14,0,0,3486
+Hotel register.xlsx,HR3133,direct,stay,2026-06-28,1,101,Sahil Dhawan,Bengaluru,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR8707,walkin,stay,2026-07-03,1,103,Parth Bhandari,Dehradun,3700,0,0,0,0,0,0,3700
+Hotel register.xlsx,HR4872,direct,stay,2026-07-05,1,203,Ankit Upadhyay,Delhi,3000,0,0,0,12,0,0,2988
+Hotel register.xlsx,HR4904,direct,stay,2026-07-05,2,110,Vaibhav Pandey,Jaipur,7400,0,0,0,30,0,0,7370
+Hotel register.xlsx,HR8587,direct,stay,2026-07-07,1,205,Gaurav Vohra,Ghaziabad,3100,0,0,0,12,0,0,3088
+Hotel register.xlsx,HR4272,walkin,stay,2026-07-10,2,104,Lavanya Sood,Jaipur,7400,0,0,0,0,0,0,7400
+Hotel register.xlsx,HR2838,direct,stay,2026-07-11,1,106,Sahil Shukla,Ghaziabad,4000,0,0,0,16,0,0,3984
+Hotel register.xlsx,HR3745,direct,stay,2026-07-11,2,107,Varsha Wadhwa,Noida,7600,0,0,0,30,0,0,7570
+Hotel register.xlsx,HR3823,direct,stay,2026-07-11,1,201,Nikhil Dutta,Jaipur,3100,0,0,0,12,0,0,3088
+Hotel register.xlsx,HR4043,direct,stay,2026-07-12,1,112,Saurabh Bhandari,Ambala,3100,0,0,0,12,0,0,3088
+Hotel register.xlsx,HR6625,walkin,stay,2026-07-14,2,108,Omkar Mittal,Ludhiana,7200,0,0,0,0,0,0,7200
+Hotel register.xlsx,HR3727,direct,stay,2026-07-18,1,108,Amrita Sethi,Mumbai,3900,0,0,0,16,0,0,3884
+Hotel register.xlsx,HR7932,walkin,stay,2026-07-18,1,208,Ashish Sethi,Ghaziabad,5200,0,0,0,0,0,0,5200
+Hotel register.xlsx,HR6839,direct,stay,2026-07-21,2,112,Sakshi Trivedi,Pune,6000,0,0,0,24,0,0,5976
+Hotel register.xlsx,HR1142,direct,stay,2026-07-25,2,108,Ishita Pandey,Kolkata,7600,0,0,0,30,0,0,7570
+Hotel register.xlsx,HR6393,walkin,stay,2026-07-25,1,204,Simran Bhandari,Lucknow,2800,0,0,0,0,0,0,2800
+Hotel register.xlsx,HR8694,direct,stay,2026-07-26,2,105,Omkar Sood,Ambala,7600,0,0,0,30,0,0,7570
+Hotel register.xlsx,HR7742,walkin,stay,2026-07-27,1,210,Sahil Thakur,Ludhiana,5300,0,0,0,0,0,0,5300
+Hotel register.xlsx,HR1458,walkin,stay,2026-07-29,1,101,Devansh Saxena,Meerut,3700,0,0,0,0,0,0,3700
+Hotel register.xlsx,HR2145,walkin,stay,2026-08-05,1,104,Tarun Mittal,Mumbai,3500,0,0,0,0,0,0,3500
+Hotel register.xlsx,HR4417,direct,stay,2026-08-07,1,103,Abhinav Mathur,Gurugram,3800,0,0,0,15,0,0,3785
+Hotel register.xlsx,HR4510,direct,stay,2026-08-08,2,109,Parth Sinha,Ambala,7600,0,0,0,30,0,0,7570
+Hotel register.xlsx,HR5467,direct,stay,2026-08-08,1,201,Alok Bhandari,Faridabad,3000,0,0,0,12,0,0,2988
+Hotel register.xlsx,HR7146,direct,stay,2026-08-08,1,111,Yash Rastogi,Chandigarh,3200,0,0,0,13,0,0,3187
+Hotel register.xlsx,HR9126,direct,stay,2026-08-10,2,202,Tanvi Mathur,Ghaziabad,6000,0,0,0,24,0,0,5976
+Hotel register.xlsx,HR3354,walkin,stay,2026-08-11,1,201,Siddharth Trivedi,Dehradun,2800,0,0,0,0,0,0,2800
+Hotel register.xlsx,HR7933,walkin,stay,2026-08-11,1,204,Alok Negi,Faridabad,2800,0,0,0,0,0,0,2800
+Hotel register.xlsx,HR4308,walkin,stay,2026-08-14,1,208,Yash Grover,Chandigarh,5200,0,0,0,0,0,0,5200
+Hotel register.xlsx,HR6971,walkin,stay,2026-08-14,2,112,Manish Thakur,Mumbai,5800,0,0,0,0,0,0,5800
+Hotel register.xlsx,HR5500,direct,stay,2026-08-15,2,207,Harsh Lamba,Noida,11200,0,0,0,45,0,0,11155
+Hotel register.xlsx,HR7445,walkin,stay,2026-08-17,1,101,Aakash Vohra,Chandigarh,3700,0,0,0,0,0,0,3700
+Hotel register.xlsx,HR3668,direct,stay,2026-08-19,2,210,Chirag Garg,Ghaziabad,10600,0,0,0,42,0,0,10558
+Hotel register.xlsx,HR5558,direct,stay,2026-08-23,1,111,Amrita Lamba,Pune,2900,0,0,0,12,0,0,2888
+Hotel register.xlsx,HR6145,direct,stay,2026-08-24,1,208,Nikhil Kohli,Delhi,5500,0,0,0,22,0,0,5478
+Hotel register.xlsx,HR5606,walkin,stay,2026-08-26,1,104,Anushka Srivastava,Ghaziabad,3600,0,0,0,0,0,0,3600
+Hotel register.xlsx,HR8073,direct,stay,2026-08-28,1,102,Alok Oberoi,Ludhiana,3800,0,0,0,15,0,0,3785
+Hotel register.xlsx,HR3446,direct,stay,2026-08-29,1,101,Nidhi Kohli,Ludhiana,3700,0,0,0,15,0,0,3685
+Hotel register.xlsx,HR3196,walkin,stay,2026-09-01,1,105,Aparna Sood,Lucknow,4000,0,0,0,0,0,0,4000
+Hotel register.xlsx,HR9346,walkin,stay,2026-09-01,1,108,Arnav Bisht,Dehradun,4000,0,0,0,0,0,0,4000
+Hotel register.xlsx,HR6314,direct,stay,2026-09-02,2,109,Zoya Chopra,Bengaluru,8600,0,0,0,34,0,0,8566
+Hotel register.xlsx,HR7764,direct,stay,2026-09-03,1,207,Rajat Srivastava,Ludhiana,6400,0,0,0,26,0,0,6374
+Hotel register.xlsx,HR6573,direct,stay,2026-09-04,1,108,Omkar Gill,Delhi,4400,0,0,0,18,0,0,4382
+Hotel register.xlsx,HR5365,walkin,stay,2026-09-05,1,207,Jatin Ahuja,Kolkata,6200,0,0,0,0,0,0,6200
+Hotel register.xlsx,HR6676,walkin,stay,2026-09-05,1,208,Aditi Oberoi,Chandigarh,5700,0,0,0,0,0,0,5700
+Hotel register.xlsx,HR5658,direct,stay,2026-09-06,1,107,Varsha Sethi,Agra,4200,0,0,0,17,0,0,4183
+Hotel register.xlsx,HR3388,walkin,stay,2026-09-10,2,210,Anushka Thakur,Lucknow,11800,0,0,0,0,0,0,11800
+Hotel register.xlsx,HR4070,walkin,stay,2026-09-10,1,207,Tanvi Kulkarni,Noida,5800,0,0,0,0,0,0,5800
+Hotel register.xlsx,HR4134,walkin,stay,2026-09-10,2,209,Tanvi Gill,Kanpur,11400,0,0,0,0,0,0,11400
+Hotel register.xlsx,HR6543,direct,stay,2026-09-11,2,106,Bhavna Kapoor,Chandigarh,8200,0,0,0,33,0,0,8167
+Hotel register.xlsx,HR2623,direct,stay,2026-09-12,1,101,Alok Lamba,Kanpur,4200,0,0,0,17,0,0,4183
+Hotel register.xlsx,HR3988,direct,stay,2026-09-12,2,105,Lavanya Upadhyay,Gurugram,8800,0,0,0,35,0,0,8765
+Hotel register.xlsx,HR8002,direct,stay,2026-09-12,1,210,Amrita Shukla,Mumbai,6100,0,0,0,24,0,0,6076
+Hotel register.xlsx,HR3009,walkin,stay,2026-09-13,1,108,Ritika Sood,Noida,4100,0,0,0,0,0,0,4100
+Hotel register.xlsx,HR7830,direct,stay,2026-09-14,1,105,Udit Bhandari,Ludhiana,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR8026,walkin,stay,2026-09-14,1,110,Saurabh Trivedi,Dehradun,4000,0,0,0,0,0,0,4000
+Hotel register.xlsx,HR9607,walkin,stay,2026-09-14,1,106,Parth Negi,Kolkata,4300,0,0,0,0,0,0,4300
+Hotel register.xlsx,HR6643,direct,stay,2026-09-15,1,108,Nidhi Wadhwa,Delhi,4500,0,0,0,18,0,0,4482
+Hotel register.xlsx,HR1678,walkin,stay,2026-09-17,1,107,Chirag Tandon,Gurugram,4100,0,0,0,0,0,0,4100
+Hotel register.xlsx,HR1707,direct,stay,2026-09-17,2,203,Mansi Thakur,Lucknow,6600,0,0,0,26,0,0,6574
+Hotel register.xlsx,HR7264,direct,stay,2026-09-17,2,104,Aakash Grover,Delhi,8400,0,0,0,34,0,0,8366
+Hotel register.xlsx,HR1411,direct,stay,2026-09-19,1,208,Harsh Rastogi,Gurugram,6300,0,0,0,25,0,0,6275
+Hotel register.xlsx,HR2707,direct,stay,2026-09-19,2,207,Ritika Bisht,Ghaziabad,11800,0,0,0,47,0,0,11753
+Hotel register.xlsx,HR6293,walkin,stay,2026-09-20,1,109,Nidhi Saxena,Lucknow,3900,0,0,0,0,0,0,3900
+Hotel register.xlsx,HR8442,direct,stay,2026-09-21,3,102,Rajat Rana,Chandigarh,13200,0,0,0,53,0,0,13147
+Hotel register.xlsx,HR4482,direct,stay,2026-09-23,2,101,Ritika Tiwari,Faridabad,9000,0,0,0,36,0,0,8964
+Hotel register.xlsx,HR8737,direct,stay,2026-09-23,1,111,Chirag Jain,Lucknow,3300,0,0,0,13,0,0,3287
+Hotel register.xlsx,HR9056,direct,stay,2026-09-24,1,107,Alok Kapoor,Ludhiana,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR7894,direct,stay,2026-09-25,1,101,Siddharth Bisht,Kolkata,4200,0,0,0,17,0,0,4183
+Hotel register.xlsx,HR9820,direct,stay,2026-09-25,1,210,Nikhil Bisht,Chandigarh,6200,0,0,0,25,0,0,6175
+Hotel register.xlsx,HR8069,direct,stay,2026-09-27,1,101,Harsh Tandon,Dehradun,4300,0,0,0,17,0,0,4283
+Hotel register.xlsx,HR9549,walkin,stay,2026-09-27,1,108,Omkar Chopra,Mumbai,4200,0,0,0,0,0,0,4200
+Hotel register.xlsx,HR2237,walkin,stay,2026-09-28,2,107,Payal Sethi,Kanpur,8600,0,0,0,0,0,0,8600
+MakeMyTrip Apr to Jun.pdf,MM11117,mmt,stay,2026-04-01,1,110,Ashish Kohli,Kanpur,4300,900,748,135,0,3,0,2514
+MakeMyTrip Apr to Jun.pdf,MM79225,mmt,stay,2026-04-01,2,106,Chirag Rana,Lucknow,8600,80,1874,337,0,9,0,6300
+MakeMyTrip Apr to Jun.pdf,MM40955,mmt,cancelled,2026-04-02,1,,Nikhil Saxena,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM80035,mmt,stay,2026-04-02,1,110,Chirag Upadhyay,Lucknow,4300,0,946,170,0,4,0,3180
+MakeMyTrip Apr to Jun.pdf,MM18350,mmt,stay,2026-04-03,1,108,Ankit Sinha,Dehradun,4200,670,777,140,0,4,0,2609
+MakeMyTrip Apr to Jun.pdf,MM30945,mmt,stay,2026-04-03,1,209,Gaurav Srivastava,Lucknow,5700,680,1104,199,0,5,0,3712
+MakeMyTrip Apr to Jun.pdf,MM58427,mmt,stay,2026-04-03,1,201,Aakash Marwah,Kanpur,3400,408,658,118,0,3,0,2213
+MakeMyTrip Apr to Jun.pdf,MM87732,mmt,stay,2026-04-03,1,202,Manish Lamba,Jaipur,3400,0,748,135,0,3,0,2514
+MakeMyTrip Apr to Jun.pdf,MM32946,mmt,stay,2026-04-04,1,208,Chirag Bhatt,Gurugram,5900,925,1095,197,0,5,0,3678
+MakeMyTrip Apr to Jun.pdf,MM41195,mmt,stay,2026-04-04,1,110,Mansi Dutta,Noida,4100,615,767,138,0,3,0,2577
+MakeMyTrip Apr to Jun.pdf,MM43713,mmt,stay,2026-04-04,1,203,Mansi Negi,Ludhiana,3300,495,617,111,0,3,0,2074
+MakeMyTrip Apr to Jun.pdf,MM51105,mmt,stay,2026-04-04,1,101,Akshay Shukla,Faridabad,4200,419,832,150,0,4,0,2795
+MakeMyTrip Apr to Jun.pdf,MM71181,mmt,stay,2026-04-04,1,104,Varsha Marwah,Bengaluru,4100,0,902,162,0,4,0,3032
+MakeMyTrip Apr to Jun.pdf,MM87997,mmt,stay,2026-04-04,1,106,Rajat Bhatt,Ludhiana,4000,400,792,143,0,4,0,2661
+MakeMyTrip Apr to Jun.pdf,MM18545,mmt,stay,2026-04-05,1,108,Ritika Jain,Ambala,4100,490,794,143,0,4,0,2669
+MakeMyTrip Apr to Jun.pdf,MM23787,mmt,stay,2026-04-05,1,103,Nikhil Garg,Chandigarh,4300,510,834,150,0,4,0,2802
+MakeMyTrip Apr to Jun.pdf,MM35715,mmt,stay,2026-04-05,1,107,Amrita Kulkarni,Meerut,4200,460,823,148,0,4,0,2765
+MakeMyTrip Apr to Jun.pdf,MM58563,mmt,stay,2026-04-05,1,109,Varsha Goel,Chandigarh,4100,615,767,138,0,3,0,2577
+MakeMyTrip Apr to Jun.pdf,MM97440,mmt,cancelled,2026-04-05,1,,Abhinav Oberoi,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM23559,mmt,stay,2026-04-06,1,106,Pallavi Bhatt,Meerut,4400,880,774,139,0,4,0,2603
+MakeMyTrip Apr to Jun.pdf,MM27101,mmt,stay,2026-04-06,3,210,A. Verma family,Lucknow,17100,1457,3441,619,0,16,0,11567
+MakeMyTrip Apr to Jun.pdf,MM52932,mmt,stay,2026-04-06,1,112,Rajat Thakur,Faridabad,3400,420,656,118,0,3,0,2203
+MakeMyTrip Apr to Jun.pdf,MM73228,mmt,cancelled,2026-04-06,2,,Kunal Srivastava,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM77161,mmt,cancelled,2026-04-06,1,,Jatin Puri,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM26693,mmt,stay,2026-04-07,1,110,Tanvi Goel,Faridabad,4200,420,832,150,0,4,0,2794
+MakeMyTrip Apr to Jun.pdf,MM34059,mmt,stay,2026-04-07,1,101,Ishita Mittal,Ghaziabad,4200,920,722,130,0,3,0,2425
+MakeMyTrip Apr to Jun.pdf,MM35703,mmt,stay,2026-04-07,2,104,Udit Shukla,Noida,8600,860,1703,307,0,8,0,5722
+MakeMyTrip Apr to Jun.pdf,MM37118,mmt,stay,2026-04-07,1,206,Abhinav Kohli,Pune,3500,350,693,125,0,3,0,2329
+MakeMyTrip Apr to Jun.pdf,MM73899,mmt,stay,2026-04-07,1,103,Pallavi Gill,Kolkata,4200,840,739,133,0,3,0,2485
+MakeMyTrip Apr to Jun.pdf,MM84949,mmt,stay,2026-04-08,1,208,Saurabh Srivastava,Ghaziabad,6200,824,1183,213,0,5,0,3975
+MakeMyTrip Apr to Jun.pdf,MM90365,mmt,cancelled,2026-04-08,1,,Simran Mathur,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM54160,mmt,stay,2026-04-09,1,201,Simran Rana,Kolkata,3300,396,639,115,0,3,0,2147
+MakeMyTrip Apr to Jun.pdf,MM79444,mmt,stay,2026-04-09,1,206,Vaibhav Gill,Meerut,3100,80,664,120,0,3,0,2233
+MakeMyTrip Apr to Jun.pdf,MM96660,mmt,cancelled,2026-04-09,2,,Varsha Kapoor,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM10743,mmt,stay,2026-04-10,1,106,Lavanya Mathur,Meerut,4200,504,813,146,0,4,0,2733
+MakeMyTrip Apr to Jun.pdf,MM14893,mmt,stay,2026-04-10,2,107,Ritika Srivastava,Kolkata,8400,880,1654,298,0,8,0,5560
+MakeMyTrip Apr to Jun.pdf,MM75696,mmt,stay,2026-04-10,1,103,Payal Oberoi,Lucknow,4200,420,832,150,0,4,0,2794
+MakeMyTrip Apr to Jun.pdf,MM93141,mmt,stay,2026-04-10,1,102,Tanvi Thakur,Dehradun,4300,645,804,145,0,4,0,2702
+MakeMyTrip Apr to Jun.pdf,MM41271,mmt,stay,2026-04-11,2,203,Parth Puri,Jaipur,6800,891,1300,234,0,6,0,4369
+MakeMyTrip Apr to Jun.pdf,MM56410,mmt,stay,2026-04-11,1,105,Sahil Marwah,Noida,4000,599,748,135,0,3,0,2515
+MakeMyTrip Apr to Jun.pdf,MM69458,mmt,stay,2026-04-11,1,101,Simran Kapoor,Agra,4000,840,695,125,0,3,0,2337
+MakeMyTrip Apr to Jun.pdf,MM83005,mmt,stay,2026-04-11,1,202,Anushka Jain,Agra,3300,555,604,109,0,3,0,2029
+MakeMyTrip Apr to Jun.pdf,MM90509,mmt,stay,2026-04-11,1,209,Tarun Grover,Ludhiana,6100,39,1333,240,0,6,0,4482
+MakeMyTrip Apr to Jun.pdf,MM24217,mmt,stay,2026-04-12,1,205,Mansi Chopra,Kolkata,3200,680,554,100,0,3,0,1863
+MakeMyTrip Apr to Jun.pdf,MM31352,mmt,stay,2026-04-12,2,105,Manish Bisht,Ludhiana,8000,1200,1496,269,0,7,0,5028
+MakeMyTrip Apr to Jun.pdf,MM36993,mmt,stay,2026-04-12,1,104,Lavanya Wadhwa,Ambala,4100,496,793,143,0,4,0,2664
+MakeMyTrip Apr to Jun.pdf,MM53200,mmt,stay,2026-04-12,1,103,Siddharth Sood,Kolkata,4000,0,880,158,0,4,0,2958
+MakeMyTrip Apr to Jun.pdf,MM64018,mmt,cancelled,2026-04-12,1,,Anushka Puri,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM68716,mmt,stay,2026-04-12,1,109,Siddharth Gill,Meerut,4100,410,812,146,0,4,0,2728
+MakeMyTrip Apr to Jun.pdf,MM88163,mmt,stay,2026-04-13,1,208,Vaibhav Grover,Mumbai,5900,1180,1038,187,0,5,0,3490
+MakeMyTrip Apr to Jun.pdf,MM40664,mmt,cancelled,2026-04-14,1,,Nidhi Sood,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM50119,mmt,stay,2026-04-14,1,206,Nikhil Jain,Chandigarh,3400,408,658,118,0,3,0,2213
+MakeMyTrip Apr to Jun.pdf,MM76801,mmt,stay,2026-04-14,2,102,Siddharth Negi,Kanpur,8600,0,1892,341,0,9,0,6358
+MakeMyTrip Apr to Jun.pdf,MM22708,mmt,stay,2026-04-15,1,208,Akshay Trivedi,Mumbai,6300,0,1386,249,0,6,0,4659
+MakeMyTrip Apr to Jun.pdf,MM31208,mmt,cancelled,2026-04-15,2,,Akshay Sood,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM96608,mmt,stay,2026-04-15,2,209,Payal Pandey,Faridabad,12600,1592,2422,436,0,11,0,8139
+MakeMyTrip Apr to Jun.pdf,MM96721,mmt,stay,2026-04-15,1,110,Nikhil Kulkarni,Bengaluru,3900,508,746,134,0,3,0,2509
+MakeMyTrip Apr to Jun.pdf,MM67928,mmt,stay,2026-04-16,1,107,Nidhi Bhatt,Bengaluru,4400,528,852,153,0,4,0,2863
+MakeMyTrip Apr to Jun.pdf,MM68341,mmt,stay,2026-04-16,1,207,Yash Bhatt,Chandigarh,6200,620,1228,221,0,6,0,4125
+MakeMyTrip Apr to Jun.pdf,MM73216,mmt,stay,2026-04-16,2,210,Nikhil Khanna,Ludhiana,11600,80,2534,456,0,12,0,8518
+MakeMyTrip Apr to Jun.pdf,MM15746,mmt,stay,2026-04-17,1,109,Aditi Mittal,Ludhiana,4200,502,814,147,0,4,0,2733
+MakeMyTrip Apr to Jun.pdf,MM20096,mmt,stay,2026-04-17,1,204,Varsha Mathur,Faridabad,3300,699,572,103,0,3,0,1923
+MakeMyTrip Apr to Jun.pdf,MM49810,mmt,stay,2026-04-17,1,111,Abhinav Khanna,Chandigarh,3300,396,639,115,0,3,0,2147
+MakeMyTrip Apr to Jun.pdf,MM70667,mmt,stay,2026-04-17,1,106,Lavanya Saxena,Meerut,4000,600,748,135,0,3,0,2514
+MakeMyTrip Apr to Jun.pdf,MM89490,mmt,stay,2026-04-17,1,104,Ashish Pandey,Jaipur,4100,410,812,146,0,4,0,2728
+MakeMyTrip Apr to Jun.pdf,MM94063,mmt,stay,2026-04-17,1,103,Alok Marwah,Dehradun,4100,0,902,162,0,4,0,3032
+MakeMyTrip Apr to Jun.pdf,MM94149,mmt,stay,2026-04-17,1,112,Anushka Shukla,Chandigarh,3300,436,630,113,0,3,0,2118
+MakeMyTrip Apr to Jun.pdf,MM13570,mmt,stay,2026-04-18,1,208,Aditi Tiwari,Ghaziabad,6000,720,1162,209,0,5,0,3904
+MakeMyTrip Apr to Jun.pdf,MM20113,mmt,stay,2026-04-18,1,105,Mansi Puri,Kanpur,4300,430,851,153,0,4,0,2862
+MakeMyTrip Apr to Jun.pdf,MM20130,mmt,stay,2026-04-18,1,110,Ritika Dhawan,Meerut,4300,470,843,152,0,4,0,2831
+MakeMyTrip Apr to Jun.pdf,MM29326,mmt,cancelled,2026-04-18,2,,Simran Bisht,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM29871,mmt,cancelled,2026-04-18,2,,Shreya Bhandari,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM35997,mmt,stay,2026-04-18,1,201,Siddharth Wadhwa,Agra,3400,720,590,106,0,3,0,1981
+MakeMyTrip Apr to Jun.pdf,MM36607,mmt,cancelled,2026-04-18,1,,Aditi Agarwal,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM49999,mmt,stay,2026-04-18,1,112,Arnav Gill,Delhi,3200,635,564,102,0,3,0,1896
+MakeMyTrip Apr to Jun.pdf,MM68256,mmt,stay,2026-04-18,2,111,Shreya Grover,Dehradun,6400,808,1230,221,0,6,0,4135
+MakeMyTrip Apr to Jun.pdf,MM20185,mmt,stay,2026-04-19,1,108,Zoya Negi,Kolkata,4000,600,748,135,0,3,0,2514
+MakeMyTrip Apr to Jun.pdf,MM33668,mmt,stay,2026-04-19,1,104,Kunal Kapoor,Chandigarh,4300,900,748,135,0,3,0,2514
+MakeMyTrip Apr to Jun.pdf,MM44311,mmt,stay,2026-04-19,1,208,Lavanya Jain,Meerut,5800,776,1105,199,0,5,0,3715
+MakeMyTrip Apr to Jun.pdf,MM70659,mmt,cancelled,2026-04-19,1,,Ashish Bisht,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM13288,mmt,stay,2026-04-20,1,204,Parth Thakur,Faridabad,3300,535,608,109,0,3,0,2045
+MakeMyTrip Apr to Jun.pdf,MM20193,mmt,stay,2026-04-20,1,103,Anushka Dutta,Kolkata,4400,568,843,152,0,4,0,2833
+MakeMyTrip Apr to Jun.pdf,MM96972,mmt,stay,2026-04-20,1,106,Bhavna Kulkarni,Meerut,4100,815,723,130,0,3,0,2429
+MakeMyTrip Apr to Jun.pdf,MM75563,mmt,stay,2026-04-21,3,102,Rohit Bansal,Meerut,14100,1385,2797,503,0,13,0,9402
+MakeMyTrip Apr to Jun.pdf,MM82677,mmt,cancelled,2026-04-21,1,,Udit Gill,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM94821,mmt,stay,2026-04-21,1,201,Zoya Ahuja,Dehradun,3100,452,583,105,0,3,0,1957
+MakeMyTrip Apr to Jun.pdf,MM29958,mmt,cancelled,2026-04-22,1,,Gaurav Bisht,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM73897,mmt,cancelled,2026-04-22,2,,Anushka Lamba,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM54774,mmt,stay,2026-04-23,1,206,Aditi Mathur,Mumbai,3300,660,581,105,0,3,0,1951
+MakeMyTrip Apr to Jun.pdf,MM58250,mmt,cancelled,2026-04-23,2,,Bhavna Bhandari,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM71639,mmt,cancelled,2026-04-23,1,,Bhavna Dutta,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM84450,mmt,cancelled,2026-04-23,1,,Vaibhav Dutta,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM86957,mmt,cancelled,2026-04-23,2,,Gaurav Goel,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM14293,mmt,stay,2026-04-24,1,203,Rajat Wadhwa,Meerut,3400,80,730,131,0,3,0,2456
+MakeMyTrip Apr to Jun.pdf,MM16631,mmt,stay,2026-04-24,2,112,Simran Grover,Ludhiana,6200,40,1355,244,0,6,0,4555
+MakeMyTrip Apr to Jun.pdf,MM35369,mmt,stay,2026-04-24,1,204,Amrita Jain,Ambala,3300,476,621,112,0,3,0,2088
+MakeMyTrip Apr to Jun.pdf,MM80620,mmt,stay,2026-04-24,1,205,Siddharth Dutta,Gurugram,3500,605,637,115,0,3,0,2140
+MakeMyTrip Apr to Jun.pdf,MM10015,mmt,stay,2026-04-25,1,107,Chirag Dutta,Ambala,4300,555,824,148,0,4,0,2769
+MakeMyTrip Apr to Jun.pdf,MM13691,mmt,cancelled,2026-04-25,1,,Kavya Garg,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM16139,mmt,stay,2026-04-25,1,101,Anushka Wadhwa,Ghaziabad,4200,504,813,146,0,4,0,2733
+MakeMyTrip Apr to Jun.pdf,MM29092,mmt,stay,2026-04-25,1,103,Lavanya Pandey,Mumbai,4300,556,824,148,0,4,0,2768
+MakeMyTrip Apr to Jun.pdf,MM33638,mmt,stay,2026-04-25,1,102,Nikhil Bhatt,Faridabad,4200,880,730,131,0,3,0,2456
+MakeMyTrip Apr to Jun.pdf,MM49004,mmt,stay,2026-04-25,1,104,Harsh Srivastava,Faridabad,4100,572,776,140,0,4,0,2608
+MakeMyTrip Apr to Jun.pdf,MM51248,mmt,stay,2026-04-25,1,206,Payal Mittal,Chandigarh,3400,720,590,106,0,3,0,1981
+MakeMyTrip Apr to Jun.pdf,MM58074,mmt,stay,2026-04-25,1,110,Ritika Garg,Noida,4300,514,833,150,0,4,0,2799
+MakeMyTrip Apr to Jun.pdf,MM67760,mmt,stay,2026-04-25,2,209,Bhavna Rana,Delhi,12000,1447,2322,418,0,11,0,7802
+MakeMyTrip Apr to Jun.pdf,MM89198,mmt,stay,2026-04-25,1,109,Saurabh Pandey,Faridabad,3900,468,755,136,0,3,0,2538
+MakeMyTrip Apr to Jun.pdf,MM30310,mmt,stay,2026-04-26,1,102,Tanvi Shukla,Noida,4100,492,794,143,0,4,0,2667
+MakeMyTrip Apr to Jun.pdf,MM43523,mmt,cancelled,2026-04-26,1,,Parth Kapoor,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM66202,mmt,cancelled,2026-04-26,1,,Mansi Shukla,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM44837,mmt,stay,2026-04-27,1,209,Vaibhav Ahuja,Kolkata,5700,1220,986,177,0,4,0,3313
+MakeMyTrip Apr to Jun.pdf,MM99126,mmt,stay,2026-04-28,1,103,Arnav Jain,Dehradun,4100,450,803,145,0,4,0,2698
+MakeMyTrip Apr to Jun.pdf,MM24593,mmt,stay,2026-04-29,2,205,Rajat Kapoor,Lucknow,6600,1070,1217,219,0,6,0,4088
+MakeMyTrip Apr to Jun.pdf,MM74915,mmt,stay,2026-04-29,1,204,Harsh Upadhyay,Lucknow,3000,340,585,105,0,3,0,1967
+MakeMyTrip Apr to Jun.pdf,MM36687,mmt,stay,2026-04-30,1,206,Saurabh Jain,Lucknow,3300,436,630,113,0,3,0,2118
+MakeMyTrip Apr to Jun.pdf,MM43040,mmt,stay,2026-04-30,1,110,Yash Chopra,Gurugram,3900,468,755,136,0,3,0,2538
+MakeMyTrip Apr to Jun.pdf,MM51898,mmt,stay,2026-04-30,1,202,Rajat Pandey,Mumbai,3100,660,537,97,0,2,0,1804
+MakeMyTrip Apr to Jun.pdf,MM82544,mmt,stay,2026-04-30,1,104,Kunal Khanna,Pune,4100,860,713,128,0,3,0,2396
+MakeMyTrip Apr to Jun.pdf,MM88680,mmt,stay,2026-04-30,1,108,Aakash Saxena,Bengaluru,4200,9,922,166,0,4,0,3099
+MakeMyTrip Apr to Jun.pdf,MM12622,mmt,stay,2026-05-01,2,109,Rajat Goel,Chandigarh,8400,838,1664,300,0,8,0,5590
+MakeMyTrip Apr to Jun.pdf,MM23024,mmt,stay,2026-05-01,1,202,Abhinav Ahuja,Faridabad,3600,360,713,128,0,3,0,2396
+MakeMyTrip Apr to Jun.pdf,MM29063,mmt,stay,2026-05-01,1,105,Saurabh Vohra,Mumbai,4300,1,946,170,0,4,0,3179
+MakeMyTrip Apr to Jun.pdf,MM45725,mmt,stay,2026-05-01,2,110,Saurabh Bisht,Delhi,8800,1760,1549,279,0,7,0,5205
+MakeMyTrip Apr to Jun.pdf,MM53552,mmt,stay,2026-05-01,1,106,Bhavna Garg,Dehradun,4400,700,814,147,0,4,0,2735
+MakeMyTrip Apr to Jun.pdf,MM54546,mmt,stay,2026-05-01,1,111,Zoya Sethi,Kanpur,3300,700,572,103,0,3,0,1922
+MakeMyTrip Apr to Jun.pdf,MM60940,mmt,stay,2026-05-01,1,102,Harsh Negi,Kolkata,4400,440,871,157,0,4,0,2928
+MakeMyTrip Apr to Jun.pdf,MM65299,mmt,stay,2026-05-01,1,201,Ankit Bhatt,Lucknow,3700,740,651,117,0,3,0,2189
+MakeMyTrip Apr to Jun.pdf,MM72695,mmt,stay,2026-05-01,1,205,Jatin Jain,Ghaziabad,3300,740,563,101,0,3,0,1893
+MakeMyTrip Apr to Jun.pdf,MM74186,mmt,stay,2026-05-01,1,204,Ishita Ahuja,Chandigarh,3400,0,748,135,0,3,0,2514
+MakeMyTrip Apr to Jun.pdf,MM76389,mmt,stay,2026-05-01,1,108,Ashish Rastogi,Meerut,4300,860,757,136,0,3,0,2544
+MakeMyTrip Apr to Jun.pdf,MM80972,mmt,stay,2026-05-01,2,103,Harsh Marwah,Dehradun,9200,1099,1782,321,0,8,0,5990
+MakeMyTrip Apr to Jun.pdf,MM19780,mmt,cancelled,2026-05-02,2,,Bhavna Rastogi,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM28108,mmt,stay,2026-05-02,1,101,Kavya Saxena,Gurugram,4100,450,803,145,0,4,0,2698
+MakeMyTrip Apr to Jun.pdf,MM39335,mmt,stay,2026-05-02,1,201,Sahil Tandon,Lucknow,3400,488,641,115,0,3,0,2153
+MakeMyTrip Apr to Jun.pdf,MM43018,mmt,stay,2026-05-02,1,106,Jatin Vohra,Ghaziabad,4500,80,972,175,0,4,0,3269
+MakeMyTrip Apr to Jun.pdf,MM78420,mmt,stay,2026-05-02,1,107,Pallavi Sinha,Kanpur,4300,685,795,143,0,4,0,2673
+MakeMyTrip Apr to Jun.pdf,MM90942,mmt,stay,2026-05-02,3,105,Rahul S.,Delhi,14700,1294,2949,531,0,13,0,9913
+MakeMyTrip Apr to Jun.pdf,MM93657,mmt,stay,2026-05-02,1,108,Siddharth Upadhyay,Dehradun,4300,40,937,169,0,4,0,3150
+MakeMyTrip Apr to Jun.pdf,MM13956,mmt,cancelled,2026-05-03,2,,Varsha Bisht,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM36354,mmt,stay,2026-05-03,1,101,Sahil Bhandari,Delhi,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM45211,mmt,stay,2026-05-03,1,109,Jatin Kulkarni,Ambala,4600,552,891,160,0,4,0,2993
+MakeMyTrip Apr to Jun.pdf,MM19965,mmt,stay,2026-05-04,1,110,Kavya Ahuja,Kanpur,4600,462,910,164,0,4,0,3060
+MakeMyTrip Apr to Jun.pdf,MM39477,mmt,stay,2026-05-04,2,202,Pallavi Dhawan,Gurugram,7000,740,1377,248,0,6,0,4629
+MakeMyTrip Apr to Jun.pdf,MM32704,mmt,stay,2026-05-05,1,203,Zoya Saxena,Kanpur,3500,525,655,118,0,3,0,2199
+MakeMyTrip Apr to Jun.pdf,MM99055,mmt,stay,2026-05-05,1,210,Akshay Lamba,Ambala,6400,960,1197,215,0,5,0,4023
+MakeMyTrip Apr to Jun.pdf,MM63311,mmt,stay,2026-05-06,1,108,Divya Ahuja,Pune,4600,690,860,155,0,4,0,2891
+MakeMyTrip Apr to Jun.pdf,MM66512,mmt,stay,2026-05-06,1,101,Kavya Marwah,Ludhiana,4400,525,853,154,0,4,0,2864
+MakeMyTrip Apr to Jun.pdf,MM80465,mmt,stay,2026-05-06,1,104,Sahil Lamba,Jaipur,4500,540,871,157,0,4,0,2928
+MakeMyTrip Apr to Jun.pdf,MM16196,mmt,cancelled,2026-05-07,2,,Zoya Kohli,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM40971,mmt,stay,2026-05-07,1,108,Yash Ahuja,Pune,4700,705,879,158,0,4,0,2954
+MakeMyTrip Apr to Jun.pdf,MM65030,mmt,cancelled,2026-05-07,1,,Kavya Pandey,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM73309,mmt,cancelled,2026-05-07,2,,Pallavi Mittal,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM27173,mmt,stay,2026-05-08,2,203,Nikhil Trivedi,Jaipur,6800,1020,1272,229,0,6,0,4273
+MakeMyTrip Apr to Jun.pdf,MM55041,mmt,stay,2026-05-08,2,210,Varsha Shukla,Meerut,12000,2440,2103,379,0,10,0,7068
+MakeMyTrip Apr to Jun.pdf,MM64086,mmt,stay,2026-05-08,1,104,Tarun Tandon,Dehradun,4500,450,891,160,0,4,0,2995
+MakeMyTrip Apr to Jun.pdf,MM64824,mmt,stay,2026-05-08,1,204,Ashish Ahuja,Pune,3400,550,627,113,0,3,0,2107
+MakeMyTrip Apr to Jun.pdf,MM69126,mmt,stay,2026-05-08,1,209,Simran Sinha,Jaipur,6300,1255,1110,200,0,5,0,3730
+MakeMyTrip Apr to Jun.pdf,MM80434,mmt,stay,2026-05-08,2,111,Mansi Bisht,Faridabad,6800,816,1316,237,0,6,0,4425
+MakeMyTrip Apr to Jun.pdf,MM86598,mmt,stay,2026-05-08,1,105,Udit Tandon,Kolkata,4300,510,834,150,0,4,0,2802
+MakeMyTrip Apr to Jun.pdf,MM87688,mmt,stay,2026-05-08,1,108,Jatin Rastogi,Ghaziabad,4600,460,911,164,0,4,0,3061
+MakeMyTrip Apr to Jun.pdf,MM11572,mmt,cancelled,2026-05-09,1,,Shreya Chopra,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM37413,mmt,stay,2026-05-09,1,101,Simran Thakur,Chandigarh,4200,584,796,143,0,4,0,2673
+MakeMyTrip Apr to Jun.pdf,MM46082,mmt,stay,2026-05-09,1,103,Rajat Jain,Kanpur,4200,500,814,147,0,4,0,2735
+MakeMyTrip Apr to Jun.pdf,MM48596,mmt,stay,2026-05-09,1,201,Lavanya Chopra,Kanpur,3600,620,656,118,0,3,0,2203
+MakeMyTrip Apr to Jun.pdf,MM91694,mmt,stay,2026-05-09,1,204,Manish Marwah,Ghaziabad,3300,410,636,114,0,3,0,2137
+MakeMyTrip Apr to Jun.pdf,MM93328,mmt,stay,2026-05-09,2,206,Aakash Trivedi,Ghaziabad,6800,816,1316,237,0,6,0,4425
+MakeMyTrip Apr to Jun.pdf,MM26684,mmt,stay,2026-05-10,1,210,Shreya Dutta,Ludhiana,6200,970,1151,207,0,5,0,3867
+MakeMyTrip Apr to Jun.pdf,MM35948,mmt,cancelled,2026-05-10,2,,Pallavi Tiwari,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM43170,mmt,stay,2026-05-10,1,108,Parth Kohli,Chandigarh,4300,556,824,148,0,4,0,2768
+MakeMyTrip Apr to Jun.pdf,MM28794,mmt,cancelled,2026-05-11,1,,Amrita Kohli,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM44509,mmt,stay,2026-05-11,1,206,Payal Kohli,Jaipur,3300,396,639,115,0,3,0,2147
+MakeMyTrip Apr to Jun.pdf,MM77350,mmt,stay,2026-05-11,1,102,Alok Saxena,Agra,4400,880,774,139,0,4,0,2603
+MakeMyTrip Apr to Jun.pdf,MM91183,mmt,stay,2026-05-11,1,103,Shreya Srivastava,Ambala,4200,581,796,143,0,4,0,2676
+MakeMyTrip Apr to Jun.pdf,MM13935,mmt,cancelled,2026-05-12,2,,Siddharth Tiwari,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM56006,mmt,cancelled,2026-05-12,1,,Zoya Marwah,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM89068,mmt,cancelled,2026-05-12,1,,Aditi Grover,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM26224,mmt,stay,2026-05-13,1,105,Devansh Mittal,Faridabad,4100,532,785,141,0,4,0,2638
+MakeMyTrip Apr to Jun.pdf,MM35697,mmt,cancelled,2026-05-13,1,,Shreya Thakur,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM27753,mmt,stay,2026-05-14,1,108,Pallavi Lamba,Noida,4200,420,832,150,0,4,0,2794
+MakeMyTrip Apr to Jun.pdf,MM29946,mmt,stay,2026-05-14,2,105,Devansh Thakur,Ludhiana,9200,0,2024,364,0,9,0,6803
+MakeMyTrip Apr to Jun.pdf,MM37351,mmt,stay,2026-05-14,1,109,Alok Garg,Faridabad,4100,491,794,143,0,4,0,2668
+MakeMyTrip Apr to Jun.pdf,MM62234,mmt,stay,2026-05-14,1,101,Vaibhav Shukla,Lucknow,4600,690,860,155,0,4,0,2891
+MakeMyTrip Apr to Jun.pdf,MM75117,mmt,stay,2026-05-14,1,110,Akshay Rana,Delhi,4200,504,813,146,0,4,0,2733
+MakeMyTrip Apr to Jun.pdf,MM85922,mmt,stay,2026-05-14,1,207,Bhavna Khanna,Kanpur,6400,1280,1126,203,0,5,0,3786
+MakeMyTrip Apr to Jun.pdf,MM92071,mmt,cancelled,2026-05-14,1,,Aakash Lamba,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM18098,mmt,stay,2026-05-15,1,106,Manish Gill,Meerut,4200,424,831,150,0,4,0,2791
+MakeMyTrip Apr to Jun.pdf,MM26793,mmt,stay,2026-05-15,1,108,Sakshi Dhawan,Meerut,4500,450,891,160,0,4,0,2995
+MakeMyTrip Apr to Jun.pdf,MM44385,mmt,cancelled,2026-05-15,1,,Aditi Bhandari,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM51658,mmt,stay,2026-05-15,2,210,Vaibhav Kulkarni,Lucknow,12600,2560,2209,398,0,10,0,7423
+MakeMyTrip Apr to Jun.pdf,MM58451,mmt,cancelled,2026-05-15,1,,Arnav Negi,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM18194,mmt,stay,2026-05-16,1,110,Parth Oberoi,Dehradun,4500,542,871,157,0,4,0,2926
+MakeMyTrip Apr to Jun.pdf,MM43670,mmt,stay,2026-05-16,2,101,Bhavna Vohra,Pune,8800,1,1936,348,0,9,0,6506
+MakeMyTrip Apr to Jun.pdf,MM44539,mmt,stay,2026-05-16,1,105,Rajat Oberoi,Gurugram,4100,492,794,143,0,4,0,2667
+MakeMyTrip Apr to Jun.pdf,MM84377,mmt,stay,2026-05-16,1,107,Sahil Trivedi,Faridabad,4100,487,795,143,0,4,0,2671
+MakeMyTrip Apr to Jun.pdf,MM24590,mmt,stay,2026-05-17,1,108,Rajat Negi,Mumbai,4400,700,814,147,0,4,0,2735
+MakeMyTrip Apr to Jun.pdf,MM64093,mmt,cancelled,2026-05-17,1,,Shreya Kapoor,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM67407,mmt,stay,2026-05-17,2,210,Kavya Sinha,Lucknow,12800,1536,2478,446,0,11,0,8329
+MakeMyTrip Apr to Jun.pdf,MM72904,mmt,stay,2026-05-17,1,104,Rajat Chopra,Delhi,4300,556,824,148,0,4,0,2768
+MakeMyTrip Apr to Jun.pdf,MM89132,mmt,stay,2026-05-17,1,105,Tarun Garg,Mumbai,4100,577,775,140,0,4,0,2604
+MakeMyTrip Apr to Jun.pdf,MM49081,mmt,stay,2026-05-18,1,204,Arnav Vohra,Chandigarh,3300,330,653,118,0,3,0,2196
+MakeMyTrip Apr to Jun.pdf,MM78208,mmt,stay,2026-05-18,2,203,Yash Bisht,Delhi,7200,864,1394,251,0,6,0,4685
+MakeMyTrip Apr to Jun.pdf,MM97420,mmt,stay,2026-05-18,1,101,Divya Mathur,Ghaziabad,4300,685,795,143,0,4,0,2673
+MakeMyTrip Apr to Jun.pdf,MM12388,mmt,cancelled,2026-05-19,1,,Simran Sethi,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM82242,mmt,cancelled,2026-05-19,1,,Ishita Puri,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM22526,mmt,stay,2026-05-20,2,101,Shreya Kohli,Dehradun,8600,1032,1665,300,0,8,0,5595
+MakeMyTrip Apr to Jun.pdf,MM39691,mmt,cancelled,2026-05-20,2,,Lavanya Gill,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM47269,mmt,stay,2026-05-20,1,111,Divya Srivastava,Gurugram,3500,700,616,111,0,3,0,2070
+MakeMyTrip Apr to Jun.pdf,MM76212,mmt,cancelled,2026-05-20,2,,Saurabh Upadhyay,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM12605,mmt,cancelled,2026-05-21,1,,Ritika Khanna,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM37594,mmt,cancelled,2026-05-21,1,,Sahil Upadhyay,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM50298,mmt,stay,2026-05-21,2,102,Kunal Bhatt,Delhi,8600,980,1676,302,0,8,0,5634
+MakeMyTrip Apr to Jun.pdf,MM51462,mmt,stay,2026-05-21,1,205,Aparna Trivedi,Lucknow,3400,420,656,118,0,3,0,2203
+MakeMyTrip Apr to Jun.pdf,MM56815,mmt,cancelled,2026-05-21,1,,Udit Sinha,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM60641,mmt,stay,2026-05-21,1,109,Alok Grover,Chandigarh,4400,528,852,153,0,4,0,2863
+MakeMyTrip Apr to Jun.pdf,MM75217,mmt,stay,2026-05-21,1,111,Mansi Upadhyay,Gurugram,3700,40,805,145,0,4,0,2706
+MakeMyTrip Apr to Jun.pdf,MM88229,mmt,stay,2026-05-21,1,206,Omkar Marwah,Kanpur,3500,500,660,119,0,3,0,2218
+MakeMyTrip Apr to Jun.pdf,MM24123,mmt,stay,2026-05-22,1,207,Ankit Mathur,Lucknow,6200,1240,1091,196,0,5,0,3668
+MakeMyTrip Apr to Jun.pdf,MM32707,mmt,stay,2026-05-22,1,106,Ritika Agarwal,Pune,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM37437,mmt,stay,2026-05-22,1,109,Ashish Sood,Dehradun,4500,980,774,139,0,4,0,2603
+MakeMyTrip Apr to Jun.pdf,MM39392,mmt,stay,2026-05-22,1,104,Rajat Khanna,Jaipur,4400,608,834,150,0,4,0,2804
+MakeMyTrip Apr to Jun.pdf,MM42223,mmt,stay,2026-05-22,1,110,Sakshi Bhandari,Lucknow,4300,556,824,148,0,4,0,2768
+MakeMyTrip Apr to Jun.pdf,MM18075,mmt,stay,2026-05-23,1,106,Omkar Puri,Kolkata,4500,540,871,157,0,4,0,2928
+MakeMyTrip Apr to Jun.pdf,MM20093,mmt,stay,2026-05-23,1,107,Shreya Bisht,Ghaziabad,4300,900,748,135,0,3,0,2514
+MakeMyTrip Apr to Jun.pdf,MM40991,mmt,stay,2026-05-23,1,209,Yash Tandon,Jaipur,6400,808,1230,221,0,6,0,4135
+MakeMyTrip Apr to Jun.pdf,MM43862,mmt,stay,2026-05-23,1,110,Lavanya Grover,Agra,4500,536,872,157,0,4,0,2931
+MakeMyTrip Apr to Jun.pdf,MM51315,mmt,stay,2026-05-23,1,108,Aparna Srivastava,Kanpur,4400,700,814,147,0,4,0,2735
+MakeMyTrip Apr to Jun.pdf,MM52054,mmt,stay,2026-05-23,1,109,Ishita Tandon,Faridabad,4000,80,862,155,0,4,0,2899
+MakeMyTrip Apr to Jun.pdf,MM52371,mmt,stay,2026-05-23,1,103,Divya Grover,Jaipur,4500,0,990,178,0,5,0,3327
+MakeMyTrip Apr to Jun.pdf,MM64050,mmt,stay,2026-05-23,1,202,Vaibhav Vohra,Faridabad,3500,700,616,111,0,3,0,2070
+MakeMyTrip Apr to Jun.pdf,MM67268,mmt,cancelled,2026-05-23,1,,Anushka Dhawan,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM92859,mmt,stay,2026-05-23,1,102,Aakash Pandey,Mumbai,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM95407,mmt,stay,2026-05-23,1,207,Rajat Kulkarni,Bengaluru,6500,690,1278,230,0,6,0,4296
+MakeMyTrip Apr to Jun.pdf,MM95860,mmt,stay,2026-05-23,1,210,Ritika Marwah,Jaipur,6700,708,1318,237,0,6,0,4431
+MakeMyTrip Apr to Jun.pdf,MM35460,mmt,cancelled,2026-05-24,2,,Amrita Negi,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM41178,mmt,stay,2026-05-24,1,201,Abhinav Kapoor,Pune,3600,472,688,124,0,3,0,2313
+MakeMyTrip Apr to Jun.pdf,MM73259,mmt,stay,2026-05-24,1,101,Parth Sethi,Ambala,4400,660,823,148,0,4,0,2765
+MakeMyTrip Apr to Jun.pdf,MM88536,mmt,stay,2026-05-24,1,105,Simran Pandey,Kanpur,4500,530,873,157,0,4,0,2936
+MakeMyTrip Apr to Jun.pdf,MM28764,mmt,stay,2026-05-25,1,204,Bhavna Tiwari,Ludhiana,3600,400,704,127,0,3,0,2366
+MakeMyTrip Apr to Jun.pdf,MM67713,mmt,stay,2026-05-25,1,208,Siddharth Saxena,Pune,6500,900,1232,222,0,6,0,4140
+MakeMyTrip Apr to Jun.pdf,MM55171,mmt,stay,2026-05-26,1,107,Divya Pandey,Delhi,4300,512,833,150,0,4,0,2801
+MakeMyTrip Apr to Jun.pdf,MM12325,mmt,cancelled,2026-05-27,2,,Parth Trivedi,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM52367,mmt,cancelled,2026-05-27,2,,Zoya Tiwari,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM53946,mmt,stay,2026-05-27,1,110,Ashish Bhatt,Agra,4400,0,968,174,0,4,0,3254
+MakeMyTrip Apr to Jun.pdf,MM85165,mmt,stay,2026-05-27,2,102,Shreya Mittal,Noida,9000,900,1782,321,0,8,0,5989
+MakeMyTrip Apr to Jun.pdf,MM22755,mmt,stay,2026-05-28,1,101,Pallavi Vohra,Gurugram,4500,580,862,155,0,4,0,2899
+MakeMyTrip Apr to Jun.pdf,MM14434,mmt,stay,2026-05-29,1,202,Udit Mathur,Noida,3500,460,669,120,0,3,0,2248
+MakeMyTrip Apr to Jun.pdf,MM20868,mmt,stay,2026-05-29,1,111,Pallavi Puri,Meerut,3700,453,714,129,0,3,0,2401
+MakeMyTrip Apr to Jun.pdf,MM21257,mmt,stay,2026-05-29,2,205,Tarun Wadhwa,Ludhiana,7200,40,1575,284,0,7,0,5294
+MakeMyTrip Apr to Jun.pdf,MM23674,mmt,stay,2026-05-29,1,206,Payal Garg,Delhi,3400,510,636,114,0,3,0,2137
+MakeMyTrip Apr to Jun.pdf,MM26544,mmt,stay,2026-05-29,1,103,Nidhi Vohra,Pune,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM46070,mmt,stay,2026-05-29,1,101,Manish Trivedi,Ambala,4400,920,766,138,0,3,0,2573
+MakeMyTrip Apr to Jun.pdf,MM51326,mmt,stay,2026-05-29,1,107,Jatin Bisht,Bengaluru,4300,470,843,152,0,4,0,2831
+MakeMyTrip Apr to Jun.pdf,MM69361,mmt,stay,2026-05-29,1,104,Saurabh Chopra,Ludhiana,4400,520,854,154,0,4,0,2868
+MakeMyTrip Apr to Jun.pdf,MM72095,mmt,stay,2026-05-29,1,109,Shreya Bhatt,Lucknow,4400,480,862,155,0,4,0,2899
+MakeMyTrip Apr to Jun.pdf,MM80759,mmt,stay,2026-05-29,1,110,Shreya Vohra,Faridabad,4400,528,852,153,0,4,0,2863
+MakeMyTrip Apr to Jun.pdf,MM84017,mmt,stay,2026-05-29,1,208,Anushka Bisht,Chandigarh,6100,0,1342,242,0,6,0,4510
+MakeMyTrip Apr to Jun.pdf,MM89117,mmt,cancelled,2026-05-29,2,,Ishita Saxena,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM12237,mmt,stay,2026-05-30,1,110,Ashish Goel,Ludhiana,4400,703,813,146,0,4,0,2734
+MakeMyTrip Apr to Jun.pdf,MM21008,mmt,stay,2026-05-30,1,109,Zoya Bhandari,Gurugram,4400,880,774,139,0,4,0,2603
+MakeMyTrip Apr to Jun.pdf,MM26620,mmt,stay,2026-05-30,1,104,Rajat Sood,Meerut,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM41954,mmt,stay,2026-05-30,1,112,Yash Goel,Ambala,3400,445,650,117,0,3,0,2185
+MakeMyTrip Apr to Jun.pdf,MM48213,mmt,stay,2026-05-30,1,102,Gaurav Sehgal,Rohtak,4870,488,964,174,0,4,0,3120
+MakeMyTrip Apr to Jun.pdf,MM56989,mmt,stay,2026-05-30,1,202,Ritika Tandon,Jaipur,3500,700,616,111,0,3,0,2070
+MakeMyTrip Apr to Jun.pdf,MM72522,mmt,stay,2026-05-30,1,207,Anushka Negi,Kolkata,6300,756,1220,220,0,6,0,4098
+MakeMyTrip Apr to Jun.pdf,MM48585,mmt,stay,2026-05-31,1,201,Tanvi Dhawan,Dehradun,3400,408,658,118,0,3,0,2213
+MakeMyTrip Apr to Jun.pdf,MM42083,mmt,cancelled,2026-06-01,2,,Aditi Kulkarni,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM43041,mmt,stay,2026-06-01,1,209,Arnav Kulkarni,Pune,6100,650,1199,216,0,5,0,4030
+MakeMyTrip Apr to Jun.pdf,MM50617,mmt,stay,2026-06-01,1,101,Mansi Bhandari,Kolkata,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM80128,mmt,stay,2026-06-01,1,105,Harsh Thakur,Agra,4600,460,911,164,0,4,0,3061
+MakeMyTrip Apr to Jun.pdf,MM44333,mmt,stay,2026-06-02,1,205,Abhinav Sood,Gurugram,3500,420,678,122,0,3,0,2277
+MakeMyTrip Apr to Jun.pdf,MM70085,mmt,stay,2026-06-02,1,111,Gaurav Sinha,Meerut,3500,0,770,139,0,4,0,2587
+MakeMyTrip Apr to Jun.pdf,MM19072,mmt,stay,2026-06-03,1,105,Nikhil Rastogi,Delhi,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM48215,mmt,cancelled,2026-06-03,1,,Harsh Rana,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM69574,mmt,cancelled,2026-06-03,1,,Tanvi Tandon,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM74404,mmt,stay,2026-06-03,1,111,Tanvi Tiwari,Pune,3300,660,581,105,0,3,0,1951
+MakeMyTrip Apr to Jun.pdf,MM62086,mmt,stay,2026-06-04,1,207,Aditi Goel,Ghaziabad,6700,844,1288,232,0,6,0,4330
+MakeMyTrip Apr to Jun.pdf,MM78802,mmt,stay,2026-06-04,2,102,Mansi Rastogi,Ghaziabad,8800,1096,1695,305,0,8,0,5696
+MakeMyTrip Apr to Jun.pdf,MM89923,mmt,cancelled,2026-06-04,2,,Omkar Rana,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM16186,mmt,stay,2026-06-05,2,101,Gaurav Tandon,Gurugram,8200,900,1606,289,0,7,0,5398
+MakeMyTrip Apr to Jun.pdf,MM24581,mmt,stay,2026-06-05,1,208,Aparna Sinha,Kolkata,6300,1260,1109,200,0,5,0,3726
+MakeMyTrip Apr to Jun.pdf,MM25017,mmt,stay,2026-06-05,2,209,Nikhil Shukla,Dehradun,12800,1616,2460,443,0,11,0,8270
+MakeMyTrip Apr to Jun.pdf,MM29058,mmt,stay,2026-06-05,1,106,Payal Dhawan,Bengaluru,4400,880,774,139,0,4,0,2603
+MakeMyTrip Apr to Jun.pdf,MM35714,mmt,stay,2026-06-05,1,109,Payal Chopra,Lucknow,4300,556,824,148,0,4,0,2768
+MakeMyTrip Apr to Jun.pdf,MM38006,mmt,cancelled,2026-06-05,2,,Yash Srivastava,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM54854,mmt,cancelled,2026-06-05,1,,Gaurav Lamba,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM62518,mmt,stay,2026-06-05,1,204,Pallavi Kapoor,Pune,3400,408,658,118,0,3,0,2213
+MakeMyTrip Apr to Jun.pdf,MM92776,mmt,stay,2026-06-05,1,104,Zoya Puri,Mumbai,4600,40,1003,181,0,5,0,3371
+MakeMyTrip Apr to Jun.pdf,MM18010,mmt,stay,2026-06-06,1,106,Chirag Pandey,Ambala,4200,506,813,146,0,4,0,2731
+MakeMyTrip Apr to Jun.pdf,MM21202,mmt,stay,2026-06-06,1,108,Akshay Dhawan,Dehradun,4500,0,990,178,0,5,0,3327
+MakeMyTrip Apr to Jun.pdf,MM31480,mmt,stay,2026-06-06,1,204,Gaurav Bhandari,Delhi,3500,420,678,122,0,3,0,2277
+MakeMyTrip Apr to Jun.pdf,MM32994,mmt,stay,2026-06-06,3,110,Vikram Chauhan,Chandigarh,15300,1239,3093,557,0,14,0,10397
+MakeMyTrip Apr to Jun.pdf,MM33202,mmt,stay,2026-06-06,1,202,Lavanya Agarwal,Lucknow,3600,355,714,129,0,3,0,2399
+MakeMyTrip Apr to Jun.pdf,MM34707,mmt,stay,2026-06-06,1,203,Aparna Kulkarni,Mumbai,3200,424,611,110,0,3,0,2052
+MakeMyTrip Apr to Jun.pdf,MM41587,mmt,stay,2026-06-06,1,105,Mansi Lamba,Meerut,4100,660,757,136,0,3,0,2544
+MakeMyTrip Apr to Jun.pdf,MM43878,mmt,stay,2026-06-06,1,207,Shreya Upadhyay,Gurugram,6400,960,1197,215,0,5,0,4023
+MakeMyTrip Apr to Jun.pdf,MM44512,mmt,cancelled,2026-06-06,2,,Kavya Sethi,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM52408,mmt,stay,2026-06-06,1,109,Arnav Mittal,Noida,4400,528,852,153,0,4,0,2863
+MakeMyTrip Apr to Jun.pdf,MM61702,mmt,cancelled,2026-06-06,1,,Aditi Dhawan,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM66674,mmt,stay,2026-06-06,3,103,Aakash Tiwari,Chandigarh,14100,2820,2482,447,0,11,0,8340
+MakeMyTrip Apr to Jun.pdf,MM93606,mmt,stay,2026-06-06,1,102,Nikhil Oberoi,Jaipur,4500,580,862,155,0,4,0,2899
+MakeMyTrip Apr to Jun.pdf,MM93803,mmt,stay,2026-06-06,1,107,Udit Upadhyay,Jaipur,4400,80,950,171,0,4,0,3195
+MakeMyTrip Apr to Jun.pdf,MM99996,mmt,stay,2026-06-06,1,201,Chirag Khanna,Ambala,3600,760,625,113,0,3,0,2099
+MakeMyTrip Apr to Jun.pdf,MM28408,mmt,stay,2026-06-07,1,201,Harsh Kapoor,Ambala,3400,680,598,108,0,3,0,2011
+MakeMyTrip Apr to Jun.pdf,MM41483,mmt,cancelled,2026-06-07,2,,Yash Sinha,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM70272,mmt,stay,2026-06-07,1,105,Tanvi Saxena,Faridabad,4300,522,831,150,0,4,0,2793
+MakeMyTrip Apr to Jun.pdf,MM79193,mmt,stay,2026-06-07,1,108,Lavanya Kohli,Pune,4600,690,860,155,0,4,0,2891
+MakeMyTrip Apr to Jun.pdf,MM82035,mmt,stay,2026-06-07,1,207,Sakshi Marwah,Delhi,6200,80,1346,242,0,6,0,4526
+MakeMyTrip Apr to Jun.pdf,MM84849,mmt,stay,2026-06-07,1,109,Nidhi Grover,Delhi,4300,556,824,148,0,4,0,2768
+MakeMyTrip Apr to Jun.pdf,MM99019,mmt,stay,2026-06-07,1,104,Harsh Khanna,Chandigarh,4300,1,946,170,0,4,0,3179
+MakeMyTrip Apr to Jun.pdf,MM99732,mmt,stay,2026-06-07,1,101,Sakshi Rastogi,Lucknow,4300,0,946,170,0,4,0,3180
+MakeMyTrip Apr to Jun.pdf,MM33093,mmt,stay,2026-06-08,1,106,Tarun Trivedi,Ludhiana,4400,660,823,148,0,4,0,2765
+MakeMyTrip Apr to Jun.pdf,MM34099,mmt,stay,2026-06-08,1,109,Manish Rana,Ambala,4200,880,730,131,0,3,0,2456
+MakeMyTrip Apr to Jun.pdf,MM66282,mmt,stay,2026-06-08,1,108,Sakshi Bisht,Mumbai,4600,552,891,160,0,4,0,2993
+MakeMyTrip Apr to Jun.pdf,MM95602,mmt,stay,2026-06-08,1,201,Aparna Mathur,Noida,3400,510,636,114,0,3,0,2137
+MakeMyTrip Apr to Jun.pdf,MM10362,mmt,stay,2026-06-09,1,204,Mansi Grover,Ambala,3400,448,649,117,0,3,0,2183
+MakeMyTrip Apr to Jun.pdf,MM29246,mmt,cancelled,2026-06-09,2,,Abhinav Rana,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM94048,mmt,stay,2026-06-09,1,103,Divya Dhawan,Ambala,4500,0,990,178,0,5,0,3327
+MakeMyTrip Apr to Jun.pdf,MM51545,mmt,cancelled,2026-06-10,1,,Harsh Shukla,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM57150,mmt,stay,2026-06-10,1,109,Omkar Tandon,Bengaluru,4500,40,981,177,0,4,0,3298
+MakeMyTrip Apr to Jun.pdf,MM59457,mmt,cancelled,2026-06-11,1,,Sahil Mathur,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM95400,mmt,cancelled,2026-06-11,1,,Saurabh Goel,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM13681,mmt,stay,2026-06-12,1,104,Sakshi Lamba,Delhi,4400,0,968,174,0,4,0,3254
+MakeMyTrip Apr to Jun.pdf,MM17559,mmt,stay,2026-06-12,2,107,Nidhi Mathur,Dehradun,8800,1880,1522,274,0,7,0,5117
+MakeMyTrip Apr to Jun.pdf,MM18645,mmt,cancelled,2026-06-12,1,,Manish Dutta,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM18925,mmt,stay,2026-06-12,1,106,Jatin Thakur,Mumbai,4500,715,833,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM33040,mmt,stay,2026-06-12,1,207,Aparna Pandey,Delhi,6400,0,1408,253,0,6,0,4733
+MakeMyTrip Apr to Jun.pdf,MM33639,mmt,stay,2026-06-12,1,109,Ankit Grover,Bengaluru,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM37396,mmt,stay,2026-06-12,1,208,Abhinav Tandon,Ludhiana,6700,884,1280,230,0,6,0,4300
+MakeMyTrip Apr to Jun.pdf,MM46708,mmt,stay,2026-06-12,1,101,Sahil Wadhwa,Dehradun,4500,40,981,177,0,4,0,3298
+MakeMyTrip Apr to Jun.pdf,MM77025,mmt,stay,2026-06-12,1,102,Varsha Oberoi,Lucknow,4400,480,862,155,0,4,0,2899
+MakeMyTrip Apr to Jun.pdf,MM42658,mmt,stay,2026-06-13,2,108,Aparna Jain,Chandigarh,9200,1144,1772,319,0,8,0,5957
+MakeMyTrip Apr to Jun.pdf,MM65101,mmt,stay,2026-06-13,1,204,Omkar Dhawan,Faridabad,3300,491,618,111,0,3,0,2077
+MakeMyTrip Apr to Jun.pdf,MM67656,mmt,stay,2026-06-13,1,109,Devansh Gill,Kanpur,4200,504,813,146,0,4,0,2733
+MakeMyTrip Apr to Jun.pdf,MM68183,mmt,stay,2026-06-13,1,104,Manish Dhawan,Ludhiana,4300,430,851,153,0,4,0,2862
+MakeMyTrip Apr to Jun.pdf,MM38986,mmt,stay,2026-06-14,1,111,Tanvi Grover,Delhi,3300,396,639,115,0,3,0,2147
+MakeMyTrip Apr to Jun.pdf,MM53387,mmt,stay,2026-06-14,1,101,Lavanya Tiwari,Chandigarh,4600,0,1012,182,0,5,0,3401
+MakeMyTrip Apr to Jun.pdf,MM66286,mmt,stay,2026-06-14,1,202,Lavanya Bhandari,Jaipur,3600,512,679,122,0,3,0,2284
+MakeMyTrip Apr to Jun.pdf,MM83062,mmt,stay,2026-06-14,1,206,Varsha Dhawan,Ghaziabad,3500,737,608,109,0,3,0,2043
+MakeMyTrip Apr to Jun.pdf,MM22410,mmt,stay,2026-06-15,1,203,Omkar Goel,Kanpur,3500,40,761,137,0,3,0,2559
+MakeMyTrip Apr to Jun.pdf,MM43760,mmt,stay,2026-06-15,1,207,Vaibhav Saxena,Meerut,6500,650,1287,232,0,6,0,4325
+MakeMyTrip Apr to Jun.pdf,MM46029,mmt,cancelled,2026-06-15,1,,Alok Sood,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM48166,mmt,stay,2026-06-16,1,106,Payal Upadhyay,Kolkata,4500,585,861,155,0,4,0,2895
+MakeMyTrip Apr to Jun.pdf,MM29715,mmt,stay,2026-06-18,1,102,Devansh Dhawan,Mumbai,4400,660,823,148,0,4,0,2765
+MakeMyTrip Apr to Jun.pdf,MM31944,mmt,stay,2026-06-18,1,206,Jatin Lamba,Kanpur,3700,519,700,126,0,3,0,2352
+MakeMyTrip Apr to Jun.pdf,MM37040,mmt,cancelled,2026-06-18,1,,Pallavi Chopra,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM80370,mmt,stay,2026-06-18,1,208,Devansh Jain,Meerut,6300,630,1247,224,0,6,0,4193
+MakeMyTrip Apr to Jun.pdf,MM33157,mmt,cancelled,2026-06-19,1,,Divya Mittal,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM53197,mmt,stay,2026-06-19,1,108,Ishita Negi,Chandigarh,4100,450,803,145,0,4,0,2698
+MakeMyTrip Apr to Jun.pdf,MM60460,mmt,cancelled,2026-06-19,1,,Vaibhav Puri,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM82216,mmt,stay,2026-06-19,1,110,Rajat Trivedi,Noida,4100,80,884,159,0,4,0,2973
+MakeMyTrip Apr to Jun.pdf,MM35370,mmt,stay,2026-06-20,2,210,Harsh Saxena,Faridabad,12600,1260,2495,449,0,11,0,8385
+MakeMyTrip Apr to Jun.pdf,MM43283,mmt,stay,2026-06-20,1,204,Ishita Vohra,Bengaluru,3400,720,590,106,0,3,0,1981
+MakeMyTrip Apr to Jun.pdf,MM50455,mmt,stay,2026-06-20,1,109,Shreya Gill,Gurugram,4700,470,931,168,0,4,0,3127
+MakeMyTrip Apr to Jun.pdf,MM59618,mmt,stay,2026-06-20,3,101,Deepak Rawat,Ghaziabad,15000,1362,3000,540,0,14,0,10084
+MakeMyTrip Apr to Jun.pdf,MM97824,mmt,stay,2026-06-20,2,205,Gaurav Sethi,Ludhiana,7000,840,1355,244,0,6,0,4555
+MakeMyTrip Apr to Jun.pdf,MM15552,mmt,stay,2026-06-21,1,109,Amrita Chopra,Ludhiana,4500,454,890,160,0,4,0,2992
+MakeMyTrip Apr to Jun.pdf,MM64230,mmt,stay,2026-06-21,2,106,Chirag Bhandari,Lucknow,9400,5,2067,372,0,9,0,6947
+MakeMyTrip Apr to Jun.pdf,MM70702,mmt,stay,2026-06-21,1,104,Ishita Bhandari,Ludhiana,4700,564,910,164,0,4,0,3058
+MakeMyTrip Apr to Jun.pdf,MM72686,mmt,cancelled,2026-06-21,1,,Akshay Srivastava,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM73755,mmt,cancelled,2026-06-21,1,,Yash Saxena,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM94940,mmt,stay,2026-06-21,1,107,Nidhi Kapoor,Faridabad,4400,482,862,155,0,4,0,2897
+MakeMyTrip Apr to Jun.pdf,MM39235,mmt,cancelled,2026-06-22,2,,Siddharth Lamba,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM95655,mmt,stay,2026-06-22,1,201,Jatin Sethi,Agra,3600,472,688,124,0,3,0,2313
+MakeMyTrip Apr to Jun.pdf,MM97084,mmt,stay,2026-06-22,1,112,Sahil Oberoi,Gurugram,3400,510,636,114,0,3,0,2137
+MakeMyTrip Apr to Jun.pdf,MM33374,mmt,stay,2026-06-23,1,101,Sakshi Tandon,Lucknow,4300,649,803,145,0,4,0,2699
+MakeMyTrip Apr to Jun.pdf,MM88541,mmt,cancelled,2026-06-23,1,,Udit Vohra,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM19370,mmt,stay,2026-06-24,1,105,Kunal Sethi,Mumbai,4200,80,906,163,0,4,0,3047
+MakeMyTrip Apr to Jun.pdf,MM25560,mmt,stay,2026-06-24,1,102,Nidhi Oberoi,Meerut,4500,900,792,143,0,4,0,2661
+MakeMyTrip Apr to Jun.pdf,MM26926,mmt,cancelled,2026-06-24,1,,Rajat Gill,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM52034,mmt,stay,2026-06-24,2,110,Payal Thakur,Ghaziabad,9200,1144,1772,319,0,8,0,5957
+MakeMyTrip Apr to Jun.pdf,MM66102,mmt,stay,2026-06-24,1,206,Sahil Grover,Ludhiana,3700,492,706,127,0,3,0,2372
+MakeMyTrip Apr to Jun.pdf,MM86235,mmt,cancelled,2026-06-24,1,,Parth Srivastava,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM97999,mmt,stay,2026-06-24,1,104,Tarun Ahuja,Jaipur,4500,715,833,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM23247,mmt,stay,2026-06-25,1,106,Abhinav Goel,Ludhiana,4400,527,852,153,0,4,0,2864
+MakeMyTrip Apr to Jun.pdf,MM32049,mmt,stay,2026-06-25,1,206,Kavya Khanna,Delhi,3500,423,677,122,0,3,0,2275
+MakeMyTrip Apr to Jun.pdf,MM45611,mmt,stay,2026-06-25,1,102,Tarun Pandey,Gurugram,4700,604,901,162,0,4,0,3029
+MakeMyTrip Apr to Jun.pdf,MM55576,mmt,stay,2026-06-25,1,108,Parth Dutta,Jaipur,4400,0,968,174,0,4,0,3254
+MakeMyTrip Apr to Jun.pdf,MM96545,mmt,cancelled,2026-06-25,1,,Ankit Dutta,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM17853,mmt,stay,2026-06-26,1,107,Chirag Tiwari,Pune,4300,596,815,147,0,4,0,2738
+MakeMyTrip Apr to Jun.pdf,MM33373,mmt,stay,2026-06-26,2,201,Nidhi Negi,Mumbai,7200,1080,1346,242,0,6,0,4526
+MakeMyTrip Apr to Jun.pdf,MM44720,mmt,stay,2026-06-26,1,202,Gaurav Grover,Faridabad,3600,360,713,128,0,3,0,2396
+MakeMyTrip Apr to Jun.pdf,MM46626,mmt,stay,2026-06-26,1,110,Abhinav Upadhyay,Gurugram,4600,552,891,160,0,4,0,2993
+MakeMyTrip Apr to Jun.pdf,MM57000,mmt,stay,2026-06-26,1,209,Abhinav Kulkarni,Dehradun,6400,1000,1188,214,0,5,0,3993
+MakeMyTrip Apr to Jun.pdf,MM62816,mmt,stay,2026-06-26,1,210,Divya Puri,Dehradun,6200,0,1364,246,0,6,0,4584
+MakeMyTrip Apr to Jun.pdf,MM70473,mmt,stay,2026-06-26,1,105,Kunal Puri,Pune,4300,0,946,170,0,4,0,3180
+MakeMyTrip Apr to Jun.pdf,MM79420,mmt,stay,2026-06-26,1,207,Amrita Khanna,Mumbai,6500,1300,1144,206,0,5,0,3845
+MakeMyTrip Apr to Jun.pdf,MM89671,mmt,stay,2026-06-26,1,103,Arnav Marwah,Lucknow,4400,0,968,174,0,4,0,3254
+MakeMyTrip Apr to Jun.pdf,MM12129,mmt,stay,2026-06-27,1,205,Ritika Chopra,Delhi,3400,340,673,121,0,3,0,2263
+MakeMyTrip Apr to Jun.pdf,MM15257,mmt,stay,2026-06-27,2,209,Kavya Gill,Kolkata,13000,2600,2288,412,0,10,0,7690
+MakeMyTrip Apr to Jun.pdf,MM19376,mmt,stay,2026-06-27,1,111,Kunal Sinha,Lucknow,3600,432,697,125,0,3,0,2343
+MakeMyTrip Apr to Jun.pdf,MM47937,mmt,stay,2026-06-27,1,106,Ankit Srivastava,Delhi,4100,410,812,146,0,4,0,2728
+MakeMyTrip Apr to Jun.pdf,MM62627,mmt,stay,2026-06-27,1,109,Tarun Negi,Mumbai,4600,637,872,157,0,4,0,2930
+MakeMyTrip Apr to Jun.pdf,MM64491,mmt,stay,2026-06-27,1,103,Saurabh Bhatt,Kanpur,4200,630,785,141,0,4,0,2640
+MakeMyTrip Apr to Jun.pdf,MM75719,mmt,stay,2026-06-27,1,208,Sakshi Jain,Noida,6500,1420,1118,201,0,5,0,3756
+MakeMyTrip Apr to Jun.pdf,MM88350,mmt,stay,2026-06-27,2,104,Ritika Kapoor,Faridabad,9200,924,1821,328,0,8,0,6119
+MakeMyTrip Apr to Jun.pdf,MM92256,mmt,stay,2026-06-27,1,107,Gaurav Jain,Pune,4300,516,832,150,0,4,0,2798
+MakeMyTrip Apr to Jun.pdf,MM14238,mmt,cancelled,2026-06-28,1,,Omkar Agarwal,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM29629,mmt,stay,2026-06-28,1,112,Sakshi Grover,Faridabad,3500,565,646,116,0,3,0,2170
+MakeMyTrip Apr to Jun.pdf,MM53088,mmt,stay,2026-06-28,1,202,Akshay Grover,Faridabad,3600,400,704,127,0,3,0,2366
+MakeMyTrip Apr to Jun.pdf,MM58923,mmt,cancelled,2026-06-28,1,,Abhinav Lamba,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM60514,mmt,stay,2026-06-28,1,111,Abhinav Rastogi,Ghaziabad,3600,620,656,118,0,3,0,2203
+MakeMyTrip Apr to Jun.pdf,MM90450,mmt,stay,2026-06-28,1,207,Tarun Sethi,Dehradun,6200,784,1192,215,0,5,0,4004
+MakeMyTrip Apr to Jun.pdf,MM95277,mmt,stay,2026-06-28,1,107,Sakshi Sood,Lucknow,4300,430,851,153,0,4,0,2862
+MakeMyTrip Apr to Jun.pdf,MM98740,mmt,cancelled,2026-06-28,1,,Rajat Sethi,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Apr to Jun.pdf,MM40103,mmt,stay,2026-06-29,1,207,Aparna Puri,Jaipur,6500,40,1421,256,0,6,0,4777
+MakeMyTrip Apr to Jun.pdf,MM61275,mmt,stay,2026-06-29,1,111,Akshay Mathur,Gurugram,3400,377,665,120,0,3,0,2235
+MakeMyTrip Apr to Jun.pdf,MM73929,mmt,stay,2026-06-29,2,105,Ankit Mittal,Bengaluru,8600,1757,1505,271,0,7,0,5060
+MakeMyTrip Apr to Jun.pdf,MM90935,mmt,stay,2026-06-29,1,101,Devansh Kulkarni,Agra,4500,620,854,154,0,4,0,2868
+MakeMyTrip Apr to Jun.pdf,MM60703,mmt,stay,2026-06-30,1,102,Rajat Ahuja,Dehradun,4500,0,990,178,0,5,0,3327
+MakeMyTrip Apr to Jun.pdf,MM63652,mmt,stay,2026-06-30,1,106,Akshay Kapoor,Mumbai,4600,924,809,146,0,4,0,2717
+MakeMyTrip Jul to Sep.pdf,MM15117,mmt,cancelled,2026-07-01,2,,Pallavi Trivedi,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM20584,mmt,cancelled,2026-07-01,1,,Ritika Vohra,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM16853,mmt,cancelled,2026-07-02,1,,Yash Marwah,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM80847,mmt,stay,2026-07-02,1,107,Alok Thakur,Ghaziabad,3800,496,727,131,0,3,0,2443
+MakeMyTrip Jul to Sep.pdf,MM30822,mmt,stay,2026-07-03,1,102,Kavya Bhatt,Ghaziabad,3800,536,718,129,0,3,0,2414
+MakeMyTrip Jul to Sep.pdf,MM48285,mmt,cancelled,2026-07-03,1,,Sakshi Kapoor,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM85257,mmt,stay,2026-07-03,1,101,Parth Bisht,Mumbai,3700,444,716,129,0,3,0,2408
+MakeMyTrip Jul to Sep.pdf,MM87476,mmt,stay,2026-07-03,1,207,Jatin Tandon,Agra,5500,550,1089,196,0,5,0,3660
+MakeMyTrip Jul to Sep.pdf,MM11998,mmt,stay,2026-07-04,1,210,Bhavna Saxena,Ludhiana,5500,1180,950,171,0,4,0,3195
+MakeMyTrip Jul to Sep.pdf,MM32945,mmt,stay,2026-07-04,1,205,Shreya Marwah,Meerut,2900,348,561,101,0,3,0,1887
+MakeMyTrip Jul to Sep.pdf,MM47642,mmt,stay,2026-07-04,1,103,Payal Lamba,Mumbai,3600,0,792,143,0,4,0,2661
+MakeMyTrip Jul to Sep.pdf,MM72423,mmt,cancelled,2026-07-04,1,,Nikhil Vohra,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM85848,mmt,cancelled,2026-07-04,2,,Shreya Pandey,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM87335,mmt,stay,2026-07-04,1,112,Shreya Sinha,Jaipur,2900,0,638,115,0,3,0,2144
+MakeMyTrip Jul to Sep.pdf,MM89078,mmt,stay,2026-07-04,1,102,Aakash Tandon,Faridabad,3900,625,721,130,0,3,0,2421
+MakeMyTrip Jul to Sep.pdf,MM92147,mmt,cancelled,2026-07-04,1,,Ishita Oberoi,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM61977,mmt,stay,2026-07-05,1,112,Vaibhav Oberoi,Ambala,3000,360,581,105,0,3,0,1951
+MakeMyTrip Jul to Sep.pdf,MM13939,mmt,cancelled,2026-07-06,2,,Arnav Kapoor,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM94042,mmt,stay,2026-07-06,1,102,Vaibhav Rastogi,Ambala,3800,456,736,132,0,3,0,2473
+MakeMyTrip Jul to Sep.pdf,MM11354,mmt,stay,2026-07-07,1,208,Harsh Dhawan,Meerut,5400,728,1028,185,0,5,0,3454
+MakeMyTrip Jul to Sep.pdf,MM36745,mmt,cancelled,2026-07-07,1,,Payal Bhandari,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM46650,mmt,cancelled,2026-07-07,2,,Ritika Sinha,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM65910,mmt,cancelled,2026-07-07,1,,Zoya Tandon,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM72949,mmt,cancelled,2026-07-07,1,,Udit Bhatt,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM53797,mmt,cancelled,2026-07-08,1,,Payal Gill,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM96251,mmt,stay,2026-07-08,1,101,Divya Kapoor,Pune,3700,444,716,129,0,3,0,2408
+MakeMyTrip Jul to Sep.pdf,MM19116,mmt,cancelled,2026-07-09,1,,Lavanya Srivastava,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM42987,mmt,cancelled,2026-07-09,1,,Arnav Chopra,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM64823,mmt,stay,2026-07-09,1,208,Aditi Saxena,Agra,5700,40,1245,224,0,6,0,4185
+MakeMyTrip Jul to Sep.pdf,MM22853,mmt,stay,2026-07-10,1,105,Chirag Sinha,Pune,3800,565,712,128,0,3,0,2392
+MakeMyTrip Jul to Sep.pdf,MM33545,mmt,stay,2026-07-10,1,108,Vaibhav Jain,Dehradun,3700,0,814,147,0,4,0,2735
+MakeMyTrip Jul to Sep.pdf,MM63642,mmt,stay,2026-07-10,1,110,Omkar Bisht,Ghaziabad,3900,390,772,139,0,4,0,2595
+MakeMyTrip Jul to Sep.pdf,MM68463,mmt,stay,2026-07-10,1,111,Omkar Grover,Ludhiana,2900,619,502,90,0,2,0,1687
+MakeMyTrip Jul to Sep.pdf,MM76269,mmt,stay,2026-07-10,1,107,Varsha Dutta,Kolkata,3600,480,686,123,0,3,0,2308
+MakeMyTrip Jul to Sep.pdf,MM83023,mmt,cancelled,2026-07-10,1,,Akshay Bhatt,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM87038,mmt,cancelled,2026-07-10,1,,Abhinav Gill,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM94178,mmt,stay,2026-07-10,1,102,Bhavna Upadhyay,Ludhiana,3700,40,805,145,0,4,0,2706
+MakeMyTrip Jul to Sep.pdf,MM15556,mmt,cancelled,2026-07-11,1,,Tarun Vohra,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM36722,mmt,cancelled,2026-07-11,1,,Aparna Saxena,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM43180,mmt,stay,2026-07-11,1,110,Ritika Sethi,Ludhiana,3800,795,661,119,0,3,0,2222
+MakeMyTrip Jul to Sep.pdf,MM48872,mmt,stay,2026-07-11,1,112,Yash Rana,Meerut,2900,620,502,90,0,2,0,1686
+MakeMyTrip Jul to Sep.pdf,MM77466,mmt,stay,2026-07-11,1,108,Alok Sinha,Ambala,3700,440,717,129,0,3,0,2411
+MakeMyTrip Jul to Sep.pdf,MM91166,mmt,stay,2026-07-11,1,101,Abhinav Garg,Lucknow,3700,40,805,145,0,4,0,2706
+MakeMyTrip Jul to Sep.pdf,MM12309,mmt,cancelled,2026-07-12,2,,Udit Srivastava,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM14172,mmt,cancelled,2026-07-12,2,,Aakash Chopra,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM30896,mmt,stay,2026-07-12,1,111,Bhavna Jain,Lucknow,2900,580,510,92,0,2,0,1716
+MakeMyTrip Jul to Sep.pdf,MM40569,mmt,cancelled,2026-07-12,1,,Kavya Rana,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM44001,mmt,cancelled,2026-07-12,1,,Arnav Tandon,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM79732,mmt,stay,2026-07-13,1,106,Sahil Srivastava,Pune,3900,780,686,123,0,3,0,2308
+MakeMyTrip Jul to Sep.pdf,MM90178,mmt,cancelled,2026-07-13,1,,Udit Sood,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM95682,mmt,stay,2026-07-13,1,102,Pallavi Ahuja,Ghaziabad,3800,496,727,131,0,3,0,2443
+MakeMyTrip Jul to Sep.pdf,MM19044,mmt,stay,2026-07-14,1,201,Kavya Goel,Ambala,3000,645,518,93,0,2,0,1742
+MakeMyTrip Jul to Sep.pdf,MM88304,mmt,stay,2026-07-14,1,105,Zoya Jain,Gurugram,3600,433,697,125,0,3,0,2342
+MakeMyTrip Jul to Sep.pdf,MM37978,mmt,stay,2026-07-15,1,106,Akshay Jain,Jaipur,3700,740,651,117,0,3,0,2189
+MakeMyTrip Jul to Sep.pdf,MM39226,mmt,cancelled,2026-07-15,1,,Ritika Negi,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM60528,mmt,cancelled,2026-07-15,1,,Shreya Tiwari,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM94148,mmt,stay,2026-07-15,1,204,Kavya Grover,Jaipur,3100,620,546,98,0,2,0,1834
+MakeMyTrip Jul to Sep.pdf,MM74225,mmt,cancelled,2026-07-16,1,,Devansh Rana,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM83145,mmt,cancelled,2026-07-16,1,,Omkar Tiwari,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM33315,mmt,stay,2026-07-17,2,105,Pallavi Shukla,Ghaziabad,7200,0,1584,285,0,7,0,5324
+MakeMyTrip Jul to Sep.pdf,MM35443,mmt,stay,2026-07-17,1,201,Alok Dutta,Delhi,3000,300,594,107,0,3,0,1996
+MakeMyTrip Jul to Sep.pdf,MM49237,mmt,cancelled,2026-07-17,1,,Tanvi Upadhyay,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM60506,mmt,stay,2026-07-17,1,210,Nidhi Chopra,Noida,5400,540,1069,192,0,5,0,3594
+MakeMyTrip Jul to Sep.pdf,MM72344,mmt,stay,2026-07-17,1,202,Nikhil Grover,Gurugram,3000,0,660,119,0,3,0,2218
+MakeMyTrip Jul to Sep.pdf,MM92130,mmt,stay,2026-07-17,1,103,Tarun Srivastava,Ambala,3700,370,733,132,0,3,0,2462
+MakeMyTrip Jul to Sep.pdf,MM31484,mmt,stay,2026-07-18,1,207,Kunal Mittal,Jaipur,5300,676,1017,183,0,5,0,3419
+MakeMyTrip Jul to Sep.pdf,MM35426,mmt,cancelled,2026-07-18,2,,Lavanya Negi,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM53447,mmt,cancelled,2026-07-18,1,,Bhavna Agarwal,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM75949,mmt,stay,2026-07-18,1,111,Simran Oberoi,Mumbai,3000,40,651,117,0,3,0,2189
+MakeMyTrip Jul to Sep.pdf,MM88622,mmt,stay,2026-07-18,1,110,Manish Sethi,Bengaluru,3800,500,726,131,0,3,0,2440
+MakeMyTrip Jul to Sep.pdf,MM92454,mmt,stay,2026-07-18,1,109,Ishita Bisht,Faridabad,3800,80,818,147,0,4,0,2751
+MakeMyTrip Jul to Sep.pdf,MM95296,mmt,cancelled,2026-07-18,1,,Lavanya Thakur,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM69076,mmt,cancelled,2026-07-19,2,,Anushka Sinha,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM84093,mmt,cancelled,2026-07-19,2,,Zoya Agarwal,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM13043,mmt,cancelled,2026-07-20,1,,Aditi Jain,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM39082,mmt,cancelled,2026-07-20,1,,Siddharth Sinha,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM40780,mmt,cancelled,2026-07-20,1,,Vaibhav Sethi,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM51337,mmt,stay,2026-07-20,1,109,Tanvi Oberoi,Gurugram,3900,468,755,136,0,3,0,2538
+MakeMyTrip Jul to Sep.pdf,MM86895,mmt,stay,2026-07-20,1,206,Payal Vohra,Jaipur,2700,4,593,107,0,3,0,1993
+MakeMyTrip Jul to Sep.pdf,MM91888,mmt,stay,2026-07-20,2,205,Varsha Mittal,Mumbai,5800,736,1114,201,0,5,0,3744
+MakeMyTrip Jul to Sep.pdf,MM25027,mmt,cancelled,2026-07-21,1,,Nikhil Kapoor,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM38469,mmt,cancelled,2026-07-22,2,,Abhinav Wadhwa,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM58821,mmt,cancelled,2026-07-22,1,,Divya Chopra,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM67270,mmt,cancelled,2026-07-22,1,,Ritika Saxena,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM34077,mmt,cancelled,2026-07-23,2,,Yash Wadhwa,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM32216,mmt,cancelled,2026-07-24,1,,Vaibhav Kohli,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM61967,mmt,stay,2026-07-24,1,112,Divya Sethi,Chandigarh,3000,400,572,103,0,3,0,1922
+MakeMyTrip Jul to Sep.pdf,MM78956,mmt,stay,2026-07-24,1,107,Manish Kulkarni,Gurugram,3800,800,660,119,0,3,0,2218
+MakeMyTrip Jul to Sep.pdf,MM82939,mmt,stay,2026-07-24,1,101,Yash Khanna,Kolkata,3600,360,713,128,0,3,0,2396
+MakeMyTrip Jul to Sep.pdf,MM88853,mmt,stay,2026-07-24,1,205,Tanvi Jain,Bengaluru,3100,0,682,123,0,3,0,2292
+MakeMyTrip Jul to Sep.pdf,MM96867,mmt,cancelled,2026-07-24,1,,Shreya Kulkarni,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM97596,mmt,cancelled,2026-07-24,1,,Vaibhav Tiwari,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM11483,mmt,stay,2026-07-25,1,109,Harsh Vohra,Delhi,3600,720,634,114,0,3,0,2129
+MakeMyTrip Jul to Sep.pdf,MM38778,mmt,stay,2026-07-25,1,203,Aparna Sethi,Agra,2800,560,493,89,0,2,0,1656
+MakeMyTrip Jul to Sep.pdf,MM40563,mmt,stay,2026-07-25,1,110,Rajat Upadhyay,Pune,3800,0,836,150,0,4,0,2810
+MakeMyTrip Jul to Sep.pdf,MM75403,mmt,stay,2026-07-25,1,112,Anushka Tandon,Delhi,2800,320,546,98,0,2,0,1834
+MakeMyTrip Jul to Sep.pdf,MM79322,mmt,stay,2026-07-25,1,103,Divya Rana,Ambala,3500,699,616,111,0,3,0,2071
+MakeMyTrip Jul to Sep.pdf,MM87788,mmt,stay,2026-07-25,1,111,Tarun Puri,Bengaluru,2900,331,565,102,0,3,0,1899
+MakeMyTrip Jul to Sep.pdf,MM40193,mmt,cancelled,2026-07-26,2,,Jatin Rana,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM22061,mmt,cancelled,2026-07-27,2,,Nikhil Negi,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM62542,mmt,stay,2026-07-28,1,202,Aparna Bhatt,Noida,3100,0,682,123,0,3,0,2292
+MakeMyTrip Jul to Sep.pdf,MM19099,mmt,cancelled,2026-07-29,1,,Anushka Rastogi,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM91606,mmt,stay,2026-07-29,1,112,Ishita Srivastava,Gurugram,3100,372,600,108,0,3,0,2017
+MakeMyTrip Jul to Sep.pdf,MM65179,mmt,stay,2026-07-30,1,109,Manish Saxena,Noida,3900,585,729,131,0,3,0,2452
+MakeMyTrip Jul to Sep.pdf,MM79306,mmt,stay,2026-07-30,1,110,Chirag Goel,Mumbai,3700,555,692,125,0,3,0,2325
+MakeMyTrip Jul to Sep.pdf,MM95838,mmt,stay,2026-07-30,1,204,Tarun Rana,Agra,2800,420,524,94,0,2,0,1760
+MakeMyTrip Jul to Sep.pdf,MM10942,mmt,stay,2026-07-31,1,201,Kunal Upadhyay,Delhi,3000,360,581,105,0,3,0,1951
+MakeMyTrip Jul to Sep.pdf,MM26398,mmt,stay,2026-07-31,1,209,Varsha Rana,Mumbai,5500,829,1028,185,0,5,0,3453
+MakeMyTrip Jul to Sep.pdf,MM32384,mmt,stay,2026-08-01,1,106,Nidhi Ahuja,Faridabad,3900,468,755,136,0,3,0,2538
+MakeMyTrip Jul to Sep.pdf,MM40232,mmt,cancelled,2026-08-01,1,,Siddharth Bhatt,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM41643,mmt,stay,2026-08-01,1,204,Manish Agarwal,Gurugram,2900,330,565,102,0,3,0,1900
+MakeMyTrip Jul to Sep.pdf,MM77811,mmt,stay,2026-08-01,1,104,Vaibhav Bhatt,Ambala,3700,370,733,132,0,3,0,2462
+MakeMyTrip Jul to Sep.pdf,MM17685,mmt,stay,2026-08-02,1,107,Jatin Marwah,Ambala,3800,496,727,131,0,3,0,2443
+MakeMyTrip Jul to Sep.pdf,MM36368,mmt,stay,2026-08-02,1,203,Ankit Saxena,Noida,2900,388,553,100,0,3,0,1856
+MakeMyTrip Jul to Sep.pdf,MM87974,mmt,stay,2026-08-02,1,112,Sakshi Mathur,Gurugram,2700,329,522,94,0,2,0,1753
+MakeMyTrip Jul to Sep.pdf,MM21981,mmt,stay,2026-08-03,1,206,Manish Oberoi,Mumbai,2700,324,523,94,0,2,0,1757
+MakeMyTrip Jul to Sep.pdf,MM25517,mmt,stay,2026-08-03,1,107,Akshay Sethi,Jaipur,3800,456,736,132,0,3,0,2473
+MakeMyTrip Jul to Sep.pdf,MM72409,mmt,cancelled,2026-08-03,2,,Kunal Rana,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM76769,mmt,stay,2026-08-03,1,112,Shreya Ahuja,Jaipur,3000,400,572,103,0,3,0,1922
+MakeMyTrip Jul to Sep.pdf,MM12060,mmt,cancelled,2026-08-05,1,,Zoya Wadhwa,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM21681,mmt,stay,2026-08-05,1,111,Udit Kulkarni,Agra,2900,353,560,101,0,3,0,1883
+MakeMyTrip Jul to Sep.pdf,MM64731,mmt,cancelled,2026-08-05,2,,Anushka Tiwari,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM30427,mmt,stay,2026-08-06,1,105,Payal Shukla,Agra,3700,484,708,127,0,3,0,2378
+MakeMyTrip Jul to Sep.pdf,MM70877,mmt,cancelled,2026-08-06,1,,Ishita Dutta,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM77356,mmt,stay,2026-08-06,1,111,Bhavna Oberoi,Chandigarh,2900,40,629,113,0,3,0,2115
+MakeMyTrip Jul to Sep.pdf,MM70575,mmt,stay,2026-08-07,1,107,Devansh Rastogi,Ludhiana,3900,508,746,134,0,3,0,2509
+MakeMyTrip Jul to Sep.pdf,MM71094,mmt,stay,2026-08-07,1,108,Sakshi Khanna,Gurugram,3900,508,746,134,0,3,0,2509
+MakeMyTrip Jul to Sep.pdf,MM89902,mmt,stay,2026-08-07,1,101,Nidhi Bhandari,Jaipur,3600,535,674,121,0,3,0,2267
+MakeMyTrip Jul to Sep.pdf,MM19179,mmt,cancelled,2026-08-08,1,,Nidhi Shukla,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM68880,mmt,stay,2026-08-08,1,112,Arnav Puri,Ghaziabad,3000,0,660,119,0,3,0,2218
+MakeMyTrip Jul to Sep.pdf,MM72215,mmt,stay,2026-08-08,1,103,Tanvi Sethi,Dehradun,3600,511,680,122,0,3,0,2284
+MakeMyTrip Jul to Sep.pdf,MM93094,mmt,stay,2026-08-08,1,205,Udit Saxena,Pune,2800,336,542,98,0,2,0,1822
+MakeMyTrip Jul to Sep.pdf,MM11964,mmt,cancelled,2026-08-09,2,,Siddharth Marwah,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM63959,mmt,cancelled,2026-08-09,1,,Divya Bisht,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM66960,mmt,cancelled,2026-08-09,1,,Simran Rastogi,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM72924,mmt,cancelled,2026-08-09,1,,Akshay Upadhyay,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM97718,mmt,stay,2026-08-09,2,208,Omkar Negi,Kanpur,11400,1368,2207,397,0,10,0,7418
+MakeMyTrip Jul to Sep.pdf,MM99025,mmt,stay,2026-08-09,1,101,Zoya Trivedi,Lucknow,3900,625,721,130,0,3,0,2421
+MakeMyTrip Jul to Sep.pdf,MM11206,mmt,cancelled,2026-08-10,2,,Zoya Goel,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM58146,mmt,cancelled,2026-08-10,2,,Shreya Khanna,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM25348,mmt,stay,2026-08-11,1,104,Siddharth Rastogi,Kanpur,3600,720,634,114,0,3,0,2129
+MakeMyTrip Jul to Sep.pdf,MM39106,mmt,cancelled,2026-08-11,2,,Aakash Thakur,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM45228,mmt,cancelled,2026-08-12,1,,Omkar Upadhyay,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM31212,mmt,cancelled,2026-08-13,2,,Simran Saxena,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM63742,mmt,cancelled,2026-08-13,2,,Omkar Bhandari,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM87504,mmt,cancelled,2026-08-13,1,,Kunal Bisht,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM25281,mmt,stay,2026-08-14,1,105,Tanvi Kohli,Meerut,3500,76,753,136,0,3,0,2532
+MakeMyTrip Jul to Sep.pdf,MM43586,mmt,cancelled,2026-08-14,1,,Nikhil Goel,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM57778,mmt,stay,2026-08-14,1,108,Gaurav Gill,Ambala,3800,565,712,128,0,3,0,2392
+MakeMyTrip Jul to Sep.pdf,MM75085,mmt,stay,2026-08-14,1,104,Zoya Upadhyay,Ludhiana,3700,484,708,127,0,3,0,2378
+MakeMyTrip Jul to Sep.pdf,MM27050,mmt,stay,2026-08-15,1,106,Lavanya Trivedi,Dehradun,3600,80,774,139,0,4,0,2603
+MakeMyTrip Jul to Sep.pdf,MM28004,mmt,stay,2026-08-15,1,109,Siddharth Oberoi,Faridabad,3700,740,651,117,0,3,0,2189
+MakeMyTrip Jul to Sep.pdf,MM38919,mmt,cancelled,2026-08-15,2,,Kunal Sood,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM44728,mmt,stay,2026-08-15,1,101,Siddharth Dhawan,Gurugram,3600,79,775,140,0,4,0,2602
+MakeMyTrip Jul to Sep.pdf,MM76678,mmt,stay,2026-08-15,1,102,Sahil Mittal,Pune,3600,720,634,114,0,3,0,2129
+MakeMyTrip Jul to Sep.pdf,MM82183,mmt,cancelled,2026-08-15,1,,Shreya Negi,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM21578,mmt,cancelled,2026-08-17,2,,Jatin Agarwal,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM36108,mmt,cancelled,2026-08-17,1,,Jatin Dhawan,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM46187,mmt,cancelled,2026-08-17,1,,Saurabh Sethi,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM17536,mmt,cancelled,2026-08-18,1,,Chirag Saxena,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM21267,mmt,cancelled,2026-08-18,1,,Sahil Sinha,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM49864,mmt,cancelled,2026-08-19,2,,Arnav Sethi,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM67733,mmt,cancelled,2026-08-19,1,,Anushka Mittal,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM48270,mmt,cancelled,2026-08-20,1,,Tarun Agarwal,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM73075,mmt,cancelled,2026-08-20,2,,Devansh Kohli,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM31990,mmt,stay,2026-08-21,1,206,Amrita Sood,Ghaziabad,2900,40,629,113,0,3,0,2115
+MakeMyTrip Jul to Sep.pdf,MM34810,mmt,stay,2026-08-21,1,112,Akshay Saxena,Ludhiana,3000,360,581,105,0,3,0,1951
+MakeMyTrip Jul to Sep.pdf,MM36736,mmt,stay,2026-08-21,1,107,Yash Garg,Bengaluru,3500,740,607,109,0,3,0,2041
+MakeMyTrip Jul to Sep.pdf,MM51577,mmt,stay,2026-08-21,1,209,Arnav Grover,Gurugram,5500,865,1020,184,0,5,0,3426
+MakeMyTrip Jul to Sep.pdf,MM55607,mmt,cancelled,2026-08-21,1,,Amrita Mittal,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM76622,mmt,cancelled,2026-08-21,2,,Udit Jain,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM97590,mmt,stay,2026-08-21,1,102,Ashish Sinha,Mumbai,3700,444,716,129,0,3,0,2408
+MakeMyTrip Jul to Sep.pdf,MM26729,mmt,cancelled,2026-08-22,1,,Aditi Upadhyay,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM42387,mmt,stay,2026-08-22,1,106,Varsha Garg,Delhi,3700,410,724,130,0,3,0,2433
+MakeMyTrip Jul to Sep.pdf,MM53660,mmt,stay,2026-08-22,1,204,Sakshi Garg,Chandigarh,2900,0,638,115,0,3,0,2144
+MakeMyTrip Jul to Sep.pdf,MM75088,mmt,stay,2026-08-22,1,107,Amrita Srivastava,Lucknow,3800,570,711,128,0,3,0,2388
+MakeMyTrip Jul to Sep.pdf,MM75864,mmt,stay,2026-08-22,1,103,Varsha Srivastava,Meerut,3900,625,721,130,0,3,0,2421
+MakeMyTrip Jul to Sep.pdf,MM83240,mmt,stay,2026-08-22,1,206,Ashish Srivastava,Kolkata,3000,360,581,105,0,3,0,1951
+MakeMyTrip Jul to Sep.pdf,MM11815,mmt,cancelled,2026-08-23,1,,Udit Wadhwa,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM13634,mmt,cancelled,2026-08-23,2,,Ritika Mathur,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM30416,mmt,cancelled,2026-08-23,1,,Harsh Sethi,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM59978,mmt,stay,2026-08-23,1,205,Udit Agarwal,Kolkata,2900,424,545,98,0,2,0,1831
+MakeMyTrip Jul to Sep.pdf,MM13146,mmt,cancelled,2026-08-24,1,,Udit Bisht,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM95214,mmt,stay,2026-08-24,1,110,Kavya Thakur,Pune,3600,795,617,111,0,3,0,2074
+MakeMyTrip Jul to Sep.pdf,MM33035,mmt,stay,2026-08-25,1,104,Mansi Sethi,Gurugram,3600,360,713,128,0,3,0,2396
+MakeMyTrip Jul to Sep.pdf,MM63063,mmt,cancelled,2026-08-25,2,,Bhavna Wadhwa,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM25283,mmt,stay,2026-08-26,2,111,Mansi Kohli,Agra,6200,619,1228,221,0,6,0,4126
+MakeMyTrip Jul to Sep.pdf,MM33237,mmt,cancelled,2026-08-26,2,,Mansi Oberoi,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM63396,mmt,stay,2026-08-26,1,201,Pallavi Tandon,Jaipur,2900,290,574,103,0,3,0,1930
+MakeMyTrip Jul to Sep.pdf,MM49287,mmt,stay,2026-08-27,1,202,Jatin Tiwari,Bengaluru,3000,450,561,101,0,3,0,1885
+MakeMyTrip Jul to Sep.pdf,MM71956,mmt,cancelled,2026-08-27,1,,Siddharth Goel,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM76010,mmt,cancelled,2026-08-27,1,,Ashish Dutta,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM95850,mmt,cancelled,2026-08-27,1,,Tarun Sinha,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM33594,mmt,cancelled,2026-08-28,1,,Simran Marwah,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM71015,mmt,stay,2026-08-28,1,210,Nikhil Mittal,Chandigarh,5100,805,945,170,0,4,0,3176
+MakeMyTrip Jul to Sep.pdf,MM72407,mmt,cancelled,2026-08-28,2,,Nidhi Goel,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM77184,mmt,stay,2026-08-28,1,106,Ankit Agarwal,Chandigarh,3900,780,686,123,0,3,0,2308
+MakeMyTrip Jul to Sep.pdf,MM94697,mmt,stay,2026-08-28,1,104,Saurabh Mathur,Lucknow,3700,524,699,126,0,3,0,2348
+MakeMyTrip Jul to Sep.pdf,MM14689,mmt,stay,2026-08-29,1,112,Vaibhav Goel,Ambala,2700,310,526,95,0,2,0,1767
+MakeMyTrip Jul to Sep.pdf,MM25161,mmt,cancelled,2026-08-29,1,,Simran Puri,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM26472,mmt,stay,2026-08-29,1,206,Kunal Tandon,Meerut,2800,562,492,89,0,2,0,1655
+MakeMyTrip Jul to Sep.pdf,MM35554,mmt,stay,2026-08-29,1,110,Jatin Goel,Chandigarh,3900,470,755,136,0,3,0,2536
+MakeMyTrip Jul to Sep.pdf,MM45633,mmt,stay,2026-08-29,1,111,Harsh Oberoi,Delhi,2800,420,524,94,0,2,0,1760
+MakeMyTrip Jul to Sep.pdf,MM56201,mmt,stay,2026-08-29,1,209,Tarun Sood,Noida,5300,636,1026,185,0,5,0,3448
+MakeMyTrip Jul to Sep.pdf,MM57893,mmt,stay,2026-08-29,1,210,Aparna Khanna,Ghaziabad,5500,36,1202,216,0,5,0,4041
+MakeMyTrip Jul to Sep.pdf,MM68790,mmt,stay,2026-08-29,1,207,Udit Grover,Kolkata,5300,636,1026,185,0,5,0,3448
+MakeMyTrip Jul to Sep.pdf,MM84615,mmt,cancelled,2026-08-29,1,,Aakash Rana,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM96253,mmt,stay,2026-08-29,1,203,Anushka Garg,Kolkata,2900,348,561,101,0,3,0,1887
+MakeMyTrip Jul to Sep.pdf,MM88395,mmt,stay,2026-08-30,1,201,Aakash Dutta,Ambala,2800,460,515,93,0,2,0,1730
+MakeMyTrip Jul to Sep.pdf,MM90253,mmt,cancelled,2026-09-01,2,,Amrita Mathur,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM94896,mmt,stay,2026-09-01,1,106,Jatin Saxena,Kanpur,4000,480,774,139,0,4,0,2603
+MakeMyTrip Jul to Sep.pdf,MM24922,mmt,cancelled,2026-09-02,1,,Aparna Ahuja,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM45831,mmt,stay,2026-09-02,1,110,Bhavna Sood,Noida,4000,685,729,131,0,3,0,2452
+MakeMyTrip Jul to Sep.pdf,MM64134,mmt,cancelled,2026-09-02,1,,Simran Kulkarni,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM72750,mmt,stay,2026-09-02,1,108,Varsha Grover,Gurugram,4000,440,783,141,0,4,0,2632
+MakeMyTrip Jul to Sep.pdf,MM87123,mmt,stay,2026-09-02,1,105,Aditi Sethi,Faridabad,4200,40,915,165,0,4,0,3076
+MakeMyTrip Jul to Sep.pdf,MM94528,mmt,cancelled,2026-09-02,1,,Kavya Kulkarni,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM95138,mmt,cancelled,2026-09-02,2,,Lavanya Rastogi,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM96404,mmt,cancelled,2026-09-02,2,,Saurabh Sinha,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM16777,mmt,cancelled,2026-09-03,2,,Vaibhav Mittal,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM18678,mmt,cancelled,2026-09-03,2,,Arnav Ahuja,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM59512,mmt,cancelled,2026-09-03,1,,Omkar Oberoi,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM63611,mmt,stay,2026-09-03,1,106,Anushka Saxena,Kanpur,4100,494,793,143,0,4,0,2666
+MakeMyTrip Jul to Sep.pdf,MM76694,mmt,cancelled,2026-09-03,1,,Vaibhav Chopra,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM77464,mmt,cancelled,2026-09-03,1,,Manish Jain,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM79552,mmt,cancelled,2026-09-03,2,,Udit Garg,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM11469,mmt,stay,2026-09-04,1,210,Mansi Garg,Mumbai,6200,784,1192,215,0,5,0,4004
+MakeMyTrip Jul to Sep.pdf,MM15498,mmt,cancelled,2026-09-04,1,,Lavanya Sethi,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM19860,mmt,stay,2026-09-04,1,207,Vaibhav Agarwal,Chandigarh,5900,626,1160,209,0,5,0,3900
+MakeMyTrip Jul to Sep.pdf,MM27930,mmt,stay,2026-09-04,1,205,Manish Pandey,Delhi,3300,396,639,115,0,3,0,2147
+MakeMyTrip Jul to Sep.pdf,MM38219,mmt,stay,2026-09-04,1,109,Ishita Rana,Ghaziabad,4000,600,748,135,0,3,0,2514
+MakeMyTrip Jul to Sep.pdf,MM40801,mmt,stay,2026-09-04,1,202,Rajat Lamba,Ludhiana,3000,300,594,107,0,3,0,1996
+MakeMyTrip Jul to Sep.pdf,MM57373,mmt,cancelled,2026-09-04,2,,Arnav Upadhyay,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM67512,mmt,cancelled,2026-09-04,1,,Sakshi Puri,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM80294,mmt,stay,2026-09-04,1,208,Harsh Bisht,Ludhiana,6400,40,1399,252,0,6,0,4703
+MakeMyTrip Jul to Sep.pdf,MM85430,mmt,cancelled,2026-09-04,2,,Tanvi Chopra,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM14793,mmt,stay,2026-09-05,1,103,Parth Saxena,Ambala,4100,615,767,138,0,3,0,2577
+MakeMyTrip Jul to Sep.pdf,MM21520,mmt,cancelled,2026-09-05,1,,Shreya Saxena,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM25886,mmt,stay,2026-09-05,1,109,Amrita Vohra,Meerut,4100,820,722,130,0,3,0,2425
+MakeMyTrip Jul to Sep.pdf,MM29701,mmt,stay,2026-09-05,1,108,Ishita Tiwari,Jaipur,4100,40,893,161,0,4,0,3002
+MakeMyTrip Jul to Sep.pdf,MM37020,mmt,stay,2026-09-05,1,104,Rajat Saxena,Delhi,4300,860,757,136,0,3,0,2544
+MakeMyTrip Jul to Sep.pdf,MM40275,mmt,stay,2026-09-05,1,112,Manish Shukla,Gurugram,3300,700,572,103,0,3,0,1922
+MakeMyTrip Jul to Sep.pdf,MM84376,mmt,stay,2026-09-05,1,210,Aparna Shukla,Delhi,5900,1181,1038,187,0,5,0,3489
+MakeMyTrip Jul to Sep.pdf,MM86395,mmt,stay,2026-09-05,1,105,Tarun Kulkarni,Kolkata,4100,660,757,136,0,3,0,2544
+MakeMyTrip Jul to Sep.pdf,MM92347,mmt,cancelled,2026-09-05,2,,Kunal Chopra,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM95415,mmt,stay,2026-09-05,1,101,Ankit Tandon,Gurugram,4300,0,946,170,0,4,0,3180
+MakeMyTrip Jul to Sep.pdf,MM98490,mmt,stay,2026-09-05,1,107,Kavya Vohra,Ambala,4100,532,785,141,0,4,0,2638
+MakeMyTrip Jul to Sep.pdf,MM24455,mmt,stay,2026-09-06,1,111,Siddharth Kulkarni,Lucknow,3200,384,620,112,0,3,0,2081
+MakeMyTrip Jul to Sep.pdf,MM54398,mmt,stay,2026-09-06,1,203,Aakash Oberoi,Gurugram,3200,422,611,110,0,3,0,2054
+MakeMyTrip Jul to Sep.pdf,MM56947,mmt,cancelled,2026-09-06,2,,Chirag Marwah,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM95032,mmt,cancelled,2026-09-06,1,,Aditi Bhatt,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM99962,mmt,cancelled,2026-09-06,2,,Bhavna Thakur,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM22152,mmt,cancelled,2026-09-07,1,,Nikhil Gill,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM65242,mmt,cancelled,2026-09-07,1,,Jatin Mathur,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM67109,mmt,cancelled,2026-09-07,1,,Ankit Wadhwa,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM10031,mmt,stay,2026-09-08,1,110,Harsh Puri,Agra,4300,860,757,136,0,3,0,2544
+MakeMyTrip Jul to Sep.pdf,MM76431,mmt,cancelled,2026-09-08,1,,Vaibhav Mathur,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM92968,mmt,cancelled,2026-09-08,1,,Amrita Pandey,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM67975,mmt,cancelled,2026-09-09,2,,Aakash Wadhwa,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM90551,mmt,stay,2026-09-09,1,107,Pallavi Negi,Gurugram,4300,470,843,152,0,4,0,2831
+MakeMyTrip Jul to Sep.pdf,MM13627,mmt,cancelled,2026-09-10,2,,Manish Sood,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM36449,mmt,stay,2026-09-10,1,108,Varsha Bhandari,Chandigarh,4000,400,792,143,0,4,0,2661
+MakeMyTrip Jul to Sep.pdf,MM46984,mmt,cancelled,2026-09-10,1,,Gaurav Agarwal,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM65674,mmt,cancelled,2026-09-10,1,,Divya Tiwari,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM65941,mmt,cancelled,2026-09-10,2,,Jatin Kapoor,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM74706,mmt,stay,2026-09-10,1,106,Rajat Marwah,Lucknow,4300,725,787,142,0,4,0,2642
+MakeMyTrip Jul to Sep.pdf,MM80440,mmt,cancelled,2026-09-10,1,,Gaurav Bhatt,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM96250,mmt,cancelled,2026-09-10,2,,Gaurav Kulkarni,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM43096,mmt,stay,2026-09-11,1,110,Gaurav Rana,Chandigarh,4100,655,758,136,0,3,0,2548
+MakeMyTrip Jul to Sep.pdf,MM47264,mmt,cancelled,2026-09-11,1,,Yash Kapoor,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM60284,mmt,cancelled,2026-09-11,1,,Alok Agarwal,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM82155,mmt,cancelled,2026-09-11,1,,Saurabh Kapoor,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM98164,mmt,stay,2026-09-11,1,206,Divya Thakur,Pune,3200,422,611,110,0,3,0,2054
+MakeMyTrip Jul to Sep.pdf,MM14858,mmt,stay,2026-09-12,1,102,Aakash Upadhyay,Delhi,4200,3,923,166,0,4,0,3104
+MakeMyTrip Jul to Sep.pdf,MM36395,mmt,cancelled,2026-09-12,1,,Varsha Lamba,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM48188,mmt,stay,2026-09-12,1,208,Parth Ahuja,Agra,6000,760,1153,208,0,5,0,3874
+MakeMyTrip Jul to Sep.pdf,MM80070,mmt,stay,2026-09-12,1,109,Amrita Thakur,Ludhiana,4000,600,748,135,0,3,0,2514
+MakeMyTrip Jul to Sep.pdf,MM84364,mmt,stay,2026-09-12,1,205,Akshay Wadhwa,Mumbai,3100,465,580,104,0,3,0,1948
+MakeMyTrip Jul to Sep.pdf,MM26180,mmt,stay,2026-09-13,1,206,Shreya Rastogi,Meerut,3300,660,581,105,0,3,0,1951
+MakeMyTrip Jul to Sep.pdf,MM34315,mmt,cancelled,2026-09-13,2,,Chirag Kapoor,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM34419,mmt,stay,2026-09-13,1,208,Devansh Bhatt,Gurugram,6100,40,1333,240,0,6,0,4481
+MakeMyTrip Jul to Sep.pdf,MM34954,mmt,stay,2026-09-13,2,109,Parth Vohra,Ghaziabad,8800,1056,1704,307,0,8,0,5725
+MakeMyTrip Jul to Sep.pdf,MM47030,mmt,cancelled,2026-09-13,1,,Shreya Agarwal,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM55270,mmt,cancelled,2026-09-13,1,,Gaurav Saxena,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM60956,mmt,stay,2026-09-13,1,102,Sakshi Oberoi,Kolkata,4000,80,862,155,0,4,0,2899
+MakeMyTrip Jul to Sep.pdf,MM67213,mmt,stay,2026-09-13,1,111,Bhavna Kohli,Agra,3400,448,649,117,0,3,0,2183
+MakeMyTrip Jul to Sep.pdf,MM86859,mmt,stay,2026-09-13,1,204,Ritika Mittal,Kolkata,3300,495,617,111,0,3,0,2074
+MakeMyTrip Jul to Sep.pdf,MM92202,mmt,cancelled,2026-09-13,1,,Mansi Ahuja,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM24403,mmt,stay,2026-09-14,1,204,Divya Gill,Chandigarh,3300,780,554,100,0,3,0,1863
+MakeMyTrip Jul to Sep.pdf,MM43949,mmt,cancelled,2026-09-14,2,,Arnav Tiwari,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM53719,mmt,cancelled,2026-09-14,1,,Zoya Thakur,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM70890,mmt,stay,2026-09-14,1,207,Zoya Khanna,Jaipur,5800,1160,1021,184,0,5,0,3430
+MakeMyTrip Jul to Sep.pdf,MM79792,mmt,stay,2026-09-14,1,104,Divya Dutta,Agra,4300,516,832,150,0,4,0,2798
+MakeMyTrip Jul to Sep.pdf,MM83128,mmt,cancelled,2026-09-14,1,,Aakash Bhatt,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM93946,mmt,stay,2026-09-14,1,107,Aparna Tiwari,Kanpur,4000,40,871,157,0,4,0,2928
+MakeMyTrip Jul to Sep.pdf,MM95651,mmt,cancelled,2026-09-14,1,,Ishita Shukla,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM26057,mmt,stay,2026-09-15,1,207,Ashish Wadhwa,Ludhiana,6000,760,1153,208,0,5,0,3874
+MakeMyTrip Jul to Sep.pdf,MM37495,mmt,cancelled,2026-09-15,1,,Aditi Bisht,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM38606,mmt,cancelled,2026-09-15,2,,Gaurav Oberoi,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM53402,mmt,cancelled,2026-09-15,1,,Lavanya Dutta,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM31623,mmt,stay,2026-09-16,1,208,Ashish Grover,Bengaluru,5700,855,1066,192,0,5,0,3582
+MakeMyTrip Jul to Sep.pdf,MM53186,mmt,cancelled,2026-09-16,2,,Pallavi Pandey,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM89445,mmt,stay,2026-09-16,1,111,Payal Bisht,Bengaluru,3200,40,695,125,0,3,0,2337
+MakeMyTrip Jul to Sep.pdf,MM10033,mmt,stay,2026-09-17,1,105,Parth Goel,Agra,4200,585,795,143,0,4,0,2673
+MakeMyTrip Jul to Sep.pdf,MM15269,mmt,cancelled,2026-09-17,1,,Nikhil Marwah,Kolkata,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM16787,mmt,stay,2026-09-17,1,207,Kunal Negi,Faridabad,6200,744,1200,216,0,5,0,4035
+MakeMyTrip Jul to Sep.pdf,MM58100,mmt,cancelled,2026-09-17,2,,Lavanya Garg,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM64475,mmt,stay,2026-09-17,1,201,Alok Gill,Noida,3400,410,658,118,0,3,0,2211
+MakeMyTrip Jul to Sep.pdf,MM75491,mmt,stay,2026-09-17,1,206,Abhinav Saxena,Pune,3400,680,598,108,0,3,0,2011
+MakeMyTrip Jul to Sep.pdf,MM93813,mmt,stay,2026-09-17,1,210,Devansh Negi,Mumbai,6100,734,1181,213,0,5,0,3967
+MakeMyTrip Jul to Sep.pdf,MM10904,mmt,stay,2026-09-18,1,110,Nikhil Ahuja,Agra,4200,504,813,146,0,4,0,2733
+MakeMyTrip Jul to Sep.pdf,MM21063,mmt,stay,2026-09-18,1,202,Varsha Upadhyay,Delhi,3200,384,620,112,0,3,0,2081
+MakeMyTrip Jul to Sep.pdf,MM32472,mmt,stay,2026-09-18,1,103,Rajat Puri,Faridabad,4100,655,758,136,0,3,0,2548
+MakeMyTrip Jul to Sep.pdf,MM37800,mmt,cancelled,2026-09-18,2,,Abhinav Trivedi,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM42492,mmt,stay,2026-09-18,1,109,Nidhi Sethi,Meerut,4200,420,832,150,0,4,0,2794
+MakeMyTrip Jul to Sep.pdf,MM44111,mmt,stay,2026-09-18,1,101,Anushka Agarwal,Bengaluru,4200,78,907,163,0,4,0,3048
+MakeMyTrip Jul to Sep.pdf,MM52583,mmt,cancelled,2026-09-18,1,,Tarun Bhandari,Faridabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM54882,mmt,cancelled,2026-09-18,1,,Sahil Goel,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM67154,mmt,stay,2026-09-18,1,209,Jatin Gill,Bengaluru,5800,0,1276,230,0,6,0,4288
+MakeMyTrip Jul to Sep.pdf,MM79208,mmt,stay,2026-09-18,1,207,Sahil Rana,Delhi,5800,1160,1021,184,0,5,0,3430
+MakeMyTrip Jul to Sep.pdf,MM85970,mmt,stay,2026-09-18,1,112,Anushka Pandey,Gurugram,3100,310,614,111,0,3,0,2062
+MakeMyTrip Jul to Sep.pdf,MM92055,mmt,stay,2026-09-18,1,206,Ishita Sethi,Ghaziabad,3400,408,658,118,0,3,0,2213
+MakeMyTrip Jul to Sep.pdf,MM10301,mmt,stay,2026-09-19,1,201,Payal Wadhwa,Agra,3200,424,611,110,0,3,0,2052
+MakeMyTrip Jul to Sep.pdf,MM22381,mmt,stay,2026-09-19,1,112,Manish Mittal,Delhi,3100,465,580,104,0,3,0,1948
+MakeMyTrip Jul to Sep.pdf,MM29329,mmt,stay,2026-09-19,1,111,Jatin Sinha,Mumbai,3400,448,649,117,0,3,0,2183
+MakeMyTrip Jul to Sep.pdf,MM30678,mmt,stay,2026-09-19,1,108,Sakshi Wadhwa,Faridabad,4100,492,794,143,0,4,0,2667
+MakeMyTrip Jul to Sep.pdf,MM30754,mmt,stay,2026-09-19,1,205,Ankit Vohra,Kolkata,3300,660,581,105,0,3,0,1951
+MakeMyTrip Jul to Sep.pdf,MM41197,mmt,stay,2026-09-19,1,204,Payal Goel,Ambala,3200,0,704,127,0,3,0,2366
+MakeMyTrip Jul to Sep.pdf,MM47364,mmt,cancelled,2026-09-19,1,,Aparna Kapoor,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM49937,mmt,cancelled,2026-09-19,1,,Chirag Vohra,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM53166,mmt,stay,2026-09-19,1,206,Gaurav Ahuja,Mumbai,3300,40,717,129,0,3,0,2411
+MakeMyTrip Jul to Sep.pdf,MM56526,mmt,stay,2026-09-19,1,101,Nikhil Chopra,Pune,4300,517,832,150,0,4,0,2797
+MakeMyTrip Jul to Sep.pdf,MM60031,mmt,stay,2026-09-19,1,105,Nikhil Lamba,Faridabad,4200,840,739,133,0,3,0,2485
+MakeMyTrip Jul to Sep.pdf,MM60146,mmt,stay,2026-09-19,1,109,Kavya Sood,Ghaziabad,4200,840,739,133,0,3,0,2485
+MakeMyTrip Jul to Sep.pdf,MM61780,mmt,stay,2026-09-19,1,104,Lavanya Shukla,Pune,4200,840,739,133,0,3,0,2485
+MakeMyTrip Jul to Sep.pdf,MM72371,mmt,stay,2026-09-19,2,110,Udit Thakur,Gurugram,8000,1000,1540,277,0,7,0,5176
+MakeMyTrip Jul to Sep.pdf,MM73990,mmt,cancelled,2026-09-19,1,,Gaurav Chopra,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM92692,mmt,stay,2026-09-19,1,102,Payal Negi,Ambala,4300,725,787,142,0,4,0,2642
+MakeMyTrip Jul to Sep.pdf,MM99327,mmt,stay,2026-09-19,1,209,Gaurav Upadhyay,Kolkata,5600,672,1084,195,0,5,0,3644
+MakeMyTrip Jul to Sep.pdf,MM14382,mmt,cancelled,2026-09-20,1,,Ankit Garg,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM21817,mmt,cancelled,2026-09-20,2,,Siddharth Puri,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM36498,mmt,cancelled,2026-09-20,2,,Varsha Gill,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM49129,mmt,stay,2026-09-20,3,106,Karan Malhotra,Delhi,12000,980,2424,436,0,11,0,8149
+MakeMyTrip Jul to Sep.pdf,MM59460,mmt,cancelled,2026-09-20,1,,Akshay Kulkarni,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM70489,mmt,cancelled,2026-09-20,1,,Saurabh Saxena,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM77581,mmt,stay,2026-09-20,1,103,Payal Sinha,Pune,4300,556,824,148,0,4,0,2768
+MakeMyTrip Jul to Sep.pdf,MM15994,mmt,cancelled,2026-09-21,2,,Anushka Kohli,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM71077,mmt,cancelled,2026-09-21,1,,Kunal Trivedi,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM73545,mmt,stay,2026-09-21,1,109,Pallavi Garg,Ghaziabad,4300,430,851,153,0,4,0,2862
+MakeMyTrip Jul to Sep.pdf,MM89481,mmt,stay,2026-09-21,1,203,Tarun Dhawan,Ambala,3200,600,572,103,0,3,0,1922
+MakeMyTrip Jul to Sep.pdf,MM14587,mmt,stay,2026-09-22,1,208,Chirag Bisht,Chandigarh,5800,950,1067,192,0,5,0,3586
+MakeMyTrip Jul to Sep.pdf,MM41559,mmt,cancelled,2026-09-22,1,,Alok Wadhwa,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM51644,mmt,cancelled,2026-09-22,1,,Kavya Puri,Ludhiana,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM80304,mmt,stay,2026-09-22,1,210,Vaibhav Marwah,Lucknow,6000,760,1153,208,0,5,0,3874
+MakeMyTrip Jul to Sep.pdf,MM96748,mmt,stay,2026-09-22,1,209,Sahil Tiwari,Kanpur,5800,1240,1003,181,0,5,0,3371
+MakeMyTrip Jul to Sep.pdf,MM18647,mmt,stay,2026-09-23,1,105,Vaibhav Negi,Ambala,4100,820,722,130,0,3,0,2425
+MakeMyTrip Jul to Sep.pdf,MM35897,mmt,cancelled,2026-09-23,2,,Saurabh Tiwari,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM50416,mmt,cancelled,2026-09-23,1,,Gaurav Tiwari,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM59752,mmt,cancelled,2026-09-23,1,,Harsh Wadhwa,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM71006,mmt,cancelled,2026-09-23,1,,Amrita Agarwal,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM95255,mmt,cancelled,2026-09-23,1,,Lavanya Tandon,Noida,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM23644,mmt,cancelled,2026-09-24,1,,Akshay Goel,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM44458,mmt,stay,2026-09-24,1,103,Mansi Kapoor,Ghaziabad,4100,490,794,143,0,4,0,2669
+MakeMyTrip Jul to Sep.pdf,MM45781,mmt,stay,2026-09-24,1,201,Abhinav Chopra,Jaipur,3300,370,645,116,0,3,0,2166
+MakeMyTrip Jul to Sep.pdf,MM81652,mmt,cancelled,2026-09-24,1,,Gaurav Wadhwa,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM92220,mmt,stay,2026-09-24,1,110,Kunal Marwah,Mumbai,4100,615,767,138,0,3,0,2577
+MakeMyTrip Jul to Sep.pdf,MM93086,mmt,cancelled,2026-09-24,2,,Zoya Kapoor,Delhi,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM15122,mmt,stay,2026-09-25,1,204,Tanvi Wadhwa,Jaipur,3500,391,684,123,0,3,0,2299
+MakeMyTrip Jul to Sep.pdf,MM18371,mmt,stay,2026-09-25,1,106,Nikhil Pandey,Bengaluru,4000,440,783,141,0,4,0,2632
+MakeMyTrip Jul to Sep.pdf,MM20036,mmt,stay,2026-09-25,1,202,Omkar Bhatt,Ludhiana,3300,436,630,113,0,3,0,2118
+MakeMyTrip Jul to Sep.pdf,MM20625,mmt,stay,2026-09-25,1,203,Nikhil Rana,Mumbai,3200,520,590,106,0,3,0,1981
+MakeMyTrip Jul to Sep.pdf,MM26895,mmt,stay,2026-09-25,1,111,Vaibhav Trivedi,Faridabad,3400,510,636,114,0,3,0,2137
+MakeMyTrip Jul to Sep.pdf,MM34050,mmt,stay,2026-09-25,1,205,Vaibhav Srivastava,Meerut,3100,372,600,108,0,3,0,2017
+MakeMyTrip Jul to Sep.pdf,MM66145,mmt,stay,2026-09-25,1,206,Anushka Khanna,Meerut,3300,433,631,114,0,3,0,2119
+MakeMyTrip Jul to Sep.pdf,MM73278,mmt,cancelled,2026-09-25,1,,Anushka Rana,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM76324,mmt,stay,2026-09-25,1,209,Aparna Goel,Kolkata,6200,864,1174,211,0,5,0,3946
+MakeMyTrip Jul to Sep.pdf,MM87321,mmt,stay,2026-09-25,1,112,Payal Mathur,Ludhiana,3400,488,641,115,0,3,0,2153
+MakeMyTrip Jul to Sep.pdf,MM11092,mmt,stay,2026-09-26,1,208,Nikhil Tandon,Ambala,6200,1240,1091,196,0,5,0,3668
+MakeMyTrip Jul to Sep.pdf,MM30326,mmt,stay,2026-09-26,1,106,Sahil Kulkarni,Agra,4200,840,739,133,0,3,0,2485
+MakeMyTrip Jul to Sep.pdf,MM32434,mmt,cancelled,2026-09-26,2,,Manish Srivastava,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM32473,mmt,cancelled,2026-09-26,1,,Zoya Dutta,Meerut,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM33218,mmt,stay,2026-09-26,1,204,Varsha Negi,Meerut,3100,390,596,107,0,3,0,2004
+MakeMyTrip Jul to Sep.pdf,MM38776,mmt,stay,2026-09-26,1,107,Pallavi Rana,Noida,4100,611,768,138,0,3,0,2580
+MakeMyTrip Jul to Sep.pdf,MM43889,mmt,cancelled,2026-09-26,2,,Rajat Kohli,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM44434,mmt,stay,2026-09-26,1,101,Parth Upadhyay,Dehradun,4400,880,774,139,0,4,0,2603
+MakeMyTrip Jul to Sep.pdf,MM46581,mmt,stay,2026-09-26,1,102,Amrita Garg,Jaipur,4300,556,824,148,0,4,0,2768
+MakeMyTrip Jul to Sep.pdf,MM53740,mmt,stay,2026-09-26,1,110,Saurabh Mittal,Agra,4100,532,785,141,0,4,0,2638
+MakeMyTrip Jul to Sep.pdf,MM59895,mmt,cancelled,2026-09-26,1,,Vaibhav Kapoor,Gurugram,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM60287,mmt,cancelled,2026-09-26,2,,Payal Grover,Dehradun,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM92318,mmt,stay,2026-09-26,1,203,Simran Dhawan,Bengaluru,3300,396,639,115,0,3,0,2147
+MakeMyTrip Jul to Sep.pdf,MM96950,mmt,stay,2026-09-26,1,108,Ashish Vohra,Meerut,4200,630,785,141,0,4,0,2640
+MakeMyTrip Jul to Sep.pdf,MM98147,mmt,cancelled,2026-09-26,2,,Akshay Thakur,Bengaluru,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM11387,mmt,cancelled,2026-09-27,2,,Tanvi Vohra,Agra,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM15798,mmt,stay,2026-09-27,1,102,Ashish Tandon,Noida,4000,640,739,133,0,3,0,2485
+MakeMyTrip Jul to Sep.pdf,MM19346,mmt,cancelled,2026-09-27,1,,Simran Shukla,Mumbai,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM39227,mmt,stay,2026-09-27,1,110,Jatin Negi,Jaipur,4100,860,713,128,0,3,0,2396
+MakeMyTrip Jul to Sep.pdf,MM44287,mmt,stay,2026-09-27,1,201,Tarun Thakur,Jaipur,3200,360,625,113,0,3,0,2099
+MakeMyTrip Jul to Sep.pdf,MM55430,mmt,cancelled,2026-09-27,1,,Udit Khanna,Chandigarh,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM57055,mmt,cancelled,2026-09-27,2,,Ashish Saxena,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM61151,mmt,cancelled,2026-09-27,1,,Udit Sethi,Pune,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM72660,mmt,stay,2026-09-27,1,104,Kunal Dhawan,Chandigarh,4100,655,758,136,0,3,0,2548
+MakeMyTrip Jul to Sep.pdf,MM80077,mmt,stay,2026-09-27,1,105,Harsh Grover,Dehradun,4000,640,739,133,0,3,0,2485
+MakeMyTrip Jul to Sep.pdf,MM14091,mmt,cancelled,2026-09-28,2,,Nidhi Mittal,Ghaziabad,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM18494,mmt,cancelled,2026-09-28,1,,Aakash Mittal,Kanpur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM21292,mmt,cancelled,2026-09-28,1,,Ankit Thakur,Lucknow,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM65337,mmt,cancelled,2026-09-28,1,,Manish Wadhwa,Jaipur,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM73517,mmt,cancelled,2026-09-28,1,,Pallavi Oberoi,Ambala,0,0,0,0,0,0,0,0
+MakeMyTrip Jul to Sep.pdf,MM76466,mmt,stay,2026-09-28,1,101,Harsh Kohli,Ambala,3800,0,836,150,0,4,0,2810
+MakeMyTrip Jul to Sep.pdf,MM39212,mmt,stay,2026-09-30,1,201,Chirag Lamba,Meerut,3000,300,594,107,0,3,0,1996
+MakeMyTrip Jul to Sep.pdf,MM68363,mmt,stay,2026-09-30,1,111,Aakash Sethi,Meerut,3300,700,572,103,0,3,0,1922
+MakeMyTrip Jul to Sep.pdf,MM87471,mmt,stay,2026-09-30,1,109,Chirag Rastogi,Ghaziabad,4200,630,785,141,0,4,0,2640
+MakeMyTrip Jul to Sep.pdf,MM90226,mmt,stay,2026-09-30,1,207,Sahil Sood,Agra,5900,591,1168,210,0,5,0,3926
+Travel agent register.xlsx,TA1154,ta,cancelled,2026-04-02,1,,Anushka Trivedi,Gurugram,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA5304,ta,stay,2026-04-02,1,204,Ashish Kapoor,Meerut,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA8601,ta,stay,2026-04-02,1,111,Anushka Mathur,Ambala,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA9839,ta,stay,2026-04-02,1,205,Devansh Dutta,Noida,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA2394,ta,stay,2026-04-03,1,208,Ankit Marwah,Delhi,5600,0,560,0,0,0,0,5040
+Travel agent register.xlsx,TA2014,ta,cancelled,2026-04-05,1,,Aparna Chopra,Lucknow,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA4990,ta,stay,2026-04-07,1,111,Ashish Agarwal,Ghaziabad,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA4027,ta,stay,2026-04-08,1,205,Ashish Dhawan,Bengaluru,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA1662,ta,stay,2026-04-10,2,109,Lavanya Kulkarni,Gurugram,7600,0,760,0,0,0,0,6840
+Travel agent register.xlsx,TA4845,ta,stay,2026-04-10,1,105,Aakash Bisht,Ghaziabad,4000,0,400,0,0,0,0,3600
+Travel agent register.xlsx,TA7306,ta,stay,2026-04-10,1,101,Arnav Srivastava,Ambala,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA2641,ta,stay,2026-04-11,1,204,Aparna Rastogi,Lucknow,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA7698,ta,stay,2026-04-12,1,202,Nidhi Bisht,Ludhiana,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA9968,ta,cancelled,2026-04-12,1,,Shreya Dhawan,Meerut,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA5900,ta,stay,2026-04-13,1,210,Omkar Saxena,Bengaluru,5700,0,570,0,0,0,0,5130
+Travel agent register.xlsx,TA3704,ta,stay,2026-04-14,1,105,Amrita Goel,Bengaluru,3700,0,370,0,0,0,0,3330
+Travel agent register.xlsx,TA1633,ta,stay,2026-04-15,1,207,Nikhil Wadhwa,Noida,5800,0,580,0,0,0,0,5220
+Travel agent register.xlsx,TA2508,ta,stay,2026-04-17,3,107,Parth Chopra,Faridabad,11400,0,1140,0,0,0,0,10260
+Travel agent register.xlsx,TA6589,ta,stay,2026-04-17,1,108,Simran Goel,Meerut,4000,0,400,0,0,0,0,3600
+Travel agent register.xlsx,TA3802,ta,stay,2026-04-18,1,206,Bhavna Grover,Agra,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA5894,ta,stay,2026-04-18,1,102,Jatin Trivedi,Jaipur,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA6306,ta,stay,2026-04-18,1,203,Udit Kapoor,Lucknow,3100,0,310,0,0,0,0,2790
+Travel agent register.xlsx,TA8067,ta,stay,2026-04-18,1,108,Ankit Bisht,Jaipur,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA9898,ta,stay,2026-04-19,1,203,Devansh Vohra,Noida,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA1214,ta,stay,2026-04-23,1,111,Aditi Gill,Faridabad,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA2362,ta,stay,2026-04-25,1,205,Zoya Shukla,Ludhiana,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA8244,ta,stay,2026-04-25,1,111,Siddharth Chopra,Kolkata,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA7544,ta,stay,2026-04-26,1,110,Saurabh Gill,Noida,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA5124,ta,stay,2026-04-27,1,205,Devansh Shukla,Lucknow,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA6788,ta,stay,2026-04-27,1,110,Aparna Vohra,Dehradun,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA7714,ta,stay,2026-04-28,1,206,Alok Mittal,Agra,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA8019,ta,stay,2026-04-28,1,208,Pallavi Jain,Kolkata,5400,0,540,0,0,0,0,4860
+Travel agent register.xlsx,TA1010,ta,stay,2026-05-01,1,208,Devansh Sethi,Ambala,6000,0,600,0,0,0,0,5400
+Travel agent register.xlsx,TA6124,ta,stay,2026-05-01,2,210,Sahil Kapoor,Kanpur,11600,0,1160,0,0,0,0,10440
+Travel agent register.xlsx,TA6927,ta,stay,2026-05-01,1,112,Aakash Bhandari,Chandigarh,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA6894,ta,stay,2026-05-02,1,112,Divya Kulkarni,Chandigarh,3500,0,350,0,0,0,0,3150
+Travel agent register.xlsx,TA6038,ta,stay,2026-05-03,1,103,Amrita Tiwari,Mumbai,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA7430,ta,stay,2026-05-03,1,102,Shreya Goel,Bengaluru,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA1028,ta,stay,2026-05-05,1,204,Ishita Sood,Kolkata,3500,0,350,0,0,0,0,3150
+Travel agent register.xlsx,TA3492,ta,stay,2026-05-05,1,101,Udit Lamba,Pune,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA8431,ta,stay,2026-05-05,1,111,Devansh Kapoor,Kanpur,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA9832,ta,stay,2026-05-05,1,109,Aditi Dutta,Ambala,4300,0,430,0,0,0,0,3870
+Travel agent register.xlsx,TA6500,ta,stay,2026-05-06,1,208,Arnav Thakur,Ghaziabad,5900,0,590,0,0,0,0,5310
+Travel agent register.xlsx,TA7028,ta,stay,2026-05-06,1,109,Alok Bisht,Delhi,4300,0,430,0,0,0,0,3870
+Travel agent register.xlsx,TA6777,ta,stay,2026-05-08,1,107,Mansi Bhatt,Chandigarh,4400,0,440,0,0,0,0,3960
+Travel agent register.xlsx,TA4278,ta,stay,2026-05-09,1,207,Tarun Dutta,Meerut,5900,0,590,0,0,0,0,5310
+Travel agent register.xlsx,TA5862,ta,stay,2026-05-09,1,202,Nidhi Trivedi,Ghaziabad,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA6735,ta,stay,2026-05-10,1,109,Amrita Bhandari,Agra,4400,0,440,0,0,0,0,3960
+Travel agent register.xlsx,TA4847,ta,cancelled,2026-05-11,1,,Yash Lamba,Pune,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA9329,ta,stay,2026-05-12,1,209,Arnav Sood,Meerut,6100,0,610,0,0,0,0,5490
+Travel agent register.xlsx,TA2452,ta,stay,2026-05-14,1,102,Siddharth Mittal,Delhi,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA3988,ta,stay,2026-05-15,1,111,Ritika Gill,Bengaluru,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA9677,ta,stay,2026-05-15,1,209,Manish Garg,Faridabad,5900,0,590,0,0,0,0,5310
+Travel agent register.xlsx,TA1070,ta,cancelled,2026-05-18,1,,Parth Marwah,Agra,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA9319,ta,stay,2026-05-18,1,112,Siddharth Ahuja,Pune,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA6786,ta,stay,2026-05-20,1,206,Ishita Gill,Faridabad,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA6369,ta,stay,2026-05-21,2,201,Ankit Rana,Meerut,7000,0,700,0,0,0,0,6300
+Travel agent register.xlsx,TA4270,ta,stay,2026-05-22,1,205,Lavanya Bisht,Gurugram,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA5754,ta,stay,2026-05-22,1,203,Tanvi Sood,Mumbai,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA6676,ta,stay,2026-05-24,1,206,Lavanya Vohra,Ghaziabad,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA1989,ta,stay,2026-05-25,1,105,Gaurav Rastogi,Meerut,4400,0,440,0,0,0,0,3960
+Travel agent register.xlsx,TA1939,ta,stay,2026-05-26,1,204,Ishita Khanna,Mumbai,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA7127,ta,cancelled,2026-05-26,2,,Alok Rana,Jaipur,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA9491,ta,stay,2026-05-26,1,203,Saurabh Shukla,Jaipur,3500,0,350,0,0,0,0,3150
+Travel agent register.xlsx,TA2025,ta,stay,2026-05-27,1,204,Anushka Chopra,Ambala,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA5484,ta,stay,2026-05-27,1,201,Sahil Jain,Kanpur,3500,0,350,0,0,0,0,3150
+Travel agent register.xlsx,TA7788,ta,stay,2026-05-27,2,112,Aparna Bisht,Jaipur,6400,0,640,0,0,0,0,5760
+Travel agent register.xlsx,TA6562,ta,stay,2026-05-28,1,103,Parth Gill,Noida,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA7234,ta,stay,2026-05-28,1,109,Tanvi Rana,Faridabad,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA5301,ta,stay,2026-05-29,1,204,Simran Garg,Jaipur,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA7764,ta,stay,2026-05-29,1,102,Sakshi Kohli,Bengaluru,4300,0,430,0,0,0,0,3870
+Travel agent register.xlsx,TA6681,ta,stay,2026-05-30,1,206,Vaibhav Sood,Ludhiana,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA8803,ta,stay,2026-06-01,1,202,Simran Sood,Delhi,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA5716,ta,stay,2026-06-03,2,205,Nidhi Agarwal,Pune,6400,0,640,0,0,0,0,5760
+Travel agent register.xlsx,TA4431,ta,stay,2026-06-05,1,111,Sakshi Sethi,Meerut,3500,0,350,0,0,0,0,3150
+Travel agent register.xlsx,TA6487,ta,stay,2026-06-05,1,210,Jatin Grover,Meerut,6200,0,620,0,0,0,0,5580
+Travel agent register.xlsx,TA1256,ta,stay,2026-06-06,1,111,Lavanya Khanna,Meerut,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA1634,ta,stay,2026-06-07,1,107,Akshay Puri,Kanpur,4300,0,430,0,0,0,0,3870
+Travel agent register.xlsx,TA5500,ta,cancelled,2026-06-08,1,,Bhavna Tandon,Ghaziabad,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA2275,ta,cancelled,2026-06-09,1,,Harsh Pandey,Ghaziabad,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA9735,ta,stay,2026-06-10,1,208,Tanvi Khanna,Meerut,6300,0,630,0,0,0,0,5670
+Travel agent register.xlsx,TA2370,ta,stay,2026-06-12,1,206,Bhavna Ahuja,Mumbai,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA5820,ta,stay,2026-06-12,1,203,Shreya Lamba,Ghaziabad,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA7237,ta,stay,2026-06-12,1,108,Manish Negi,Ambala,4400,0,440,0,0,0,0,3960
+Travel agent register.xlsx,TA8725,ta,stay,2026-06-12,1,105,Sakshi Ahuja,Faridabad,4400,0,440,0,0,0,0,3960
+Travel agent register.xlsx,TA9695,ta,stay,2026-06-12,1,205,Aditi Rastogi,Dehradun,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA3998,ta,stay,2026-06-13,1,210,Pallavi Goel,Noida,6100,0,610,0,0,0,0,5490
+Travel agent register.xlsx,TA9605,ta,stay,2026-06-13,1,105,Chirag Agarwal,Dehradun,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA5802,ta,stay,2026-06-15,1,202,Yash Dhawan,Delhi,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA5984,ta,stay,2026-06-15,1,109,Nikhil Thakur,Ludhiana,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA8647,ta,stay,2026-06-15,1,210,Amrita Rastogi,Ludhiana,6000,0,600,0,0,0,0,5400
+Travel agent register.xlsx,TA7003,ta,stay,2026-06-16,1,112,Akshay Gill,Ghaziabad,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA8697,ta,stay,2026-06-16,1,204,Udit Tiwari,Ludhiana,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA9550,ta,stay,2026-06-16,1,107,Vaibhav Tandon,Jaipur,4300,0,430,0,0,0,0,3870
+Travel agent register.xlsx,TA4486,ta,stay,2026-06-17,1,109,Devansh Pandey,Ghaziabad,4400,0,440,0,0,0,0,3960
+Travel agent register.xlsx,TA4246,ta,stay,2026-06-18,2,204,Alok Kohli,Meerut,6800,0,680,0,0,0,0,6120
+Travel agent register.xlsx,TA2720,ta,stay,2026-06-19,1,107,Aparna Oberoi,Pune,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA5581,ta,stay,2026-06-19,1,208,Ankit Jain,Lucknow,6200,0,620,0,0,0,0,5580
+Travel agent register.xlsx,TA6614,ta,stay,2026-06-19,2,106,Anushka Gill,Chandigarh,8600,0,860,0,0,0,0,7740
+Travel agent register.xlsx,TA6930,ta,stay,2026-06-19,1,105,Mansi Tiwari,Kolkata,4300,0,430,0,0,0,0,3870
+Travel agent register.xlsx,TA1281,ta,stay,2026-06-20,1,110,Devansh Lamba,Pune,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA4090,ta,stay,2026-06-20,1,202,Aakash Sinha,Gurugram,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA5136,ta,stay,2026-06-20,1,105,Zoya Srivastava,Dehradun,4300,0,430,0,0,0,0,3870
+Travel agent register.xlsx,TA5243,ta,stay,2026-06-21,1,202,Devansh Chopra,Agra,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA5881,ta,cancelled,2026-06-21,1,,Alok Goel,Agra,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA3414,ta,stay,2026-06-27,1,206,Chirag Oberoi,Bengaluru,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA3516,ta,stay,2026-06-27,1,203,Ashish Bhandari,Jaipur,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA4286,ta,stay,2026-06-27,1,105,Ritika Bhatt,Kolkata,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA5539,ta,stay,2026-06-27,1,207,Devansh Tandon,Delhi,6300,0,630,0,0,0,0,5670
+Travel agent register.xlsx,TA5895,ta,stay,2026-06-27,1,108,Omkar Rastogi,Chandigarh,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA2120,ta,stay,2026-06-28,1,203,Ashish Shukla,Faridabad,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA3584,ta,stay,2026-06-30,1,101,Amrita Sinha,Pune,4400,0,440,0,0,0,0,3960
+Travel agent register.xlsx,TA5063,ta,stay,2026-07-03,1,205,Harsh Bhatt,Agra,2900,0,290,0,0,0,0,2610
+Travel agent register.xlsx,TA1485,ta,stay,2026-07-10,2,205,Parth Bhatt,Dehradun,5600,0,560,0,0,0,0,5040
+Travel agent register.xlsx,TA2616,ta,stay,2026-07-10,1,202,Omkar Sethi,Gurugram,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA9882,ta,stay,2026-07-11,1,202,Tanvi Agarwal,Gurugram,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA8266,ta,cancelled,2026-07-12,1,,Rajat Sinha,Jaipur,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA2603,ta,stay,2026-07-16,1,101,Aakash Puri,Noida,3700,0,370,0,0,0,0,3330
+Travel agent register.xlsx,TA1371,ta,stay,2026-07-17,1,206,Payal Jain,Noida,2900,0,290,0,0,0,0,2610
+Travel agent register.xlsx,TA3356,ta,stay,2026-07-18,1,204,Ritika Puri,Dehradun,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA9580,ta,stay,2026-07-18,1,103,Nikhil Sood,Chandigarh,3700,0,370,0,0,0,0,3330
+Travel agent register.xlsx,TA8479,ta,stay,2026-07-19,2,102,Ashish Trivedi,Chandigarh,7000,0,700,0,0,0,0,6300
+Travel agent register.xlsx,TA7170,ta,stay,2026-07-24,1,111,Tanvi Bisht,Dehradun,2900,0,290,0,0,0,0,2610
+Travel agent register.xlsx,TA4668,ta,stay,2026-07-25,1,107,Akshay Dutta,Ghaziabad,3700,0,370,0,0,0,0,3330
+Travel agent register.xlsx,TA1285,ta,stay,2026-07-26,1,204,Amrita Oberoi,Kolkata,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA9542,ta,stay,2026-07-26,1,101,Sakshi Goel,Mumbai,3700,0,370,0,0,0,0,3330
+Travel agent register.xlsx,TA8075,ta,stay,2026-07-27,1,202,Simran Srivastava,Noida,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA5550,ta,cancelled,2026-07-29,1,,Parth Kulkarni,Jaipur,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA4860,ta,stay,2026-07-30,1,103,Vaibhav Lamba,Ludhiana,3400,0,340,0,0,0,0,3060
+Travel agent register.xlsx,TA9175,ta,stay,2026-07-31,1,208,Sakshi Bhatt,Ludhiana,5000,0,500,0,0,0,0,4500
+Travel agent register.xlsx,TA9602,ta,stay,2026-08-01,1,108,Alok Sethi,Meerut,3600,0,360,0,0,0,0,3240
+Travel agent register.xlsx,TA6914,ta,stay,2026-08-03,1,204,Rajat Tandon,Ghaziabad,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA4351,ta,stay,2026-08-05,1,204,Nikhil Sethi,Ambala,2900,0,290,0,0,0,0,2610
+Travel agent register.xlsx,TA6785,ta,stay,2026-08-06,1,201,Sahil Khanna,Jaipur,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA9502,ta,stay,2026-08-08,1,206,Abhinav Agarwal,Ludhiana,2900,0,290,0,0,0,0,2610
+Travel agent register.xlsx,TA3740,ta,stay,2026-08-09,1,203,Shreya Jain,Agra,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA8676,ta,stay,2026-08-09,1,202,Nidhi Rana,Lucknow,2700,0,270,0,0,0,0,2430
+Travel agent register.xlsx,TA3991,ta,stay,2026-08-11,2,207,Aakash Goel,Chandigarh,10400,0,1040,0,0,0,0,9360
+Travel agent register.xlsx,TA4296,ta,cancelled,2026-08-14,1,,Lavanya Dhawan,Kolkata,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA2947,ta,stay,2026-08-15,1,208,Abhinav Marwah,Ambala,5100,0,510,0,0,0,0,4590
+Travel agent register.xlsx,TA9183,ta,stay,2026-08-16,1,110,Sakshi Agarwal,Noida,3600,0,360,0,0,0,0,3240
+Travel agent register.xlsx,TA3871,ta,stay,2026-08-18,1,108,Jatin Chopra,Noida,3700,0,370,0,0,0,0,3330
+Travel agent register.xlsx,TA1389,ta,stay,2026-08-19,1,206,Kunal Tiwari,Kanpur,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA5586,ta,stay,2026-08-28,1,108,Yash Negi,Ghaziabad,3700,0,370,0,0,0,0,3330
+Travel agent register.xlsx,TA6529,ta,stay,2026-08-28,1,206,Gaurav Negi,Noida,2800,0,280,0,0,0,0,2520
+Travel agent register.xlsx,TA7929,ta,stay,2026-08-28,1,201,Alok Bhatt,Ghaziabad,2700,0,270,0,0,0,0,2430
+Travel agent register.xlsx,TA4083,ta,stay,2026-08-29,1,205,Payal Bhatt,Noida,2900,0,290,0,0,0,0,2610
+Travel agent register.xlsx,TA2583,ta,stay,2026-09-01,2,206,Omkar Thakur,Chandigarh,6000,0,600,0,0,0,0,5400
+Travel agent register.xlsx,TA2618,ta,stay,2026-09-04,1,103,Bhavna Sinha,Pune,3800,0,380,0,0,0,0,3420
+Travel agent register.xlsx,TA3726,ta,stay,2026-09-04,1,209,Divya Kohli,Bengaluru,6000,0,600,0,0,0,0,5400
+Travel agent register.xlsx,TA2210,ta,stay,2026-09-05,1,205,Chirag Grover,Faridabad,3100,0,310,0,0,0,0,2790
+Travel agent register.xlsx,TA4163,ta,stay,2026-09-07,1,107,Harsh Sinha,Noida,4000,0,400,0,0,0,0,3600
+Travel agent register.xlsx,TA1309,ta,cancelled,2026-09-11,1,,Abhinav Grover,Dehradun,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA1812,ta,stay,2026-09-11,1,202,Aditi Khanna,Agra,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA2102,ta,stay,2026-09-11,1,111,Kunal Saxena,Faridabad,3100,0,310,0,0,0,0,2790
+Travel agent register.xlsx,TA3784,ta,stay,2026-09-12,2,110,Simran Kohli,Mumbai,8000,0,800,0,0,0,0,7200
+Travel agent register.xlsx,TA4265,ta,stay,2026-09-12,1,107,Ishita Bhatt,Ambala,3900,0,390,0,0,0,0,3510
+Travel agent register.xlsx,TA6338,ta,stay,2026-09-12,1,103,Aditi Lamba,Chandigarh,4200,0,420,0,0,0,0,3780
+Travel agent register.xlsx,TA7802,ta,stay,2026-09-12,1,111,Mansi Mittal,Mumbai,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA4791,ta,stay,2026-09-14,1,102,Sahil Sethi,Lucknow,4000,0,400,0,0,0,0,3600
+Travel agent register.xlsx,TA5297,ta,cancelled,2026-09-14,1,,Siddharth Garg,Ludhiana,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA1893,ta,stay,2026-09-15,1,104,Ishita Mathur,Jaipur,4000,0,400,0,0,0,0,3600
+Travel agent register.xlsx,TA7105,ta,stay,2026-09-16,1,108,Ashish Marwah,Chandigarh,3900,0,390,0,0,0,0,3510
+Travel agent register.xlsx,TA5506,ta,stay,2026-09-18,1,201,Arnav Kohli,Delhi,3100,0,310,0,0,0,0,2790
+Travel agent register.xlsx,TA7165,ta,stay,2026-09-19,1,202,Ritika Shukla,Kanpur,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA3304,ta,cancelled,2026-09-20,1,,Zoya Rastogi,Pune,0,0,0,0,0,0,0,0
+Travel agent register.xlsx,TA7478,ta,stay,2026-09-20,1,104,Divya Oberoi,Kolkata,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA2185,ta,stay,2026-09-21,1,202,Siddharth Rana,Faridabad,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA7510,ta,stay,2026-09-22,1,107,Aakash Dhawan,Gurugram,4100,0,410,0,0,0,0,3690
+Travel agent register.xlsx,TA7133,ta,stay,2026-09-23,1,202,Aditi Pandey,Ambala,3100,0,310,0,0,0,0,2790
+Travel agent register.xlsx,TA3551,ta,stay,2026-09-24,1,202,Mansi Srivastava,Dehradun,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA4562,ta,stay,2026-09-25,1,201,Devansh Grover,Agra,3200,0,320,0,0,0,0,2880
+Travel agent register.xlsx,TA3088,ta,stay,2026-09-26,1,201,Nidhi Rastogi,Kolkata,2900,0,290,0,0,0,0,2610
+Travel agent register.xlsx,TA3707,ta,stay,2026-09-26,1,105,Zoya Gill,Kolkata,4000,0,400,0,0,0,0,3600
+Travel agent register.xlsx,TA5925,ta,stay,2026-09-26,1,206,Gaurav Marwah,Faridabad,3000,0,300,0,0,0,0,2700
+Travel agent register.xlsx,TA2786,ta,stay,2026-09-27,2,203,Rajat Shukla,Jaipur,6200,0,620,0,0,0,0,5580
+Travel agent register.xlsx,TA5529,ta,stay,2026-09-27,1,204,Jatin Wadhwa,Jaipur,3300,0,330,0,0,0,0,2970
+Travel agent register.xlsx,TA7056,ta,stay,2026-09-28,1,110,Harsh Tiwari,Mumbai,4000,0,400,0,0,0,0,3600
+Travel agent register.xlsx,TA5321,ta,stay,2026-09-30,1,107,Sakshi Rana,Meerut,3900,0,390,0,0,0,0,3510
+Travel agent register.xlsx,TA7341,ta,stay,2026-09-30,1,112,Arnav Oberoi,Ludhiana,3200,0,320,0,0,0,0,2880

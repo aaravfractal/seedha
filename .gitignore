@@ -1,0 +1,43 @@
+# Secrets (rule 10)
+.env
+.env.*
+!.env.example
+firmware/seedha-desk/include/secrets.h
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Databases
+*.db
+*.db-journal
+*.sqlite
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+playwright-report/
+test-results/
+
+# Firmware
+.pio/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Uploaded files at runtime
+apps/api/uploads/
