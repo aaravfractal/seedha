@@ -29,11 +29,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>
       <body>
+        <a className="skip-link" href="#main">
+          Skip to content
+        </a>
         <ToastProvider>
           <Suspense fallback={<header className="site-header" style={{ height: 61 }} />}>
             <TopNav />
           </Suspense>
-          <main className="page">
+          <main id="main" className="page" tabIndex={-1}>
             <Suspense fallback={null}>{children}</Suspense>
           </main>
           <SiteFooter />

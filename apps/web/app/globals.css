@@ -122,6 +122,23 @@ a {
   outline-offset: 2px;
   border-radius: 10px;
 }
+main:focus {
+  outline: none;
+}
+.skip-link {
+  position: absolute;
+  left: 16px;
+  top: -100px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--bg);
+  font-weight: 600;
+}
+.skip-link:focus {
+  top: 12px;
+}
 .num {
   font-variant-numeric: tabular-nums;
 }
@@ -531,6 +548,11 @@ h2.title {
   .side a[aria-current="page"] {
     background: var(--ink);
     color: var(--bg);
+  }
+  /* The active pill is inverted; a solid page-colour tag keeps its contrast. */
+  .side a[aria-current="page"] .tag.pro {
+    background: var(--bg);
+    color: var(--goldInk);
   }
 }
 

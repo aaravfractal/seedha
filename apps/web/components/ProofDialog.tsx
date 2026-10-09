@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { useApi } from "@/lib/api";
 import type { ConsentProof } from "@/lib/types";
 import { useToast } from "./Toast";
 import { Loading } from "./States";
+import { useDialogFocus } from "./useDialogFocus";
 
 function when(iso: string): string {
   return new Date(iso).toLocaleString("en-IN", {
@@ -24,22 +25,21 @@ function short(hash: string): string {
 export function ProofDialog({ consentId, onClose }: { consentId: number; onClose: () => void }) {
   const proof = useApi<ConsentProof>(`proof/consents/${consentId}`);
   const toast = useToast();
-  const done = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    done.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const dialog = useRef<HTMLDivElement>(null);
+  useDialogFocus(dialog, true, onClose);
 
   const p = proof.data;
   const verified = p?.status === "verified" && p.matches === true;
   return (
     <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="dlg" role="dialog" aria-modal="true" aria-labelledby="proofTitle">
+      <div
+        ref={dialog}
+        tabIndex={-1}
+        className="dlg"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="proofTitle"
+      >
         <h3 id="proofTitle" className="sub-title" style={{ fontSize: 24 }}>
           Consent proof
         </h3>
@@ -132,13 +132,7 @@ export function ProofDialog({ consentId, onClose }: { consentId: number; onClose
                   View public record
                 </a>
               ) : null}
-              <button
-                ref={done}
-                type="button"
-                className="btn small"
-                style={{ marginLeft: "auto" }}
-                onClick={onClose}
-              >
+              <button type="button" className="btn small" style={{ marginLeft: "auto" }} onClick={onClose}>
                 Done
               </button>
             </div>

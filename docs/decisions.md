@@ -415,3 +415,15 @@ schema, so a new route is covered automatically: anything not in the known
 public or device set must answer 401 with no token, a wrong token, or the
 device key. (FastAPI 0.143 nests included routers, so `app.routes` alone does
 not list them.)
+
+**D-073 Accessibility checks.** Added dev dependency `@axe-core/playwright`
+(free, the standard axe engine for Playwright; allowed under answer A). The
+e2e suite runs axe with the WCAG 2.0/2.1 A and AA rules on all 27 pages, in
+light and dark, at 1440 and 390 px. axe cannot judge everything, so keyboard
+behaviour is tested directly: a skip link, and dialogs that take focus, keep
+Tab inside, close on Escape and hand focus back (`useDialogFocus`).
+
+**D-074 Flip speed.** Measured on the production build in the e2e suite:
+from navigation start to ranked rows with a working toggle, under 1,000 ms
+(about 190 ms cold, 85 ms warm locally); re-ranking under 300 ms (about
+5 ms), timed inside the page so Playwright's own checks are not counted.

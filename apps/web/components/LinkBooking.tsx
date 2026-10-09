@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { inr } from "@/lib/format";
 import type { BookResult, LinkPage } from "@/lib/types";
 import { ErrorState, Loading } from "./States";
+import { useDialogFocus } from "./useDialogFocus";
 
 const LONG_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August",
   "September", "October", "November", "December"]; // prettier-ignore
@@ -45,6 +46,8 @@ export function LinkBooking({
     const t = setTimeout(() => setQuery(typed), 300);
     return () => clearTimeout(t);
   }, [typed]);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(sheetRef, sheet, () => setSheet(false));
 
   if (page.error && !page.data) return <ErrorState message={page.error.message} onRetry={page.reload} />;
   if (!page.data) return <Loading rows={3} label="Opening the booking page" />;
@@ -200,10 +203,13 @@ export function LinkBooking({
         Same price as the hotel&apos;s own rate. Your perk is extra.
       </p>
       <div
+        ref={sheetRef}
         className={`sheet${sheet ? " up" : ""}`}
         role="dialog"
+        aria-modal="true"
         aria-label="Pay with UPI"
         aria-hidden={!sheet}
+        inert={!sheet}
       >
         <h3 className="sub-title">Pay with UPI</h3>
         <p className="sub" style={{ margin: "6px 0 4px" }}>
