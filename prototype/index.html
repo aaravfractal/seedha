@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seedha · Know what you really keep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#FBFBFD; --bg2:#F5F5F7; --card:#FFFFFF; --ink:#1D1D1F; --ink2:#6E6E73; --ink3:#86868B;
+  --line:rgba(0,0,0,.08); --accent:#1E6B4E; --accentSoft:#E6F1EC; --gold:#E8A33D; --goldSoft:#FBF1DE;
+  --gain:#1F8A55; --loss:#D7372B; --lossSoft:#FCEBEA; --glass:rgba(251,251,253,.72);
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(0,0,0,.06);
+  --spring:cubic-bezier(.22,1,.36,1);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Helvetica Neue",Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#000; --bg2:#111113; --card:#1C1C1E; --ink:#F5F5F7; --ink2:#A1A1A6; --ink3:#8E8E93;
+  --line:rgba(255,255,255,.1); --accent:#4CC38A; --accentSoft:rgba(76,195,138,.14); --gold:#F2B54E; --goldSoft:rgba(242,181,78,.14);
+  --gain:#4CC38A; --loss:#FF6B5E; --lossSoft:rgba(255,107,94,.14); --glass:rgba(22,22,24,.72); --shadow:0 1px 2px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#000; --bg2:#111113; --card:#1C1C1E; --ink:#F5F5F7; --ink2:#A1A1A6; --ink3:#8E8E93;
+  --line:rgba(255,255,255,.1); --accent:#4CC38A; --accentSoft:rgba(76,195,138,.14); --gold:#F2B54E; --goldSoft:rgba(242,181,78,.14);
+  --gain:#4CC38A; --loss:#FF6B5E; --lossSoft:rgba(255,107,94,.14); --glass:rgba(22,22,24,.72); --shadow:0 1px 2px rgba(0,0,0,.5);
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:17px;line-height:1.47;-webkit-font-smoothing:antialiased;letter-spacing:-.01em}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px}
+.num{font-variant-numeric:tabular-nums}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.bar{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:10px 20px}
+.brand{font-weight:700;font-size:21px;letter-spacing:-.03em;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.brand i{width:22px;height:22px;border-radius:7px;background:var(--accent);display:inline-block;position:relative}
+.brand i:after{content:"";position:absolute;left:5px;right:5px;bottom:6px;height:2px;background:#fff;border-radius:2px;box-shadow:0 -5px 0 #fff}
+.seg{display:flex;background:var(--bg2);border-radius:11px;padding:3px;gap:2px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.seg::-webkit-scrollbar{display:none}
+.seg button{padding:7px 14px;border-radius:9px;font-size:15px;font-weight:500;color:var(--ink2);white-space:nowrap;transition:background .3s var(--spring),color .3s}
+@media (max-width:620px){.bar{flex-wrap:wrap;gap:8px;padding:8px 14px}.seg{margin-left:0;width:100%}.seg button{flex:1;padding:7px 4px;font-size:14px}}
+.seg button[aria-selected="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+main{max-width:1120px;margin:0 auto;padding:28px 20px 80px}
+.view{display:none;animation:rise .55s var(--spring)}
+.view.on{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(36px,6vw,64px);line-height:1.04;letter-spacing:-.035em;margin:12px 0 12px;font-weight:700}
+h2{font-size:clamp(26px,3.4vw,34px);letter-spacing:-.025em;line-height:1.12;margin:0 0 8px;font-weight:700}
+h3{font-size:20px;letter-spacing:-.02em;margin:0 0 4px;font-weight:600}
+.lede{font-size:clamp(19px,2.2vw,22px);color:var(--ink2);max-width:640px;margin:0 0 28px}
+.sub{color:var(--ink2);margin:0 0 20px;max-width:640px}
+.card{background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:24px;border:1px solid var(--line)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:980px;background:var(--accent);color:#fff;font-weight:600;font-size:17px;transition:transform .2s var(--spring),opacity .2s}
+.btn:active{transform:scale(.97)} .btn[disabled]{opacity:.35;cursor:not-allowed}
+.btn.ghost{background:var(--bg2);color:var(--ink)}
+.btn.small{min-height:40px;padding:0 16px;font-size:15px}
+.link{color:var(--accent);font-weight:600}
+.grid{display:grid;gap:16px}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:980px;background:var(--bg2);color:var(--ink2)}
+.tag.pro{background:var(--goldSoft);color:#8a5a12} :root[data-theme="dark"] .tag.pro{color:var(--gold)}
+.tag.ok{background:var(--accentSoft);color:var(--accent)} .tag.bad{background:var(--lossSoft);color:var(--loss)}
+.calc{font-size:13px;color:var(--ink3);margin-top:12px}
+/* pipeline */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:8px}
+.step{display:flex;gap:14px;align-items:flex-start;text-align:left;padding:18px;border-radius:18px;background:var(--card);border:1px solid var(--line);transition:transform .35s var(--spring),box-shadow .35s}
+.step:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.dot{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:600;background:var(--bg2);color:var(--ink2);transition:background .4s,color .4s}
+.step.done .dot{background:var(--accent);color:#fff}
+.step b{display:block;font-size:16px;margin-bottom:2px} .step span{font-size:14px;color:var(--ink2)}
+.progress{height:6px;border-radius:6px;background:var(--bg2);overflow:hidden;margin:6px 0 4px}
+.progress i{display:block;height:100%;width:0;background:var(--accent);border-radius:6px;transition:width .8s var(--spring)}
+/* owner layout */
+.owner{display:grid;grid-template-columns:220px 1fr;gap:28px}
+.side{position:sticky;top:84px;align-self:start;display:flex;flex-direction:column;gap:2px}
+.side button{text-align:left;padding:10px 14px;border-radius:12px;font-size:16px;color:var(--ink2);display:flex;justify-content:space-between;align-items:center}
+.side button[aria-selected="true"]{background:var(--bg2);color:var(--ink);font-weight:600}
+.pane{display:none;animation:rise .5s var(--spring)} .pane.on{display:block}
+@media (max-width:860px){.owner{grid-template-columns:1fr}.side{position:static;flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:6px}.side::-webkit-scrollbar{display:none}.side button{white-space:nowrap;background:var(--bg2);font-size:15px}.side button[aria-selected="true"]{background:var(--ink);color:var(--bg)}}
+/* upload */
+.drop{border:2px dashed var(--line);border-radius:22px;padding:36px 20px;text-align:center;background:var(--card)}
+.file{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.file:last-child{border:0}
+/* flip */
+.toggle{display:inline-flex;background:var(--bg2);border-radius:12px;padding:3px;margin:4px 0 20px}
+.toggle button{padding:9px 18px;border-radius:10px;font-weight:600;font-size:15px;color:var(--ink2);transition:all .3s var(--spring)}
+.toggle button[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.rows{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:40px 1.3fr 1fr 1fr;gap:12px;align-items:center;padding:16px 18px;background:var(--card);border:1px solid var(--line);border-radius:18px;will-change:transform}
+.rank{font-size:22px;font-weight:700;color:var(--ink3)}
+.row .nm{font-weight:600}
+.row .meta{font-size:14px;color:var(--ink2)}
+.kv{text-align:right} .kv b{display:block;font-size:20px;letter-spacing:-.02em} .kv small{font-size:13px;color:var(--ink2)}
+.split{height:6px;border-radius:6px;background:var(--lossSoft);overflow:hidden;margin-top:8px;grid-column:2/-1}
+.split i{display:block;height:100%;background:var(--gain);border-radius:6px}
+.row.hl{border-color:var(--gold);box-shadow:0 0 0 3px var(--goldSoft)}
+@media (max-width:620px){.row{grid-template-columns:30px 1fr 1fr}.row .hide-s{display:none}}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:20px}
+.stat{background:var(--bg2);border-radius:18px;padding:16px}
+.stat b{display:block;font-size:26px;letter-spacing:-.03em} .stat span{font-size:14px;color:var(--ink2)}
+.insight{font-size:19px;font-weight:500;letter-spacing:-.015em;margin:0 0 6px}
+/* list items */
+.item{display:grid;grid-template-columns:1fr auto;gap:6px 16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.item .meta{font-size:14px;color:var(--ink2)}
+/* desk */
+.deskwrap{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:start}
+@media (max-width:860px){.deskwrap{grid-template-columns:1fr}}
+.device{background:#E9E6DF;border-radius:28px;padding:22px;position:relative;box-shadow:inset 0 -6px 0 rgba(0,0,0,.06)}
+:root[data-theme="dark"] .device{background:#2A2A2C}
+.ring{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:6px;border-radius:6px;background:#cfccc4;transition:background .4s,box-shadow .4s}
+.ring.green{background:#34C759;box-shadow:0 0 18px #34C759}
+.screen{aspect-ratio:3/2;background:#0E1512;border-radius:14px;color:#fff;display:grid;place-items:center;text-align:center;padding:16px;overflow:hidden;position:relative}
+.screen .s{display:none;animation:rise .45s var(--spring)} .screen .s.on{display:block}
+.screen small{display:block;color:#9fb3a9;font-size:14px;margin-top:6px}
+.qrbox{background:#fff;padding:8px;border-radius:10px;display:inline-block}
+.check{width:64px;height:64px;border-radius:50%;background:#34C759;display:grid;place-items:center;margin:0 auto 10px;animation:pop .5s var(--spring)}
+@keyframes pop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
+.devctl{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.printslot{height:8px;background:#1d1d1f;border-radius:4px;margin:16px auto 0;width:70%}
+.paperwrap{overflow:hidden;width:70%;margin:0 auto}
+.paper{background:#fff;color:#111;font:13px/1.45 "SF Mono",ui-monospace,Menlo,monospace;padding:14px;transform:translateY(-102%);transition:transform 1.6s cubic-bezier(.3,.7,.3,1);box-shadow:0 6px 16px rgba(0,0,0,.12)}
+.paper.out{transform:none}
+.paper hr{border:0;border-top:1px dashed #999;margin:8px 0}
+.paper .r{display:flex;justify-content:space-between}
+.phone{width:min(100%,340px);margin:0 auto;border-radius:44px;border:10px solid #1D1D1F;background:var(--bg);min-height:560px;overflow:hidden;position:relative;box-shadow:var(--shadow)}
+.notch{width:110px;height:26px;background:#1D1D1F;border-radius:0 0 16px 16px;margin:0 auto}
+.phone .in{padding:18px 18px 28px}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:14px;background:var(--bg2);margin:16px 0;cursor:pointer;font-size:15px}
+.chk input{width:22px;height:22px;accent-color:var(--accent);flex:none;margin-top:1px}
+.perk{background:var(--goldSoft);border-radius:16px;padding:14px;font-weight:600}
+/* whatsapp */
+.wa{background:var(--bg2);border-radius:22px;padding:16px;min-height:360px;display:flex;flex-direction:column;gap:8px}
+.bub{max-width:85%;padding:10px 14px;border-radius:18px;font-size:15px;line-height:1.4;animation:rise .35s var(--spring)}
+.bub.me{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:6px}
+.bub.bot{align-self:flex-start;background:var(--card);border-bottom-left-radius:6px;border:1px solid var(--line)}
+.bub .foot{display:block;font-size:12px;opacity:.65;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chip{padding:9px 14px;border-radius:980px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:500;transition:transform .2s var(--spring)}
+.chip:active{transform:scale(.96)}
+/* savings */
+.big{font-size:clamp(48px,8vw,84px);font-weight:700;letter-spacing:-.045em;line-height:1;color:var(--gold)}
+/* plans */
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:24px}
+.plan{padding:28px;border-radius:24px;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;gap:12px;transition:transform .4s var(--spring)}
+.plan.rec{border:2px solid var(--accent);transform:translateY(-6px)}
+.price{font-size:40px;font-weight:700;letter-spacing:-.04em}
+.price small{font-size:16px;font-weight:500;color:var(--ink2);letter-spacing:0}
+.plan ul{margin:0;padding:0;list-style:none;font-size:15px;color:var(--ink2)}
+.plan li{padding:6px 0;border-bottom:1px solid var(--line)} .plan li:last-child{border:0}
+.locked{position:relative}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:980px;font-size:15px;font-weight:500;transition:transform .5s var(--spring);z-index:50;max-width:92vw;text-align:center}
+.toast.show{transform:translate(-50%,0)}
+.sheet{position:absolute;inset:auto 0 0 0;background:var(--card);border-radius:24px 24px 0 0;padding:22px;transform:translateY(105%);transition:transform .55s var(--spring);box-shadow:0 -10px 30px rgba(0,0,0,.15)}
+.sheet.up{transform:none}
+input[type=text],select{font:inherit;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);min-height:48px}
+label.fl{display:block;font-size:14px;color:var(--ink2);margin:12px 0 6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px} @media (max-width:860px){.two{grid-template-columns:1fr}}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:flex-end;justify-content:center;z-index:40;padding:16px}
+.overlay.on{display:flex;animation:rise .4s var(--spring)}
+@media (min-width:700px){.overlay{align-items:center}}
+.dlg{background:var(--card);border-radius:24px;padding:24px;max-width:480px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);max-height:90vh;overflow:auto}
+.tl{list-style:none;margin:16px 0;padding:0}
+.tl li{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.tl li:last-child{border:0}
+.mono{font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:14px;color:var(--ink2)}
+.chipv{cursor:pointer;border:0}
+.frame{border:1px solid var(--line);border-radius:22px;overflow:hidden;background:#fff;color:#1d1d1f}
+.hs{font-family:var(--font)}
+.hs .hero{height:200px;position:relative;display:flex;align-items:flex-end;padding:18px;color:#fff}
+.hs .hero h4{margin:0;font-size:28px;letter-spacing:-.03em}
+.hs .sec{padding:16px 18px;border-top:1px solid #eee}
+.hs .sec h5{margin:0 0 8px;font-size:17px}
+.hs .rm{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;padding:8px 0}
+.hs .ph{height:56px;border-radius:10px}
+.hs .bk{border-radius:980px;padding:8px 14px;color:#fff;font-weight:600;font-size:14px}
+.hs .pk{border-radius:14px;padding:12px;margin:8px 0}
+.hs .foot{font-size:11px;color:#999;text-align:center;padding:10px}
+.pkg{display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.pkg:last-child{border:0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand"><i aria-hidden="true"></i>Seedha</div>
+    <nav class="seg" role="tablist" aria-label="Sections">
+      <button role="tab" data-view="pipeline" aria-selected="true">Pipeline</button>
+      <button role="tab" data-view="owner" aria-selected="false">Owner</button>
+      <button role="tab" data-view="desk" aria-selected="false">Desk</button>
+      <button role="tab" data-view="guest" aria-selected="false">Guest</button>
+      <button role="tab" data-view="plans" aria-selected="false">Plans</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- PIPELINE -->
+<section class="view on" id="v-pipeline">
+  <p class="tag">Hotel Deodar View · Mussoorie · 22 rooms · sample data</p>
+  <h1>Know what you really keep.</h1>
+  <p class="lede">Seedha reads your OTA statements, shows what each channel actually leaves you, and stops you paying commission twice for guests you already won.</p>
+  <div class="progress" aria-hidden="true"><i id="pbar"></i></div>
+  <p class="calc" id="ptext">0 of 8 steps done. Tap any step to run it.</p>
+  <div class="steps" id="steps"></div>
+</section>
+
+<!-- OWNER -->
+<section class="view" id="v-owner">
+  <div class="owner">
+    <nav class="side" role="tablist" aria-label="Owner screens" id="side"></nav>
+    <div>
+      <div class="pane" id="p-upload">
+        <h2>Bring your statements.</h2>
+        <p class="sub">Drop MakeMyTrip, Booking.com and Agoda payouts with your hotel register. Seedha reads every format and checks that each row adds up.</p>
+        <div class="drop" id="drop">
+          <h3>Drop files here</h3>
+          <p class="sub" style="margin:4px auto 18px">PDF, Excel or CSV</p>
+          <button class="btn" id="loadSample">Use sample statements</button>
+        </div>
+        <div class="card" id="files" style="margin-top:16px;display:none"></div>
+      </div>
+
+      <div class="pane" id="p-flip">
+        <h2>Bookings are not money.</h2>
+        <p class="insight" id="insight">MakeMyTrip ne sabse zyada bookings di, par har room par sabse kam paisa chhoda.</p>
+        <button class="link" id="lang" style="font-size:14px;margin-bottom:12px">Show in English</button><br>
+        <div class="toggle" role="group" aria-label="Rank channels by">
+          <button aria-pressed="true" data-sort="rn">By bookings</button>
+          <button aria-pressed="false" data-sort="nadr">By money kept</button>
+        </div>
+        <div class="rows" id="rows"></div>
+        <div class="stats" id="stats"></div>
+        <p class="calc">Calculated from your statements. Net = list revenue minus hotel-funded discount, commission, GST on commission and payment fees. TDS is a tax credit and is not counted as a cost.</p>
+      </div>
+
+      <div class="pane" id="p-repeat">
+        <h2>Guests you paid for twice.</h2>
+        <p class="sub">These guests came back through an OTA. You already won them, and paid commission again.</p>
+        <div class="stats" style="margin:0 0 16px"><div class="stat"><b class="num">12</b><span>repeat guests</span></div><div class="stat"><b class="num" style="color:var(--loss)">₹41,800</b><span>commission paid twice</span></div></div>
+        <div class="card" id="repeatList"></div>
+        <p class="calc">For your eyes only. Seedha never messages guests found through OTA data.</p>
+      </div>
+
+      <div class="pane" id="p-scenario">
+        <h2>One move for Saturday.</h2>
+        <p class="sub">Agoda leaves you the least per room. Keep a few Saturday rooms for guests who book you directly.</p>
+        <div class="card">
+          <h3>Hold 6 Saturday rooms off Agoda</h3>
+          <p class="sub" style="margin:6px 0 16px">Keep them for direct and walk-in guests. The other rooms stay on OTAs so you are never empty.</p>
+          <div class="stats" style="margin:0 0 18px">
+            <div class="stat"><b class="num">₹2,598</b><span>kept per room on Agoda</span></div>
+            <div class="stat"><b class="num">₹4,283</b><span>kept per room direct</span></div>
+            <div class="stat"><b class="num" style="color:var(--gain)">+₹10,110</b><span>extra kept per Saturday if they sell direct</span></div>
+          </div>
+          <button class="btn" id="acceptScenario">Accept</button>
+          <button class="btn ghost" id="skipScenario" style="margin-left:6px">Not now</button>
+        </div>
+      </div>
+
+      <div class="pane" id="p-approve">
+        <h2>Messages waiting for you.</h2>
+        <p class="sub">Seedha drafts a thank-you with a perk for guests who said yes at the desk. Nothing is sent until you approve.</p>
+        <div class="card" id="approveList"></div>
+      </div>
+
+      <div class="pane" id="p-savings">
+        <h2>Saved by booking direct.</h2>
+        <p class="sub">Counted only when a perk code is used. No code, no saving claimed.</p>
+        <div class="card">
+          <div class="big num" id="bigSave">₹0</div>
+          <p class="sub" style="margin:10px 0 0" id="saveSub">No coded direct bookings yet.</p>
+        </div>
+        <div class="card" id="ledger" style="margin-top:16px"></div>
+      </div>
+
+      <div class="pane" id="p-ask">
+        <h2>Ask on WhatsApp.</h2>
+        <p class="sub">Six questions, exact answers from your statements.</p>
+        <div class="wa" id="wa" aria-live="polite">
+          <div class="bub bot">Namaste Rajesh ji. Kya jaanna hai?<span class="foot">Seedha</span></div>
+        </div>
+        <div class="chips" id="chips"></div>
+      </div>
+
+      <div class="pane" id="p-site">
+        <div id="siteBody"></div>
+      </div>
+
+      <div class="pane" id="p-proof">
+        <h2>Every yes, provable.</h2>
+        <p class="sub">Each consent becomes a fingerprint. Every night the fingerprints are written to a public record that nobody can change.</p>
+        <div class="stats" style="margin:0 0 16px" id="proofStats"></div>
+        <button class="btn" id="bundleBtn">Write tonight's proof</button>
+        <div class="card" id="proofList" style="margin-top:16px"></div>
+        <p class="calc">Only a fingerprint is public. No name, phone or booking detail is ever stored on the blockchain. Monthly statement summaries are proven the same way.</p>
+      </div>
+
+      <div class="pane" id="p-pro">
+        <h2>Seedha Pro.</h2>
+        <p class="sub">For owners who want Seedha to find more money.</p>
+        <div class="grid" id="proCards"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DESK -->
+<section class="view" id="v-desk">
+  <h2>Seedha Desk.</h2>
+  <p class="sub">The box on your reception counter. One scan at check-in, one slip at checkout.</p>
+  <div class="deskwrap">
+    <div>
+      <div class="device">
+        <div class="ring" id="ring"></div>
+        <div class="screen" aria-live="polite">
+          <div class="s on" id="d-idle"><div style="font-size:26px;font-weight:700">Seedha</div><small>Deodar View · Ready</small></div>
+          <div class="s" id="d-qr"><div class="qrbox" id="qr"></div><small id="qrText">Room 104 · Scan for your perk</small></div>
+          <div class="s" id="d-ok"><div class="check"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div><div style="font-size:22px;font-weight:600" id="okText">Thank you</div><small>Consent saved</small><small style="font-size:12px;opacity:.75">Proof added tonight</small></div>
+          <div class="s" id="d-print"><div style="font-size:22px;font-weight:600">Printing slip</div><small>Please take your receipt</small></div>
+        </div>
+        <div class="printslot"></div>
+        <div class="paperwrap"><div class="paper" id="paper"></div></div>
+      </div>
+      <div class="devctl">
+        <label for="guestSel" class="sr">Guest checking in</label>
+        <select id="guestSel" style="max-width:260px"></select>
+        <button class="btn small" id="showQR">Show QR</button>
+        <button class="btn small ghost" id="printSlip" disabled>Check out and print</button>
+        <button class="btn small ghost" id="closeSlip">9 PM close slip</button>
+      </div>
+    </div>
+    <div class="phone" aria-label="Guest phone">
+      <div class="notch"></div>
+      <div class="in" id="guestPhone"><p class="sub" style="margin-top:80px;text-align:center">Guest phone. Show a QR on the desk, then it opens here.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- GUEST LINK -->
+<section class="view" id="v-guest">
+  <div class="two">
+    <div>
+      <h2>Seedha Link.</h2>
+      <p class="sub">The page a returning guest opens from the WhatsApp message. Dates, room, perk, UPI. Booked directly with the hotel.</p>
+      <p class="sub" id="linkHint">Approve a message in Owner, or type a code from a checkout slip.</p>
+    </div>
+    <div class="phone" style="position:relative">
+      <div class="notch"></div>
+      <div class="in" id="linkPage"></div>
+      <div class="sheet" id="upi">
+        <h3>Pay with UPI</h3>
+        <p class="sub" id="upiAmt" style="margin:6px 0 16px"></p>
+        <button class="btn" style="width:100%" id="upiPay">Pay</button>
+        <button class="btn ghost" style="width:100%;margin-top:8px" id="upiCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANS -->
+<section class="view" id="v-plans">
+  <h1 style="text-align:center">Pick a plan.</h1>
+  <p class="lede" style="text-align:center;margin:0 auto 18px">One returning family booking direct usually covers a month of Seedha.</p>
+  <div style="text-align:center"><div class="toggle" role="group" aria-label="Billing">
+    <button aria-pressed="true" data-bill="y">Yearly · 2 months free</button>
+    <button aria-pressed="false" data-bill="m">Monthly</button>
+  </div></div>
+  <div class="plans" id="plans"></div>
+  <p class="calc" style="text-align:center">Prices are early estimates. The Desk is included with yearly plans.</p>
+  <p class="sub" style="text-align:center;margin:4px auto 0">Only need a website? Seedha Site setup ₹4,999 one time.</p>
+</section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<div class="overlay" id="ov" role="dialog" aria-modal="true" aria-labelledby="ovT"><div class="dlg" id="dlg"></div></div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const CH=[
+ {n:'MakeMyTrip',rn:620,adr:4200,list:2604000,disc:312480,com:504134,gst:90744,fee:0,net:1696641,nadr:2737},
+ {n:'Booking.com',rn:310,adr:4400,list:1364000,disc:136400,com:220968,gst:39774,fee:0,net:966858,nadr:3119},
+ {n:'Agoda',rn:140,adr:4000,list:560000,disc:84000,com:95200,gst:17136,fee:0,net:363664,nadr:2598},
+ {n:'Travel agents',rn:180,adr:3800,list:684000,disc:0,com:68400,gst:0,fee:0,net:615600,nadr:3420},
+ {n:'Walk-in',rn:90,adr:4500,list:405000,disc:0,com:0,gst:0,fee:0,net:405000,nadr:4500},
+ {n:'Direct',rn:160,adr:4300,list:688000,disc:0,com:0,gst:0,fee:2752,net:685248,nadr:4283}];
+const GUESTS=[
+ {id:'ng',name:'Neha Gupta',short:'Neha ji',room:104,via:'Booking.com',code:'DEODAR-NG26'},
+ {id:'rs',name:'Rahul Sharma',short:'Rahul ji',room:207,via:'MakeMyTrip',code:'DEODAR-RS26'},
+ {id:'am',name:'Arjun Mehta',short:'Arjun ji',room:112,via:'Walk-in',code:'DEODAR-AM26'}];
+const S={steps:new Set(),uploaded:false,consent:{},checkedOut:{},sent:{},ledger:[],sort:'rn',hindi:true,current:null,bill:'y',scenario:false};
+
+/* toast + chime */
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
+function chime(){try{const a=new (window.AudioContext||window.webkitAudioContext)();[880,1320].forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=f;o.connect(g);g.connect(a.destination);const t=a.currentTime+i*.12;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.15,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.3);o.start(t);o.stop(t+.32)})}catch(e){}}
+
+/* navigation */
+function go(view,pane){$$('.seg button').forEach(b=>b.setAttribute('aria-selected',b.dataset.view===view));$$('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+view));if(pane)openPane(pane);window.scrollTo({top:0,behavior:'smooth'})}
+$$('.seg button').forEach(b=>b.onclick=()=>go(b.dataset.view));
+const PANES=[['upload','Upload'],['flip','Money kept'],['repeat','Repeat guests'],['scenario','Saturday move'],['approve','Approvals'],['savings','Savings'],['ask','Ask'],['site','Website'],['proof','Proof'],['pro','Pro']];
+$('#side').innerHTML=PANES.map(([k,l],i)=>`<button role="tab" data-pane="${k}" aria-selected="${i===0}">${l}${k==='pro'||k==='proof'?' <span class="tag pro">Pro</span>':''}${k==='approve'?' <span class="tag" id="apCount" style="display:none"></span>':''}</button>`).join('');
+$$('#side button').forEach(b=>b.onclick=()=>openPane(b.dataset.pane));
+function openPane(k){$$('#side button').forEach(b=>b.setAttribute('aria-selected',b.dataset.pane===k));$$('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+k));if(k==='flip')renderRows(false)}
+openPane('upload');
+
+/* pipeline */
+const STEPS=[
+ ['up','Upload statements','OTA payouts and hotel register','owner','upload'],
+ ['ai','AI reads every row','Math check flags bad rows','owner','upload'],
+ ['flip','See the flip','Gross vs net by channel','owner','flip'],
+ ['rep','Find repeat guests','Commission paid twice','owner','repeat'],
+ ['desk','Check-in consent','Guest scans the Desk QR','desk'],
+ ['slip','Checkout slip','Bill and perk code printed','desk'],
+ ['msg','Approve win-back','Owner approves WhatsApp','owner','approve'],
+ ['book','Guest books direct','Code used, saving counted','guest']];
+function done(k){if(!S.steps.has(k)){S.steps.add(k);renderSteps()}}
+function renderSteps(){$('#steps').innerHTML=STEPS.map(([k,t,d,v,p],i)=>`<button class="step ${S.steps.has(k)?'done':''}" data-v="${v}" data-p="${p||''}"><span class="dot">${S.steps.has(k)?'✓':i+1}</span><span><b>${t}</b><span>${d}</span></span></button>`).join('');
+ $$('#steps .step').forEach(b=>b.onclick=()=>go(b.dataset.v,b.dataset.p||null));
+ const n=S.steps.size;$('#pbar').style.width=(n/8*100)+'%';$('#ptext').textContent=n===8?'All 8 steps done. The full loop works.':`${n} of 8 steps done. Tap any step to run it.`}
+renderSteps();
+
+/* upload */
+const FILES=[['MakeMyTrip Apr to Jun.pdf',410],['MakeMyTrip Jul to Sep.pdf',412],['Booking.com payouts.xlsx',214],['Agoda statement.csv',96],['Travel agent register.xlsx',180],['Hotel register.xlsx',188]];
+$('#loadSample').onclick=()=>{if(S.uploaded){openPane('flip');return}
+ const box=$('#files');box.style.display='block';box.innerHTML=FILES.map((f,i)=>`<div class="file"><span>${f[0]}</span><span class="num meta" id="fs${i}" style="color:var(--ink2)">Waiting</span><div class="progress" style="grid-column:1/-1"><i id="fp${i}"></i></div></div>`).join('');
+ $('#loadSample').disabled=true;$('#loadSample').textContent='Reading 6 files';done('up');
+ FILES.forEach((f,i)=>setTimeout(()=>{$('#fp'+i).style.width='100%';$('#fs'+i).textContent=f[1]+' rows'},300+i*380));
+ setTimeout(()=>{done('ai');S.uploaded=true;box.insertAdjacentHTML('beforeend',`<div style="padding-top:16px"><h3>1,500 rows matched. 3 need a look.</h3>
+ <div class="item"><div><b>MakeMyTrip #MM48213</b><div class="meta">Payout ₹3,120, but list minus deductions is ₹3,240</div></div><span class="tag bad">Check</span></div>
+ <div class="item"><div><b>Agoda #AG77102</b><div class="meta">Commission charged on a cancelled stay</div></div><span class="tag bad">Check</span></div>
+ <div class="item"><div><b>Booking.com #BK55320</b><div class="meta">GST on commission line missing</div></div><span class="tag bad">Check</span></div>
+ <button class="btn" style="margin-top:14px" id="toFlip">See my real money</button></div>`);
+ $('#loadSample').textContent='Statements read';$('#toFlip').onclick=()=>openPane('flip')},300+FILES.length*380+300)};
+
+/* flip with FLIP animation */
+function renderRows(animate){
+ if(!S.uploaded){$('#rows').innerHTML=`<div class="card"><h3>No statements yet</h3><p class="sub" style="margin:6px 0 14px">Upload your payouts to see what each channel leaves you.</p><button class="btn small" onclick="openPane('upload')">Upload statements</button></div>`;$('#stats').innerHTML='';return}
+ const rowsEl=$('#rows');const before={};$$('#rows .row').forEach(r=>before[r.dataset.k]=r.getBoundingClientRect().top);
+ const sorted=[...CH].sort((a,b)=>b[S.sort]-a[S.sort]);
+ rowsEl.innerHTML=sorted.map((c,i)=>{const kept=c.net/c.list*100;const lost=c.disc+c.com+c.gst+c.fee;const hl=S.sort==='nadr'&&c.n==='MakeMyTrip';
+  return `<div class="row ${hl?'hl':''}" data-k="${c.n}"><span class="rank num">${i+1}</span>
+  <div><div class="nm">${c.n}</div><div class="meta num">${c.rn} room nights</div></div>
+  <div class="kv hide-s"><b class="num" style="color:${lost?'var(--loss)':'var(--ink3)'}">${lost?'−'+inr(lost):inr(0)}</b><small>${c.fee&&!c.com?'UPI fees':'discount + commission + GST'}</small></div>
+  <div class="kv"><b class="num">${inr(c.nadr)}</b><small>kept per room</small></div>
+  <div class="split" aria-hidden="true"><i style="width:${kept}%"></i></div></div>`}).join('');
+ if(animate){$$('#rows .row').forEach(r=>{const b=before[r.dataset.k];if(b==null)return;const d=b-r.getBoundingClientRect().top;if(!d)return;r.style.transform=`translateY(${d}px)`;r.style.transition='none';requestAnimationFrame(()=>{requestAnimationFrame(()=>{r.style.transition='transform .7s var(--spring)';r.style.transform=''})})})}
+ $('#stats').innerHTML=`<div class="stat"><b class="num" style="color:var(--loss)">₹10,39,108</b><span>paid to channels in 6 months</span></div>
+ <div class="stat"><b class="num">16.5%</b><span>of room revenue lost to channels</span></div>
+ <div class="stat"><b class="num">16.7%</b><span>direct share of room nights</span></div>
+ <div class="stat"><b class="num">₹1,566 → ₹1,176</b><span>RevPAR, list vs net</span></div>`;
+ done('flip')}
+$$('[data-sort]').forEach(b=>b.onclick=()=>{S.sort=b.dataset.sort;$$('[data-sort]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderRows(true);if(S.sort==='nadr')toast('MakeMyTrip drops from 1st to 5th')});
+$('#lang').onclick=()=>{S.hindi=!S.hindi;$('#insight').textContent=S.hindi?'MakeMyTrip ne sabse zyada bookings di, par har room par sabse kam paisa chhoda.':'MakeMyTrip brought the most bookings but left you the least per room.';$('#lang').textContent=S.hindi?'Show in English':'Hindi mein dikhao'};
+
+/* repeat */
+const REP=[['Rahul S., Delhi','MakeMyTrip, May 2025','MakeMyTrip, May 2026',92,3480],['Neha Gupta, Gurugram','Booking.com, Oct 2025','Booking.com, Jun 2026',88,3120],['A. Verma family, Lucknow','Agoda, Dec 2025','MakeMyTrip, Apr 2026',74,4060]];
+function renderRepeat(){$('#repeatList').innerHTML=REP.map((r,i)=>`<div class="item"><div><b>${r[0]}</b><div class="meta">${r[1]} · came back ${r[2]}</div><div class="meta">Same guest? <span class="tag ${r[3]>=80?'ok':''}">${r[3]}% sure</span> <span class="tag">Not new demand</span></div></div>
+ <div style="text-align:right"><b class="num" style="color:var(--loss)">${inr(r[4])}</b><div style="margin-top:6px">${r[3]<80&&!r.c?`<button class="btn small" data-rc="${i}">Confirm</button>`:'<span class="tag ok">Confirmed</span>'}</div></div></div>`).join('')+`<p class="calc">Showing 3 of 12.</p>`;
+ $$('[data-rc]').forEach(b=>b.onclick=()=>{REP[b.dataset.rc].c=1;REP[b.dataset.rc][3]=100;renderRepeat();toast('Match confirmed')})}
+renderRepeat();
+$$('#side button').forEach(b=>{if(b.dataset.pane==='repeat')b.addEventListener('click',()=>{if(S.uploaded)done('rep')})});
+$('#acceptScenario').onclick=()=>{S.scenario=true;$('#acceptScenario').textContent='Accepted';$('#acceptScenario').disabled=true;toast('6 Saturday rooms held for direct guests')};
+$('#skipScenario').onclick=()=>toast('Okay. It stays here for later.');
+
+/* desk */
+$('#guestSel').innerHTML=GUESTS.map(g=>`<option value="${g.id}">Room ${g.room} · ${g.name}</option>`).join('');
+function devState(id){$$('.screen .s').forEach(s=>s.classList.toggle('on',s.id===id))}
+const G=id=>GUESTS.find(g=>g.id===id);
+$('#showQR').onclick=()=>{const g=G($('#guestSel').value);S.current=g.id;$('#qr').innerHTML='';
+ if(window.QRCode)new QRCode($('#qr'),{text:'https://seedha.example/consent/'+g.code,width:110,height:110,colorDark:'#0E1512'});else $('#qr').textContent=g.code;
+ $('#qrText').textContent=`Room ${g.room} · Scan for your perk`;devState('d-qr');$('#ring').classList.remove('green');$('#paper').classList.remove('out');
+ $('#printSlip').disabled=!S.consent[g.id];renderConsent(g)};
+function renderConsent(g){$('#guestPhone').innerHTML=`<p class="tag">Deodar View · Mussoorie</p><h3 style="margin-top:14px;font-size:24px">Welcome, ${g.short}.</h3>
+ <div class="perk" style="margin-top:14px">Free breakfast on your next direct stay</div>
+ <label class="chk"><input type="checkbox" id="cbox"><span>Send me direct-booking offers on WhatsApp. I can reply STOP anytime.</span></label>
+ <button class="btn" style="width:100%" id="yes" disabled>Yes, send me offers</button>
+ <p class="calc" style="text-align:center">No tick, no messages. Your number stays with the hotel.</p>`;
+ $('#cbox').onchange=e=>$('#yes').disabled=!e.target.checked;
+ $('#yes').onclick=()=>{S.consent[g.id]=new Date();addProof(g);devState('d-ok');$('#okText').textContent='Thank you, '+g.short;$('#ring').classList.add('green');chime();done('desk');$('#printSlip').disabled=false;
+  $('#guestPhone').innerHTML=`<div style="text-align:center;margin-top:90px"><div class="check" style="background:var(--accent)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div><h3>You're in.</h3><p class="sub">Your perk arrives after checkout.</p></div>`}}
+$('#printSlip').onclick=()=>{const g=G(S.current);if(!g||!S.consent[g.id])return;S.checkedOut[g.id]=true;devState('d-print');
+ $('#paper').innerHTML=`<b>DEODAR VIEW, MUSSOORIE</b><br>${g.name} · Room ${g.room}<hr><div class="r"><span>Room (via ${g.via})</span><span>₹4,000</span></div><div class="r"><span>Discount</span><span>−₹600</span></div><div class="r"><span>Commission</span><span>−₹612</span></div><div class="r"><span>GST on commission</span><span>−₹110</span></div><hr><div class="r"><b>Hotel kept</b><b>₹2,678</b></div><hr>Book direct next time and the hotel keeps it all.<br>Free breakfast with code<br><b>${g.code}</b>`;
+ $('#paper').classList.remove('out');requestAnimationFrame(()=>requestAnimationFrame(()=>$('#paper').classList.add('out')));
+ setTimeout(()=>{devState('d-idle');$('#ring').classList.remove('green')},2600);done('slip');renderApprove();toast('Slip printed. A draft is waiting in Approvals.')};
+$('#closeSlip').onclick=()=>{devState('d-print');$('#paper').innerHTML=`<b>CLOSE · DEODAR VIEW</b><br>Today, 9:00 PM<hr><div class="r"><span>Rooms sold</span><span>14</span></div><div class="r"><span>Gross</span><span>₹58,800</span></div><div class="r"><span>Commission + GST</span><span>−₹10,900</span></div><div class="r"><b>Net kept</b><b>₹47,900</b></div><div class="r"><span>Direct share</span><span>21%</span></div><hr>Saved this month: ${inr(S.ledger.reduce((a,b)=>a+b.saved,0))}`;
+ $('#paper').classList.remove('out');requestAnimationFrame(()=>requestAnimationFrame(()=>$('#paper').classList.add('out')));setTimeout(()=>devState('d-idle'),2600)};
+
+/* approvals */
+function renderApprove(){const list=GUESTS.filter(g=>S.consent[g.id]&&S.checkedOut[g.id]);const pend=list.filter(g=>!S.sent[g.id]).length;
+ const c=$('#apCount');c.style.display=pend?'inline-block':'none';c.textContent=pend;
+ $('#approveList').innerHTML=list.length?list.map(g=>`<div class="item" style="grid-template-columns:1fr"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${g.name}</b><span class="tag ok">Consent ${S.consent[g.id].toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})} at Desk</span>${proofChip(g.id)}</div>
+ <div class="bub ${S.sent[g.id]?'me':'bot'}" style="max-width:100%">Namaste ${g.short}, thank you for staying at Deodar View. Book your next stay directly with us and breakfast is on us. Code ${g.code}. Reply STOP to opt out.${S.sent[g.id]?'<span class="foot">Sent</span>':''}</div>
+ ${S.sent[g.id]?`<button class="btn small ghost" data-open="${g.id}">Open as guest</button>`:`<div style="display:flex;gap:8px"><button class="btn small" data-ap="${g.id}">Approve and send</button><button class="btn small ghost" data-rj="${g.id}">Reject</button></div>`}</div>`).join(''):`<h3>No messages waiting</h3><p class="sub" style="margin:6px 0 14px">Drafts appear after a guest says yes at the Desk and checks out.</p><button class="btn small" id="toDesk">Go to Desk</button>`;
+ $$('[data-pf]').forEach(b=>b.onclick=()=>openProof(b.dataset.pf));
+ $$('[data-ap]').forEach(b=>b.onclick=()=>{S.sent[b.dataset.ap]=true;done('msg');renderApprove();renderLink(G(b.dataset.ap).code);toast('Sent on WhatsApp')});
+ $$('[data-rj]').forEach(b=>b.onclick=()=>{S.checkedOut[b.dataset.rj]=false;renderApprove();toast('Draft removed')});
+ $$('[data-open]').forEach(b=>b.onclick=()=>{renderLink(G(b.dataset.open).code);go('guest')});
+ const td=$('#toDesk');if(td)td.onclick=()=>go('desk')}
+renderApprove();
+
+/* seedha link */
+let linkCode='';
+function renderLink(code){if(code!==undefined)linkCode=code;const valid=GUESTS.find(g=>g.code===linkCode.trim().toUpperCase());const used=S.ledger.find(l=>l.code===(valid&&valid.code));
+ $('#linkPage').innerHTML=`<p class="tag">Booking directly with the hotel</p><h3 style="font-size:26px;margin-top:12px">Deodar View</h3><p class="sub" style="margin:2px 0 12px">Mall Road, Mussoorie</p>
+ <div style="height:120px;border-radius:18px;background:linear-gradient(160deg,#2C5E48,#1E6B4E 40%,#A9C7B6);margin-bottom:6px" aria-hidden="true"></div>
+ <label class="fl" for="lnDates">Dates</label><select id="lnDates"><option>14 Nov to 16 Nov · 2 nights</option><option>21 Nov to 23 Nov · 2 nights</option></select>
+ <label class="fl" for="lnRoom">Room</label><select id="lnRoom"><option>Deluxe Valley View · ₹4,300 a night</option></select>
+ <label class="fl" for="lnCode">Perk code</label><input type="text" id="lnCode" value="${linkCode}" placeholder="DEODAR-XX26" autocomplete="off">
+ <p style="font-size:14px;margin:8px 0 0;color:${valid?'var(--gain)':'var(--ink3)'}" id="codeMsg">${used?'This code was already used.':valid?'Free breakfast added for '+valid.short:'Enter the code from your slip or WhatsApp'}</p>
+ <div style="display:flex;justify-content:space-between;margin:16px 0 12px;font-weight:600"><span>Total</span><span class="num">₹8,600</span></div>
+ <button class="btn" style="width:100%" id="lnPay" ${used?'disabled':''}>Pay ₹8,600 with UPI</button>`;
+ $('#lnCode').oninput=e=>{linkCode=e.target.value;const v=GUESTS.find(g=>g.code===linkCode.trim().toUpperCase());$('#codeMsg').textContent=v?'Free breakfast added for '+v.short:'Enter the code from your slip or WhatsApp';$('#codeMsg').style.color=v?'var(--gain)':'var(--ink3)'};
+ $('#lnPay').onclick=()=>{$('#upiAmt').textContent='₹8,600 to Deodar View, Mussoorie';$('#upi').classList.add('up')};
+ $('#linkHint').textContent=valid?'Code '+valid.code+' is ready. Pay to complete the loop.':'Approve a message in Owner, or type a code from a checkout slip.'}
+renderLink('');
+$('#upiCancel').onclick=()=>$('#upi').classList.remove('up');
+$('#upiPay').onclick=()=>{$('#upi').classList.remove('up');const v=GUESTS.find(g=>g.code===linkCode.trim().toUpperCase());
+ if(v&&!S.ledger.find(l=>l.code===v.code)){const saved=Math.round(8600*0.22*1.18);S.ledger.push({code:v.code,name:v.name,saved,amt:8600});done('book');renderSavings();toast(inr(saved)+' commission avoided')}else toast('Booked directly. No perk code, so no saving is claimed.');
+ $('#linkPage').innerHTML=`<div style="text-align:center;margin-top:90px"><div class="check" style="background:var(--accent)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></div><h3>Booked.</h3><p class="sub">See you on 14 November.${v?' Breakfast is on us.':''}</p><button class="btn ghost small" id="again">Back</button></div>`;
+ $('#again').onclick=()=>renderLink('')};
+
+/* savings */
+function countUp(el,to){const from=+el.dataset.v||0;const t0=performance.now();const f=t=>{const p=Math.min(1,(t-t0)/900);const e=1-Math.pow(1-p,3);el.textContent=inr(from+(to-from)*e);if(p<1)requestAnimationFrame(f);else el.dataset.v=to};requestAnimationFrame(f)}
+function renderSavings(){const tot=S.ledger.reduce((a,b)=>a+b.saved,0);countUp($('#bigSave'),tot);
+ $('#saveSub').textContent=S.ledger.length?`${S.ledger.length} coded direct booking${S.ledger.length>1?'s':''} this month.`:'No coded direct bookings yet.';
+ $('#ledger').innerHTML=S.ledger.length?S.ledger.map(l=>`<div class="item"><div><b>${l.name}</b><div class="meta">Code ${l.code} · ${inr(l.amt)} booked direct</div></div><b class="num" style="color:var(--gain)">+${inr(l.saved)}</b></div>`).join('')+`<p class="calc">Saving = the commission and GST an OTA would have taken on this booking.</p>`:`<h3>The ledger is empty</h3><p class="sub" style="margin:6px 0 0">Complete the loop: Desk, Approvals, then Seedha Link.</p>`}
+renderSavings();
+
+/* whatsapp */
+const QA=[['Pichle mahine MakeMyTrip ko kitna diya?','September mein MakeMyTrip ko ₹99,146 diye. Commission plus GST on commission.'],
+ ['Sabse accha channel kaunsa?','Walk-in: har room par ₹4,500 bache. Online mein Direct sabse accha: ₹4,283 har room.'],
+ ['Kitne guest do baar commission dekar aaye?','12 guests. Unpar ₹41,800 commission dobara diya.'],
+ ['Is hafte ka payment kab aayega?','MakeMyTrip: ₹1,12,400 Friday ko. Booking.com: ₹58,200 ka virtual card abhi charge karna baaki hai.'],
+ ['Direct se kitna bacha?',()=>{const t=S.ledger.reduce((a,b)=>a+b.saved,0);return t?`Is mahine ${inr(t)} bache, ${S.ledger.length} coded direct booking se.`:'Abhi tak koi coded direct booking nahi. Desk par guests ka consent lijiye.'}],
+ ['Aaj ka close','Aaj: 14 rooms. Gross ₹58,800. Net ₹47,900. Commission plus GST ₹10,900. Direct share 21%.']];
+$('#chips').innerHTML=QA.map((q,i)=>`<button class="chip" data-q="${i}">${q[0]}</button>`).join('');
+$$('[data-q]').forEach(b=>b.onclick=()=>{const [q,a]=QA[b.dataset.q];const wa=$('#wa');wa.insertAdjacentHTML('beforeend',`<div class="bub me">${q}</div>`);
+ setTimeout(()=>{wa.insertAdjacentHTML('beforeend',`<div class="bub bot">${typeof a==='function'?a():a}<span class="foot">From your statements</span></div>`);wa.scrollTop=wa.scrollHeight},450)});
+
+/* pro */
+$('#proCards').innerHTML=[['Seedha Audit','₹18,640 to claim back','Commission on 2 cancelled stays and a higher rate than your contract on 14 rows.'],
+ ['Seedha Pulse','Winter Line Carnival, 25 to 30 Dec','Mussoorie will fill without help. Stop OTA discounts for these dates and keep 6 rooms for direct guests.'],
+ ['Rate Watch','Agoda shows ₹3,950. You sell direct at ₹4,300.','From your screenshot today. Guests who compare will book Agoda.'],['Seedha Proof','41 consents, all tamper-proof.','If an OTA, guest or regulator asks when a guest said yes, you can show it, and nobody can change it.'],['Seedha Site','Your hotel online in 10 minutes.','Website, packages, rate card and agent deck from a few photos and a voice note.']]
+ .map(c=>`<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><h3>${c[0]}</h3><span class="tag pro">Pro</span></div><p style="font-size:22px;font-weight:600;letter-spacing:-.02em;margin:8px 0 4px">${c[1]}</p><p class="sub" style="margin:0 0 14px">${c[2]}</p><button class="btn small ghost" onclick="go('plans')">See Pro</button></div>`).join('');
+
+/* plans */
+const PL=[['Base',1499,['Statement reading and the flip','Repeat guests and Saturday move','Seedha Desk with slips','Win-back, Seedha Link, savings ledger','Six Hindi WhatsApp answers','Simple one-page website']],
+ ['Pro',2499,['Everything in Base','Full website, packages, rate card, agent deck','Audit: money to claim back','Pulse: event alerts','Rate Watch','Proof: tamper-proof consent'],1],
+ ['Max',3999,['Everything in Pro','Two properties, one login','One WhatsApp for both']]];
+function renderPlans(){$('#plans').innerHTML=PL.map(p=>{const m=S.bill==='y'?Math.round(p[1]*10/12):p[1];return `<div class="plan ${p[3]?'rec':''}">${p[3]?'<span class="tag ok" style="align-self:flex-start">Recommended</span>':''}<h3 style="font-size:24px">Seedha ${p[0]}</h3>
+ <div class="price num">${inr(m)}<small> a month</small></div><p class="calc" style="margin:0">${S.bill==='y'?inr(p[1]*10)+' billed yearly':'Billed monthly'}</p>
+ <ul>${p[2].map(x=>`<li>${x}</li>`).join('')}</ul><button class="btn ${p[3]?'':'ghost'}" style="margin-top:auto" onclick="toast('Thanks. We will call you to set up ${p[0]}.')">Start with ${p[0]}</button></div>`}).join('')}
+$$('[data-bill]').forEach(b=>b.onclick=()=>{S.bill=b.dataset.bill;$$('[data-bill]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderPlans()});
+renderPlans();
+
+/* ---------- Seedha Proof ---------- */
+S.proof={};S.bundles=[{d:'3 Oct 2026, 12:00 AM',n:13,st:'v'},{d:'2 Oct 2026, 12:00 AM',n:11,st:'v'},{d:'1 Oct 2026, 12:00 AM',n:14,st:'v'}];
+async function fp(txt){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(txt));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){let h=0;for(const c of txt)h=(h*31+c.charCodeAt(0))>>>0;return h.toString(16).padStart(8,'0').repeat(8)}}
+const shortFp=f=>f.slice(0,4)+'…'+f.slice(-4);
+async function addProof(g){const t=S.consent[g.id];const secret=Math.random().toString(36).slice(2);S.proof[g.id]={st:'p',time:t,fp:await fp(g.id+'|'+t.toISOString()+'|consent-v1|'+secret)};renderProof();renderApprove()}
+function proofChip(id){const p=S.proof[id];if(!p)return'';return p.st==='v'?`<button class="tag ok chipv" data-pf="${id}">✓ Verified</button>`:`<button class="tag chipv" data-pf="${id}">◷ Pending proof</button>`}
+function renderProof(){const live=Object.values(S.proof);const pend=live.filter(p=>p.st==='p').length,ver=live.filter(p=>p.st==='v').length;
+ $('#proofStats').innerHTML=`<div class="stat"><b class="num">${41+live.length}</b><span>consents this month</span></div><div class="stat"><b class="num" style="color:var(--gain)">${38+ver}</b><span>proven</span></div><div class="stat"><b class="num">${3+pend}</b><span>pending tonight</span></div>`;
+ $('#bundleBtn').disabled=!pend&&S.bundledDemo;
+ $('#proofList').innerHTML=S.bundles.map(b=>`<div class="item"><div><b>${b.d}</b><div class="meta">Bundle of ${b.n} consents</div></div><span class="tag ok">✓ Verified</span></div>`).join('')}
+$('#bundleBtn').onclick=()=>{const ids=Object.keys(S.proof).filter(k=>S.proof[k].st==='p');ids.forEach(k=>S.proof[k].st='v');S.bundledDemo=true;
+ S.bundles.unshift({d:'4 Oct 2026, 12:00 AM',n:3+ids.length,st:'v'});renderProof();renderApprove();toast('Tonight\u2019s proof written. '+(3+ids.length)+' consents verified')};
+function openProof(id){const g=G(id),p=S.proof[id];if(!p)return;const t=p.time;const ds=t.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+', '+t.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'});
+ $('#dlg').innerHTML=`<h3 id="ovT" style="font-size:24px">Consent proof</h3><p class="sub" style="margin:6px 0 0">${g.name} said yes at the Desk on ${ds}. ${p.st==='v'?'This record has not been changed since.':'It will be written to the public record tonight.'}</p>
+ <ol class="tl"><li><span class="dot" style="background:var(--accent);color:#fff;width:26px;height:26px">1</span><span>Consent recorded at the Desk<br><span class="meta" style="color:var(--ink2);font-size:14px">${ds}</span></span></li>
+ <li><span class="dot" style="background:var(--accent);color:#fff;width:26px;height:26px">2</span><span>Fingerprint created<br><span class="mono">${shortFp(p.fp)}</span></span></li>
+ <li><span class="dot" style="${p.st==='v'?'background:var(--accent);color:#fff':''};width:26px;height:26px">3</span><span>${p.st==='v'?'Written to a public blockchain':'Waiting for tonight\u2019s bundle'}<br><span class="meta" style="color:var(--ink2);font-size:14px">${p.st==='v'?'4 Oct, 12:00 AM':'Scheduled 12:00 AM'}</span></span></li></ol>
+ <p style="font-size:20px;font-weight:600;color:${p.st==='v'?'var(--gain)':'var(--ink2)'};margin:0 0 14px">${p.st==='v'?'✓ Matches. Not changed.':'◷ Pending proof'}</p>
+ <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn small ghost" id="cpFp">Copy fingerprint</button>${p.st==='v'?'<button class="btn small ghost" onclick="toast(\'Opens the public record (demo)\')">View public record</button>':''}<button class="btn small" id="ovClose" style="margin-left:auto">Done</button></div>
+ <p class="calc">Only a fingerprint is public. No name, phone or booking detail is ever stored on the blockchain.</p>`;
+ $('#ov').classList.add('on');$('#ovClose').focus();$('#ovClose').onclick=closeOv;$('#cpFp').onclick=()=>{try{navigator.clipboard.writeText(p.fp)}catch(e){}toast('Fingerprint copied')}}
+function closeOv(){$('#ov').classList.remove('on')}
+$('#ov').onclick=e=>{if(e.target.id==='ov')closeOv()};document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOv()});
+renderProof();
+
+/* ---------- Seedha Site ---------- */
+S.site={stage:'empty',mood:'pine',lang:'en',pk:{},live:false};
+const MOODS={pine:['#2C5E48','#E8F0EC','linear-gradient(160deg,#1f3d31,#2C5E48 45%,#9DBFAE)'],stone:['#6B6259','#F1EEEA','linear-gradient(160deg,#3d3833,#6B6259 45%,#CFC6BC)'],sky:['#3C6E91','#E8F0F6','linear-gradient(160deg,#21384a,#3C6E91 45%,#A9C6DB)']};
+const PKGS=[['wk','Weekend in the clouds','2 nights, breakfast, bonfire','₹9,400','Your weekends fill fastest.'],['cd','Char Dham stopover','1 night, breakfast at 5 AM, parking','₹4,300','Yatra guests stay one night on the way.'],['mm','Monsoon midweek','3 nights, breakfast, late checkout','₹11,900','July and August weekdays are your emptiest.']];
+const SITEQ=[['Send 8 photos: rooms, view, food, outside.','📷 8 photos sent'],['Apne hotel ke baare mein ek voice note bhejiye.','🎙 Voice note, 0:42'],['Room types aur normal price?','Deluxe ₹4,300, Family Suite ₹6,200, Standard ₹3,400'],['Paas mein kya hai?','Mall Road, Gun Hill, Kempty Falls, Lal Tibba'],['Contact number aur UPI ID?','98XXX XXXXX · deodarview@upi']];
+const T={en:{book:'Book directly',why:'Why book direct',w:['Breakfast on us when you come back','Pay by UPI, straight to the hotel','Talk to us directly on WhatsApp'],rooms:'Rooms',pk:'Packages',near:'Nearby',night:'a night',welcome:'Quiet rooms above Mall Road with valley views.'},
+ hi:{book:'Seedha book karein',why:'Seedha kyun book karein',w:['Wapas aane par breakfast hamari taraf se','UPI se seedha hotel ko payment','WhatsApp par seedhe baat karein'],rooms:'Kamre',pk:'Packages',near:'Paas mein',night:'ek raat',welcome:'Mall Road ke upar shaant kamre, valley view ke saath.'}};
+function siteHTML(){const [c,soft,grad]=MOODS[S.site.mood];const t=T[S.site.lang];const pk=PKGS.filter(p=>S.site.pk[p[0]]);
+ return `<div class="hs"><div class="hero" style="background:${grad}"><div><h4>Deodar View</h4><div style="font-size:14px;opacity:.9">Mall Road, Mussoorie</div><div style="font-size:14px;opacity:.9;margin:4px 0 10px">${t.welcome}</div><button class="bk" data-book style="background:#fff;color:${c}">${t.book}</button></div></div>
+ <div class="sec"><h5>${t.why}</h5>${t.w.map(x=>`<div style="font-size:14px;padding:3px 0">✓ ${x}</div>`).join('')}</div>
+ <div class="sec"><h5>${t.rooms}</h5>${[['Deluxe Valley View','₹4,300'],['Family Suite','₹6,200'],['Standard','₹3,400']].map((r,i)=>`<div class="rm"><div class="ph" style="background:${grad};opacity:${1-i*.2}"></div><div style="font-size:14px"><b>${r[0]}</b><br><span style="color:#777">${r[1]} ${t.night}</span></div><button class="bk" data-book style="background:${c}">Book</button></div>`).join('')}</div>
+ ${pk.length?`<div class="sec"><h5>${t.pk}</h5>${pk.map(p=>`<div class="pk" style="background:${soft}"><b>${p[1]}</b><div style="font-size:13px;color:#555">${p[2]}</div><div style="font-weight:600;margin-top:4px">${p[3]}</div></div>`).join('')}</div>`:''}
+ <div class="sec"><h5>${t.near}</h5><div style="font-size:14px;color:#555">Mall Road 5 min walk · Gun Hill 10 min · Lal Tibba 15 min drive · Kempty Falls 30 min drive</div></div>
+ <div class="foot">Made with Seedha</div></div>`}
+function renderSite(){const b=$('#siteBody');const st=S.site.stage;
+ if(st==='empty'){b.innerHTML=`<h2>Your hotel, online in 10 minutes.</h2><p class="sub">No website? Send a few photos and a voice note on WhatsApp. Seedha builds a site with direct booking, packages, a rate card and an agent deck.</p><div class="card"><h3>What you send</h3><p class="sub" style="margin:6px 0 16px">8 photos, a voice note in Hindi, room prices, nearby places, contact and UPI ID. About 5 minutes.</p><button class="btn" id="siteStart">Start on WhatsApp</button></div>`;$('#siteStart').onclick=()=>{S.site.stage='chat';renderSite()};return}
+ if(st==='chat'){b.innerHTML=`<h2>Five quick questions.</h2><p class="sub">This is how the owner sets it up on WhatsApp.</p><div class="wa" id="siteWa"></div><div class="progress"><i id="siteBar"></i></div><p class="calc" id="siteNote">Question 1 of 5</p>`;
+  let i=0;const wa=$('#siteWa');const next=()=>{if(i<SITEQ.length){const [q,a]=SITEQ[i];wa.insertAdjacentHTML('beforeend',`<div class="bub bot">${q}<span class="foot">Seedha · ${i+1} of 5</span></div>`);
+   setTimeout(()=>{wa.insertAdjacentHTML('beforeend',`<div class="bub me">${a}</div>`);i++;$('#siteNote').textContent=i<5?`Question ${i+1} of 5`:'Building your site';$('#siteBar').style.width=(i/5*100)+'%';setTimeout(next,450)},550)}
+   else{wa.insertAdjacentHTML('beforeend',`<div class="bub bot">Theek hai. Building your site now.<span class="foot">Seedha</span></div>`);setTimeout(()=>{S.site.stage='review';renderSite()},1300)}};next();return}
+ const pkCards=PKGS.map(p=>`<div class="pkg"><div><b>${p[1]}</b><div class="meta" style="color:var(--ink2);font-size:14px">${p[2]} · ${p[3]}</div><div style="font-size:14px;color:var(--ink3)">Why: ${p[4]}</div></div><div>${S.site.pk[p[0]]?'<span class="tag ok">Approved</span>':`<button class="btn small" data-pk="${p[0]}">Approve</button>`}</div></div>`).join('');
+ b.innerHTML=`<h2>${S.site.live?'Your site is live.':'Your hotel, online.'}</h2><p class="sub">${S.site.live?'deodarview.seedha.site · Guests who book here pay you directly.':'Check it, approve packages, then publish. Nothing goes live before you tap Publish.'}</p>
+ <div class="two"><div>
+  <div class="toggle" role="group" aria-label="Look">${['pine','stone','sky'].map(m=>`<button aria-pressed="${S.site.mood===m}" data-mood="${m}">${m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div>
+  <div class="toggle" role="group" aria-label="Language" style="margin-left:6px">${[['en','English'],['hi','Hindi']].map(l=>`<button aria-pressed="${S.site.lang===l[0]}" data-lng="${l[0]}">${l[1]}</button>`).join('')}</div>
+  <div class="card" style="padding:8px 20px"><h3 style="margin:12px 0 0">Packages for your guests</h3><p class="calc" style="margin:2px 0 4px">Packages add value. Your public room price stays the same.</p>${pkCards}</div>
+  <div class="card" style="margin-top:16px"><h3>Ready to publish</h3>${['Photos','Rooms and prices','Nearby places','Contact and UPI'].map(x=>`<div style="padding:4px 0;font-size:15px">✓ ${x}</div>`).join('')}
+   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">${S.site.live?`<button class="btn" id="siteShare">Share on WhatsApp</button><button class="btn ghost" id="siteKit">Rate card and agent deck</button>`:`<button class="btn" id="sitePub">Publish site</button><button class="btn ghost" onclick="toast('Tell us on WhatsApp what to change')">Change something</button>`}</div></div>
+ </div><div><div class="phone" style="min-height:0;border-width:8px"><div class="notch"></div><div class="frame" style="border:0;border-radius:0">${siteHTML()}</div></div></div></div>`;
+ $$('[data-mood]').forEach(x=>x.onclick=()=>{S.site.mood=x.dataset.mood;renderSite()});
+ $$('[data-lng]').forEach(x=>x.onclick=()=>{S.site.lang=x.dataset.lng;renderSite()});
+ $$('[data-pk]').forEach(x=>x.onclick=()=>{S.site.pk[x.dataset.pk]=1;renderSite();toast('Package approved')});
+ $$('[data-book]').forEach(x=>x.onclick=()=>{renderLink(linkCode);go('guest');toast('Opens Seedha Link')});
+ const pb=$('#sitePub');if(pb)pb.onclick=()=>{S.site.live=true;renderSite();toast('Your site is live')};
+ const sh=$('#siteShare');if(sh)sh.onclick=()=>toast('Link ready to share on WhatsApp');
+ const kt=$('#siteKit');if(kt)kt.onclick=()=>toast('Rate card PDF and 6-slide agent deck ready')}
+renderSite();
+</script>
+</body>
+</html>
