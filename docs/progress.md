@@ -276,3 +276,58 @@ e2e n/a until M6
 
 **Simulated (missing keys)**: none needed; the Desk box is simulated in the
 browser until hardware exists (M8).
+
+**Commit**: 9988246
+
+---
+
+## M6 Win-back, Seedha Link and savings — passed
+
+**Built**
+- Messages: drafts created at checkout or at consent-after-checkout only for
+  active consents (ruling 7), one per perk code (DB unique), Claude wording
+  checked against code/link/STOP/no-money rules with a template fallback;
+  `GET /messages`, approve-and-send (consent re-checked), reject, and a
+  labelled "simulate reply" for the demo. Simulated WhatsApp sender; Cloud API
+  sender (request shape checked against Meta's docs, version configurable).
+- STOP: webhook `GET|POST /webhooks/whatsapp` (verify token, HMAC signature),
+  STOP variants withdraw consent, block drafts, log an opt-out event without
+  the number.
+- Seedha Link: `GET /public/link?code=`, `POST /public/link/book` (public rate
+  x nights, room availability, atomic one-time redemption, simulated UPI).
+- Savings: original channel's contract rate + 18% GST − UPI fee, stored with
+  the rate (ruling 5); `GET /savings`. `savings.py` is in the 100% money set.
+- Web: Approvals (consent time, proof chip, bubbles, approve/reject, open as
+  guest, simulated STOP), sidebar badge, Seedha Link (owner demo in a phone
+  frame and the guest page `/link/[code]`, UPI bottom sheet), Savings with a
+  gold count-up and the full breakdown.
+- Playwright e2e of the full 8-step loop + code reuse, on its own API,
+  database and production build; in `make check`; green 3 runs in a row.
+
+**Tests**: API 253 passed, 0 failed. Web unit 13 passed. e2e 2/2 (x3).
+
+**Code quality**: ruff 0 · pylint 10.00 · mypy 0 · coverage 99% (money 100%:
+money, ledger, scenario, slips, savings) · bandit 0 · pip-audit 0 · tsc 0 ·
+eslint 0 · npm audit 0 high in production (dev allowlist D-012) · e2e 2/2
+
+**Numbers checked**
+- Rahul DEODAR-RS26, ₹8,600 (2 nights Deluxe at ₹4,300): commission ₹1,892 +
+  GST ₹341 = ₹2,233 avoided, UPI fee ₹34, net ₹2,199 (API, e2e, browser)
+- Neha (Booking.com 18%) would give ₹1,827 avoided, ₹1,793 net (unit test)
+- Second use of a code: 409, savings stay at one row
+- Matched-but-unconsented guests: no draft, no send (ruling 7 test)
+- After STOP: drafts blocked, approve refused, opt-out event recorded
+
+**Issues found in self-review and fixed**
+- Drafting on GET made 8 drafts for 2 guests when two screens loaded at once;
+  now event-driven + unique constraint.
+- The code check passed when the code appeared only inside the link.
+- A text replacement silently missed the checkout hook (caught by tests).
+- Alembic's logging config silenced SIMULATED warnings after migrations.
+- UPI sheet showed below the form on phones; now a fixed, hidden-until-open
+  bottom sheet.
+- e2e servers started before global setup, so the API held a stale database.
+- Stale Turbopack dev cache hid new CSS (dev only, documented).
+
+**Simulated (missing keys)**: WhatsApp sends and inbound (labelled), UPI
+payment (labelled), Claude wording (template used).

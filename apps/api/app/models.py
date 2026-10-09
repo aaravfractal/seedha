@@ -35,6 +35,7 @@ __all__ = [
     "DeskCommand",
     "DeskDevice",
     "DirectBooking",
+    "OptOutEvent",
     "Guest",
     "Message",
     "PerkCode",
@@ -71,6 +72,7 @@ class Property(Base):
     rooms_count: Mapped[int] = mapped_column(Integer)
     owner_name: Mapped[str] = mapped_column(String(80))
     perk_text: Mapped[str] = mapped_column(String(120))
+    perk_promise: Mapped[str] = mapped_column(String(80), default="your perk is waiting")
     code_prefix: Mapped[str] = mapped_column(String(20))
     is_sample: Mapped[bool] = mapped_column(Boolean, default=True)
 
@@ -311,7 +313,10 @@ class Message(Base):
     """An outgoing win-back message. Sent only after owner approval (rule 7)."""
 
     __tablename__ = "message"
-    __table_args__ = (CheckConstraint(f"status IN {MESSAGE_STATUSES}", name="message_status"),)
+    __table_args__ = (
+        CheckConstraint(f"status IN {MESSAGE_STATUSES}", name="message_status"),
+        UniqueConstraint("perk_code_id", name="uq_message_perk_code_id"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     consent_id: Mapped[int] = mapped_column(ForeignKey("consent.id"))
@@ -469,3 +474,14 @@ class DeskCommand(Base):
     payload: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     acked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class OptOutEvent(Base):
+    """A STOP received for a consent. Stores no phone number."""
+
+    __tablename__ = "optout_event"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    consent_id: Mapped[int] = mapped_column(ForeignKey("consent.id"))
+    source: Mapped[str] = mapped_column(String(12))
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

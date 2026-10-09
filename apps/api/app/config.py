@@ -31,6 +31,8 @@ class Settings:
     whatsapp_token: str
     whatsapp_phone_number_id: str
     whatsapp_verify_token: str
+    whatsapp_app_secret: str
+    whatsapp_api_version: str
     razorpay_key_id: str
     razorpay_key_secret: str
     proof_rpc_url: str
@@ -70,6 +72,8 @@ def load_settings() -> Settings:
         whatsapp_token=_env("WHATSAPP_TOKEN"),
         whatsapp_phone_number_id=_env("WHATSAPP_PHONE_NUMBER_ID"),
         whatsapp_verify_token=_env("WHATSAPP_VERIFY_TOKEN"),
+        whatsapp_app_secret=_env("WHATSAPP_APP_SECRET"),
+        whatsapp_api_version=_env("WHATSAPP_API_VERSION", "v21.0"),
         razorpay_key_id=_env("RAZORPAY_KEY_ID"),
         razorpay_key_secret=_env("RAZORPAY_KEY_SECRET"),
         proof_rpc_url=_env("PROOF_RPC_URL"),

@@ -7,7 +7,7 @@ from datetime import datetime
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
-from app.deps import PropertyDep, SessionDep
+from app.deps import PropertyDep, SessionDep, SettingsDep, WordingDep
 from app.errors import ApiError
 from app.services.consent import (
     CONSENT_WORDING,
@@ -17,6 +17,7 @@ from app.services.consent import (
     resolve_token,
 )
 from app.services.desk import enqueue, property_device, utc_now
+from app.services.messages import draft_for_booking
 
 router = APIRouter(prefix="/public", tags=["public"])
 
@@ -74,14 +75,19 @@ def consent_page(token: str, session: SessionDep, prop: PropertyDep) -> ConsentP
 
 
 @router.post("/consent/{token}", response_model=ConsentOut)
-def give_consent(token: str, body: ConsentIn, session: SessionDep, prop: PropertyDep) -> ConsentOut:
-    """Save an explicit yes, then light the Desk ring green."""
+def give_consent(
+    token: str, body: ConsentIn, session: SessionDep, prop: PropertyDep,
+    settings: SettingsDep, wording: WordingDep,
+) -> ConsentOut:  # fmt: skip
+    """Save an explicit yes, then light the Desk ring green. If the guest has
+    already checked out, the win-back draft is prepared now."""
     now = utc_now()
     try:
         record = resolve_token(session, token, now)
         result = record_consent(session, record, body.agree, body.whatsapp, now)
     except ConsentError as exc:
         raise consent_error(exc) from exc
+    draft_for_booking(session, prop, record.booking.id, settings.web_origin, wording)
     guest = record.booking.guest
     short = guest.short_name if guest else "Guest"
     device = property_device(session, prop.id)

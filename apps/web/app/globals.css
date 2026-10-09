@@ -1003,3 +1003,87 @@ label.fl {
   max-width: 480px;
   margin: 0 auto;
 }
+
+/* approvals */
+.bub {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 15px;
+  line-height: 1.4;
+  animation: rise 0.35s var(--spring);
+  overflow-wrap: anywhere;
+}
+.bub.me {
+  align-self: flex-end;
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 6px;
+}
+:root[data-theme="dark"] .bub.me {
+  color: #04140c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .bub.me {
+    color: #04140c;
+  }
+}
+.bub.bot {
+  align-self: flex-start;
+  background: var(--card);
+  border-bottom-left-radius: 6px;
+  border: 1px solid var(--line);
+}
+.bub .foot {
+  display: block;
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+.chipv {
+  cursor: pointer;
+  border: 0;
+}
+
+/* link + savings */
+.sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  padding: 22px 22px calc(22px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(105%);
+  visibility: hidden;
+  transition:
+    transform 0.55s var(--spring),
+    visibility 0s linear 0.55s;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.15);
+}
+.sheet.up {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.55s var(--spring);
+}
+.phone .sheet {
+  position: absolute;
+}
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 860px) {
+  .two {
+    grid-template-columns: 1fr;
+  }
+}
+.big {
+  font-size: clamp(48px, 8vw, 84px);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: var(--goldText);
+}

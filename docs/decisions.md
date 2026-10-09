@@ -231,3 +231,60 @@ recording a decision then is still a 422.
 **D-042 Next 16 Cache Components.** The header and page content sit inside
 `<Suspense>` in the root layout so dynamic routes (consent links) stream
 without prerender errors.
+
+## M6 Win-back, Seedha Link and savings
+
+**D-043 Drafts are created by events, not by reading.** A draft is made at
+checkout (if the guest has an active consent) or when consent arrives after
+checkout. `GET /messages` only reads. A unique constraint allows one message
+per perk code. (The first version drafted on GET; two screens loading at once
+produced duplicates, found in the browser check.)
+
+**D-044 Draft rules.** Template: "Namaste Rahul ji, thank you for staying at
+Deodar View. Book your next stay directly with us and breakfast is on us. Code
+DEODAR-RS26: <link> Reply STOP to opt out." Claude may reword it, but its text
+is used only if it contains the code (outside the link), the link, ends with
+"Reply STOP to opt out." and has no ₹/Rs/INR amount, percentage or "rupees";
+otherwise the template is used. The link to Seedha Link is included so the
+guest can book in one tap.
+
+**D-045 Sending.** Approval re-checks consent at send time. Without WhatsApp
+keys the send is SIMULATED (recorded on the message, logged without number or
+text, labelled in the UI). Live sends use the Cloud API text message;
+`WHATSAPP_API_VERSION` is configurable (default v21.0, to be confirmed).
+WhatsApp requires an approved template for business-initiated messages
+outside a 24-hour window; see needs-from-aarav.md.
+
+**D-046 STOP.** STOP, STOP ALL, UNSUBSCRIBE and OPT OUT (any case) withdraw
+every active consent for that number, block unsent drafts and record an
+`optout_event` (no number stored). Inbound webhooks must carry a valid
+X-Hub-Signature-256; without `WHATSAPP_APP_SECRET` they are refused (503).
+The demo has a labelled "Simulate guest reply STOP (sample)" button.
+
+**D-047 Seedha Link pricing and redemption.** Price = public (rack) rate x
+nights; the perk is extra, never a lower rate (rule 6). Two suggested
+Friday-to-Sunday stays about a month out; any date up to a year ahead is
+accepted by the API. A code is redeemed by one conditional UPDATE so it can
+never be used twice; a used, unknown or missing code books with no saving.
+The guest's confirmation never shows the hotel's saving.
+
+**D-048 Saving rows** store the original channel and its contract rate;
+nothing is claimed when the original channel took no commission (walk-in,
+direct).
+
+**D-049 Razorpay is not built yet.** Only simulated UPI is implemented and
+labelled. Building Razorpay checkout without test keys would mean untested
+payment code; it is listed in needs-from-aarav.md.
+
+**D-050 Playwright e2e** runs its own API (port 8001, fresh `e2e.db`
+seeded by the server command itself) and a production build of the web app
+(port 3001), with every integration forced to simulated. It is part of
+`make check`.
+
+**D-051 Alembic logging.** `migrations/env.py` keeps existing loggers
+(`disable_existing_loggers=False`); otherwise an in-process migration silenced
+the "SIMULATED" warnings.
+
+**Note on dev caching.** If CSS changes do not show in `next dev`, delete
+`apps/web/.next/dev` (Turbopack's persistent cache missed appended rules once;
+production builds were unaffected). `make clean` removes it.

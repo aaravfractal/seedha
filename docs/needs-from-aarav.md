@@ -11,10 +11,14 @@ Everything below has a working simulated fallback today. Nothing is blocked.
    tie-breaks use the score alone, and wording uses fixed templates. Money is
    never affected either way (rule 1).
 3. **WhatsApp Cloud API test number** (`WHATSAPP_TOKEN`,
-   `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`). Without it: sends
-   are written to a "simulated send" log and labelled in the UI.
-4. **Razorpay test keys** (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`). Without
-   them: simulated UPI sheet, labelled.
+   `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`,
+   and the current `WHATSAPP_API_VERSION`). Also an approved **message
+   template** for the win-back text: WhatsApp only allows free text inside a
+   24-hour window after the guest writes first. Without keys: sends are
+   simulated and labelled.
+4. **Razorpay test keys** (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`). Only
+   simulated UPI is built (D-049); with keys I can add Razorpay test-mode
+   checkout and signature verification.
 5. **Polygon Amoy testnet** (`PROOF_RPC_URL`, `PROOF_PRIVATE_KEY` for a funded
    test wallet). Without them: the nightly Merkle root is stored locally and
    labelled "stored, not yet on a public chain".

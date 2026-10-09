@@ -169,3 +169,58 @@ export type ConsentPage = {
   wording_version: string;
   expires_at: string;
 };
+
+export type WinbackMessage = {
+  id: number;
+  guest_name: string;
+  short_name: string;
+  perk_code: string;
+  body: string;
+  status: "draft" | "approved" | "sent" | "rejected" | "failed" | "blocked";
+  transport: string | null;
+  consent_given_at: string;
+  consent_fingerprint: string;
+  proof_status: string;
+  consent_active: boolean;
+  created_at: string;
+  sent_at: string | null;
+};
+
+export type Messages = { pending: number; simulated: boolean; messages: WinbackMessage[] };
+
+export type LinkPage = {
+  hotel: string;
+  address: string;
+  code: string | null;
+  code_status: "valid" | "used" | "unknown" | "none";
+  guest_short_name: string | null;
+  perk: string;
+  rooms: { room_type: string; nightly_rate: number }[];
+  dates: { check_in: string; nights: number; label: string }[];
+};
+
+export type BookResult = {
+  reference: string;
+  amount: number;
+  check_in: string;
+  nights: number;
+  room_type: string;
+  perk_applied: boolean;
+  payment: string;
+};
+
+export type SavingItem = {
+  guest_name: string;
+  code: string;
+  amount: number;
+  check_in: string;
+  original_channel: string;
+  commission_rate_used: number;
+  commission_avoided: number;
+  gst_avoided: number;
+  upi_fee: number;
+  net_saving: number;
+  booked_at: string;
+};
+
+export type Savings = { total_net_saving: number; total_avoided: number; count: number; items: SavingItem[] };

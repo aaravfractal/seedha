@@ -15,6 +15,7 @@ PROPERTY = {
     "rooms_count": 22,
     "owner_name": "Rajesh",
     "perk_text": "Free breakfast on your next direct stay",
+    "perk_promise": "breakfast is on us",
     "code_prefix": "DEODAR",
 }
 

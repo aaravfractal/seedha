@@ -14,6 +14,7 @@ from app.config import Settings
 from app.errors import ApiError
 from app.models import DeskDevice, Property
 from app.services.desk import device_for_key
+from app.services.drafter import ClaudeWording, Wording
 
 
 def get_settings(request: Request) -> Settings:
@@ -83,3 +84,17 @@ def require_device(
 
 
 DeviceDep = Annotated[DeskDevice, Depends(require_device)]
+
+
+def get_wording(request: Request, settings: SettingsDep) -> Wording | None:
+    """Claude wording for drafts (None in simulated mode); tests override
+    it via app.state.wording."""
+    override: Wording | None = getattr(request.app.state, "wording", None)
+    if override is not None:
+        return override
+    if not settings.llm_enabled:
+        return None
+    return ClaudeWording(settings.anthropic_api_key, settings.claude_model)
+
+
+WordingDep = Annotated[Wording | None, Depends(get_wording)]

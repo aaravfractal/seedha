@@ -10,7 +10,7 @@ from fastapi import APIRouter, Body
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from app.deps import DeviceDep, OwnerDep, PropertyDep, SessionDep, SettingsDep
+from app.deps import DeviceDep, OwnerDep, PropertyDep, SessionDep, SettingsDep, WordingDep
 from app.errors import ApiError
 from app.models import PerkCode, Property
 from app.routers.pipeline import record_step
@@ -29,6 +29,7 @@ from app.services.desk import (
     tonight_close,
     utc_now,
 )
+from app.services.messages import draft_for_booking
 from app.services.slips import Slip
 
 router = APIRouter(prefix="/desk", tags=["desk"])
@@ -196,11 +197,18 @@ def desk_checkin(
 
 @router.post("/checkout", response_model=CheckoutOut)
 def desk_checkout(
-    body: RoomIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
+    body: RoomIn,
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
+    wording: WordingDep,
 ) -> CheckoutOut:
-    """Print the checkout slip from the guest's own booking (ruling 4)."""
+    """Print the checkout slip from the guest's own booking (ruling 4) and,
+    if the guest said yes at the Desk, prepare a win-back draft."""
     stay = stay_for_room(session, prop, body.room)
     slip, perk = check_out(session, prop, stay, utc_now())
+    draft_for_booking(session, prop, stay.booking.id, settings.web_origin, wording)
     record_step(session, "slip")
     return CheckoutOut(booking_id=stay.booking.id, perk_code=perk.code, slip=slip_out(slip))
 

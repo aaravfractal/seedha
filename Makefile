@@ -10,10 +10,10 @@ VENV := $(API)/.venv
 PY := $(VENV)/bin/python
 PYTHON ?= $(shell command -v python3.12 || command -v python3.13 || command -v python3.11 || echo python3)
 LOAD_ENV := set -a && { [ ! -f $(ROOT)/.env ] || . $(ROOT)/.env; } && set +a
-MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py
+MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py,app/services/savings.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
-        check check-api check-web dev api web demo build-web e2e firmware clean
+        check check-api check-web check-e2e dev api web demo build-web e2e firmware clean
 
 help:
 	@echo "make demo       - first run: .env, install, seed, build and start everything"
@@ -53,7 +53,7 @@ test-api:
 test-web:
 	cd $(WEB) && node --test lib/*.test.ts
 
-check: check-api check-web
+check: check-api check-web check-e2e
 	@echo "All quality gates passed."
 
 check-api:
@@ -75,6 +75,9 @@ check-web:
 	cd $(WEB) && npx prettier --check . --log-level warn
 	cd $(WEB) && node --test lib/*.test.ts
 	cd $(WEB) && node scripts/audit-check.mjs
+
+check-e2e:
+	cd $(WEB) && npx playwright test
 
 api: env
 	$(LOAD_ENV) && cd $(API) && $(VENV)/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 $(API_FLAGS)
