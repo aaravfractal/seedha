@@ -1,75 +1,108 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { FormEvent } from "react";
+import { type CodeSent, normalisePhone, safeNext } from "@/lib/auth";
+import { AuthFrame, BetaLogin, errorMessage, savePending, styles, useShake } from "./AuthFrame";
 
-function safeNext(raw: string | null): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/home";
-}
+const PHONE_ERROR = "Enter a 10-digit mobile number starting with 6, 7, 8 or 9.";
 
 export default function LoginPage() {
-  const [passcode, setPasscode] = useState("");
+  const [phone, setPhone] = useState("");
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [shaking, shake] = useShake();
+  const router = useRouter();
+  const next = safeNext(useSearchParams().get("next"));
+
+  function fail(message: string) {
+    setError(message);
+    shake();
+  }
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    const normal = normalisePhone(phone);
+    if (!normal) {
+      fail(PHONE_ERROR);
+      return;
+    }
     setBusy(true);
     setError("");
     try {
-      const res = await fetch("/api/session", {
+      const res = await fetch("/api/auth/otp/request", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ passcode }),
+        body: JSON.stringify({ phone: normal }),
       });
       if (res.ok) {
-        const next = safeNext(new URLSearchParams(window.location.search).get("next"));
-        window.location.assign(next);
+        savePending(normal, (await res.json()) as CodeSent, { remember, flow: "signin", next });
+        router.push("/otp");
         return;
       }
-      const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
-      setError(body?.error?.message ?? "Could not log in");
+      fail(await errorMessage(res));
     } catch {
-      setError("No connection. Try again.");
-    } finally {
-      setBusy(false);
+      fail("No connection. Try again.");
     }
+    setBusy(false);
   }
 
   return (
-    <section className="view" style={{ maxWidth: 440, margin: "40px auto" }}>
-      <h2 className="title">Owner login</h2>
-      <p className="sub">Enter the passcode for your hotel.</p>
-      <form className="card" onSubmit={submit} noValidate>
-        <label className="fl" htmlFor="passcode">
-          Passcode
+    <AuthFrame
+      title="Sign in"
+      sub="We send a one-time code to your WhatsApp. No password to remember or leak."
+    >
+      <BetaLogin remember={remember} onError={fail} next={next} />
+      <p className={styles.or}>or sign in with your number</p>
+      <form onSubmit={submit} noValidate>
+        <label className={styles.label} htmlFor="phone">
+          Mobile number
         </label>
-        <input
-          id="passcode"
-          type="password"
-          autoComplete="current-password"
-          value={passcode}
-          onChange={(e) => setPasscode(e.target.value)}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={error ? "login-error" : "login-hint"}
-        />
-        <p id="login-hint" className="calc">
-          Sample hotel: the passcode is OWNER_PASSCODE in your .env (deodar-demo in .env.example).
-        </p>
+        <div
+          className={`${styles.phone} ${shaking ? styles.shake : ""}`}
+          data-invalid={error ? "true" : undefined}
+        >
+          <span className={styles.prefix} aria-hidden="true">
+            +91
+          </span>
+          <input
+            id="phone"
+            className={styles.input}
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            placeholder="10-digit number"
+            maxLength={16}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? "login-error" : undefined}
+          />
+        </div>
+        <label className={styles.check}>
+          <input
+            id="remember"
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+          />
+          <span>Keep me signed in on this device for 30 days</span>
+        </label>
         {error ? (
-          <p id="login-error" role="alert" style={{ color: "var(--loss)", fontSize: 15, margin: "8px 0 0" }}>
+          <p id="login-error" className={styles.error} role="alert">
             {error}
           </p>
         ) : null}
-        <button
-          className="btn"
-          type="submit"
-          style={{ width: "100%", marginTop: 16 }}
-          disabled={busy || !passcode}
-        >
-          {busy ? "Checking" : "Log in"}
+        <button id="send-code" className={styles.primary} type="submit" disabled={busy}>
+          {busy ? "Sending code" : "Send code on WhatsApp"}
         </button>
       </form>
-    </section>
+      <p className={styles.foot}>
+        New to Seedha? <Link href="/signup">Create an account</Link>
+      </p>
+    </AuthFrame>
   );
 }

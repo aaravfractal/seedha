@@ -1,12 +1,12 @@
 /**
- * In-memory sliding-window rate limit, per key. Used for owner login so a
- * script cannot guess the passcode. One server process is enough for the
- * prototype; several processes need a shared store (docs/decisions.md D-071).
+ * In-memory sliding-window rate limit, per key. Used for owner sign in
+ * (WhatsApp code requests and checks, Direct beta login; see
+ * lib/authServer.ts) so a script cannot guess codes. One server process is
+ * enough for the prototype; several processes need a shared store
+ * (docs/decisions.md D-071).
  */
 
 export type Limit = { count: number; seconds: number };
-
-export const LOGIN_LIMIT: Limit = { count: 10, seconds: 15 * 60 };
 
 const MAX_KEYS = 10_000;
 

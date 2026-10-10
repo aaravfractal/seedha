@@ -39,6 +39,9 @@ class Settings:
     proof_private_key: str
     demo_date: date | None
     desk_device_key: str
+    # SEEDHA_DEMO=1: the simulated OTP sender returns the code to the web app,
+    # which shows it in a labelled demo banner. Local demo only.
+    seedha_demo: bool = False
 
     @property
     def llm_enabled(self) -> bool:
@@ -81,4 +84,5 @@ def load_settings() -> Settings:
         proof_private_key=_env("PROOF_PRIVATE_KEY"),
         demo_date=date.fromisoformat(raw_demo_date) if raw_demo_date else None,
         desk_device_key=_env("DESK_DEVICE_KEY"),
+        seedha_demo=_env("SEEDHA_DEMO") == "1",
     )

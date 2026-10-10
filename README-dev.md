@@ -20,8 +20,23 @@ make demo
 `make demo` installs the API and web dependencies, builds a fresh database
 with the sample hotel, makes a production build of the web app, and starts:
 
-- web: http://localhost:3000 (log in with `OWNER_PASSCODE`, `deodar-demo` in `.env.example`)
+- web: http://localhost:3000 (sign in below)
 - API: http://localhost:8000 (`/docs` lists every route)
+
+### Sign in
+
+- **Direct beta login** on `/login` (or `/demo`) opens the fictional sample
+  hotel in one tap, no code. It works only while the property is sample data.
+- **WhatsApp code**: enter a 10-digit Indian mobile on `/login` (or create an
+  account on `/signup`), then the 6-digit code on `/otp`. The sender is
+  simulated. With `SEEDHA_DEMO=1` (the `.env.example` value) the code shows
+  in a labelled demo banner on `/otp`; without it the code is never shown or
+  logged. Codes expire after 5 minutes, a new code can be sent after 30
+  seconds, and 5 wrong codes lock the number for 15 minutes.
+- "Keep me signed in on this device for 30 days" makes the session cookie
+  last 30 days; otherwise it ends with the browser session (and after 12
+  hours at most). New accounts go through the 4-step onboarding on `/onboard`;
+  its answers are saved on the account and never change the sample hotel.
 
 Stop with Ctrl+C. For development with reload use `make dev` instead.
 
@@ -92,8 +107,9 @@ code, never by a model, whatever is configured.
 To add a key, put it in `.env` and restart. Never commit `.env`; the
 pre-commit hook and `make check` scan for secrets.
 
-The demo values of `OWNER_API_TOKEN`, `OWNER_PASSCODE`, `SESSION_SECRET` and
-`DESK_DEVICE_KEY` must be changed for anything beyond a local demo.
+The demo values of `OWNER_API_TOKEN`, `SESSION_SECRET` and `DESK_DEVICE_KEY`
+must be changed, and `SEEDHA_DEMO` left empty, for anything beyond a local
+demo.
 
 ## Layout
 

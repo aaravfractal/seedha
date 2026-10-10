@@ -16,6 +16,7 @@ from app.errors import install_error_handlers
 from app.ratelimit import RateLimiter
 from app.routers import (
     ask,
+    auth,
     desk,
     ledger,
     link,
@@ -101,6 +102,7 @@ def create_app(
     def get_property_info(_owner: OwnerDep, prop: PropertyDep) -> PropertyOut:
         return PropertyOut.model_validate(prop, from_attributes=True)
 
+    app.include_router(auth.router)
     app.include_router(pipeline.router)
     app.include_router(statements.router)
     app.include_router(ledger.router)

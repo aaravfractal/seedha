@@ -1,12 +1,17 @@
 /**
- * Owner session cookie: "<expiresEpochSeconds>.<hmacHex>", signed with
- * SESSION_SECRET using HMAC-SHA256 (Web Crypto, so it runs in Proxy and in
- * Route Handlers). Holds no personal data.
+ * Owner session cookie: "<expiresEpochSeconds>.<subject>.<hmacHex>", signed
+ * with SESSION_SECRET using HMAC-SHA256 (Web Crypto, so it runs in Proxy and
+ * in Route Handlers). The subject is "demo" (Direct beta login) or
+ * "a<accountId>" (WhatsApp code sign in). No personal data is stored.
  */
 
 export const SESSION_COOKIE = "seedha_owner";
+/** Default lifetime: the signature expires after 12 hours. */
 export const SESSION_TTL_SECONDS = 12 * 60 * 60;
+/** "Keep me signed in on this device for 30 days". */
+export const LONG_SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
 
+const SUBJECT = /^(demo|a\d{1,12})$/;
 const encoder = new TextEncoder();
 
 async function hmacHex(secret: string, message: string): Promise<string> {
@@ -29,10 +34,40 @@ export function safeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
+export function isSubject(value: string): boolean {
+  return SUBJECT.test(value);
+}
+
+export type SessionOptions = { subject?: string; ttlSeconds?: number };
+
 /** Create a signed session value that expires after the TTL. */
-export async function signSession(secret: string, nowSeconds: number): Promise<string> {
-  const expires = nowSeconds + SESSION_TTL_SECONDS;
-  return `${expires}.${await hmacHex(secret, `owner.${expires}`)}`; // pragma: allowlist secret (not a secret: signature format)
+export async function signSession(
+  secret: string,
+  nowSeconds: number,
+  options: SessionOptions = {},
+): Promise<string> {
+  const subject = options.subject ?? "demo";
+  if (!isSubject(subject)) throw new Error("Bad session subject");
+  const expires = nowSeconds + (options.ttlSeconds ?? SESSION_TTL_SECONDS);
+  return `${expires}.${subject}.${await hmacHex(secret, `owner.${expires}.${subject}`)}`; // pragma: allowlist secret (not a secret: signature format)
+}
+
+export type SessionInfo = { subject: string; expires: number };
+
+/** The subject and expiry when the value is well formed, correctly signed and not expired. */
+export async function readSession(
+  secret: string,
+  value: string | undefined,
+  nowSeconds: number,
+): Promise<SessionInfo | null> {
+  if (!secret || !value) return null;
+  const parts = value.split(".");
+  if (parts.length !== 3) return null;
+  const [expiresText = "", subject = "", signature = ""] = parts;
+  const expires = Number(expiresText);
+  if (!Number.isInteger(expires) || expires <= nowSeconds || !isSubject(subject) || !signature) return null;
+  const ok = safeEqual(signature, await hmacHex(secret, `owner.${expires}.${subject}`));
+  return ok ? { subject, expires } : null;
 }
 
 /** True when the value is well formed, correctly signed and not expired. */
@@ -41,11 +76,22 @@ export async function verifySession(
   value: string | undefined,
   nowSeconds: number,
 ): Promise<boolean> {
-  if (!secret || !value) return false;
-  const [expiresText, signature] = value.split(".");
-  const expires = Number(expiresText);
-  if (!Number.isInteger(expires) || !signature || expires <= nowSeconds) return false;
-  return safeEqual(signature, await hmacHex(secret, `owner.${expires}`));
+  return (await readSession(secret, value, nowSeconds)) !== null;
+}
+
+/**
+ * Set-Cookie header for a session. Without `remember` the cookie lasts for
+ * the browser session (and the signature for 12 hours); with it, 30 days.
+ */
+export function sessionCookie(value: string, options: { remember: boolean; secure: boolean }): string {
+  const maxAge = options.remember ? `; Max-Age=${LONG_SESSION_TTL_SECONDS}` : "";
+  const secure = options.secure ? "; Secure" : "";
+  return `${SESSION_COOKIE}=${value}; Path=/; HttpOnly; SameSite=Lax${maxAge}${secure}`;
+}
+
+/** Set-Cookie header that removes the session. */
+export function clearSessionCookie(secure: boolean): string {
+  return `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secure ? "; Secure" : ""}`;
 }
 
 export function nowSeconds(): number {
