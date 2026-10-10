@@ -34,7 +34,7 @@ Everything below has a working simulated fallback today. Nothing is blocked.
    to new codes, e.g. DEODAR-RS26-K7Q (demo code unchanged); (b) ask for the
    last 4 digits of the consented WhatsApp number before the perk applies;
    (c) stop showing the name on the link page. I recommend (a) plus (c).
-10. **Files outside the repo** (blockers B-003). Both `~/.platformio`
+10. **Done (11 Oct 2026).** ~~Files outside the repo~~ (blockers B-003). Both `~/.platformio`
     (about 20 MB) and `~/.cache/pre-commit` are still on the machine.
     Correction: I wrongly reported ~/.platformio as gone on 10 Oct (I
     misread a truncated listing). Nothing in the repo needs them, and the
