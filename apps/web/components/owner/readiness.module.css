@@ -1,0 +1,114 @@
+.card {
+  background: var(--card);
+  border-radius: var(--r-panel);
+  padding: 24px 20px;
+}
+@media (min-width: 760px) {
+  .card {
+    padding: 28px;
+  }
+}
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.title {
+  margin: 0;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.sub {
+  margin: 4px 0 0;
+  color: var(--ink2);
+  font-size: 15px;
+}
+.parts {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+@media (min-width: 980px) {
+  .parts {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+.part {
+  min-width: 0;
+}
+.partHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.partLabel {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.partScore {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.track {
+  display: block;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+}
+.formula {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+.total {
+  margin: 16px 0 0;
+  font-size: 17px;
+}
+.total b {
+  font-variant-numeric: tabular-nums;
+}
+.form {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+  max-width: 420px;
+}
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.error {
+  margin: 0;
+  font-size: 14px;
+  color: var(--loss);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}

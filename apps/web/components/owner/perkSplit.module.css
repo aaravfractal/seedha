@@ -1,0 +1,96 @@
+.form {
+  margin: 4px 0 8px;
+}
+.label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--ink2);
+  margin-bottom: 6px;
+}
+.inputRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.inputRow input {
+  max-width: 140px;
+}
+.hint,
+.error {
+  font-size: 13px;
+  margin: 6px 0 0;
+  color: var(--ink2);
+}
+.error {
+  color: var(--loss);
+}
+.wrap {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.toggle {
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 44px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+.panel {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: var(--r-row);
+  background: var(--bg2);
+}
+.lead {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+.rows {
+  margin: 0;
+}
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.row dt {
+  color: var(--ink2);
+}
+.row dd {
+  margin: 0;
+  white-space: nowrap;
+}
+.keep {
+  border-bottom: 0;
+  font-weight: 600;
+}
+.keep dt {
+  color: var(--ink);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.gold {
+  color: var(--goldText);
+  font-weight: 700;
+}
+.loss {
+  color: var(--loss);
+  font-weight: 700;
+}
+.note {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--ink2);
+}

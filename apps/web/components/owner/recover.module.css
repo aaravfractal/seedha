@@ -1,0 +1,57 @@
+.totals {
+  margin: 12px 0 4px;
+  padding: 14px 16px;
+  border-radius: var(--r-row);
+  background: var(--bg2);
+}
+.total {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+.wrap {
+  margin-top: 8px;
+}
+.panel {
+  margin-top: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-row);
+  background: var(--bg2);
+}
+.subject {
+  margin: 0 0 8px;
+  font-weight: 600;
+  font-size: 15px;
+}
+.letter {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.claim {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.note {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--ink2);
+}

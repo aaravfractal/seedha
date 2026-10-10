@@ -14,12 +14,18 @@ from sqlalchemy import select
 from app.deps import OwnerDep, PropertyDep, SessionDep
 from app.errors import ApiError
 from app.models import Channel, DirectBooking, Saving
+from app.money import PAISE_PER_RUPEE
 from app.ratelimit import rate_limited
 from app.services.consent import as_utc
 from app.services.desk import business_date, utc_now
 from app.services.ledger import DEFAULT_END, DEFAULT_START
 from app.services.link import BookingRequest, LinkError, book, code_status, date_options, room_rates
-from app.services.savings import season_review
+from app.services.savings import (
+    MAX_PERK_COST_PER_NIGHT,
+    SAMPLE_PERK_COST_PER_NIGHT,
+    perk_split,
+    season_review,
+)
 
 public_router = APIRouter(prefix="/public/link", tags=["link"])
 savings_router = APIRouter(prefix="/savings", tags=["savings"])
@@ -152,6 +158,10 @@ class SavingOut(BaseModel):
     upi_fee: int
     net_saving: int
     booked_at: datetime
+    nights: int
+    perk: str
+    perk_cost: int
+    kept_after_perk: int
 
 
 class SeasonOut(BaseModel):
@@ -171,11 +181,37 @@ class SavingsOut(BaseModel):
     count: int
     items: list[SavingOut]
     season: SeasonOut
+    perk_cost_per_night: int
+    perk_cost_is_sample: bool
+
+
+def split_fields(saving: Saving, nights: int, cost_per_night: int) -> dict[str, int]:
+    """The perk split of one saving row (ruling 5 lines untouched)."""
+    split = perk_split(
+        saving.commission_avoided + saving.gst_avoided, saving.upi_fee, nights, cost_per_night
+    )
+    return {"perk_cost": split.perk_cost, "kept_after_perk": split.kept_after_perk}
 
 
 @savings_router.get("", response_model=SavingsOut)
-def get_savings(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> SavingsOut:
-    """Savings from coded direct bookings only. No code, no saving claimed."""
+def get_savings(
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    perk_cost_per_night: Annotated[
+        int | None, Query(ge=0, le=MAX_PERK_COST_PER_NIGHT // PAISE_PER_RUPEE, description="Rupees")
+    ] = None,
+) -> SavingsOut:
+    """Savings from coded direct bookings only. No code, no saving claimed.
+
+    Each item also splits what it avoided into the UPI fee, the perk's cost
+    to the hotel (a sample cost unless the owner enters one) and the rest.
+    """
+    cost = (
+        SAMPLE_PERK_COST_PER_NIGHT
+        if perk_cost_per_night is None
+        else perk_cost_per_night * PAISE_PER_RUPEE
+    )
     rows = session.execute(
         select(Saving, DirectBooking, Channel.name)
         .join(DirectBooking, DirectBooking.id == Saving.direct_booking_id)
@@ -196,6 +232,9 @@ def get_savings(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> Sav
             upi_fee=s.upi_fee,
             net_saving=s.net_saving,
             booked_at=d.created_at,
+            nights=d.booking.nights,
+            perk=d.perk_code.perk if d.perk_code else "",
+            **split_fields(s, d.booking.nights, cost),
         )  # fmt: skip
         for s, d, name in rows
     ]
@@ -206,6 +245,8 @@ def get_savings(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> Sav
         total_avoided=sum(i.commission_avoided + i.gst_avoided for i in items),
         count=len(items),
         items=items,
+        perk_cost_per_night=cost,
+        perk_cost_is_sample=perk_cost_per_night is None,
         season=SeasonOut(
             start=season.start,
             end=season.end,

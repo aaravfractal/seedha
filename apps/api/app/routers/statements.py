@@ -16,6 +16,7 @@ from app.models import Booking, Channel, StatementFile
 from app.services.ingest import MAX_UPLOAD_BYTES, IngestOutcome, ingest_statement
 from app.services.llm import statement_reader
 from app.services.parser import ParseError, ReaderUnavailableError, StatementReader
+from app.services.recover import dispute_for, disputes
 from app.services.samples import SAMPLE_FILES, sample_path
 
 router = APIRouter(prefix="/statements", tags=["statements"])
@@ -82,6 +83,28 @@ class ReviewIn(BaseModel):
 
     decision: Literal["accept", "exclude"]
     note: str | None = Field(default=None, max_length=200)
+
+
+class DisputeOut(BaseModel):
+    """A dispute letter filled by code from the stored line (Seedha Recover)."""
+
+    booking_id: int
+    channel: str
+    external_ref: str
+    reason: str
+    review_status: str
+    audit_claim: int
+    other_claim: int
+    subject: str
+    text: str
+
+
+class RecoverOut(BaseModel):
+    """Every dispute. audit_claim equals the Seedha Audit figure on Pro."""
+
+    audit_claim: int
+    other_claim: int
+    disputes: list[DisputeOut]
 
 
 def get_reader(request: Request, settings: SettingsDep) -> StatementReader | None:
@@ -201,3 +224,20 @@ def review_row(
     booking.review_status = "accepted" if body.decision == "accept" else "excluded"
     session.flush()
     return statement_summary(session, prop.id)
+
+
+@router.get("/disputes", response_model=RecoverOut)
+def list_disputes(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> RecoverOut:
+    """Dispute letters for flagged and above-contract lines. Nothing is sent."""
+    return RecoverOut.model_validate(disputes(session, prop), from_attributes=True)
+
+
+@router.get("/rows/{booking_id}/dispute", response_model=DisputeOut)
+def get_dispute(
+    booking_id: int, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
+) -> DisputeOut:
+    """The dispute letter for one line. Drafting it is not a review (rule 3)."""
+    found = dispute_for(session, prop, booking_id)
+    if found is None:
+        raise ApiError(404, "no_dispute", "Nothing to dispute on that row")
+    return DisputeOut.model_validate(found, from_attributes=True)

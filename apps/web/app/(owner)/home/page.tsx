@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { longDate } from "@/lib/format";
 import { StepTracker } from "@/components/StepTracker";
+import { ReadinessCard } from "@/components/owner/ReadinessCard";
 import { ErrorState } from "@/components/States";
 import { useShell } from "@/components/shell/ShellData";
 import { ChannelMix, InsightBanner, KpiTiles, LastNight, NeedsYou, Waterfall } from "./parts";
@@ -52,6 +53,13 @@ export default function OverviewPage() {
         <>
           {data.insight ? <InsightBanner insight={data.insight} /> : null}
           <KpiTiles kpis={data.kpis} savings={data.savings} period={data.period} />
+          <ReadinessCard
+            inputs={{
+              directTenths: data.kpis.direct_bookings_tenths,
+              freeTenths: data.kpis.commission_free_share_tenths,
+              codedBookings: data.savings.count,
+            }}
+          />
         </>
       ) : (
         <section className={styles.empty} aria-labelledby="start-title">

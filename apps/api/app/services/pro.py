@@ -37,27 +37,52 @@ def contract_rates(session: Session, property_id: int) -> dict[int, int]:
     return dict(rows)
 
 
-def audit(session: Session, property_id: int) -> AuditResult:
-    """Claimable commission on cancelled stays and above-contract lines."""
+@dataclass(frozen=True, slots=True)
+class AuditLine:
+    """One statement line with money to claim back, in paise.
+
+    kind is "cancelled" (commission and its GST on a cancelled stay) or
+    "over_rate" (commission above the contract rate, plus GST on the excess).
+    """
+
+    booking: Booking
+    kind: str
+    claim: int
+    contract_bps: int | None
+    contract_commission: int
+
+
+def audit_lines(session: Session, property_id: int) -> list[AuditLine]:
+    """Every claimable line. Seedha Audit and Seedha Recover both sum this."""
     rates = contract_rates(session, property_id)
-    claim = 0
-    cancelled = 0
-    over = 0
+    lines: list[AuditLine] = []
     for b in session.scalars(
-        select(Booking).where(Booking.property_id == property_id, Booking.source == "statement")
+        select(Booking)
+        .where(Booking.property_id == property_id, Booking.source == "statement")
+        .order_by(Booking.id)
     ):
+        rate = rates.get(b.channel_id)
         if b.flag_reason == REASON_COMMISSION_ON_CANCELLED and b.review_status != "accepted":
-            claim += b.commission + b.gst_on_commission
-            cancelled += 1
+            claim = b.commission + b.gst_on_commission
+            lines.append(AuditLine(b, "cancelled", claim, rate, 0))
             continue
-        if b.status != "stay" or b.channel_id not in rates:
+        if b.status != "stay" or rate is None:
             continue
-        due = bps_of(b.list_amount - b.discount, rates[b.channel_id])
+        due = bps_of(b.list_amount - b.discount, rate)
         if b.commission > due:
             excess = b.commission - due
-            claim += excess + gst_on_commission(excess)
-            over += 1
-    return AuditResult(claim, cancelled, over)
+            lines.append(AuditLine(b, "over_rate", excess + gst_on_commission(excess), rate, due))
+    return lines
+
+
+def audit(session: Session, property_id: int) -> AuditResult:
+    """Claimable commission on cancelled stays and above-contract lines."""
+    lines = audit_lines(session, property_id)
+    return AuditResult(
+        claim=sum(line.claim for line in lines),
+        cancelled_lines=sum(1 for line in lines if line.kind == "cancelled"),
+        over_rate_lines=sum(1 for line in lines if line.kind == "over_rate"),
+    )
 
 
 def active_consents(session: Session, property_id: int) -> int:

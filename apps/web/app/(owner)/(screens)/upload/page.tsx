@@ -6,9 +6,11 @@ import type { DragEvent } from "react";
 import { ApiError, api, postJson, useApi } from "@/lib/api";
 import { count } from "@/lib/format";
 import type { FlaggedRow, IngestOutcome, SampleFile, StatementsSummary } from "@/lib/types";
+import type { RecoverData } from "@/lib/types-owner";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
 import { Chip, Screen, ui } from "@/components/owner/ui";
+import { DisputeDraft, RecoverTotals } from "@/components/owner/Recover";
 import u from "./upload.module.css";
 
 type FileStatus = "waiting" | "reading" | "done" | "error";
@@ -218,17 +220,22 @@ export default function UploadPage() {
 
 function Summary({ data, onChange }: { data: StatementsSummary; onChange: (s: StatementsSummary) => void }) {
   const toast = useToast();
+  const recover = useApi<RecoverData>("statements/disputes");
   const need = data.pending_review;
+  const disputes = new Map((recover.data?.disputes ?? []).map((d) => [d.booking_id, d]));
+  const flaggedIds = new Set(data.flagged_rows.map((row) => row.id));
+  const overRate = (recover.data?.disputes ?? []).filter((d) => !flaggedIds.has(d.booking_id));
   async function review(row: FlaggedRow, decision: "accept" | "exclude") {
     try {
       onChange(await postJson<StatementsSummary>(`statements/rows/${row.id}/review`, { decision }));
+      recover.reload();
       toast(decision === "accept" ? "Row counted in your numbers" : "Row kept out of your numbers");
     } catch (err) {
       toast(err instanceof ApiError ? err.message : "Could not save that");
     }
   }
   return (
-    <div className={`${ui.card} ${u.summary}`}>
+    <div className={`${ui.card} ${u.summary}`} id="disputes">
       <h2 className={u.summaryTitle}>
         <span className={u.tick} aria-hidden="true">
           ✓{" "}
@@ -239,6 +246,7 @@ function Summary({ data, onChange }: { data: StatementsSummary; onChange: (s: St
       {data.flagged_rows.length ? (
         <p className={ui.sub}>These rows do not add up. They stay out of your numbers until you decide.</p>
       ) : null}
+      {recover.data ? <RecoverTotals data={recover.data} /> : null}
       {data.flagged_rows.map((row) => (
         <div className={u.flag} key={row.id}>
           <div>
@@ -256,6 +264,7 @@ function Summary({ data, onChange }: { data: StatementsSummary; onChange: (s: St
                 </button>
               </div>
             ) : null}
+            <DisputeDraft dispute={disputes.get(row.id)} />
           </div>
           {row.review_status === "pending" ? (
             <Chip tone="bad">
@@ -266,6 +275,18 @@ function Summary({ data, onChange }: { data: StatementsSummary; onChange: (s: St
               {row.review_status === "accepted" ? "Counted" : "Kept out"}
             </Chip>
           )}
+        </div>
+      ))}
+      {overRate.map((d) => (
+        <div className={u.flag} key={`over-${d.booking_id}`}>
+          <div>
+            <div className={u.flagRef}>
+              {d.channel} #{d.external_ref}
+            </div>
+            <div className={u.flagDetail}>Commission above your contract rate</div>
+            <DisputeDraft dispute={d} />
+          </div>
+          <Chip>Over rate</Chip>
         </div>
       ))}
       <div className={ui.actions}>

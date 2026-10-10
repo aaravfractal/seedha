@@ -8,7 +8,14 @@ import { ErrorState, Loading } from "@/components/States";
 import { Chip, Screen, ui } from "@/components/owner/ui";
 import o from "./pro.module.css";
 
-type BigCard = { name: string; headline: string; detail: string; foot: string; sample: boolean };
+type BigCard = {
+  name: string;
+  headline: string;
+  detail: string;
+  foot: string;
+  sample: boolean;
+  link?: { href: string; label: string };
+};
 type SmallCard = { name: string; text: string; href?: string };
 
 function bigCards(p: ProData): BigCard[] {
@@ -21,6 +28,7 @@ function bigCards(p: ProData): BigCard[] {
       detail: `Commission on ${count(cancelled)} cancelled stay${cancelled === 1 ? "" : "s"} and a higher rate than your contract on ${count(over)} row${over === 1 ? "" : "s"}.`,
       foot: "Calculated from your statements.",
       sample: false,
+      link: p.audit_claim ? { href: "/upload#disputes", label: "Draft the disputes" } : undefined,
     },
     {
       name: "Seedha Pulse",
@@ -90,6 +98,11 @@ export default function ProPage() {
                 <p className={o.headline}>{c.headline}</p>
                 <p className={o.detail}>{c.detail}</p>
                 <span className={o.bigFoot}>{c.foot}</span>
+                {c.link ? (
+                  <Link className={o.bigLink} href={c.link.href}>
+                    {c.link.label}
+                  </Link>
+                ) : null}
               </article>
             ))}
           </div>

@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useApi } from "@/lib/api";
 import { count, inr, monthRange, pctTenths } from "@/lib/format";
-import type { SavingItem } from "@/lib/types";
-import type { OwnerSavings } from "@/lib/types-owner";
+import type { OwnerSavingItem, OwnerSavings } from "@/lib/types-owner";
 import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { CalcNote, Screen, ui } from "@/components/owner/ui";
 import { useCountUp } from "@/components/owner/motion";
+import { PerkCostForm, PerkSplit } from "@/components/owner/PerkSplit";
 import v from "./savings.module.css";
 
 const TITLE = "Saved by booking direct.";
@@ -32,7 +33,10 @@ function GoldCard({ total, bookings }: { total: number; bookings: number }) {
 }
 
 export default function SavingsPage() {
-  const savings = useApi<OwnerSavings>("savings");
+  const [perkCost, setPerkCost] = useState<number | null>(null);
+  const savings = useApi<OwnerSavings>(
+    perkCost === null ? "savings" : `savings?perk_cost_per_night=${perkCost}`,
+  );
   if (savings.error) {
     return (
       <Screen title={TITLE}>
@@ -72,8 +76,17 @@ export default function SavingsPage() {
         <div className={v.grid}>
           <div className={`${ui.card} ${v.ledger}`}>
             <h2 className={`${ui.sectionTitle} ${v.ledgerTitle}`}>Code ledger</h2>
+            <PerkCostForm
+              perNight={s.perk_cost_per_night}
+              isSample={s.perk_cost_is_sample}
+              onChange={setPerkCost}
+            />
             {s.items.map((item) => (
-              <LedgerRow key={`${item.code}-${item.booked_at}`} item={item} />
+              <LedgerRow
+                key={`${item.code}-${item.booked_at}`}
+                item={item}
+                isSample={s.perk_cost_is_sample}
+              />
             ))}
             <CalcNote>
               Saving = the commission and GST the guest&apos;s original channel would have taken on this
@@ -95,7 +108,7 @@ export default function SavingsPage() {
   );
 }
 
-function LedgerRow({ item }: { item: SavingItem }) {
+function LedgerRow({ item, isSample }: { item: OwnerSavingItem; isSample: boolean }) {
   const avoided = item.commission_avoided + item.gst_avoided;
   return (
     <div className={`item ${v.row}`}>
@@ -115,6 +128,7 @@ function LedgerRow({ item }: { item: SavingItem }) {
         <b className="num">+{inr(item.net_saving)}</b>
         <span>net saving</span>
       </div>
+      <PerkSplit item={item} isSample={isSample} />
     </div>
   );
 }
