@@ -20,6 +20,7 @@ from app.routers import (
     ledger,
     link,
     messages,
+    overview,
     pipeline,
     proof,
     public,
@@ -102,6 +103,7 @@ def create_app(
         return PropertyOut.model_validate(prop, from_attributes=True)
 
     app.include_router(pipeline.router)
+    app.include_router(overview.router)
     app.include_router(statements.router)
     app.include_router(ledger.router)
     app.include_router(repeat.router)

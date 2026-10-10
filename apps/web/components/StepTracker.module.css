@@ -1,0 +1,94 @@
+.card {
+  background: var(--card);
+  border-radius: var(--r-panel);
+  padding: 24px 20px 12px;
+}
+@media (min-width: 760px) {
+  .card {
+    padding: 28px 32px 16px;
+  }
+}
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.head h2 {
+  margin: 0;
+  font-size: clamp(22px, 2.2vw, 26px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.count {
+  color: var(--ink2);
+  font-size: 15px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.track {
+  height: 8px;
+  border-radius: 8px;
+  background: var(--fill);
+  overflow: hidden;
+  margin: 16px 0 8px;
+}
+.track i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 8px;
+  transition: width 0.8s var(--spring);
+}
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 32px;
+}
+@media (min-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+}
+.row:hover .title {
+  color: var(--accent);
+}
+.done,
+.todo {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+.done {
+  background: var(--accent);
+  color: var(--onAccent);
+}
+.todo {
+  background: var(--fill);
+  color: var(--ink2);
+}
+.title {
+  flex: 1;
+  font-size: 17px;
+  min-width: 0;
+}
+.chev {
+  color: var(--ink2);
+  display: grid;
+}

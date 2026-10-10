@@ -2,34 +2,51 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { OWNER_SCREENS } from "@/lib/screens";
-import { useApi } from "@/lib/api";
-import type { Messages } from "@/lib/types";
+import { OWNER_SCREENS, isCurrent } from "@/lib/screens";
+import { Icon } from "./shell/Icons";
+import type { IconName } from "./shell/Icons";
+import { useShell } from "./shell/ShellData";
+import styles from "./shell/Shell.module.css";
 
-/** Owner screens list: a sidebar on desktop, a scrolling chip row on phones. */
+/**
+ * Owner screens in the approved order: a 232px sidebar from 980px, a
+ * scrolling pill row on phones. The Approvals count is the number of drafts
+ * waiting, from GET /overview (reloaded on every navigation).
+ */
 export function OwnerSidebar() {
   const pathname = usePathname();
-  const messages = useApi<Messages>(`messages?from=${encodeURIComponent(pathname)}`);
-  const pending = messages.data?.pending ?? 0;
+  const { data } = useShell(pathname);
+  const pending = data?.pending_approvals ?? 0;
   return (
-    <nav className="side" aria-label="Owner screens">
-      {OWNER_SCREENS.map((screen) => (
-        <Link
-          key={screen.key}
-          href={screen.href}
-          aria-current={
-            pathname === screen.href || pathname.startsWith(`${screen.href}/`) ? "page" : undefined
-          }
-        >
-          <span>{screen.label}</span>
-          {screen.pro ? <span className="tag pro">Pro</span> : null}
-          {screen.key === "approvals" && pending ? (
-            <span className="tag ok" aria-label={`${pending} waiting`}>
-              {pending}
-            </span>
-          ) : null}
+    <nav className={styles.side} aria-label="Owner screens">
+      <ul>
+        {OWNER_SCREENS.map((screen) => (
+          <li key={screen.key}>
+            <Link
+              href={screen.href}
+              className={styles.item}
+              aria-current={isCurrent(pathname, screen.href) ? "page" : undefined}
+            >
+              <span className={styles.tile}>
+                <Icon name={screen.icon as IconName} />
+              </span>
+              <span className={styles.label}>{screen.label}</span>
+              {screen.key === "approvals" && pending ? (
+                <span className={styles.count}>
+                  {pending}
+                  <span className="sr-only-text"> waiting</span>
+                </span>
+              ) : null}
+              {screen.tag ? <span className={styles.tag}>{screen.tag}</span> : null}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className={styles.deskCard}>
+        <Link href="/desk">
+          Open Seedha Desk <span aria-hidden="true">↗</span>
         </Link>
-      ))}
+      </div>
     </nav>
   );
 }

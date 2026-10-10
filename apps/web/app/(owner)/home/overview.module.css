@@ -1,0 +1,435 @@
+/* Overview (Home). Tokens from app/globals.css; light and dark switch there. */
+
+.stack {
+  display: grid;
+  gap: 20px;
+}
+
+.hello {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.date {
+  margin: 0 0 6px;
+  font-size: 17px;
+  color: var(--ink2);
+}
+.h1 {
+  margin: 0;
+  font-size: var(--t-large);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.04;
+}
+
+/* insight */
+.insight {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px 18px;
+  align-items: center;
+  background: var(--graphite);
+  color: #f5f5f7;
+  border-radius: var(--r-panel);
+  padding: 22px 22px;
+}
+@media (min-width: 760px) {
+  .insight {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 26px 30px;
+  }
+}
+.sparkle {
+  display: grid;
+}
+.insight p {
+  margin: 0;
+  font-size: clamp(17px, 1.6vw, 21px);
+  line-height: 1.4;
+}
+.insight button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+@media (min-width: 760px) {
+  .insight button {
+    grid-column: auto;
+  }
+}
+.insight button:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* KPI tiles */
+.tiles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+@media (min-width: 560px) {
+  .tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1100px) {
+  .tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.tile {
+  background: var(--card);
+  border-radius: var(--r-card-lg);
+  padding: 22px 24px 24px;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+.tileLabel {
+  font-size: 15px;
+  color: var(--ink2);
+}
+.tileValue {
+  font-size: clamp(28px, 2.6vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.tileSub {
+  font-size: 15px;
+  color: var(--ink2);
+}
+.gold {
+  background: var(--gold);
+}
+.gold .tileLabel,
+.gold .tileValue,
+.gold .tileSub {
+  color: var(--onGold);
+}
+.gain {
+  color: var(--gain);
+}
+.loss {
+  color: var(--loss);
+}
+.calc {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink2);
+}
+
+/* cards */
+.card,
+.empty {
+  background: var(--card);
+  border-radius: var(--r-panel);
+  padding: 24px 20px;
+}
+@media (min-width: 760px) {
+  .card,
+  .empty {
+    padding: 28px 32px;
+  }
+}
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+}
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cardTitle {
+  margin: 0;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.cardSub {
+  margin: 4px 0 16px;
+  color: var(--ink2);
+  font-size: 17px;
+}
+.cardNote {
+  font-size: 15px;
+  color: var(--ink2);
+}
+
+/* waterfall */
+.fall {
+  list-style: none;
+  margin: 8px 0 16px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 760px) {
+  .fall {
+    gap: 16px;
+  }
+}
+.fall li {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 2px;
+}
+.fallPlot {
+  position: relative;
+  width: 100%;
+  height: clamp(160px, 22vw, 240px);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px;
+}
+.fallPlot i {
+  position: absolute;
+  left: 0;
+  right: 0;
+  min-height: 3px;
+  border-radius: 8px;
+}
+.barList {
+  background: var(--ink);
+}
+.barDrop {
+  background: var(--lossFill);
+}
+.barNet {
+  background: var(--gainFill);
+}
+.fallValue {
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.fallLabel {
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.3;
+}
+@media (min-width: 760px) {
+  .fallValue {
+    font-size: 17px;
+  }
+  .fallLabel {
+    font-size: 14px;
+  }
+}
+
+/* channel mix */
+.mix {
+  display: grid;
+  gap: 24px;
+  align-items: center;
+}
+@media (min-width: 760px) {
+  .mix {
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 40px;
+  }
+}
+.donut {
+  position: relative;
+  width: min(240px, 70vw);
+  aspect-ratio: 1;
+  justify-self: center;
+}
+.donut svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.donutCentre {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+.donutCentre b {
+  font-size: 40px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.donutCentre span {
+  font-size: 15px;
+  color: var(--ink2);
+  margin-top: 6px;
+}
+.legend {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+}
+.legend th {
+  text-align: left;
+  font-weight: 400;
+  padding: 7px 0;
+}
+.legend th i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 12px;
+  vertical-align: -1px;
+}
+.legendCount {
+  text-align: right;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+  padding-left: 12px;
+}
+.legendShare {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  width: 76px;
+}
+
+/* last night */
+.nightBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.nightBar .cardSub {
+  margin: 4px 0 0;
+}
+.rooms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
+  gap: 10px;
+}
+@media (min-width: 1100px) {
+  .rooms {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+}
+.room {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--fill);
+  color: var(--ink2);
+}
+.room b {
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+.room span {
+  font-size: 13px;
+  font-weight: 700;
+}
+/* Text on each channel colour keeps 4.5:1 in light and dark. */
+.room[data-ch="mmt"],
+.room[data-ch="bcom"] {
+  color: var(--bg);
+}
+.room[data-ch="agoda"] {
+  color: #000;
+}
+.room[data-ch="ta"],
+.room[data-ch="walkin"] {
+  color: var(--ink);
+}
+.room[data-ch="direct"] {
+  color: var(--onAccent);
+}
+.roomLegend {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 15px;
+  color: var(--ink2);
+}
+.roomLegend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: -1px;
+}
+
+/* needs you */
+.needs {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+.need {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+}
+.needs li:last-child .need {
+  border-bottom: 0;
+}
+.needTile {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--fill);
+  color: var(--ink);
+}
+.needTileOk {
+  background: var(--accentSoft);
+  color: var(--accent);
+}
+.needText {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.needText b {
+  font-size: 17px;
+  font-weight: 600;
+}
+.needText > span {
+  font-size: 15px;
+  color: var(--ink2);
+}
+.need:hover b {
+  color: var(--accent);
+}
+.chev {
+  color: var(--ink2);
+  display: grid;
+}

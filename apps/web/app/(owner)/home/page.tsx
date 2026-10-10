@@ -1,37 +1,83 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
-import { useApi } from "@/lib/api";
-import type { PipelineStatus, PropertyInfo } from "@/lib/types";
+import { longDate } from "@/lib/format-overview";
 import { StepTracker } from "@/components/StepTracker";
-import { ErrorState, Loading } from "@/components/States";
+import { ErrorState } from "@/components/States";
+import { useShell } from "@/components/shell/ShellData";
+import { ChannelMix, InsightBanner, KpiTiles, LastNight, NeedsYou, Waterfall } from "./parts";
+import styles from "./overview.module.css";
 
-export default function PipelineHome() {
-  const property = useApi<PropertyInfo>("property");
-  const pipeline = useApi<PipelineStatus>("pipeline");
+/** Overview (Home): every figure comes from GET /overview. */
+export default function OverviewPage() {
+  const { data, error, loading, reload } = useShell("/home");
   const done = useMemo(
-    () => new Set((pipeline.data?.steps ?? []).filter((s) => s.done).map((s) => s.key)),
-    [pipeline.data],
+    () => new Set((data?.checklist.steps ?? []).filter((s) => s.done).map((s) => s.key)),
+    [data],
   );
-  const p = property.data;
 
+  if (!data) {
+    if (error) return <ErrorState message={error.message} code={error.code} onRetry={reload} />;
+    return (
+      <div role="status" aria-live="polite" aria-busy={loading} className={styles.stack}>
+        <span className="sr-only-text">Loading your overview</span>
+        <div className="skeleton" style={{ height: 96 }} />
+        <div className="skeleton" style={{ height: 88, borderRadius: 28 }} />
+        <div className={styles.tiles}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="skeleton" style={{ height: 150, borderRadius: 24 }} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const allDone = data.checklist.done_count >= data.checklist.total;
   return (
-    <section className="view">
-      <p className="tag">
-        {p ? `${p.name} · ${p.city} · ${p.rooms_count} rooms${p.is_sample ? " · sample data" : ""}` : " "}
-      </p>
-      <h1 className="display">Know what you really keep.</h1>
-      <p className="lede">
-        Seedha reads your OTA statements, shows what each channel actually leaves you, and stops you paying
-        commission twice for guests you already won.
-      </p>
-      {pipeline.error ? (
-        <ErrorState message={pipeline.error.message} code={pipeline.error.code} onRetry={pipeline.reload} />
-      ) : pipeline.loading && !pipeline.data ? (
-        <Loading rows={2} label="Loading the 8 steps" />
+    <div className={styles.stack}>
+      <div className={styles.hello}>
+        <div>
+          <p className={styles.date}>{longDate(data.business_date)}</p>
+          <h1 className={styles.h1}>Namaste, {data.owner.short_name} ji.</h1>
+        </div>
+        {data.has_statements ? (
+          <Link href="/flip" className="btn">
+            See the flip
+          </Link>
+        ) : null}
+      </div>
+
+      {data.has_statements && data.kpis ? (
+        <>
+          {data.insight ? <InsightBanner insight={data.insight} /> : null}
+          <KpiTiles kpis={data.kpis} savings={data.savings} period={data.period} />
+        </>
       ) : (
-        <StepTracker done={done} />
+        <section className={styles.empty} aria-labelledby="start-title">
+          <h2 id="start-title" className={styles.cardTitle}>
+            Start with your statements
+          </h2>
+          <p className={styles.cardSub}>
+            Add your MakeMyTrip, Booking.com and Agoda payouts with your hotel register. Seedha works out what
+            each channel really leaves you.
+          </p>
+          <Link href="/upload" className="btn">
+            Upload statements
+          </Link>
+        </section>
       )}
-    </section>
+
+      {allDone ? null : <StepTracker done={done} />}
+
+      {data.has_statements && data.kpis ? (
+        <>
+          <Waterfall steps={data.waterfall} period={data.period} />
+          <ChannelMix mix={data.channel_mix} kpis={data.kpis} />
+        </>
+      ) : null}
+      <LastNight night={data.last_night} />
+      <NeedsYou items={data.needs_you} />
+    </div>
   );
 }

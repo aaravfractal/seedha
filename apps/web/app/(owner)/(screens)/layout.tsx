@@ -1,10 +1,4 @@
-import { OwnerSidebar } from "@/components/OwnerSidebar";
-
+/** Owner screens share the frame in app/(owner)/layout.tsx. */
 export default function OwnerScreensLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="owner">
-      <OwnerSidebar />
-      <div className="view">{children}</div>
-    </div>
-  );
+  return children;
 }
