@@ -3,26 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
-import { OWNER_SCREENS } from "@/lib/screens";
-
-const TABS = [
-  { label: "Pipeline", href: "/home", match: (p: string) => p === "/home" || p === "/" },
-  {
-    label: "Owner",
-    href: "/upload",
-    match: (p: string) => OWNER_SCREENS.some((s) => p === s.href || p.startsWith(`${s.href}/`)),
-  },
-  { label: "Desk", href: "/desk", match: (p: string) => p.startsWith("/desk") },
-  { label: "Guest", href: "/link", match: (p: string) => p.startsWith("/link") || p.startsWith("/consent") },
-  { label: "Plans", href: "/plans", match: (p: string) => p.startsWith("/plans") },
-];
+import { AppHeader } from "./shell/AppHeader";
+import { isAppRoute } from "@/lib/screens";
 
 /** Pages a guest opens on their own phone: no owner navigation. */
 export function isGuestPage(pathname: string): boolean {
   return pathname.startsWith("/consent/") || /^\/link\/[^/]+/.test(pathname);
 }
 
-/** Sticky glass header with the five sections from the prototype. */
+/**
+ * Header for every page: the app shell header on owner, Front desk and Guest
+ * mode screens; a plain brand bar on guest phones, sign-in and public pages.
+ * The old "Pipeline" and "Plans" tabs are gone (D3).
+ */
 export function TopNav() {
   const pathname = usePathname();
   if (isGuestPage(pathname)) {
@@ -40,6 +33,7 @@ export function TopNav() {
       </header>
     );
   }
+  if (isAppRoute(pathname)) return <AppHeader />;
   return (
     <header className="site-header">
       <div className="bar">
@@ -47,13 +41,7 @@ export function TopNav() {
           <i aria-hidden="true" />
           Seedha
         </Link>
-        <nav className="seg" aria-label="Sections">
-          {TABS.map((tab) => (
-            <Link key={tab.href} href={tab.href} aria-current={tab.match(pathname) ? "page" : undefined}>
-              {tab.label}
-            </Link>
-          ))}
-        </nav>
+        <span style={{ marginLeft: "auto" }} />
         <ThemeToggle />
       </div>
     </header>

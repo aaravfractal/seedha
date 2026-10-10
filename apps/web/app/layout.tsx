@@ -4,6 +4,7 @@ import "./globals.css";
 import { TopNav } from "@/components/TopNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ToastProvider } from "@/components/Toast";
+import { ShellProvider } from "@/components/shell/ShellData";
 import { THEME_BOOT_SCRIPT } from "@/components/ThemeToggle";
 import { mukta } from "@/lib/fonts";
 
@@ -34,13 +35,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <ToastProvider>
-          <Suspense fallback={<header className="site-header" style={{ height: 61 }} />}>
-            <TopNav />
-          </Suspense>
-          <main id="main" className="page" tabIndex={-1}>
-            <Suspense fallback={null}>{children}</Suspense>
-          </main>
-          <SiteFooter />
+          <ShellProvider>
+            <Suspense fallback={<header className="site-header" style={{ height: 61 }} />}>
+              <TopNav />
+            </Suspense>
+            <main id="main" className="page" tabIndex={-1}>
+              <Suspense fallback={null}>{children}</Suspense>
+            </main>
+            <SiteFooter />
+          </ShellProvider>
         </ToastProvider>
       </body>
     </html>
