@@ -68,7 +68,10 @@ export default function TermsPage() {
       <ul>
         <li>No scraping of OTA websites and no attempts to break or overload Seedha.</li>
         <li>No spam, no messages to people who did not opt in, no misleading offers.</li>
-        <li>Keep your passcode and Desk device key private. Tell us at once if you think they leaked.</li>
+        <li>
+          Keep your WhatsApp number, sign-in codes and Desk device key private. Tell us at once if you think
+          one leaked.
+        </li>
       </ul>
 
       <h2 className="section">7. Numbers and advice</h2>

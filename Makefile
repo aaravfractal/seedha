@@ -111,7 +111,7 @@ build-web:
 	$(LOAD_ENV) && cd $(WEB) && npx next build
 
 demo: setup seed build-web
-	@echo "Open http://localhost:3000 and log in with OWNER_PASSCODE from .env"
+	@echo "Open http://localhost:3000 and tap Direct beta login (SEEDHA_DEMO=1 shows sign-in codes on screen)"
 	trap 'kill 0' EXIT INT TERM; $(MAKE) api & ( $(LOAD_ENV) && cd $(WEB) && npx next start --port 3000 ) & wait
 
 e2e:

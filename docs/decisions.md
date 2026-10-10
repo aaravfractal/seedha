@@ -509,3 +509,12 @@ CSS: module classes got no hash and same-named classes leaked onto the
 whole page (the Desk logo's marigold `.brand` recoloured the header
 wordmark, caught by axe). The rule now targets `globals.css` only, the one
 file that uses Tailwind; CSS modules use Turbopack's built-in handling.
+
+**D-083 Sign-in uses full navigation.** In the production build Next.js
+prefetches links, so owner pages prefetched while signed out are cached as
+redirects to /login; a client-side `router.push` after sign-in reused them
+and bounced back (dev mode does not prefetch, so only the e2e build showed
+it). Direct beta login and OTP verify now use `window.location` to move into
+the app. e2e signs in with Direct beta login (`#beta-login`); the lockout
+test now proves the OTP 5-try, 15-minute lock (D4); `SEEDHA_DEMO=1` is set
+for the e2e API.

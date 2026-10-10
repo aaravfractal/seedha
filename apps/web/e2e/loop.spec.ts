@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { signIn } from "./helpers";
 
 /**
  * The full 8-step loop from the prototype, on the real API and the sample
@@ -6,10 +7,7 @@ import { expect, test } from "@playwright/test";
  * approve win-back -> coded direct booking with the correct saving.
  */
 test("the full 8-step loop", async ({ page, context }) => {
-  await page.goto("/login");
-  await page.fill("#passcode", process.env.E2E_PASSCODE ?? "");
-  await page.click("button[type=submit]");
-  await expect(page).toHaveURL(/\/home$/);
+  await signIn(page);
   await expect(page.getByText("0 of 8 steps done. Tap any step to run it.")).toBeVisible();
 
   // 1-2. Upload and read the six sample statements.

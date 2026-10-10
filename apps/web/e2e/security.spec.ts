@@ -21,15 +21,19 @@ test("pages send security headers and load without CSP violations", async ({ pag
   expect(violations).toEqual([]);
 });
 
-test("owner login locks out after repeated wrong passcodes", async ({ page }) => {
+test("an OTP number locks for 15 minutes after five wrong codes", async ({ page }) => {
   await page.goto("/login");
-  let status = 0;
-  for (let i = 0; i < 12 && status !== 429; i += 1) {
-    const res = await page.request.post("/api/session", { data: { passcode: `wrong-${i}` } });
-    status = res.status();
+  await page.fill("#phone", "9123456789");
+  await page.click("#send-code");
+  await expect(page).toHaveURL(/\/otp/);
+  const real = (await page.locator("#demo-code").textContent())?.replace(/\D/g, "") ?? "";
+  expect(real).toMatch(/^\d{6}$/);
+  const wrong = real === "000000" ? "111111" : "000000";
+  for (let i = 0; i < 5; i += 1) {
+    await page.fill("#otp-code", wrong);
+    await page.click("#otp-verify");
+    await expect(page.locator("#otp-error")).toBeVisible();
   }
-  expect(status).toBe(429);
-  await page.fill("#passcode", "still-wrong");
-  await page.click("button[type=submit]");
-  await expect(page.locator("#login-error")).toContainText("Too many tries");
+  await expect(page.locator("#otp-error")).toContainText("Too many tries. Try again in 15 minutes.");
+  await expect(page.locator("#otp-tries")).toHaveText("0 of 5 tries left");
 });

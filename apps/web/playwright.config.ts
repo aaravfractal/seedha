@@ -25,7 +25,8 @@ export const E2E_WEB = "http://localhost:3001";
 const shared = {
   ...fileEnv,
   OWNER_API_TOKEN: fileEnv.OWNER_API_TOKEN || "e2e-owner-token",
-  OWNER_PASSCODE: fileEnv.OWNER_PASSCODE || "e2e-passcode",
+  // Simulated WhatsApp OTP shows its code in a labelled demo banner (D4).
+  SEEDHA_DEMO: "1",
   SESSION_SECRET: fileEnv.SESSION_SECRET || "e2e-session-secret-0123456789abcdef",
   DESK_DEVICE_KEY: fileEnv.DESK_DEVICE_KEY || "e2e-desk-key",
   // All integrations simulated in e2e, whatever the developer's .env says.
@@ -35,7 +36,6 @@ const shared = {
   RAZORPAY_KEY_ID: "",
   PROOF_RPC_URL: "",
 };
-process.env.E2E_PASSCODE = shared.OWNER_PASSCODE;
 process.env.DESK_DEVICE_KEY = shared.DESK_DEVICE_KEY;
 
 export default defineConfig({

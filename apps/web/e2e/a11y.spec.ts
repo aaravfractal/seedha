@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+import { signIn } from "./helpers";
 
 /**
  * M11 accessibility pass: every page has no WCAG 2.1 A/AA violation that axe
@@ -20,6 +21,7 @@ const OWNER_PAGES = [
   "/pro",
   "/settings",
   "/desk",
+  "/onboard",
 ];
 const PUBLIC_PAGES = [
   "/link",
@@ -35,16 +37,15 @@ const PUBLIC_PAGES = [
   "/contact",
   "/faq",
   "/login",
+  "/signup",
+  "/demo",
   "/no-such-page",
 ];
 
 test("no axe violations on any page, both themes, laptop and phone", async ({ page, context }) => {
   test.setTimeout(300_000);
   // One login for the whole sweep: owner login is rate limited.
-  await page.goto("/login");
-  await page.fill("#passcode", process.env.E2E_PASSCODE ?? "");
-  await page.click("button[type=submit]");
-  await expect(page).toHaveURL(/\/home$/);
+  await signIn(page);
 
   const found: string[] = [];
   for (const theme of ["light", "dark"]) {

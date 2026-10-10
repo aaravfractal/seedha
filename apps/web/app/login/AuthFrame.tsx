@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import type { ReactNode } from "react";
 import { PENDING_KEY, type ApiErrorBody, type CodeSent, type PendingCode, maskPhone } from "@/lib/auth";
@@ -57,7 +56,6 @@ export function BetaLogin({
   next?: string;
 }) {
   const [busy, setBusy] = useState(false);
-  const router = useRouter();
   async function open() {
     setBusy(true);
     try {
@@ -67,7 +65,9 @@ export function BetaLogin({
         body: JSON.stringify({ remember }),
       });
       if (res.ok) {
-        router.push(next);
+        // Full navigation: pages prefetched while signed out hold cached
+        // redirects to /login, so a client-side push would bounce back.
+        window.location.assign(next);
         return;
       }
       onError(await errorMessage(res));

@@ -1,14 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { signIn } from "./helpers";
 
 /**
  * M11: the flip is interactive in under a second on the production build.
  * Runs after loop.spec.ts, so the 1,500 statement lines are loaded.
  */
 test("the flip renders and re-ranks in under a second", async ({ page }) => {
-  await page.goto("/login");
-  await page.fill("#passcode", process.env.E2E_PASSCODE ?? "");
-  await page.click("button[type=submit]");
-  await expect(page).toHaveURL(/\/home$/);
+  await signIn(page);
 
   const timings: number[] = [];
   for (let run = 0; run < 3; run += 1) {

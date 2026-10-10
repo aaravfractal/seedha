@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -49,7 +48,6 @@ export default function OtpPage() {
   const [announce, setAnnounce] = useState("");
   const [shaking, shake] = useShake();
   const input = useRef<HTMLInputElement>(null);
-  const router = useRouter();
 
   useEffect(() => {
     // sessionStorage exists only in the browser, so read it after mount.
@@ -104,7 +102,8 @@ export default function OtpPage() {
         const body = (await res.json()) as { onboarded: boolean };
         clearPending();
         setOpening(true);
-        router.replace(body.onboarded ? pending.next : "/onboard");
+        // Full navigation drops redirects prefetched while signed out.
+        window.location.replace(body.onboarded ? pending.next : "/onboard");
         return;
       }
       const body = (await res.json().catch(() => null)) as ApiErrorBody | null;
