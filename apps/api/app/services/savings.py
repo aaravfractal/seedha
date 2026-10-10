@@ -18,7 +18,12 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 
-from app.money import bps_of, gst_on_commission, upi_fee
+from app.money import bps_of, gst_on_commission, rupees, upi_fee
+
+# Sample cost to the hotel of the returning-guest perk (breakfast for two, the
+# Seedha Site extra). Owner-entered in a real setup; labelled "Sample cost".
+SAMPLE_PERK_COST_PER_NIGHT = rupees(400)
+MAX_PERK_COST_PER_NIGHT = rupees(5000)
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,3 +74,24 @@ def season_review(booked: Iterable[tuple[date, int]], start: date, end: date) ->
     """Count and sum the savings whose booking date falls in [start, end]."""
     inside = [net for day, net in booked if start <= day <= end]
     return Season(start=start, end=end, count=len(inside), total_net_saving=sum(inside))
+
+
+@dataclass(frozen=True, slots=True)
+class PerkSplit:
+    """Where the commission a coded booking avoided went, in paise.
+
+    avoided = upi_fee + perk_cost + kept_after_perk. The guest pays the same
+    public rate (rule 6); the perk is a separate line and net_saving
+    (ruling 5) is unchanged.
+    """
+
+    avoided: int
+    upi_fee: int
+    perk_cost: int
+    kept_after_perk: int
+
+
+def perk_split(avoided: int, fee: int, nights: int, cost_per_night: int) -> PerkSplit:
+    """Split the avoided commission into UPI fee, perk cost and what the hotel keeps."""
+    perk_cost = cost_per_night * nights
+    return PerkSplit(avoided, fee, perk_cost, avoided - fee - perk_cost)
