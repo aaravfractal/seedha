@@ -450,3 +450,15 @@ def test_d6_strips_the_link_before_the_code() -> None:
     text = f"Your code {code} works here: {link}"
     assert d6_ok(text, link=link, code=code) is True
     assert d6_ok(text) is False, "the port in the link is a 4-digit number"
+
+
+def test_data_deletion_also_erases_inbox_texts(
+    client: TestClient, owner: dict[str, str], sample: Session
+) -> None:
+    """Every erasure path ends in proof.erase_consent, which deletes the texts."""
+    cid = consent(client, owner, room=104)  # Neha, booking BK90000
+    guest_writes(client, owner, cid, "Is breakfast included?")
+    assert inbox_count(sample) == 1
+    res = client.post("/public/data-deletion", json={"booking_ref": "BK90000", "phone": NUMBER})
+    assert res.status_code == 200
+    assert inbox_count(sample) == 0

@@ -18,10 +18,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
-from app.models import Booking, Consent, Message, ProofBundle, ProofBundleItem
+from app.models import Booking, Consent, InboxMessage, Message, ProofBundle, ProofBundleItem
 from app.services.consent import as_utc, fingerprint
 
 
@@ -210,6 +210,9 @@ def erase_consent(session: Session, consent: Consent, now: datetime) -> None:
         .where(ProofBundleItem.consent_id == consent.id)
         .values(consent_id=None)
     )
+    # Guest inbox texts go too: every erasure path (STOP, Forget, data
+    # deletion) ends here, so none can leave a guest's words stored.
+    session.execute(delete(InboxMessage).where(InboxMessage.consent_id == consent.id))
     for message in session.scalars(select(Message).where(Message.consent_id == consent.id)):
         message.body = "[erased at the guest's request]"
         if message.status == "draft":

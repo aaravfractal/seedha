@@ -26,6 +26,15 @@ MONEY_PATTERN = re.compile(
 )
 
 
+# Any web address. Guest messages may carry only the guest's own perk link
+# (security review S2: no phishing links in owner-edited or away text).
+WEB_ADDRESS = re.compile(
+    r"(https?://\S+|www\.\S+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|in|net|org|co|io|app|me|"
+    r"link|info|biz|xyz|ly|gl)\b\S*)",
+    re.IGNORECASE,
+)
+
+
 @dataclass(frozen=True, slots=True)
 class DraftFacts:
     """Everything a draft may mention. No amounts on purpose."""

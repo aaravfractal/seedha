@@ -98,9 +98,10 @@ def test_sample_hotel_always_uses_the_simulated_sender(
         def __init__(self) -> None:
             self.app = app
 
-    assert isinstance(get_sender(Req(), live, prop), SimulatedSender)  # type: ignore[arg-type]
+    assert isinstance(get_sender(Req(), live, base_sample), SimulatedSender)  # type: ignore[arg-type]
     prop.is_sample = False
-    assert isinstance(get_sender(Req(), live, prop), CloudApiSender)  # type: ignore[arg-type]
+    base_sample.flush()
+    assert isinstance(get_sender(Req(), live, base_sample), CloudApiSender)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(

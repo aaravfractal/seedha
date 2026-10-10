@@ -7,10 +7,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
-from app.models import Message
+from app.models import Message, Property
 from app.services.desk import utc_now
 from app.services.messages import (
     MessageError,
@@ -69,7 +70,7 @@ class ReplyIn(BaseModel):
     text: str = Field(min_length=1, max_length=200)
 
 
-def get_sender(request: Request, settings: SettingsDep, prop: PropertyDep) -> Sender:
+def get_sender(request: Request, settings: SettingsDep, session: SessionDep) -> Sender:
     """WhatsApp sender, overridable in tests via app.state.sender.
 
     The sample hotel always uses the simulated sender, whatever keys are set:
@@ -79,7 +80,8 @@ def get_sender(request: Request, settings: SettingsDep, prop: PropertyDep) -> Se
     override: Sender | None = getattr(request.app.state, "sender", None)
     if override is not None:
         return override
-    return SimulatedSender() if prop.is_sample else sender_for(settings)
+    prop = session.scalar(select(Property).order_by(Property.id).limit(1))
+    return SimulatedSender() if prop is None or prop.is_sample else sender_for(settings)
 
 
 SenderDep = Annotated[Sender, Depends(get_sender)]

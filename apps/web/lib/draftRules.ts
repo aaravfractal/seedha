@@ -10,7 +10,8 @@ const MAX_LENGTH = 600;
 // ₹, rs/inr/rupee, percentages and any number of 3 or more digits (D6).
 const MONEY = /(₹|\brs\.?\s*\d|\binr\b|\d\s*%|\brupees?\b|\d[\d,]*\d[\d,]*\d)/i;
 // Any web address other than the perk link.
-const OTHER_LINK = /(https?:\/\/|www\.|\b[a-z0-9-]+\.(?:com|in|net|org|io|co|me|ly|app)\b)/i;
+const OTHER_LINK =
+  /(https?:\/\/\S+|www\.\S+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|in|net|org|co|io|app|me|link|info|biz|xyz|ly|gl)\b\S*)/i;
 
 /** Same rules the API applies before it saves an edit. */
 export function editProblem(text: string, code: string, link: string): string | null {

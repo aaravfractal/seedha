@@ -18,13 +18,12 @@ Rules enforced here:
 from __future__ import annotations
 
 import logging
-import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Protocol
 
 import anthropic
-from sqlalchemy import delete, func, select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import (
@@ -39,7 +38,7 @@ from app.models import (
 )
 from app.money import format_inr
 from app.services.consent import as_utc, normalise_mobile
-from app.services.drafter import MONEY_PATTERN, STOP_LINE
+from app.services.drafter import MONEY_PATTERN, STOP_LINE, WEB_ADDRESS
 from app.services.link import room_rates
 from app.services.proof import erase_consent
 from app.services.whatsapp import CloudApiSender, Sender, SimulatedSender, is_stop
@@ -52,16 +51,6 @@ MAX_BODY = 1_000
 MAX_AWAY = 300
 MAX_DRAFT = 400
 STOP_PHRASE = "reply stop to opt out"
-# D6 adds "any number with three or more digits" to the drafter's MONEY_PATTERN
-# (which covers ₹, rs + digits, INR, rupees and %). Once drafter.MONEY_PATTERN
-# carries the 3+ digit rule itself this second check is redundant but harmless.
-THREE_DIGITS = re.compile(r"\d[\d,]*\d[\d,]*\d")
-# Any web address. Owner text may carry only the guest's own perk link.
-WEB_ADDRESS = re.compile(
-    r"(https?://\S+|www\.\S+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.(?:com|in|net|org|co|io|app|me|"
-    r"link|info|biz|xyz|ly|gl)\b\S*)",
-    re.IGNORECASE,
-)
 
 
 class InboxError(ValueError):
@@ -92,7 +81,7 @@ def d6_ok(text: str, link: str = "", code: str = "") -> bool:
         text = text.replace(link, "")
     if code:
         text = text.replace(code, "")
-    return MONEY_PATTERN.search(text) is None and THREE_DIGITS.search(text) is None
+    return MONEY_PATTERN.search(text) is None
 
 
 def has_other_link(text: str, allowed_link: str = "") -> bool:
@@ -440,8 +429,7 @@ def set_away(
 
 
 def forget(session: Session, consent: Consent, now: datetime) -> None:
-    """DPDP erasure via the proof service, and the thread's texts are deleted."""
-    session.execute(delete(InboxMessage).where(InboxMessage.consent_id == consent.id))
+    """DPDP erasure via the proof service (which also deletes the thread's texts)."""
     erase_consent(session, consent, now)
 
 
