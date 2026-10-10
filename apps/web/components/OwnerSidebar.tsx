@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { OWNER_SCREENS, isCurrent } from "@/lib/screens";
 import { Icon } from "./shell/Icons";
@@ -17,8 +18,19 @@ export function OwnerSidebar() {
   const pathname = usePathname();
   const { data } = useShell(pathname);
   const pending = data?.pending_approvals ?? 0;
+  const nav = useRef<HTMLElement>(null);
+
+  // On phones the screens are a sideways pill row: keep the current one in
+  // view (design QA SH1). Only the row scrolls, never the page.
+  useEffect(() => {
+    const row = nav.current;
+    const current = row?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!row || !current || row.scrollWidth <= row.clientWidth) return;
+    row.scrollLeft = current.offsetLeft - (row.clientWidth - current.offsetWidth) / 2;
+  }, [pathname]);
+
   return (
-    <nav className={styles.side} aria-label="Owner screens">
+    <nav ref={nav} className={styles.side} aria-label="Owner screens">
       <ul>
         {OWNER_SCREENS.map((screen) => (
           <li key={screen.key}>

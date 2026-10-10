@@ -18,6 +18,17 @@ type BigCard = {
 };
 type SmallCard = { name: string; text: string; href?: string };
 
+/** "Commission on 1 cancelled stay and ..." naming only the problems found (design QA PR1). */
+function auditDetail(cancelled: number, over: number): string {
+  const parts = [
+    cancelled ? `commission on ${count(cancelled)} cancelled stay${cancelled === 1 ? "" : "s"}` : "",
+    over ? `a higher rate than your contract on ${count(over)} row${over === 1 ? "" : "s"}` : "",
+  ].filter(Boolean);
+  if (parts.length === 0) return "No overcharges found in your statements.";
+  const text = parts.join(" and ");
+  return `${text.charAt(0).toUpperCase()}${text.slice(1)}.`;
+}
+
 function bigCards(p: ProData): BigCard[] {
   const cancelled = p.audit_cancelled_lines;
   const over = p.audit_over_rate_lines;
@@ -25,9 +36,9 @@ function bigCards(p: ProData): BigCard[] {
     {
       name: "Seedha Audit",
       headline: p.audit_claim ? `${inr(p.audit_claim)} to claim back` : "Nothing to claim back yet",
-      detail: `Commission on ${count(cancelled)} cancelled stay${cancelled === 1 ? "" : "s"} and a higher rate than your contract on ${count(over)} row${over === 1 ? "" : "s"}.`,
+      detail: auditDetail(cancelled, over),
       foot: "Calculated from your statements.",
-      sample: false,
+      sample: p.audit_sample,
       link: p.audit_claim ? { href: "/upload#disputes", label: "Draft the disputes" } : undefined,
     },
     {

@@ -3,7 +3,8 @@
 
 .stage {
   position: relative;
-  min-height: calc(100dvh - 140px);
+  /* the stage is the whole page now (no app header or footer): glows reach the edges (L1) */
+  min-height: 100dvh;
   padding: 24px 16px 48px;
   display: flex;
   justify-content: center;

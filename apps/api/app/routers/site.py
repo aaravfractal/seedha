@@ -286,6 +286,9 @@ class ProOut(BaseModel):
     audit_cancelled_lines: int
     audit_over_rate_lines: int
     consents: int
+    # The Audit is computed from statements; on the sample hotel those are
+    # sample rows, so it carries a Sample label too (D10).
+    audit_sample: bool
     pulse_sample: bool
     rate_watch_sample: bool
 
@@ -296,6 +299,7 @@ def get_pro(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> ProOut:
     result = audit(session, prop.id)
     return ProOut(
         audit_claim=result.claim,
+        audit_sample=prop.is_sample,
         audit_cancelled_lines=result.cancelled_lines,
         audit_over_rate_lines=result.over_rate_lines,
         consents=active_consents(session, prop.id),

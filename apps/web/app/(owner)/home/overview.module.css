@@ -190,6 +190,14 @@
   text-align: center;
   gap: 2px;
 }
+/* Six 52px columns cannot hold "Commission" and "−8.9L" side by side on a
+   phone: two rows of three instead (design QA O2). */
+@media (max-width: 559px) {
+  .fall {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 18px;
+  }
+}
 .fallPlot {
   position: relative;
   width: 100%;

@@ -31,5 +31,16 @@ const outfit = localFont({
   display: "swap",
 });
 
-/** Class names that define the three --font-wb-* variables. */
-export const worldBFonts = `${cormorant.variable} ${dmSerif.variable} ${outfit.variable}`;
+// Mukta's Latin subset: World B body text is Mukta in English too (design QA
+// H3). Devanagari still comes from lib/fonts.ts.
+const muktaLatin = localFont({
+  src: [
+    { path: "./fonts/mukta-latin-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/mukta-latin-600.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-mukta-latin",
+  display: "swap",
+});
+
+/** Class names that define the --font-wb-* and --font-mukta-latin variables. */
+export const worldBFonts = `${cormorant.variable} ${dmSerif.variable} ${outfit.variable} ${muktaLatin.variable}`;

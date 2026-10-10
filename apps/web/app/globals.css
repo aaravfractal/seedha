@@ -1448,3 +1448,9 @@ label.fl {
 .deva {
   font-family: var(--font-deva);
 }
+
+/* A page shown inside the Desk simulator's phone frame (consent page). */
+html[data-embedded="true"] .site-header,
+html[data-embedded="true"] .site-footer {
+  display: none;
+}

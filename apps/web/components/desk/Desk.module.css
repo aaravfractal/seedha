@@ -269,6 +269,12 @@
   margin: -50px auto 0;
   padding: 0 8px 16px;
 }
+/* With no slip in the slot, the well takes no space, so the caption below
+   stays visible instead of tucking under the device (design QA D2). */
+.paperWell:empty {
+  margin-top: 0;
+  padding: 0;
+}
 .paper {
   margin: 0;
   background: #fff;

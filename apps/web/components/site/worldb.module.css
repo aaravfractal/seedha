@@ -19,7 +19,9 @@
   --wb-display: var(--font-wb-pine), "Cormorant Garamond", Georgia, serif;
   --wb-display-weight: 600;
   --wb-display-track: 0;
-  --wb-text: var(--font-mukta), "Noto Sans Devanagari", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --wb-text:
+    var(--font-mukta-latin), var(--font-mukta), "Noto Sans Devanagari", -apple-system, "Helvetica Neue",
+    Arial, sans-serif;
   --wb-hero: linear-gradient(180deg, #8fa8bc 0%, #b9c9c6 36%, #5e7566 60%, #2e4a33 80%, #1a2a1e 100%);
   --wb-ease: cubic-bezier(0.22, 1, 0.36, 1);
   container-type: inline-size;

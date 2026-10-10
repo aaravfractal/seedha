@@ -271,6 +271,7 @@ export type ProData = {
   audit_cancelled_lines: number;
   audit_over_rate_lines: number;
   consents: number;
+  audit_sample: boolean;
   pulse_sample: boolean;
   rate_watch_sample: boolean;
 };

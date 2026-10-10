@@ -103,3 +103,15 @@ test("keyboard: skip link, and the UPI sheet holds and returns focus", async ({ 
   await expect(sheet).toBeHidden();
   await expect(pay).toBeFocused();
 });
+
+test("footer links are 44px tap targets on a phone", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  for (const path of ["/plans", "/link"]) {
+    await page.goto(path);
+    const heights = await page
+      .locator("footer.site-footer a")
+      .evaluateAll((links) => links.map((a) => a.getBoundingClientRect().height));
+    expect(heights.length, path).toBeGreaterThan(0);
+    expect(Math.min(...heights), path).toBeGreaterThanOrEqual(44);
+  }
+});

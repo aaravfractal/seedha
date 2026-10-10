@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import type { ConsentPage } from "@/lib/types";
@@ -21,6 +21,11 @@ function Tick() {
 
 /** The guest's consent page, opened from the Desk QR. Unticked by default (rule 5). */
 export default function ConsentScreen({ params }: { params: Promise<{ token: string }> }) {
+  // Inside the Desk simulator's phone frame, show the guest screen alone,
+  // without the site header and footer (design QA D1).
+  useEffect(() => {
+    if (window.self !== window.top) document.documentElement.dataset.embedded = "true";
+  }, []);
   const { token } = use(params);
   const page = useApi<ConsentPage>(`public/consent/${encodeURIComponent(token)}`);
   const [ticked, setTicked] = useState(false);
