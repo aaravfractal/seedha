@@ -39,13 +39,13 @@ class DateOut(BaseModel):
 
 
 class LinkPageOut(BaseModel):
-    """What the booking page shows."""
+    """What the booking page shows. Never the guest's name: a guessed code
+    must not reveal who stayed (D-076)."""
 
     hotel: str
     address: str
     code: str | None
     code_status: str
-    guest_short_name: str | None
     perk: str
     rooms: list[RoomOut]
     dates: list[DateOut]
@@ -71,6 +71,8 @@ class BookOut(BaseModel):
     room_type: str
     perk_applied: bool
     payment: str
+    # Only once the code has been accepted with a booking (D-076).
+    guest_short_name: str | None
 
 
 def stay_label(start: date, nights: int) -> str:
@@ -97,7 +99,6 @@ def link_page(
         address=prop.address,
         code=status.perk.code if status.perk else None,
         code_status=status.status,
-        guest_short_name=status.perk.guest.short_name if status.perk else None,
         perk=prop.perk_text,
         rooms=[
             RoomOut(room_type=t, nightly_rate=r) for t, r in room_rates(session, prop.id).items()
@@ -126,6 +127,9 @@ def link_book(body: BookIn, session: SessionDep, prop: PropertyDep) -> BookOut:
         room_type=body.room_type,
         perk_applied=done.perk_applied,
         payment="Simulated UPI (test mode)",
+        guest_short_name=(
+            done.booking.guest.short_name if done.perk_applied and done.booking.guest else None
+        ),
     )
 
 

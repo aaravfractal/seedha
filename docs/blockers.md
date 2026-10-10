@@ -50,7 +50,7 @@ main.cpp includes the header); the board has no touch panel, so
 `-DDISABLE_ALL_LIBRARY_WARNINGS=1` turns off that library's setup notices.
 `pio run -e seedha_desk`: SUCCESS, zero warnings, RAM 14.5%, flash 74.8%.
 
-## B-003 Files written outside the repo (M8) — needs Aarav
+## B-003 Files written outside the repo (M8) — mostly resolved
 
 PlatformIO stores platforms and toolchains in `~/.platformio` unless told
 otherwise, and I did not redirect it in M8. It created `~/.platformio`
@@ -66,3 +66,10 @@ inside the repo. I have not deleted `~/.platformio` or `~/.cache/pre-commit`,
 because deleting outside the repo is also off-limits. Aarav: remove them
 if you want (`rm -rf ~/.platformio ~/.cache/pre-commit`); nothing in the
 repo needs them now.
+
+Update 10 Oct 2026: Aarav deleted `~/.platformio`, and I confirmed it is
+gone. `~/.cache/pre-commit` is still there: it still exists with its
+original date (9 Oct 16:30), so that delete did not happen. To stop
+touching it, commits from here on run with `PRE_COMMIT_HOME` set to
+`.pre-commit-home/` in the repo (gitignored). Remaining for Aarav:
+`rm -rf ~/.cache/pre-commit`.

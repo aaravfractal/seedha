@@ -17,7 +17,8 @@ function longDate(iso: string): string {
 
 function codeMessage(page: LinkPage, typed: string): { text: string; good: boolean } {
   if (!typed.trim()) return { text: "Enter the code from your slip or WhatsApp", good: false };
-  if (page.code_status === "valid") return { text: `${page.perk} for ${page.guest_short_name}`, good: true };
+  // No name until the code is accepted with a booking: a guessed code must not reveal a guest.
+  if (page.code_status === "valid") return { text: `${page.perk}. Your code is valid.`, good: true };
   if (page.code_status === "used") return { text: "This code was already used.", good: false };
   return { text: "That code is not right. Check your slip or WhatsApp.", good: false };
 }
@@ -100,7 +101,9 @@ export function LinkBooking({
             <path d="M5 12l5 5 9-10" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <h3 className="sub-title">Booked.</h3>
+        <h3 className="sub-title">
+          {done.guest_short_name ? `Booked. Thank you, ${done.guest_short_name}.` : "Booked."}
+        </h3>
         <p className="sub">
           See you on {longDate(done.check_in)}.{done.perk_applied ? " Breakfast is on us." : ""}
           <br />

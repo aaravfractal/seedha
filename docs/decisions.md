@@ -435,3 +435,16 @@ name for a valid code, and a valid code gives one perk. Rate limits (D-071)
 slow guessing but do not stop it. Not changed unilaterally because the
 format and the named greeting are part of the demo; options are listed in
 needs-from-aarav item 9.
+
+**D-076 Perk codes with a random part (Aarav approved item 9, 10 Oct
+2026).** New codes are PREFIX-INITIALS+YY-XXXX, e.g. DEODAR-RS26-7KQ2. The
+four characters are drawn with `secrets` from 31 symbols without 0/O or
+1/I/L, about 920,000 combinations per stem; a clash draws again. The demo
+codes DEODAR-NG26 and DEODAR-RS26 are kept, and only for a property marked
+as sample data, so a real hotel never issues a guessable code. Arjun's
+walk-in code in the sample now has the random part too (only the two named
+codes were kept). The longest code (20-character prefix) is exactly 30
+characters, the existing column and input limit. The public link page never
+returns the guest's name; the booking confirmation returns it only when the
+booking accepted the code, and the page then says "Booked. Thank you,
+Rahul ji." Before that the code line reads "<perk>. Your code is valid."

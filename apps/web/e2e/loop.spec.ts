@@ -66,13 +66,15 @@ test("the full 8-step loop", async ({ page, context }) => {
   const guest = await context.newPage();
   await guest.goto("/link/DEODAR-RS26");
   await expect(guest.locator("nav.seg")).toHaveCount(0);
-  await expect(guest.getByText("Free breakfast on your next direct stay for Rahul ji")).toBeVisible();
+  await expect(guest.getByText("Free breakfast on your next direct stay. Your code is valid.")).toBeVisible();
+  // The guest's name stays hidden until the code is accepted with a booking.
+  await expect(guest.getByText("Rahul")).toHaveCount(0);
   await guest.getByRole("button", { name: "Pay ₹8,600 with UPI" }).click();
   await guest
     .getByRole("dialog", { name: "Pay with UPI" })
     .getByRole("button", { name: "Pay", exact: true })
     .click();
-  await expect(guest.getByText("Booked.")).toBeVisible();
+  await expect(guest.getByText("Booked. Thank you, Rahul ji.")).toBeVisible();
   await expect(guest.getByText(/Breakfast is on us/)).toBeVisible();
 
   await page.goto("/savings");

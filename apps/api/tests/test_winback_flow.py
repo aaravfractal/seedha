@@ -67,7 +67,8 @@ def test_full_winback_loop(client: TestClient, owner: dict[str, str]) -> None:
     assert (again.status_code, again.json()["error"]["code"]) == (409, "not_a_draft")
 
     page = client.get("/public/link?code=deodar-rs26").json()
-    assert (page["code_status"], page["guest_short_name"]) == ("valid", "Rahul ji")
+    assert page["code_status"] == "valid"
+    assert "Rahul" not in json.dumps(page), "no name until the code is accepted (D-076)"
     deluxe = next(r for r in page["rooms"] if r["room_type"] == "Deluxe Valley View")
     assert deluxe["nightly_rate"] == rupees(4_300)
     first = page["dates"][0]
@@ -79,6 +80,7 @@ def test_full_winback_loop(client: TestClient, owner: dict[str, str]) -> None:
     })  # fmt: skip
     assert booked.status_code == 200, booked.text
     assert (booked.json()["amount"], booked.json()["perk_applied"]) == (rupees(8_600), True)
+    assert booked.json()["guest_short_name"] == "Rahul ji"
     assert "saving" not in json.dumps(booked.json()).lower()
 
     savings = client.get("/savings", headers=owner).json()

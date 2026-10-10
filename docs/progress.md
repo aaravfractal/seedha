@@ -8,9 +8,13 @@ docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-aarav.md.
 **All 11 milestones passed.** `make check` is green end to end: API, web,
 e2e, history secret scan, firmware native tests and the ESP32 build.
 
-ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.98% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7
+ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7
 
-- Tests: API 300, web unit 18, Playwright 7 (green 3 runs in a row),
+- Perk codes (10 Oct, item 9 approved, D-076): new codes carry a random
+  part (DEODAR-RS26-7KQ2); the demo codes DEODAR-NG26 and DEODAR-RS26 are
+  kept for the sample hotel only; Seedha Link shows no guest name until a
+  booking accepts the code.
+- Tests: API 309, web unit 18, Playwright 7 (green 3 runs in a row),
   firmware native 5.
 - All locked numbers hold in tests, the API and the browser: ₹10,39,108
   paid to channels; ₹15,71,988 lost vs list price; ₹47,33,012 net;
@@ -25,13 +29,12 @@ ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.98% (money 1
 
 **Needs Aarav** (docs/needs-from-aarav.md): confirm D-001 (agent GST); keys
 for Claude, WhatsApp (plus an approved template), Razorpay and Amoy; Desk
-hardware; the teammate's name and the legal emails; a call on guessable perk
-codes (item 9); and whether to delete `~/.platformio` and
-`~/.cache/pre-commit` (item 10).
+hardware; the teammate's name and the legal emails; and deleting
+`~/.cache/pre-commit`, which is still there (item 10).
 
 **Rule breach to know about** (B-003): during M8, PlatformIO wrote about
-20 MB to `~/.platformio`, outside the repo. Builds now stay inside the repo.
-I have not deleted that folder.
+20 MB to `~/.platformio`, outside the repo. Aarav deleted it on 10 Oct.
+Firmware builds and pre-commit runs now stay inside the repo.
 
 **Still blocked**: B-001, the testnet write (`eth-account` will not install
 here). The fallback stores the Merkle root locally and says so in the UI.
@@ -553,3 +556,25 @@ closed, B-002 resolved). PlatformIO is kept inside the repo from now on;
 it had written to `~/.platformio` during M8 (B-003).
 
 ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.98% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7
+
+## Item 9: perk code format — passed (10 October 2026)
+
+**Built** (D-076): codes are PREFIX-INITIALS+YY plus a 4-character random
+part from 31 symbols (no 0/O, 1/I/L), drawn with `secrets`; clashes draw
+again. DEODAR-NG26 and DEODAR-RS26 are kept, only when the property is
+sample data. `/public/link` no longer returns the guest's name; the booking
+confirmation does, only when the booking accepted the code ("Booked. Thank
+you, Rahul ji."). Arjun's sample code (walk-in) now has the random part;
+the seed's informational code column was regenerated to match.
+
+**Tests**: `tests/test_perk_codes.py` (alphabet, format, demo codes kept on
+the sample hotel, other sample guests and real hotels get the random part,
+taken demo code falls back, reissue is stable, collisions retry and can run
+out, the longest code fits the column, no name on the link page for valid
+or unknown codes, name only after a coded booking). Updated: the walk-in
+checkout, win-back flow and loop e2e now expect no name before booking.
+
+**B-003**: `~/.platformio` deleted by Aarav (confirmed). `~/.cache/pre-commit`
+is still present; commits now use a repo-local `PRE_COMMIT_HOME`.
+
+ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7

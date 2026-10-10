@@ -63,7 +63,10 @@ done". Each step is also a screen in the sidebar.
    "Reply STOP to opt out."). Nothing is sent until the owner approves.
 7. **Direct booking.** Open `/link/DEODAR-RS26` (a guest page, no login).
    Free breakfast, same price as the hotel's public rate. Pay ₹8,600 with
-   simulated UPI. The code works once.
+   simulated UPI. The code works once. The page does not show the guest's
+   name until the booking has accepted the code ("Booked. Thank you, Rahul ji.").
+   New codes carry a random part (DEODAR-RS26-7KQ2); only the two demo codes
+   DEODAR-NG26 and DEODAR-RS26 are kept as they are.
 8. **Savings.** Savings shows **₹2,233** commission and GST avoided (the
    original MakeMyTrip contract rate of 22% plus 18% GST) and **+₹2,199**
    net after the UPI fee. Home now says "All 8 steps done".

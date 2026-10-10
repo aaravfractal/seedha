@@ -1,7 +1,7 @@
 file,external_ref,channel,status,check_in,nights,room,guest_name,guest_city,list_amount,discount,commission,gst,fees,tds,tcs,payout,short_name,desk,perk_code
 In-house today (sample),BK90000,bcom,stay,,1,104,Neha Gupta,Gurugram,4000,600,612,110,0,3,0,2675,Neha ji,1,DEODAR-NG26
 In-house today (sample),MM90001,mmt,stay,,1,207,Rahul Sharma,Delhi,6200,744,1200,216,0,5,0,4035,Rahul ji,1,DEODAR-RS26
-In-house today (sample),HR90002,walkin,stay,,1,112,Arjun Mehta,Ludhiana,3400,0,0,0,0,0,0,3400,Arjun ji,1,DEODAR-AM26
+In-house today (sample),HR90002,walkin,stay,,1,112,Arjun Mehta,Ludhiana,3400,0,0,0,0,0,0,3400,Arjun ji,1,
 In-house today (sample),MM90003,mmt,stay,,1,101,Kritika Anand,Delhi,4300,516,832,150,0,4,0,2798,Kritika ji,0,
 In-house today (sample),MM90004,mmt,stay,,1,102,Mohan Lal Dua,Ambala,4300,516,832,150,0,4,0,2798,Mohan ji,0,
 In-house today (sample),MM90005,mmt,stay,,1,103,Shalini Vats,Noida,4300,0,946,170,0,4,0,3180,Shalini ji,0,

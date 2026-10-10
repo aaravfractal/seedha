@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -131,9 +132,10 @@ def test_walk_in_checkout_slip(client: TestClient, owner: dict[str, str]) -> Non
     out = client.post("/desk/checkout", headers=owner, json={"room": 112}).json()
     labels = [line["label"] for line in out["slip"]["lines"]]
     assert labels == ["Room (Walk-in)", "Booked directly. Hotel kept"]
-    assert out["perk_code"] == "DEODAR-AM26"
+    # Not one of the two demo codes, so it gets the random part (D-076).
+    assert re.fullmatch(r"DEODAR-AM26-[2-9A-HJKMNP-Z]{4}", out["perk_code"])
     again = client.post("/desk/checkout", headers=owner, json={"room": 112}).json()
-    assert again["perk_code"] == "DEODAR-AM26"
+    assert again["perk_code"] == out["perk_code"]
     late = client.post("/desk/checkin", headers=owner, json={"room": 112})
     assert (late.status_code, late.json()["error"]["code"]) == (409, "already_checked_out")
 

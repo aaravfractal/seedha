@@ -172,7 +172,10 @@ def check_out(
     session: Session, prop: Property, stay: InHouse, now: datetime
 ) -> tuple[Slip, PerkCode]:
     """Issue the perk code, mark the stay checked out and print the slip."""
-    perk = issue_perk(session, prop.code_prefix, prop.perk_text, stay.guest, stay.booking, now)
+    perk = issue_perk(
+        session, prop.code_prefix, prop.perk_text, stay.guest, stay.booking, now,
+        sample_property=prop.is_sample,
+    )  # fmt: skip
     stay.booking.checked_out_at = stay.booking.checked_out_at or now
     slip = checkout_slip(
         CheckoutInput(

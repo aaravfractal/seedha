@@ -5,14 +5,11 @@ from __future__ import annotations
 from datetime import UTC, date, datetime, timedelta
 
 import pytest
-from sqlalchemy import select
-from sqlalchemy.orm import Session
 
-from app.models import Booking, PerkCode
 from app.money import LineItems, rupees
 from app.services.consent import ConsentError, fingerprint, normalise_mobile
 from app.services.ledger import ChannelInfo, LedgerRow, summarise
-from app.services.perks import code_candidates, initials, issue_perk
+from app.services.perks import code_stem, initials
 from app.services.scenario import ScenarioError, saturday_move
 from app.services.slips import (
     CheckoutInput,
@@ -139,8 +136,7 @@ def test_perk_codes() -> None:
     assert initials("A. Verma family") == "AV"
     assert initials("Madonna") == "M"
     assert initials("") == "G"
-    codes = code_candidates("DEODAR", "Rahul Sharma", 2026)
-    assert codes[:3] == ["DEODAR-RS26", "DEODAR-RS226", "DEODAR-RS326"]
+    assert code_stem("DEODAR", "Rahul Sharma", 2026) == "DEODAR-RS26"
 
 
 def test_slip_text_without_footer() -> None:
@@ -157,22 +153,6 @@ def test_saturday_move_room_range() -> None:
     for rooms in (0, 11):
         with pytest.raises(ScenarioError, match="between 1 and 10"):
             saturday_move(ledger, rooms)
-
-
-def test_perk_codes_can_run_out(monkeypatch: pytest.MonkeyPatch, sample: Session) -> None:
-    monkeypatch.setattr("app.services.perks.MAX_SUFFIX", 2)
-    booking = sample.scalars(select(Booking).where(Booking.source == "desk")).first()
-    assert booking is not None and booking.guest is not None
-    for code in code_candidates("DEODAR", booking.guest.display_name, 2026):
-        sample.add(
-            PerkCode(code=code, guest_id=booking.guest.id, origin_booking_id=booking.id, perk="x")
-        )
-    sample.flush()
-    other = sample.scalars(select(Booking).where(Booking.source == "desk")).all()[1]
-    assert other.guest is not None
-    other.guest.display_name = booking.guest.display_name
-    with pytest.raises(RuntimeError, match="No perk code left"):
-        issue_perk(sample, "DEODAR", "perk", other.guest, other, datetime(2026, 10, 13, tzinfo=UTC))
 
 
 def test_printer_text_is_ascii() -> None:

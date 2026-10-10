@@ -194,7 +194,6 @@ export type LinkPage = {
   address: string;
   code: string | null;
   code_status: "valid" | "used" | "unknown" | "none";
-  guest_short_name: string | null;
   perk: string;
   rooms: { room_type: string; nightly_rate: number }[];
   dates: { check_in: string; nights: number; label: string }[];
@@ -208,6 +207,8 @@ export type BookResult = {
   room_type: string;
   perk_applied: boolean;
   payment: string;
+  /** Set only after a booking accepted the guest's code. */
+  guest_short_name: string | null;
 };
 
 export type SavingItem = {
