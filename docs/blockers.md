@@ -74,7 +74,7 @@ touching it, commits from here on run with `PRE_COMMIT_HOME` set to
 `.pre-commit-home/` in the repo (gitignored). Remaining for Aarav:
 `rm -rf ~/.cache/pre-commit`.
 
-## B-004 Frontend build inputs missing (10 Oct 2026) — needs Aarav
+## B-004 Frontend build inputs missing (10 Oct 2026) — resolved
 
 The autonomous frontend build (docs/AUTONOMOUS_FRONTEND.md) depends on files
 that are not in the repo:
@@ -90,3 +90,11 @@ found none of them. The only design handoff folder found,
 `~/Downloads/design_handoff_fractal_labs_site`, is for a different project.
 Every phase depends on these files, so nothing was built and no code was
 changed. To unblock: add them at those paths and restart the build.
+
+Resolved 10 Oct 2026: Aarav supplied `seedha-frontend-kit.zip`, which was
+unzipped into the repo root once it had finished copying and passed
+`unzip -t`. It added 77 entries, none of which overwrote an existing file:
+`docs/FRONTEND_MASTER.md`, `docs/CLAUDE_CODE_PROMPTS.md`,
+`design/Design_Handoff.pdf`, `design/VIDEO_SPEC.md`,
+`design/handoff-pages/` (36 PNG) and `design/video-screens/` (33 PNG). The kit
+has no `design/claude-design-files/`.

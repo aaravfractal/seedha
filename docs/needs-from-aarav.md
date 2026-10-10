@@ -40,7 +40,7 @@ Everything below has a working simulated fallback today. Nothing is blocked.
     `~/.platformio` (about 20 MB) during M8 and pre-commit created
     `~/.cache/pre-commit` (56 KB). The repo no longer uses either. Delete them
     if you like; I have not, because deleting outside the repo is off-limits.
-11. **Frontend build inputs** (blockers B-004). Add `docs/FRONTEND_MASTER.md`
+11. **Done (10 Oct 2026).** ~~Frontend build inputs~~ (blockers B-004). Add `docs/FRONTEND_MASTER.md`
     and the `design/` folder (Design_Handoff.pdf, handoff-pages/,
     video-screens/, VIDEO_SPEC.md, claude-design-files/ if you have it).
     The frontend build has not started without them.
