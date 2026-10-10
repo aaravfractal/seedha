@@ -16,8 +16,10 @@ from app.errors import install_error_handlers
 from app.ratelimit import RateLimiter
 from app.routers import (
     ask,
+    assistant,
     auth,
     desk,
+    inbox,
     ledger,
     link,
     messages,
@@ -118,6 +120,8 @@ def create_app(
     app.include_router(link.savings_router)
     app.include_router(proof.router)
     app.include_router(ask.router)
+    app.include_router(inbox.router)
+    app.include_router(assistant.router)
     app.include_router(site.site_router)
     app.include_router(site.pro_router)
     app.include_router(site.demo_router)

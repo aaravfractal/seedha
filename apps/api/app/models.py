@@ -40,6 +40,8 @@ __all__ = [
     "OtpChallenge",
     "OwnerAccount",
     "Guest",
+    "InboxAway",
+    "InboxMessage",
     "Message",
     "PerkCode",
     "PipelineStep",
@@ -572,3 +574,48 @@ class OtpChallenge(Base):
     last_sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+INBOX_DIRECTIONS = ("in", "out")
+INBOX_SENDERS = ("guest", "owner", "away")
+
+
+class InboxMessage(Base):
+    """One WhatsApp text in a guest thread (Guest inbox, D5).
+
+    A thread is a consent: rows exist only for Desk-consented guests (rule 4).
+    Outgoing rows are the owner's own sends ("owner") or the owner-approved
+    away text ("away"); no AI-written text is ever sent (rule 7).
+    """
+
+    __tablename__ = "inbox_message"
+    __table_args__ = (
+        CheckConstraint(f"direction IN {INBOX_DIRECTIONS}", name="ck_inbox_message_direction"),
+        CheckConstraint(f"sent_by IN {INBOX_SENDERS}", name="ck_inbox_message_sent_by"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    consent_id: Mapped[int] = mapped_column(ForeignKey("consent.id"), index=True)
+    direction: Mapped[str] = mapped_column(String(3))
+    body: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    sent_by: Mapped[str] = mapped_column(String(5))
+    transport: Mapped[str | None] = mapped_column(String(12), nullable=True)
+    provider_message_id: Mapped[str | None] = mapped_column(String(80), nullable=True)
+
+    consent: Mapped[Consent] = relationship()
+
+
+class InboxAway(Base):
+    """The owner's away text. Saved only with the owner's explicit approval;
+    sent only to consented guests who wrote first, at most once a day."""
+
+    __tablename__ = "inbox_away"
+    __table_args__ = (UniqueConstraint("property_id", name="uq_inbox_away_property_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"))
+    body: Mapped[str] = mapped_column(Text)
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    enabled: Mapped[bool] = mapped_column(Boolean, default=False)

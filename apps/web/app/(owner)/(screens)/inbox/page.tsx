@@ -1,11 +1,6 @@
-import { NotBuilt } from "@/components/shell/NotBuilt";
+import { Inbox } from "@/components/inbox/Inbox";
 
-export default function Page() {
-  return (
-    <NotBuilt
-      title="Guest inbox"
-      icon="inbox"
-      what="WhatsApp conversations with guests who said yes at the Desk."
-    />
-  );
+/** Guest inbox: WhatsApp threads with Desk-consented guests (D5). */
+export default function InboxPage() {
+  return <Inbox />;
 }

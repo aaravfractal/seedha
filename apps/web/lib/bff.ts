@@ -28,6 +28,8 @@ const RULES: ReadonlyArray<readonly [string, Access]> = [
   ["savings", "owner"],
   ["proof", "owner"],
   ["ask", "owner"],
+  ["inbox", "owner"],
+  ["assistant", "owner"],
   ["site", "owner"],
   ["pro", "owner"],
   ["demo", "owner"],
