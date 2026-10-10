@@ -15,7 +15,16 @@ from sqlalchemy import Select, select
 from sqlalchemy.orm import Session
 
 from app.deps import OwnerDep, PropertyDep, SessionDep
-from app.models import Booking, Consent, Message, PipelineStep, Saving, StatementFile
+from app.models import (
+    SAMPLE_HISTORY_PAYMENT,
+    Booking,
+    Consent,
+    DirectBooking,
+    Message,
+    PipelineStep,
+    Saving,
+    StatementFile,
+)
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
@@ -59,7 +68,14 @@ def compute_steps(session: Session, property_id: int) -> dict[str, bool]:
         "desk": _has(session, select(Consent.id)),
         "slip": "slip" in recorded,
         "msg": _has(session, select(Message.id).where(Message.status == "sent")),
-        "book": _has(session, select(Saving.id)),
+        # The sample hotel's earlier coded bookings (seed, D-080) do not count:
+        # this step is the demo loop's own guest booking with a code.
+        "book": _has(
+            session,
+            select(Saving.id)
+            .join(DirectBooking, DirectBooking.id == Saving.direct_booking_id)
+            .where(DirectBooking.payment_method != SAMPLE_HISTORY_PAYMENT),
+        ),
     }
 
 

@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.models import Booking, Channel, ChannelContract, StatementFile
 from app.money import bps_of, gst_on_commission, rupees
 from app.services.ledger import LedgerSummary, load_ledger
+from seed.coded_history import CODED_STAYS
 from seed.load import SeedError, load_sample, resolve_demo_date
 
 DATA = Path(__file__).resolve().parent.parent / "seed" / "data"
@@ -130,7 +131,7 @@ def test_gst_is_18_percent_of_commission_on_passing_rows(sample: Session) -> Non
             b.status == "cancelled" and b.commission == 0
         ), b.external_ref
         checked += 1
-    assert checked == 1_497 + 152 + 14
+    assert checked == 1_497 + 152 + 14 + len(CODED_STAYS)  # D-080 coded history
 
 
 def test_tds_never_reduces_net(sample: Session) -> None:

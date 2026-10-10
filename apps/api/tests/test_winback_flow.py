@@ -22,6 +22,7 @@ from app.models import Consent, Message, OptOutEvent
 from app.money import rupees
 from app.routers.webhooks import MAX_WEBHOOK_BYTES
 from app.services.whatsapp import SendResult
+from seed.coded_history import CODED_STAYS, TOTAL_NET_SAVING
 
 APP_SECRET = "app-secret"  # pragma: allowlist secret (test value)
 
@@ -49,6 +50,7 @@ def test_matched_but_unconsented_guests_get_no_draft_or_send_ruling_7(
 
 @pytest.mark.usefixtures("sample")
 def test_full_winback_loop(client: TestClient, owner: dict[str, str]) -> None:
+    savings_before = client.get("/savings", headers=owner).json()
     consent_and_checkout(client, owner, 207, "9876543210")
     body = client.get("/messages", headers=owner).json()
     assert (body["pending"], body["simulated"]) == (1, True)
@@ -84,10 +86,11 @@ def test_full_winback_loop(client: TestClient, owner: dict[str, str]) -> None:
     assert "saving" not in json.dumps(booked.json()).lower()
 
     savings = client.get("/savings", headers=owner).json()
-    assert savings["count"] == 1
-    item = savings["items"][0]
+    assert savings["count"] == len(CODED_STAYS) + 1  # plus the seeded history (D-080)
+    item = next(i for i in savings["items"] if i["code"] == "DEODAR-RS26")
     assert (item["commission_avoided"], item["gst_avoided"]) == (rupees(1_892), rupees(341))
-    assert savings["total_avoided"] == rupees(2_233)
+    assert savings["total_avoided"] - savings_before["total_avoided"] == rupees(2_233)
+    assert savings["total_net_saving"] == TOTAL_NET_SAVING + rupees(2_199)
     assert (item["upi_fee"], item["net_saving"]) == (rupees(34), rupees(2_199))
     assert (item["original_channel"], item["commission_rate_used"]) == ("MakeMyTrip", 2_200)
 
@@ -97,7 +100,7 @@ def test_full_winback_loop(client: TestClient, owner: dict[str, str]) -> None:
     })  # fmt: skip
     assert (twice.status_code, twice.json()["error"]["code"]) == (409, "code_used")
     assert client.get("/public/link?code=DEODAR-RS26").json()["code_status"] == "used"
-    assert client.get("/savings", headers=owner).json()["count"] == 1
+    assert client.get("/savings", headers=owner).json()["count"] == len(CODED_STAYS) + 1
 
     steps = {s["key"] for s in client.get("/pipeline", headers=owner).json()["steps"] if s["done"]}
     assert {"desk", "slip", "msg", "book"} <= steps
@@ -175,9 +178,10 @@ def test_booking_without_code_claims_no_saving(client: TestClient, owner: dict[s
         "check_in": page["dates"][1]["check_in"], "nights": 2, "room_type": "Standard",
     })  # fmt: skip
     assert (res.json()["amount"], res.json()["perk_applied"]) == (rupees(6_800), False)
-    assert client.get("/savings", headers=owner).json() == {
-        "total_net_saving": 0, "total_avoided": 0, "count": 0, "items": [],
-    }  # fmt: skip
+    # An uncoded booking claims no saving: the ledger holds only the seeded history.
+    savings = client.get("/savings", headers=owner).json()
+    assert (savings["count"], savings["total_net_saving"]) == (len(CODED_STAYS), TOTAL_NET_SAVING)
+    assert {i["code"] for i in savings["items"]} == {s.code for s in CODED_STAYS}
 
 
 @pytest.mark.usefixtures("sample")

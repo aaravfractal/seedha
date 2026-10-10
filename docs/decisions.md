@@ -476,3 +476,22 @@ were rendered with pypdfium2 (already installed with pdfplumber) into
 `design/handoff-text/page-NN.png` and transcribed to `HANDOFF_TEXT.md`. The
 handoff totals ₹47,33,011 and MakeMyTrip ₹16,96,641 are ₹1 below ours; D1
 and ruling 1 keep the API values (₹47,33,012, ₹16,96,642).
+
+**D-080 Earlier coded bookings (D9).** Four Seedha Link bookings are seeded
+for the sample hotel: Kapoor family DEODAR-KF26, S. Bisht DEODAR-SB26,
+Arjun Mehta DEODAR-AM26, Iyer family DEODAR-IF26. Each is at the public room
+rate, and its saving uses ruling 5 with the guest's original channel
+contract, so the four net savings total exactly ₹12,600: ₹2,477 (Deluxe
+Valley View, 6 nights, first came via a travel agent at 10%, no GST),
+₹3,477 and ₹3,477 (Standard, 4 nights, via MakeMyTrip at 22%), ₹3,169
+(Family Suite, 2 nights, via MakeMyTrip). No mix of public rates and
+nights reproduces the handoff's per-row split (₹2,840 / ₹3,480 / ₹3,120 /
+₹3,160, which it calls an assumption); this one keeps the exact total and
+each row within ₹363. The bookings were made in Aug and Sep 2026 for stays
+from 24 Oct to 4 Dec, so the Apr to Sep ledger (₹47,33,012) and the
+repeat-guest scan (12, ₹41,800) do not change. Their codes are already
+redeemed and have no random suffix because they are display-only history.
+They are marked `payment_method = "sample_history"`, and the loop's "guest
+booked with code" step ignores them. "Saved this month" and Ask still
+count only the current month. In-house Arjun Mehta's new walk-in code keeps
+the random part (D-076).

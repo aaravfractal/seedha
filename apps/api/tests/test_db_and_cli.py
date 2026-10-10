@@ -13,6 +13,7 @@ from app.db import make_engine, make_session_factory, session_scope
 from app.models import Base, Booking, Consent
 from app.services.ledger import LedgerError, load_ledger
 from seed import load as seed_load
+from seed.coded_history import CODED_STAYS
 
 
 def test_sqlite_engine_enforces_foreign_keys(tmp_path: Path) -> None:
@@ -62,5 +63,5 @@ def test_seed_cli_loads_into_database_url(tmp_path: Path, monkeypatch: pytest.Mo
     seed_load.main()
     with make_session_factory(engine)() as session:
         count = session.scalar(select(func.count()).select_from(Booking))
-    assert count == 1_500 + 152 + 14
+    assert count == 1_500 + 152 + 14 + len(CODED_STAYS)  # D-080 coded history
     engine.dispose()

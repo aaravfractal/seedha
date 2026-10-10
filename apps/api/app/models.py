@@ -335,6 +335,10 @@ class Message(Base):
     perk_code: Mapped[PerkCode] = relationship()
 
 
+# payment_method of the sample hotel's earlier coded bookings (seed, D-080).
+SAMPLE_HISTORY_PAYMENT = "sample_history"
+
+
 class DirectBooking(Base):
     """A booking made on Seedha Link, paid by UPI."""
 
