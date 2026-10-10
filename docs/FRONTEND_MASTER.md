@@ -252,3 +252,7 @@ read as %, 2, 3, 7 or =. Always cross-check numbers against the seed data.
 6. make check must pass (all quality gates in CLAUDE.md). Never lower a
    threshold or skip a test.
 7. Commit locally. Update docs/progress.md and docs/SCREEN_COMPARE.md.
+
+---
+
+Addendum (10 Oct 2026): the build runs as an agent team. See docs/AGENT_TEAM.md.

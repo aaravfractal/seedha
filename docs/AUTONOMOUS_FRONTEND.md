@@ -39,3 +39,7 @@ phase in docs/FRONTEND_MASTER.md is done or only blocked items remain.
    start, seeded sample hotel), run it, and write a final summary at the top
    of docs/progress.md: phases done, screens matching, remaining
    differences, blockers, and the exact demo click path.
+
+---
+
+Addendum (10 Oct 2026): the build runs as an agent team. See docs/AGENT_TEAM.md.

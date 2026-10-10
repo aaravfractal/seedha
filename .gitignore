@@ -43,3 +43,5 @@ test-results/
 apps/api/uploads/
 firmware/seedha-desk/.pio-core/
 .pre-commit-home/
+.cache/
+.worktrees/

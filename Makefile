@@ -12,6 +12,9 @@ PIO := $(FW)/.venv/bin/pio
 # Keep PlatformIO's platforms, toolchains and cache inside the repo (gitignored),
 # not in ~/.platformio.
 export PLATFORMIO_CORE_DIR := $(FW)/.pio-core
+# npm's download cache stays in the repo too (gitignored); Next.js telemetry off.
+export npm_config_cache := $(ROOT)/.cache/npm
+export NEXT_TELEMETRY_DISABLED := 1
 PYTHON ?= $(shell command -v python3.12 || command -v python3.13 || command -v python3.11 || echo python3)
 LOAD_ENV := set -a && { [ ! -f $(ROOT)/.env ] || . $(ROOT)/.env; } && set +a
 # Rebuild the schema in place (never delete the file: a running API would keep the old one).
