@@ -266,22 +266,6 @@ export type AskAnswer = {
   source: string;
 };
 
-export type SiteData = {
-  stage: "empty" | "chat" | "review";
-  mood: "pine" | "stone" | "sky";
-  lang: "en" | "hi";
-  live: boolean;
-  published_at: string | null;
-  address: string;
-  hotel: string;
-  location: string;
-  welcome: { en: string; hi: string };
-  nearby: string;
-  setup_chat: [string, string][];
-  rooms: { room_type: string; nightly_rate: number }[];
-  packages: { key: string; name: string; includes: string; price: number; why: string; approved: boolean }[];
-};
-
 export type ProData = {
   audit_claim: number;
   audit_cancelled_lines: number;

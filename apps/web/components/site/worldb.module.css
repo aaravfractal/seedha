@@ -1,0 +1,533 @@
+/* World B: the hotel's own pages (HANDOFF README "World B").
+   Moods: Pine #1F4D3A on #F7F6F2, Stone #4A4540 on #F6F4F1, Sky #2F6FA8 on
+   #F5F8FB. Display fonts from lib/fonts-worldb.ts; text and Devanagari Mukta.
+   Always light: these pages carry the hotel's brand, not Seedha's theme.
+   Layout follows the container width (container queries), so the same
+   markup works full page and inside the owner's phone and desktop previews.
+   Text contrast is at least 4.5:1 for every mood pair used. */
+
+.wb {
+  --wb-accent: #1f4d3a;
+  --wb-on-accent: #ffffff;
+  --wb-bg: #f7f6f2;
+  --wb-surface: #ffffff;
+  --wb-soft: #ecebe4;
+  --wb-ink: #1b1b1b;
+  --wb-ink2: #5a5650;
+  --wb-line: #e2ded6;
+  --wb-head: rgba(247, 246, 242, 0.86);
+  --wb-display: var(--font-wb-pine), "Cormorant Garamond", Georgia, serif;
+  --wb-display-weight: 600;
+  --wb-display-track: 0;
+  --wb-text: var(--font-mukta), "Noto Sans Devanagari", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --wb-hero: linear-gradient(180deg, #8fa8bc 0%, #b9c9c6 36%, #5e7566 60%, #2e4a33 80%, #1a2a1e 100%);
+  --wb-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  container-type: inline-size;
+  background: var(--wb-bg);
+  color: var(--wb-ink);
+  font-family: var(--wb-text);
+  font-size: 17px;
+  line-height: 1.5;
+  color-scheme: light;
+}
+.wb[data-mood="stone"] {
+  --wb-accent: #4a4540;
+  --wb-bg: #f6f4f1;
+  --wb-soft: #ece8e3;
+  --wb-ink: #1e1c1a;
+  --wb-ink2: #5c5650;
+  --wb-line: #e3ded7;
+  --wb-head: rgba(246, 244, 241, 0.86);
+  --wb-display: var(--font-wb-stone), "DM Serif Display", Georgia, serif;
+  --wb-display-weight: 400;
+  --wb-hero: linear-gradient(180deg, #a9a39b 0%, #cfc8be 36%, #8a8074 60%, #4a4540 80%, #2a2724 100%);
+}
+.wb[data-mood="sky"] {
+  --wb-accent: #2f6fa8;
+  --wb-bg: #f5f8fb;
+  --wb-soft: #e8eff6;
+  --wb-ink: #14202b;
+  --wb-ink2: #4e5b67;
+  --wb-line: #dce4ec;
+  --wb-head: rgba(245, 248, 251, 0.86);
+  --wb-display: var(--font-wb-sky), "Outfit", -apple-system, sans-serif;
+  --wb-display-weight: 600;
+  --wb-display-track: -0.02em;
+  --wb-hero: linear-gradient(180deg, #7fa6cc 0%, #bfd3e6 36%, #6f8fa8 60%, #2f4f6e 80%, #17283a 100%);
+}
+
+.display {
+  font-family: var(--wb-display);
+  font-weight: var(--wb-display-weight);
+  letter-spacing: var(--wb-display-track);
+  line-height: 1.05;
+}
+/* Devanagari has no serif display face here: Mukta, heavier. */
+.wb[lang="hi"] .display,
+.display:lang(hi) {
+  font-family: var(--wb-text);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+.muted {
+  color: var(--wb-ink2);
+  margin: 0;
+}
+.link {
+  color: var(--wb-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.note {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: var(--wb-ink2);
+}
+
+.wb :focus-visible {
+  outline: 3px solid var(--wb-accent);
+  outline-offset: 2px;
+}
+
+/* header */
+.head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: 8px 16px;
+  background: var(--wb-head);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-bottom: 1px solid var(--wb-line);
+}
+.preview .head {
+  position: relative;
+}
+.backBtn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--wb-ink);
+}
+.brand {
+  font-size: 24px;
+  margin-right: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.langSwitch {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--wb-line);
+  border-radius: 980px;
+  background: var(--wb-surface);
+}
+.langSwitch button {
+  min-width: 44px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: 980px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--wb-ink2);
+}
+.langSwitch button[aria-pressed="true"] {
+  background: #1b1b1b;
+  color: #fff;
+}
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: 980px;
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: transform 0.2s var(--wb-ease);
+}
+.pill:active {
+  transform: scale(0.97);
+}
+.pillLight {
+  background: #fff;
+  color: #1b1b1b;
+  min-height: 56px;
+  padding: 0 30px;
+  font-size: 18px;
+}
+.headBook {
+  display: none;
+}
+
+/* hero */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: max(560px, 58cqw);
+  max-height: 960px;
+  padding: 0 20px 104px;
+  background: var(--wb-hero);
+  color: #fff;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 30% 0 0;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.42) 45%, rgba(0, 0, 0, 0.5));
+  pointer-events: none;
+}
+.heroText {
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+.kicker {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+.h1 {
+  margin: 0 0 16px;
+  font-size: clamp(52px, 8.4cqw, 124px);
+  color: #fff;
+}
+.tagline {
+  margin: 0 0 24px;
+  font-size: clamp(18px, 1.9cqw, 28px);
+  line-height: 1.35;
+  max-width: 34ch;
+}
+.chip,
+.chipQuiet {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 980px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.chip {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  background: rgba(28, 28, 30, 0.72);
+  color: #fff;
+}
+.chipQuiet {
+  background: var(--wb-soft);
+  color: var(--wb-ink2);
+}
+
+/* booking bar */
+.bar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: -72px 16px 0;
+  padding: 18px;
+  background: var(--wb-surface);
+  border-radius: 28px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 18px 48px rgba(0, 0, 0, 0.14);
+}
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--wb-ink2);
+  min-width: 0;
+}
+.field:first-child {
+  grid-column: 1 / -1;
+}
+.field input,
+.field select {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--wb-line);
+  border-radius: 14px;
+  background: var(--wb-surface);
+  color: var(--wb-ink);
+  font: inherit;
+  font-size: 17px;
+}
+.barBook {
+  grid-column: 1 / -1;
+  min-height: 52px;
+  border-radius: 14px;
+  background: var(--wb-accent);
+  color: var(--wb-on-accent);
+  font-weight: 700;
+  font-size: 18px;
+}
+.barBook[aria-disabled="true"] {
+  background: #6e6e73;
+  cursor: not-allowed;
+}
+.barNote {
+  grid-column: 1 / -1;
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 15px;
+  color: var(--wb-ink2);
+}
+.barNote:empty {
+  display: none;
+}
+.closed {
+  color: #a3271d;
+  font-weight: 600;
+}
+
+/* sections */
+.section {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 64px 20px 0;
+}
+.h2 {
+  margin: 0 0 28px;
+  font-size: clamp(40px, 4.6cqw, 68px);
+}
+.headRow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.why {
+  display: grid;
+  gap: 28px;
+}
+.why > div {
+  border-top: 3px solid var(--wb-accent);
+  padding-top: 16px;
+}
+.why h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.why p {
+  margin: 0;
+  color: var(--wb-ink2);
+}
+.rooms,
+.packages {
+  display: grid;
+  gap: 20px;
+}
+.room {
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-line);
+  border-radius: 24px;
+  overflow: hidden;
+}
+.photo {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.roomPhoto {
+  height: 240px;
+  border-radius: 0;
+}
+.roomBody {
+  padding: 20px 22px 22px;
+}
+.roomBody h3,
+.pkg h3 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+.priceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+.price {
+  margin: 0;
+  white-space: nowrap;
+}
+.price b {
+  font-size: 24px;
+}
+.price span {
+  color: var(--wb-ink2);
+  font-size: 15px;
+}
+.pkg {
+  background: var(--wb-soft);
+  border-radius: 22px;
+  padding: 24px;
+}
+.pkgPrice {
+  margin: 14px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+.soon {
+  background: var(--wb-soft);
+  border-radius: 22px;
+  padding: 24px;
+}
+.soonTitle {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+}
+.gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.gallery .photo {
+  aspect-ratio: 1;
+}
+.gallery .photo::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 0;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.5));
+}
+.photoLabel {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 1;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--wb-line);
+  font-size: 18px;
+}
+.list li > :last-child {
+  text-align: right;
+}
+.foot {
+  margin-top: 72px;
+  padding: 28px 20px 36px;
+  border-top: 1px solid var(--wb-line);
+  text-align: center;
+  font-size: 13px;
+  color: var(--wb-ink2);
+}
+.foot p {
+  margin: 2px 0;
+}
+
+@container (min-width: 520px) {
+  .headBook {
+    display: inline-flex;
+  }
+}
+
+@container (min-width: 760px) {
+  .head {
+    padding: 10px 28px;
+    min-height: 76px;
+    gap: 14px;
+  }
+  .brand {
+    font-size: 30px;
+  }
+  .hero {
+    padding: 0 32px 128px;
+  }
+  .bar {
+    grid-template-columns: 1.2fr 0.8fr 1.3fr 1fr;
+    align-items: end;
+    margin: -88px 28px 0;
+    padding: 22px 24px;
+  }
+  .field:first-child,
+  .barBook {
+    grid-column: auto;
+  }
+  .section {
+    padding: 104px 32px 0;
+  }
+  .why {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .rooms,
+  .packages {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gallery {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .roomPhoto {
+    height: 280px;
+  }
+}
+
+@container (min-width: 980px) {
+  .hero {
+    padding: 0 40px 140px;
+  }
+  .bar {
+    max-width: 1240px;
+    margin: -96px auto 0;
+    width: calc(100% - 64px);
+  }
+  .section {
+    padding: 140px 40px 0;
+  }
+  .rooms,
+  .packages {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .gallery {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .roomPhoto {
+    height: 320px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pill {
+    transition: none;
+  }
+}

@@ -1,54 +1,148 @@
 "use client";
 
+import Link from "next/link";
 import { useApi } from "@/lib/api";
 import { inr } from "@/lib/format";
-import type { SiteData } from "@/lib/types";
-import { ErrorState, Loading } from "@/components/States";
+import type { OwnerSite } from "@/lib/types-site";
+import { Photo } from "@/components/site/HotelSite";
+import { WorldBMessage } from "@/components/site/WorldBMessage";
+import p from "@/components/site/print.module.css";
+import s from "@/components/site/worldb.module.css";
 
-/** A printable rate card for travel agents, from the same prices as the site. */
+/** A4 rate card for travel agents, from the same API prices as the site. One printed page. */
 export default function RateCardPage() {
-  const site = useApi<SiteData>("site");
+  const site = useApi<OwnerSite>("site");
   if (site.error)
-    return <ErrorState message={site.error.message} code={site.error.code} onRetry={site.reload} />;
-  if (!site.data) return <Loading rows={3} label="Preparing the rate card" />;
-  const s = site.data;
+    return (
+      <WorldBMessage title="The rate card did not load." body={site.error.message} onRetry={site.reload} />
+    );
+  if (!site.data) return <WorldBMessage title="Preparing the rate card" loading />;
+  const d = site.data;
+  const packages = d.packages.filter((x) => x.approved);
+  const year = Number((d.published_at ?? new Date().toISOString()).slice(0, 4));
   return (
-    <section className="view" style={{ maxWidth: 720, margin: "0 auto" }}>
-      <p className="tag no-print">Sample hotel · prices from your rooms and packages</p>
-      <h1 className="display" style={{ fontSize: 44 }}>
-        {s.hotel}
-      </h1>
-      <p className="lede">{s.location}</p>
-      <div className="card">
-        <h3 className="sub-title">Rooms</h3>
-        {s.rooms.map((r) => (
-          <div className="item" key={r.room_type}>
-            <span>{r.room_type}</span>
-            <b className="num">{inr(r.nightly_rate)} a night</b>
-          </div>
-        ))}
+    <div className={p.desk}>
+      <div className={p.toolbar}>
+        <Link href="/site">‹ Website</Link>
+        <span className={p.hint}>Prices from your rooms and approved packages.</span>
+        <button type="button" className={p.primary} onClick={() => window.print()}>
+          Print or save as PDF
+        </button>
       </div>
-      {s.packages.some((p) => p.approved) ? (
-        <div className="card" style={{ marginTop: 16 }}>
-          <h3 className="sub-title">Packages</h3>
-          {s.packages
-            .filter((p) => p.approved)
-            .map((p) => (
-              <div className="item" key={p.key}>
-                <span>
-                  {p.name}
-                  <br />
-                  <span className="meta">{p.includes}</span>
-                </span>
-                <b className="num">{inr(p.price)}</b>
-              </div>
-            ))}
+      <article
+        className={`${s.wb} ${p.sheet}`}
+        data-mood={d.mood}
+        lang="en"
+        aria-label={`${d.hotel} rate card`}
+      >
+        <div className={p.strip} aria-hidden="true">
+          <Photo background="var(--wb-hero)" label="Sample photo · view" />
+          <Photo background="linear-gradient(160deg,#BBA98A,#7E6E5C)" label="Deluxe room" />
+          <Photo background="linear-gradient(160deg,#DCC08E,#B5834A)" label="Breakfast" />
         </div>
-      ) : null}
-      <p className="calc">Nearby: {s.nearby}</p>
-      <button type="button" className="btn no-print" onClick={() => window.print()}>
-        Print or save as PDF
-      </button>
-    </section>
+        <div className={p.sheetBody}>
+          <div className={p.titleRow}>
+            <div>
+              <h1 className={`${s.display} ${p.title}`}>{d.hotel}</h1>
+              <p className={s.muted}>
+                {d.location.en}, Uttarakhand · {d.rooms_count} rooms
+              </p>
+            </div>
+            <p className={p.right}>
+              Rate card {year} to {String(year + 1).slice(2)}
+              <br />
+              Prices per night, in ₹
+            </p>
+          </div>
+
+          <h2 className={s.display}>Rooms</h2>
+          <table className={p.table}>
+            <thead>
+              <tr>
+                <th scope="col">Room</th>
+                <th scope="col">Includes</th>
+                <th scope="col">Per night</th>
+              </tr>
+            </thead>
+            <tbody>
+              {d.rooms.map((r) => (
+                <tr key={r.room_type}>
+                  <td>{r.room_type}</td>
+                  <td>{r.detail.en.replace(" · ", ", ")}</td>
+                  <td>{inr(r.nightly_rate)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <h2 className={s.display}>Packages</h2>
+          {packages.length ? (
+            <table className={p.table}>
+              <thead>
+                <tr>
+                  <th scope="col">Package</th>
+                  <th scope="col">Includes</th>
+                  <th scope="col">Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                {packages.map((x) => (
+                  <tr key={x.key}>
+                    <td>{x.name.en}</td>
+                    <td>{x.includes.en}</td>
+                    <td>{inr(x.price)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className={s.muted}>Packages coming soon. Approve them on the Website screen.</p>
+          )}
+
+          <div className={p.twoCol}>
+            <div>
+              <h2 className={s.display}>Nearby</h2>
+              <table className={p.table}>
+                <tbody>
+                  {d.nearby.map((n) => (
+                    <tr key={n.place.en}>
+                      <td>{n.place.en}</td>
+                      <td>{n.distance.en}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <h2 className={s.display}>Book direct</h2>
+              <table className={p.table}>
+                <tbody>
+                  <tr>
+                    <td>WhatsApp or call</td>
+                    <td>{d.contact.phone}</td>
+                  </tr>
+                  <tr>
+                    <td>Advance by UPI</td>
+                    <td>{d.contact.upi}</td>
+                  </tr>
+                  <tr>
+                    <td>Website</td>
+                    <td>{d.address}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className={p.sheetFoot}>
+            <span>
+              {d.contact.placeholder ? "Contact, UPI and website are placeholders. Sample data. " : ""}
+              Packages add value; room prices stay as listed.
+            </span>
+            <span>Made with Seedha</span>
+          </div>
+        </div>
+      </article>
+    </div>
   );
 }

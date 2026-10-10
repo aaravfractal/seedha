@@ -3,27 +3,41 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import delete
+from sqlalchemy.orm import Session
 
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep, require_owner_session
 from app.errors import ApiError
-from app.models import Base, Property
+from app.models import Base, Property, SiteConfig
 from app.ratelimit import rate_limited
 from app.services.desk import business_date, utc_now
 from app.services.link import room_rates
 from app.services.pro import active_consents, audit
 from app.services.site import (
+    CONTACT,
+    GALLERY,
+    GOOGLE_CATEGORIES,
+    GOOGLE_PHOTOS,
+    LOCATION,
+    MAX_PACKAGE_NIGHTS,
+    MIN_PACKAGE_NIGHTS,
+    NAME_HI,
     NEARBY,
     SAMPLE_ADDRESS,
-    SETUP_CHAT,
-    WELCOME,
+    SETUP,
+    TAGLINE,
+    Package,
     approve_package,
+    decide_package,
     get_config,
+    google_description,
     packages,
+    rooms_copy,
+    slugify,
 )
 
 site_router = APIRouter(prefix="/site", tags=["site"])
@@ -32,39 +46,105 @@ demo_router = APIRouter(prefix="/demo", tags=["demo"])
 
 
 class SiteRoomOut(BaseModel):
-    """A room type at its public rate (paise)."""
+    """A room type at its public rate (paise), with its Hindi name and a short line."""
 
     room_type: str
+    name_hi: str
+    detail: dict[str, str]
     nightly_rate: int
 
 
-class PackageOut(BaseModel):
-    """A package with its computed price (paise)."""
+class PublicPackageOut(BaseModel):
+    """A package as guests see it, with its computed price (paise)."""
 
     key: str
-    name: str
-    includes: str
+    name: dict[str, str]
+    includes: dict[str, str]
+    nights: int
     price: int
+
+
+class PriceLineOut(BaseModel):
+    """One line of how a package price is worked out (paise)."""
+
+    label: str
+    amount: int
+
+
+class PackageOut(PublicPackageOut):
+    """A suggested package with the reason and the owner's decision."""
+
+    room_type: str
+    nightly_rate: int
+    lines: list[PriceLineOut]
     why: str
+    state: str  # pending, approved or skipped
     approved: bool
 
 
-class SiteOut(BaseModel):
-    """Everything the Website screen and its preview show."""
+class NearbyOut(BaseModel):
+    """A nearby place and how far it is."""
 
-    stage: str
+    place: dict[str, str]
+    distance: dict[str, str]
+
+
+class ContactOut(BaseModel):
+    """The hotel's contact. The sample hotel's are placeholders."""
+
+    phone: str
+    upi: str
+    placeholder: bool
+
+
+class SiteContentOut(BaseModel):
+    """What the hotel's own site shows (World B). No guest data, ever."""
+
+    slug: str
+    address: str
+    sample: bool
     mood: str
     lang: str
+    hotel: str
+    hotel_hi: str
+    location: dict[str, str]
+    tagline: dict[str, str]
+    rooms_count: int
+    rooms: list[SiteRoomOut]
+    nearby: list[NearbyOut]
+    gallery: list[dict[str, str]]
+    contact: ContactOut
+
+
+class SetupOut(BaseModel):
+    """The sample hotel's WhatsApp setup answers."""
+
+    photos_sent: int
+    photos_wanted: int
+    photo_labels: list[str]
+    photo_tip: str
+    voice_length: str
+    voice_summary: str
+
+
+class GoogleKitOut(BaseModel):
+    """Ready to paste into a Google Business Profile."""
+
+    description: dict[str, str]
+    categories: list[str]
+    photos: list[str]
+
+
+class SiteOut(SiteContentOut):
+    """Everything the owner's Website screen shows."""
+
+    stage: str
     live: bool
     published_at: datetime | None
-    address: str
-    hotel: str
-    location: str
-    welcome: dict[str, str]
-    nearby: str
-    setup_chat: list[tuple[str, str]]
-    rooms: list[SiteRoomOut]
+    owner_name: str
     packages: list[PackageOut]
+    setup: SetupOut
+    google: GoogleKitOut
 
 
 class SitePatchIn(BaseModel):
@@ -75,36 +155,74 @@ class SitePatchIn(BaseModel):
     lang: Literal["en", "hi"] | None = None
 
 
+class PackagePatchIn(BaseModel):
+    """Approve, skip, bring back, or change the nights of a package."""
+
+    state: Literal["pending", "approved", "skipped"] | None = None
+    nights: int | None = Field(default=None, ge=MIN_PACKAGE_NIGHTS, le=MAX_PACKAGE_NIGHTS)
+
+
+def site_content(session: Session, prop: Property, config: SiteConfig) -> dict[str, Any]:
+    """The fields both the owner screen and the public site share."""
+    rooms = []
+    for room_type, rate in room_rates(session, prop.id).items():
+        name_hi, detail = rooms_copy(room_type)
+        rooms.append(SiteRoomOut(room_type=room_type, name_hi=name_hi, detail=detail,
+                                 nightly_rate=rate))  # fmt: skip
+    return {
+        "slug": slugify(prop.short_name),
+        "address": SAMPLE_ADDRESS,
+        "sample": prop.is_sample,
+        "mood": config.mood,
+        "lang": config.lang,
+        "hotel": prop.short_name,
+        "hotel_hi": NAME_HI,
+        "location": LOCATION,
+        "tagline": TAGLINE,
+        "rooms_count": prop.rooms_count,
+        "rooms": rooms,
+        "nearby": [NearbyOut(place=p, distance=d) for p, d in NEARBY],
+        "gallery": list(GALLERY),
+        "contact": ContactOut(placeholder=prop.is_sample, **CONTACT),
+    }
+
+
+def public_package(p: Package) -> PublicPackageOut:
+    """A package as guests see it."""
+    return PublicPackageOut(key=p.spec.key, name=p.spec.name, nights=p.nights, price=p.price,
+                            includes={"en": p.includes("en"), "hi": p.includes("hi")})  # fmt: skip
+
+
+def owner_package(p: Package, rates: dict[str, int]) -> PackageOut:
+    """A package with everything the owner needs to decide."""
+    return PackageOut(
+        **public_package(p).model_dump(),
+        room_type=p.spec.room_type,
+        nightly_rate=rates[p.spec.room_type],
+        lines=[PriceLineOut(label=x.label, amount=x.amount) for x in p.lines],
+        why=p.why,
+        state=p.state,
+        approved=p.approved,
+    )
+
+
 def site_out(session: SessionDep, prop: Property) -> SiteOut:
     """Shape the site for the screen."""
     config = get_config(session, prop.id)
+    rates = room_rates(session, prop.id)
     return SiteOut(
+        **site_content(session, prop, config),
         stage=config.stage,
-        mood=config.mood,
-        lang=config.lang,
         live=config.published_at is not None,
         published_at=config.published_at,
-        address=SAMPLE_ADDRESS,
-        hotel=prop.short_name,
-        location=prop.address,
-        welcome=WELCOME,
-        nearby=NEARBY,
-        setup_chat=list(SETUP_CHAT),
-        rooms=[
-            SiteRoomOut(room_type=t, nightly_rate=r)
-            for t, r in room_rates(session, prop.id).items()
-        ],
-        packages=[
-            PackageOut(
-                key=p.spec.key,
-                name=p.spec.name,
-                includes=p.spec.includes,
-                price=p.price,
-                why=p.why,
-                approved=p.approved,
-            )  # fmt: skip
-            for p in packages(session, prop, config)
-        ],
+        owner_name=prop.owner_name,
+        packages=[owner_package(p, rates) for p in packages(session, prop, config)],
+        setup=SetupOut.model_validate(SETUP),
+        google=GoogleKitOut(
+            description=google_description(prop),
+            categories=list(GOOGLE_CATEGORIES),
+            photos=list(GOOGLE_PHOTOS),
+        ),  # fmt: skip
     )
 
 
@@ -134,6 +252,18 @@ def approve(key: str, _owner: OwnerDep, session: SessionDep, prop: PropertyDep) 
     """Owner approves a suggested package for the site."""
     try:
         approve_package(get_config(session, prop.id), key)
+    except KeyError as exc:
+        raise ApiError(404, "no_such_package", "No package with that key") from exc
+    return site_out(session, prop)
+
+
+@site_router.patch("/packages/{key}", response_model=SiteOut)
+def change_package(
+    key: str, body: PackagePatchIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
+) -> SiteOut:
+    """Skip, bring back or change the nights. The price is worked out again by code."""
+    try:
+        decide_package(get_config(session, prop.id), key, state=body.state, nights=body.nights)
     except KeyError as exc:
         raise ApiError(404, "no_such_package", "No package with that key") from exc
     return site_out(session, prop)
