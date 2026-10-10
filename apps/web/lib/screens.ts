@@ -14,7 +14,7 @@ export type OwnerScreen = {
 
 export const OWNER_SCREENS: OwnerScreen[] = [
   { key: "overview", label: "Overview", href: "/home", icon: "overview" },
-  { key: "myplace", label: "My Place", href: "/my-place", icon: "house", built: false },
+  { key: "myplace", label: "My Place", href: "/my-place", icon: "house" },
   { key: "inbox", label: "Guest inbox", href: "/inbox", icon: "inbox" },
   { key: "assistant", label: "Assistant", href: "/assistant", icon: "sparkle" },
   { key: "upload", label: "Upload", href: "/upload", icon: "upload" },

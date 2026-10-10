@@ -1,0 +1,600 @@
+/* My Place (P8): 2D room map, room table, floor bars, month summary, cost inputs.
+   Tokens come from globals.css; text always wears ink tokens. */
+
+.labels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 0 0 18px;
+}
+.monthField {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--ink2);
+  margin-left: auto;
+}
+.monthField select {
+  width: auto;
+  min-width: 220px;
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: 15px;
+}
+@media (max-width: 559px) {
+  .monthField {
+    margin-left: 0;
+    width: 100%;
+  }
+  .monthField select {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* KPI tiles */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (min-width: 980px) {
+  .kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.kpi {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 18px 20px;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+.kpiLabel {
+  font-size: 14px;
+  color: var(--ink2);
+}
+.kpiValue {
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.kpiNote {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.gain {
+  color: var(--gain);
+}
+.loss {
+  color: var(--loss);
+}
+
+/* layout */
+.cols {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+@media (min-width: 1100px) {
+  .cols {
+    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.side {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  min-width: 0;
+}
+@media (max-width: 759px) {
+  .card {
+    padding: 16px;
+  }
+}
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+}
+.cardTitle {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.cardSub {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 4px 0 0;
+}
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.zoom {
+  display: inline-flex;
+  gap: 4px;
+}
+.zoomBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--fill);
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+}
+.zoomBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* room map */
+.map {
+  position: relative;
+  display: grid;
+  gap: 18px;
+}
+.floor {
+  display: grid;
+  gap: 8px;
+}
+.floorName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  margin: 0;
+}
+.rooms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile, 84px), 1fr));
+  gap: 8px;
+}
+.room {
+  width: 100%;
+  min-height: 64px;
+  border-radius: 14px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2px;
+  text-align: left;
+  background: var(--fill);
+  color: var(--ink);
+  border: 2px solid transparent;
+  transition:
+    transform 0.2s var(--spring),
+    border-color 0.2s;
+}
+.room:hover {
+  transform: translateY(-1px);
+}
+.room b {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.room span {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.room[aria-expanded="true"],
+.room.selected {
+  border-color: var(--ink);
+}
+/* Profit mode: soft tint, ink text, sign in the label. */
+.room[data-tone="gain"] {
+  background: var(--accentSoft);
+}
+.room[data-tone="loss"] {
+  background: var(--lossSoft);
+}
+.room[data-tone="gain"] span {
+  color: var(--gain);
+}
+.room[data-tone="loss"] span {
+  color: var(--loss);
+}
+/* Channel mode: channel fill; text colours keep 4.5:1 in light and dark. */
+.room[data-ch="mmt"],
+.room[data-ch="bcom"] {
+  color: var(--bg);
+}
+.room[data-ch="agoda"] {
+  color: #000;
+}
+.room[data-ch="ta"],
+.room[data-ch="walkin"] {
+  color: var(--ink);
+}
+.room[data-ch="direct"] {
+  color: var(--onAccent);
+}
+.room[data-ch][aria-expanded="true"],
+.room[data-ch].selected {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.legend {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.legend i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: -1px;
+}
+.swGain {
+  background: var(--accentSoft);
+  border: 1px solid var(--gain);
+}
+.swLoss {
+  background: var(--lossSoft);
+  border: 1px solid var(--loss);
+}
+
+/* popover */
+.pop {
+  position: absolute;
+  z-index: 5;
+  width: min(280px, 100%);
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.08),
+    0 18px 40px rgba(0, 0, 0, 0.18);
+  padding: 14px 16px 12px;
+  animation: popIn 0.22s var(--spring) both;
+}
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+.popHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.popTitle {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0;
+}
+.popSub {
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 2px 0 0;
+}
+.popClose {
+  width: 44px;
+  height: 44px;
+  margin: -10px -10px 0 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--ink2);
+  font-size: 20px;
+  flex: none;
+}
+.lines {
+  margin: 10px 0 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  font-size: 14px;
+}
+.lines dt {
+  color: var(--ink2);
+}
+.lines dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lines .total {
+  font-weight: 700;
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+/* room table */
+.tableWrap {
+  overflow-x: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+.tableWrap:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  min-width: 620px;
+}
+.table th,
+.table td {
+  padding: 0 10px;
+  height: 48px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table th:first-child,
+.table td:first-child,
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  text-align: left;
+}
+.table thead th {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
+  padding: 0 4px;
+}
+.sortBtn {
+  min-height: 44px;
+  padding: 0 6px;
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.sortBtn[data-active="true"] {
+  color: var(--ink);
+}
+.rowBtn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 4px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: left;
+}
+.table tr.rowSel td {
+  background: var(--fill);
+}
+.chDot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 8px;
+  vertical-align: 0;
+}
+
+/* floor bars */
+.bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.barRow {
+  display: grid;
+  gap: 6px;
+}
+.barTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 15px;
+}
+.barTop b {
+  font-variant-numeric: tabular-nums;
+}
+.barTrack {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.bar {
+  height: 100%;
+  border-radius: 4px;
+  transform-origin: left;
+  animation: grow 0.7s var(--spring) both;
+}
+.barGain {
+  background: var(--gainFill);
+}
+.barLoss {
+  background: var(--lossFill);
+}
+@keyframes grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+.barNote {
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+/* month summary */
+.sum {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 14px;
+  font-size: 15px;
+}
+.sum dt {
+  color: var(--ink2);
+}
+.sum dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.sum .total {
+  font-weight: 700;
+  color: var(--ink);
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+.mixTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 6px;
+}
+.mix {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+.mix li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+}
+.mixNote {
+  color: var(--ink2);
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* cost form */
+.form {
+  display: grid;
+  gap: 14px;
+}
+.field {
+  display: grid;
+  gap: 6px;
+}
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.input {
+  min-height: 48px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.input[aria-invalid="true"] {
+  border-color: var(--loss);
+}
+.help {
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 0;
+}
+.error {
+  font-size: 14px;
+  color: var(--loss);
+  margin: 0;
+}
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 3D note */
+.soon {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: var(--bg2);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.soon b {
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room,
+  .pop,
+  .bar {
+    transition: none;
+    animation: none;
+  }
+  .room:hover {
+    transform: none;
+  }
+}
+
+/* The shared segmented control sits on a card here; on the card's fill its
+   grey label reads 4.41:1, so the unselected label is a step darker. */
+.modeSwitch.modeSwitch.modeSwitch button[aria-pressed="false"] {
+  color: color-mix(in srgb, var(--ink2) 78%, var(--ink));
+}
