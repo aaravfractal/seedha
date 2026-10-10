@@ -578,3 +578,26 @@ checkout, win-back flow and loop e2e now expect no name before booking.
 is still present; commits now use a repo-local `PRE_COMMIT_HOME`.
 
 ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7
+
+---
+
+# Frontend build (docs/AUTONOMOUS_FRONTEND.md, FRONTEND_MASTER.md, AGENT_TEAM.md)
+
+## Setup — done (10 Oct 2026)
+- Kit unzipped (3e02986); handoff text pages 38 to 58 rendered and
+  transcribed (`design/handoff-text/HANDOFF_TEXT.md`), gallery pages 2 to 37
+  catalogued (`GALLERY.md`), 33 video frames catalogued (`VIDEO_SCREENS.md`).
+- `docs/frontend-gap.md` (cb7e000).
+- Foundation (d84eeba): World A tokens in globals.css (D-077 contrast),
+  Mukta via next/font (D-078), framer-motion 14.1.0, npm cache in
+  `.cache/npm`, Next telemetry off.
+- D9 data (e7621c7): four earlier coded bookings, ₹12,600 (D-080). API 313
+  tests pass.
+
+## Team status
+- Builders running in worktrees `.worktrees/<name>` on branches `fe/<name>`:
+  shell (P1), desk (P3), owner (P2), auth (P4). Reports land in
+  `docs/agent-reports/P<n>-<name>.md` inside each worktree. The lead merges,
+  runs make check, applies e2e changes and commits.
+- Next: merge P1 and P3, then P2 and P4, then reviewers (design QA, code
+  quality, security, a11y/perf), then P5 to P9.
