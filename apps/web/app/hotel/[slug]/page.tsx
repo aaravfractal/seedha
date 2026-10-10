@@ -37,7 +37,11 @@ export default function HotelPage({ params }: { params: Promise<{ slug: string }
         body="Check the link the hotel sent you."
       />
     ) : (
-      <WorldBMessage title="This page did not load." body={site.error.message} onRetry={site.reload} />
+      <WorldBMessage
+        title="This page did not load."
+        body="Please try again in a moment."
+        onRetry={site.reload}
+      />
     );
   }
   if (!site.data) return <WorldBMessage title="Loading the hotel" loading />;

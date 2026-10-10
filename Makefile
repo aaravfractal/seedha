@@ -98,7 +98,7 @@ check-e2e:
 	cd $(WEB) && npx playwright test
 
 api: env
-	$(LOAD_ENV) && cd $(API) && $(VENV)/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 $(API_FLAGS)
+	$(LOAD_ENV) && cd $(API) && $(VENV)/bin/alembic upgrade head && $(VENV)/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000 $(API_FLAGS)
 
 web: env
 	rm -rf $(WEB)/.next/dev && $(LOAD_ENV) && cd $(WEB) && npx next dev --port 3000

@@ -91,7 +91,7 @@ function ProductWindow({ sample }: { sample: Loadable<Sample> }) {
             <Flip data={data} />
           ) : sample.error ? (
             <div className={styles.errorBox} role="alert">
-              <span>The sample figures could not load. {sample.error.message}</span>
+              <span>The live sample figures are not available right now. Try again in a moment.</span>
               <button type="button" className={styles.pillOutline} onClick={sample.reload}>
                 Try again
               </button>

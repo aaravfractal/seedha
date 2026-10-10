@@ -87,9 +87,13 @@ def test_only_served_for_the_sample_hotel(client: TestClient, sample: Session) -
 
 
 @pytest.mark.usefixtures("base_sample")
-def test_without_statements_it_says_so(client: TestClient) -> None:
+def test_without_statements_the_canonical_sample_is_served(client: TestClient) -> None:
+    """A fresh demo (no statements loaded yet) still shows the locked figures."""
     res = client.get("/public/sample")
-    assert res.status_code == 409
+    assert res.status_code == 200
+    body = res.json()
+    assert (body["paid_to_channels"], body["net_kept"]) == (rupees(10_39_108), rupees(47_33_012))
+    assert (body["repeat_guests"], body["paid_twice"]) == (12, rupees(41_800))
 
 
 @pytest.mark.usefixtures("sample")

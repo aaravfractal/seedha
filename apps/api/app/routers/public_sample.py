@@ -9,16 +9,19 @@ difference of two net ADRs, the same step the Saturday move takes.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
+from functools import cache
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from sqlalchemy import func, or_, select
+from sqlalchemy import create_engine, func, or_, select
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import StaticPool
 
+from app.db import Base, make_session_factory
 from app.deps import PropertyDep, SessionDep
 from app.errors import ApiError
-from app.models import Booking, RepeatMatch
+from app.models import Booking, Property, RepeatMatch
 from app.ratelimit import rate_limited
 from app.routers.ledger import ChannelOut, channel_out
 from app.services.ledger import DEFAULT_END, DEFAULT_START, LedgerSummary, load_ledger
@@ -172,12 +175,41 @@ def guest_cities(session: Session, property_id: int) -> list[SampleCityOut]:
     dependencies=[Depends(rate_limited("public_sample"))],
 )
 def get_sample(session: SessionDep, prop: PropertyDep) -> SampleOut:
-    """The sample hotel's computed summary for the public website."""
+    """The sample hotel's computed summary for the public website.
+
+    While the demo has not loaded its statements yet (a fresh `make seed`),
+    the same figures are computed from the canonical sample data in a private
+    in-memory copy, so the website never depends on how far a demo has got.
+    """
     if not prop.is_sample:
         raise ApiError(404, "no_sample", "The public sample is only served for the sample hotel")
+    live = summarise_sample(session, prop)
+    return live if live is not None else reference_sample()
+
+
+@cache
+def reference_sample() -> SampleOut:
+    """The sample hotel with all 1,500 statement lines, computed once per process."""
+    from seed.load import load_sample  # noqa: PLC0415  (sample data only)
+
+    engine = create_engine(
+        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+    Base.metadata.create_all(engine)
+    with make_session_factory(engine)() as session:
+        prop = load_sample(session, DEFAULT_END + timedelta(days=13), with_statements=True)
+        out = summarise_sample(session, prop)
+    engine.dispose()
+    if out is None:  # pragma: no cover  (the canonical sample always has statements)
+        raise ApiError(500, "no_sample", "The sample could not be computed")
+    return out
+
+
+def summarise_sample(session: Session, prop: Property) -> SampleOut | None:
+    """The public summary for this database's sample hotel, or None without statements."""
     ledger = load_ledger(session, prop.id)
     if ledger.room_nights == 0:
-        raise ApiError(409, "no_statements", "The sample statements are not loaded yet")
+        return None
     kpis = kpis_for(ledger)
     repeats = repeat_rows(session, prop.id)
     return SampleOut(
