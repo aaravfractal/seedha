@@ -448,3 +448,31 @@ characters, the existing column and input limit. The public link page never
 returns the guest's name; the booking confirmation returns it only when the
 booking accepted the code, and the page then says "Booked. Thank you,
 Rahul ji." Before that the code line reads "<perk>. Your code is valid."
+
+## Frontend build (FRONTEND_MASTER.md)
+
+**D-077 Token contrast.** The handoff's light gain #1F8A55 (4.35:1 on white)
+and loss #D7372B (4.31:1 on #F5F5F7) miss the 4.5:1 that both the handoff
+and our axe gate require for body text, and text-3 #86868B (3.6:1) is
+"hints only". So text keeps the deeper shades already in use (gain #1A7A4A,
+loss #C4312A, ink3 #6E6E73), and the handoff hex values are used where 3:1
+applies: bars, chart segments and fills (`--gainFill`, `--lossFill`), plus
+`--hint` for non-essential hints. Dark-theme values are the handoff's. The
+handoff's channel colours are for light surfaces; on dark they would vanish
+(MakeMyTrip #1D1D1F on black), so dark mode uses the same neutral ramp
+reversed (MakeMyTrip #F5F5F7 … Walk-in #48484A, Direct #4CC38A).
+
+**D-078 Fonts and caches.** Mukta (Devanagari) is loaded with next/font in
+the root layout as `--font-mukta`; it is self-hosted at build time, so the
+CSP `font-src 'self'` holds. The World B fonts load only in hotel-site
+components. Exact `[lang="hi"]` gets Mukta; Roman-script Hindi (`hi-Latn`)
+keeps the system font, as the handoff says. npm's cache is
+`.cache/npm` (gitignored) and Next.js telemetry is off, so builds write
+nothing outside the repo.
+
+**D-079 Handoff text pages.** The `Read` tool needs poppler to render PDF
+pages, and installing it would write outside the repo, so pages 38 to 58
+were rendered with pypdfium2 (already installed with pdfplumber) into
+`design/handoff-text/page-NN.png` and transcribed to `HANDOFF_TEXT.md`. The
+handoff totals ₹47,33,011 and MakeMyTrip ₹16,96,641 are ₹1 below ours; D1
+and ruling 1 keep the API values (₹47,33,012, ₹16,96,642).

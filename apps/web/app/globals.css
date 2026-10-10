@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
-/* Seedha design tokens, ported from prototype/index.html.
-   Pine is the accent. Gold is reserved for money saved. */
+/* Seedha design tokens (World A), from design/handoff-text/HANDOFF_TEXT.md
+   README "Design tokens" and docs/FRONTEND_MASTER.md section 2.
+   Pine is the accent. Gold is reserved for money saved.
+   Text colours keep 4.5:1 contrast: gain and loss text use slightly deeper
+   shades than the handoff; the handoff hex values are used for bars and
+   fills (gainFill, lossFill), and --hint only for non-essential hints
+   (docs/decisions.md D-077). */
 :root {
   --bg: #fbfbfd;
   --bg2: #f5f5f7;
@@ -9,22 +14,53 @@
   --ink: #1d1d1f;
   --ink2: #6e6e73;
   --ink3: #6e6e73;
+  --hint: #86868b;
   --line: rgba(0, 0, 0, 0.08);
   --accent: #1e6b4e;
+  --onAccent: #ffffff;
   --accentSoft: #e6f1ec;
   --gold: #e8a33d;
+  --onGold: #1d1d1f;
   --goldInk: #8a5a12;
   --goldText: #9a6210;
   --goldSoft: #fbf1de;
   --gain: #1a7a4a;
+  --gainFill: #1f8a55;
   --loss: #c4312a;
-  --lossSoft: #fcebea;
-  --glass: rgba(251, 251, 253, 0.72);
+  --lossFill: #d7372b;
+  --lossSoft: rgba(215, 55, 43, 0.1);
+  --fill: rgba(118, 118, 128, 0.12);
+  --glass: rgba(245, 245, 247, 0.72);
+  --graphite: #1d1d1f;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 28px rgba(0, 0, 0, 0.06);
+  --ch-mmt: #1d1d1f;
+  --ch-bcom: #48484a;
+  --ch-agoda: #8e8e93;
+  --ch-agent: #aeaeb2;
+  --ch-walkin: #c7c7cc;
+  --ch-direct: #1e6b4e;
   --spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-enter: 520ms;
+  --dur-seg: 300ms;
+  --dur-flip: 700ms;
+  --dur-sheet: 500ms;
+  --r-input: 12px;
+  --r-row: 18px;
+  --r-card: 22px;
+  --r-card-lg: 24px;
+  --r-panel: 28px;
+  --r-pill: 980px;
+  --r-sheet: 24px;
+  --t-hero: clamp(40px, 6.6vw, 96px);
+  --t-large: clamp(36px, 4.4vw, 64px);
+  --t-title: clamp(28px, 2.4vw, 34px);
+  --t-headline: 20px;
+  --t-body: 17px;
+  --t-caption: 14px;
   --font:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", "Helvetica Neue", Arial,
-    "Noto Sans", sans-serif;
+    sans-serif;
+  --font-deva: var(--font-mukta), "Noto Sans Devanagari", var(--font);
   --mono: "SF Mono", ui-monospace, Menlo, monospace;
   color-scheme: light;
 }
@@ -35,19 +71,32 @@
     --card: #1c1c1e;
     --ink: #f5f5f7;
     --ink2: #a1a1a6;
-    --ink3: #98989d;
+    --ink3: #8e8e93;
+    --hint: #8e8e93;
     --line: rgba(255, 255, 255, 0.1);
     --accent: #4cc38a;
+    --onAccent: #00170c;
     --accentSoft: rgba(76, 195, 138, 0.14);
     --gold: #f2b54e;
+    --onGold: #1d1d1f;
     --goldInk: #f2b54e;
     --goldText: #f2b54e;
     --goldSoft: rgba(242, 181, 78, 0.14);
     --gain: #4cc38a;
+    --gainFill: #4cc38a;
     --loss: #ff6b5e;
+    --lossFill: #ff6b5e;
     --lossSoft: rgba(255, 107, 94, 0.14);
+    --fill: rgba(118, 118, 128, 0.24);
     --glass: rgba(22, 22, 24, 0.72);
+    --graphite: #2c2c2e;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --ch-mmt: #f5f5f7;
+    --ch-bcom: #c7c7cc;
+    --ch-agoda: #8e8e93;
+    --ch-agent: #636366;
+    --ch-walkin: #48484a;
+    --ch-direct: #4cc38a;
     color-scheme: dark;
   }
 }
@@ -57,19 +106,32 @@
   --card: #1c1c1e;
   --ink: #f5f5f7;
   --ink2: #a1a1a6;
-  --ink3: #98989d;
+  --ink3: #8e8e93;
+  --hint: #8e8e93;
   --line: rgba(255, 255, 255, 0.1);
   --accent: #4cc38a;
+  --onAccent: #00170c;
   --accentSoft: rgba(76, 195, 138, 0.14);
   --gold: #f2b54e;
+  --onGold: #1d1d1f;
   --goldInk: #f2b54e;
   --goldText: #f2b54e;
   --goldSoft: rgba(242, 181, 78, 0.14);
   --gain: #4cc38a;
+  --gainFill: #4cc38a;
   --loss: #ff6b5e;
+  --lossFill: #ff6b5e;
   --lossSoft: rgba(255, 107, 94, 0.14);
+  --fill: rgba(118, 118, 128, 0.24);
   --glass: rgba(22, 22, 24, 0.72);
+  --graphite: #2c2c2e;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --ch-mmt: #f5f5f7;
+  --ch-bcom: #c7c7cc;
+  --ch-agoda: #8e8e93;
+  --ch-agent: #636366;
+  --ch-walkin: #48484a;
+  --ch-direct: #4cc38a;
   color-scheme: dark;
 }
 
@@ -80,17 +142,31 @@
   --color-ink: var(--ink);
   --color-ink2: var(--ink2);
   --color-ink3: var(--ink3);
+  --color-hint: var(--hint);
   --color-line: var(--line);
   --color-accent: var(--accent);
+  --color-on-accent: var(--onAccent);
   --color-accent-soft: var(--accentSoft);
   --color-gold: var(--gold);
+  --color-on-gold: var(--onGold);
   --color-gold-soft: var(--goldSoft);
   --color-gold-text: var(--goldText);
   --color-gain: var(--gain);
+  --color-gain-fill: var(--gainFill);
   --color-loss: var(--loss);
+  --color-loss-fill: var(--lossFill);
   --color-loss-soft: var(--lossSoft);
+  --color-fill: var(--fill);
+  --color-graphite: var(--graphite);
   --font-sans: var(--font);
   --font-mono: var(--mono);
+  --font-deva: var(--font-deva);
+  --radius-input: var(--r-input);
+  --radius-row: var(--r-row);
+  --radius-card: var(--r-card);
+  --radius-panel: var(--r-panel);
+  --radius-pill: var(--r-pill);
+  --ease-spring: var(--spring);
 }
 
 html {
@@ -1362,4 +1438,10 @@ label.fl {
 }
 .site-footer a:hover {
   color: var(--ink);
+}
+
+/* Devanagari text uses Mukta; Roman-script Hindi keeps the main font. */
+[lang="hi"],
+.deva {
+  font-family: var(--font-deva);
 }
