@@ -34,12 +34,12 @@ Everything below has a working simulated fallback today. Nothing is blocked.
    to new codes, e.g. DEODAR-RS26-K7Q (demo code unchanged); (b) ask for the
    last 4 digits of the consented WhatsApp number before the perk applies;
    (c) stop showing the name on the link page. I recommend (a) plus (c).
-10. **Files outside the repo** (blockers B-003). Update: `~/.platformio` is
-    gone; `~/.cache/pre-commit` is still there, so please run
-    `rm -rf ~/.cache/pre-commit` again. PlatformIO created
-    `~/.platformio` (about 20 MB) during M8 and pre-commit created
-    `~/.cache/pre-commit` (56 KB). The repo no longer uses either. Delete them
-    if you like; I have not, because deleting outside the repo is off-limits.
+10. **Files outside the repo** (blockers B-003). Both `~/.platformio`
+    (about 20 MB) and `~/.cache/pre-commit` are still on the machine.
+    Correction: I wrongly reported ~/.platformio as gone on 10 Oct (I
+    misread a truncated listing). Nothing in the repo needs them, and the
+    git hook now keeps pre-commit's cache in the repo. Please run
+    `rm -rf ~/.platformio ~/.cache/pre-commit`.
 11. **Done (10 Oct 2026).** ~~Frontend build inputs~~ (blockers B-004). Add `docs/FRONTEND_MASTER.md`
     and the `design/` folder (Design_Handoff.pdf, handoff-pages/,
     video-screens/, VIDEO_SPEC.md, claude-design-files/ if you have it).

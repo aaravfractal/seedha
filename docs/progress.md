@@ -3,6 +3,67 @@
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-aarav.md.
 
+## Frontend build: final summary (11 October 2026)
+
+**Phases done.** P1 app shell and Overview, P2 owner screens, P3 Front desk
+and Guest, P4 sign in and onboarding (MUST); P5 Seedha Site and World B, P6
+Guest inbox, Assistant, Calendar, Billing, Settings, P7 public website
+(SHOULD); P8 My Place as a 2D view (stretch; 3D not built, D13); P9 polish
+and verify. Plus the three approved ideas (Seedha Recover, Split the
+Commission, Direct Booking Score; D-089) and fixes for every high and
+medium finding from the security, code quality, accessibility and design QA
+reviews (D-086, D-087, D-090; reports in docs/agent-reports/).
+
+**Checks (make check, 11 Oct):**
+ruff 0 · pylint 9.97 (app) / 9.98 (tests) · mypy 0 · coverage 97.90% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 11/11
+
+Playwright passed 3 runs in a row (11/11 each). The history secret scan
+found 0 in 62 commits. Firmware: 5/5 native tests, device build SUCCESS.
+`make demo-prod` serves a production build (no dev badge), and the 8-step
+loop spec passed against it.
+
+**Screens matching.** Every handoff screen in the phases matches, apart
+from intentional differences (API numbers, D1 labels, contrast-safe text
+colours, Sample labels, "Planned" security claims); see
+docs/SCREEN_COMPARE.md. Not built: the 3D My Place hotel (2D instead) and
+the pitch deck (not in the phases). Remaining polish is the low-severity
+rows in review-design-qa.md and review-a11y-perf.md.
+
+**Blockers.**
+- B-001: the Polygon testnet write is still simulated.
+- B-003: `~/.platformio` (about 20 MB, from 9 Oct, untouched since) and
+  `~/.cache/pre-commit` (recreated 10 Oct 19:36 by a commit run that did
+  not use the repo-local cache) are still on the machine. Correction: I
+  earlier reported ~/.platformio as deleted, but my listing was truncated
+  and I misread it. The repo now keeps both caches inside itself, and the
+  git hook forces that for every commit. Please delete both folders.
+- Everything else needed is in docs/needs-from-aarav.md (keys, hardware,
+  names, D-001).
+
+**Demo click path (`make demo-prod`, then http://localhost:3000).**
+1. "/" (website): "Try the live demo" (or /login, then Direct beta login)
+   opens Overview, "Namaste, Rajesh ji.", 0 of 8 done.
+2. Upload: "Use sample statements". "1,500 rows matched. 3 need a look."
+   Each flagged row offers "Draft a dispute".
+3. "See my real money": paid to channels ₹10,39,108. Tap "By money kept":
+   MakeMyTrip drops from 1st to 5th (₹2,737).
+4. Repeat guests: 12 guests, ₹41,800 paid twice; confirm a match.
+5. Desk: pick Room 207 · Rahul Sharma, "Show QR". In the phone, type
+   98765 43210, tick, "Yes, send me offers". The ring turns green.
+6. "Check out and print": the slip shows DEODAR-RS26.
+7. Approvals: "Namaste Rahul ji…", then "Approve and send" (simulated).
+8. /link/DEODAR-RS26: "Pay ₹8,600 with UPI", "Pay ₹8,600". Then "Booked.
+   Thank you, Rahul ji."
+9. Savings: +₹2,199 net and ₹2,233 avoided for Rahul, on top of the
+   sample's 4 earlier coded bookings (₹12,600). Overview's checklist is
+   gone: all 8 steps done.
+Also: Saturday move (+₹10,110, Accept, Undo), Ask (September MakeMyTrip
+₹1,09,542), Guest inbox (after a Desk consent), My Place, Website, hotel
+site /hotel/deodar-view (Pine, Stone, Sky, Hindi), rate card, agent deck.
+Reset: Settings, Hotel tab, "Reset demo data" (or `make seed`).
+
+---
+
 ## Final summary (10 October 2026)
 
 **All 11 milestones passed.** `make check` is green end to end: API, web,

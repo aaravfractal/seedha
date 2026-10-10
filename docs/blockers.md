@@ -50,7 +50,7 @@ main.cpp includes the header); the board has no touch panel, so
 `-DDISABLE_ALL_LIBRARY_WARNINGS=1` turns off that library's setup notices.
 `pio run -e seedha_desk`: SUCCESS, zero warnings, RAM 14.5%, flash 74.8%.
 
-## B-003 Files written outside the repo (M8) — mostly resolved
+## B-003 Files written outside the repo (M8) — open, needs Aarav
 
 PlatformIO stores platforms and toolchains in `~/.platformio` unless told
 otherwise, and I did not redirect it in M8. It created `~/.platformio`
@@ -98,3 +98,14 @@ unzipped into the repo root once it had finished copying and passed
 `design/Design_Handoff.pdf`, `design/VIDEO_SPEC.md`,
 `design/handoff-pages/` (36 PNG) and `design/video-screens/` (33 PNG). The kit
 has no `design/claude-design-files/`.
+
+Correction (11 Oct 2026): `~/.platformio` was never removed. The "confirmed
+it is gone" above came from a listing cut short by `| head -2`; the folder
+is the original from 9 Oct 20:46, unmodified since 9 Oct 23:50.
+`~/.cache/pre-commit` was recreated on 10 Oct at 19:36 and 19:38 by two
+pre-commit runs that did not use the repo-local cache (no command in my
+session matches; my 19:41 commit used `.pre-commit-home/`). To stop that
+for good, the repo's git hook (.git/hooks/pre-commit) now defaults
+`PRE_COMMIT_HOME` to the repo's `.pre-commit-home/`, whoever runs
+`git commit`. Both folders can be deleted: `rm -rf ~/.platformio
+~/.cache/pre-commit`.
