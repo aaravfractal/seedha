@@ -11,17 +11,6 @@ import styles from "@/components/desk/Desk.module.css";
 
 const HEADING = "One scan at check-in. One slip at checkout.";
 
-/** A slip made in the browser for "Test print". No money on it. */
-function testSlip(where: string): Slip {
-  const lines = [
-    { label: "Printer OK", amount: null, bold: false },
-    { label: "Paper 58 mm, black only", amount: null, bold: false },
-  ];
-  const footer = ["Seedha Desk simulator"];
-  const text = ["TEST PRINT", where, "-".repeat(32), ...lines.map((l) => l.label), "-".repeat(32), ...footer];
-  return { title: "TEST PRINT", subtitle: where, lines, footer, text: text.join("\n") };
-}
-
 function timeNow(): string {
   return new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
@@ -104,11 +93,12 @@ export default function DeskPage() {
         <button
           type="button"
           className={styles.pill}
-          disabled={!online}
-          onClick={() => {
-            device.current?.printLocal(testSlip(where));
-            if (noPaper) toast("Printer needs paper. Load paper to print.");
-          }}
+          disabled={!online || busy}
+          onClick={() =>
+            act("desk/test-print", undefined, () =>
+              toast(noPaper ? "Printer needs paper. Load paper to print." : "Test print sent to the Desk"),
+            )
+          }
         >
           Test print
         </button>

@@ -21,8 +21,6 @@ type Led = "white" | "green" | "red";
 
 /** Actions the page can run on the simulated box. */
 export type DeskHandle = {
-  /** Print a slip made in the browser (Test print). */
-  printLocal: (slip: Slip) => void;
   /** Paper is back: print whatever waited. */
   paperLoaded: () => void;
 };
@@ -106,7 +104,6 @@ export function DeskDevice({
   useImperativeHandle(
     ref,
     () => ({
-      printLocal: (slip) => print({ slip, text: slip.text }),
       paperLoaded: () => {
         if (pending.current) print(pending.current, true);
       },

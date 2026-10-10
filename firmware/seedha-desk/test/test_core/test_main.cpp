@@ -65,7 +65,7 @@ void test_replays_the_api_check_in_consent_checkout() {
     TEST_ASSERT_EQUAL_STRING(expected[i].c_str(), hw.calls[i].c_str());
   }
   TEST_ASSERT_EQUAL_STRING("http://localhost:3000/consent/TOKEN", hw.qrUrl.c_str());
-  TEST_ASSERT_EQUAL_STRING("Room 104 - Scan for your perk", hw.qrText.c_str());
+  TEST_ASSERT_EQUAL_STRING("Room 104, scan to get your perk", hw.qrText.c_str());
   TEST_ASSERT_EQUAL_STRING("Thank you, Neha ji|Consent saved", hw.okText.c_str());
   TEST_ASSERT_TRUE(hw.ringGreen);
   TEST_ASSERT_EQUAL_CHAR(0x1B, hw.printed[0]);

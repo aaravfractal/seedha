@@ -80,11 +80,14 @@ test("keyboard: skip link, and the UPI sheet holds and returns focus", async ({ 
   await pay.focus();
   await page.keyboard.press("Enter");
   const sheet = page.getByRole("dialog", { name: "Pay with UPI" });
-  await expect(sheet.getByRole("button", { name: "Pay", exact: true })).toBeFocused();
+  // Order inside the sheet: Google Pay, PhonePe, Paytm, Pay ₹8,600, Cancel. Focus starts on Pay.
+  await expect(sheet.getByRole("button", { name: /^Pay ₹/ })).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(sheet.getByRole("button", { name: "Cancel" })).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(sheet.getByRole("button", { name: "Pay", exact: true })).toBeFocused();
+  await expect(sheet.getByRole("button", { name: "Google Pay" })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  await expect(sheet.getByRole("button", { name: "Cancel" })).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
   await expect(pay).toBeFocused();

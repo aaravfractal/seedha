@@ -46,7 +46,7 @@ test("the full 8-step loop", async ({ page, context }) => {
   await expect(yes).toBeDisabled();
   await phone.getByRole("checkbox").check();
   await yes.click();
-  await expect(phone.getByText("You're in.")).toBeVisible();
+  await expect(phone.getByText("You are in.")).toBeVisible();
   await expect(page.getByText("Thank you, Rahul ji")).toBeVisible();
 
   // 6. Checkout slip with the perk code.
@@ -72,15 +72,18 @@ test("the full 8-step loop", async ({ page, context }) => {
   await guest.getByRole("button", { name: "Pay ₹8,600 with UPI" }).click();
   await guest
     .getByRole("dialog", { name: "Pay with UPI" })
-    .getByRole("button", { name: "Pay", exact: true })
+    .getByRole("button", { name: "Pay ₹8,600" })
     .click();
   await expect(guest.getByText("Booked. Thank you, Rahul ji.")).toBeVisible();
   await expect(guest.getByText(/Breakfast is on us/)).toBeVisible();
 
   await page.goto("/savings");
-  await expect(page.locator(".item b.num").first()).toHaveText("+₹2,199");
-  await expect(page.getByText(/₹2,233 commission and GST avoided/)).toBeVisible();
-  await expect(page.getByText("Code DEODAR-RS26 · ₹8,600 booked direct")).toBeVisible();
+  // Rahul's row: ₹2,233 avoided (₹1,892 commission + ₹341 GST), ₹2,199 net (ruling 5).
+  // The ledger also holds the sample hotel's four earlier coded bookings (D-080).
+  const rahul = page.locator(".item").filter({ hasText: "Code DEODAR-RS26 · ₹8,600 booked direct" });
+  await expect(rahul).toHaveCount(1);
+  await expect(rahul).toContainText("₹1,892 commission + ₹341 GST");
+  await expect(rahul.locator("b.num")).toHaveText("+₹2,199");
 
   await page.goto("/home");
   await expect(page.getByText("All 8 steps done. The full loop works.")).toBeVisible();

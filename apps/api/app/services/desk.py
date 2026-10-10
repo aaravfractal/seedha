@@ -162,7 +162,7 @@ def check_in(
     enqueue(session, device, "set_ring", {"color": "off"})
     enqueue(session, device, "show_qr", {
         "url": url,
-        "text": f"Room {room} · Scan for your perk" if room else "Scan for your perk",
+        "text": f"Room {room}, scan to get your perk" if room else "Scan to get your perk",
         "expires_at": record.expires_at.isoformat(),
     })  # fmt: skip
     return url, record.expires_at

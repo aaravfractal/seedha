@@ -495,3 +495,17 @@ They are marked `payment_method = "sample_history"`, and the loop's "guest
 booked with code" step ignores them. "Saved this month" and Ask still
 count only the current month. In-house Arjun Mehta's new walk-in code keeps
 the random part (D-076).
+
+**D-081 Checkout does not need consent.** The handoff disables "Check out
+and print" until the guest says yes. A front desk must check out every
+guest, and the slip (with the perk code) prints either way (D-035,
+ruling 4); consent only decides whether a win-back message may
+follow (rule 4). So checkout stays enabled; the hint says that without a yes
+no messages will be sent.
+
+**D-082 CSS modules.** The Turbopack rule `"*.css"` (Tailwind loader, `as:
+"*.css"`) also matched `*.module.css` and turned CSS modules into global
+CSS: module classes got no hash and same-named classes leaked onto the
+whole page (the Desk logo's marigold `.brand` recoloured the header
+wordmark, caught by axe). The rule now targets `globals.css` only, the one
+file that uses Tailwind; CSS modules use Turbopack's built-in handling.

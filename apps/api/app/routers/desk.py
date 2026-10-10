@@ -230,6 +230,18 @@ def print_close_slip(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -
     return slip_out(slip)
 
 
+@router.post("/test-print", status_code=202)
+def test_print(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> dict[str, bool]:
+    """Print a short test slip on the Desk (the "Test print" button)."""
+    device = property_device(session, prop.id)
+    stamp = utc_now().strftime("%d %b %Y %H:%M UTC")
+    text = f"Seedha Desk test print\n{prop.short_name}, {prop.city}\n{stamp}\nPrinter OK"
+    enqueue(session, device, "show_text", {"text": "Test print", "sub": "Please check the paper"})
+    enqueue(session, device, "print_slip", {"text": text})
+    enqueue(session, device, "show_idle", {})
+    return {"queued": True}
+
+
 @router.get("/poll", response_model=PollOut)
 def device_poll(device: DeviceDep, session: SessionDep) -> PollOut:
     """Device: fetch commands (every 2 s). Marks the box online."""

@@ -36,8 +36,10 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
   turbopack: {
+    // Tailwind runs on globals.css only. A "*.css" rule would also catch
+    // *.module.css and turn CSS modules into global CSS (D-082).
     rules: {
-      "*.css": {
+      "globals.css": {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",
       },

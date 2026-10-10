@@ -74,7 +74,7 @@ def check_in_neha(client: TestClient, owner: dict[str, str], device: dict[str, s
     commands = poll(client, device)
     assert [c["kind"] for c in commands] == ["set_ring", "show_qr"]
     assert commands[1]["payload"]["url"] == checkin["url"]
-    assert commands[1]["payload"]["text"] == "Room 104 · Scan for your perk"
+    assert commands[1]["payload"]["text"] == "Room 104, scan to get your perk"
     assert client.get("/desk/state", headers=owner).json()["device"]["online"] is True
 
     return token
@@ -222,3 +222,15 @@ def test_no_device_registered(client: TestClient, owner: dict[str, str], session
         "last_seen": None,
     }
     assert client.post("/desk/checkin", headers=owner, json={"room": 104}).status_code == 200
+
+
+@pytest.mark.usefixtures("sample")
+def test_test_print_queues_a_short_slip(
+    client: TestClient, owner: dict[str, str], device: dict[str, str]
+) -> None:
+    assert client.post("/desk/test-print").status_code == 401
+    assert client.post("/desk/test-print", headers=owner).status_code == 202
+    commands = client.get("/desk/poll", headers=device).json()["commands"]
+    assert [c["kind"] for c in commands][-3:] == ["show_text", "print_slip", "show_idle"]
+    slip = commands[-2]["payload"]["text"]
+    assert slip.startswith("Seedha Desk test print\n") and slip.isascii()

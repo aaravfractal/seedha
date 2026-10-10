@@ -12,7 +12,7 @@
       "kind": "show_qr",
       "payload": {
         "url": "http://localhost:3000/consent/TOKEN",
-        "text": "Room 104 · Scan for your perk",
+        "text": "Room 104, scan to get your perk",
         "expires_at": "2026-10-13T09:10:00+00:00"
       }
     },
