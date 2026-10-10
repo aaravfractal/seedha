@@ -81,7 +81,7 @@ test("the full 8-step loop", async ({ page, context }) => {
   // The ledger also holds the sample hotel's four earlier coded bookings (D-080).
   const rahul = page.locator(".item").filter({ hasText: "Code DEODAR-RS26 · ₹8,600 booked direct" });
   await expect(rahul).toHaveCount(1);
-  await expect(rahul).toContainText("₹1,892 commission + ₹341 GST");
+  await expect(rahul).toContainText("₹2,233 commission and GST avoided (₹1,892 + ₹341 GST)");
   await expect(rahul.locator("b.num")).toHaveText("+₹2,199");
 
   await page.goto("/home");

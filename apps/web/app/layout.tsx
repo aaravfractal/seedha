@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 import "./globals.css";
-import { AppChrome } from "@/components/AppChrome";
 import { ToastProvider } from "@/components/Toast";
 import { ShellProvider } from "@/components/shell/ShellData";
 import { THEME_BOOT_SCRIPT } from "@/components/ThemeToggle";
@@ -34,11 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <ToastProvider>
-          <ShellProvider>
-            <Suspense fallback={null}>
-              <AppChrome>{children}</AppChrome>
-            </Suspense>
-          </ShellProvider>
+          <ShellProvider>{children}</ShellProvider>
         </ToastProvider>
       </body>
     </html>

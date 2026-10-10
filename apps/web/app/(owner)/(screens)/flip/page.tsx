@@ -244,14 +244,14 @@ export default function FlipPage() {
         </div>
         <div className={ui.tile}>
           <b className={ui.value}>
-            {data.direct_bookings_tenths !== null ? pctTenths(data.direct_bookings_tenths) : "None yet"}
-          </b>
-          <span className={ui.label}>Direct bookings</span>
-          <span className={ui.note}>
-            Commission-free share{" "}
             {data.commission_free_share_tenths !== null
               ? pctTenths(data.commission_free_share_tenths)
-              : "none yet"}
+              : "None yet"}
+          </b>
+          <span className={ui.label}>Commission-free share</span>
+          <span className={ui.note}>
+            Direct bookings{" "}
+            {data.direct_bookings_tenths !== null ? pctTenths(data.direct_bookings_tenths) : "none yet"}
           </span>
         </div>
         <div className={ui.tile}>

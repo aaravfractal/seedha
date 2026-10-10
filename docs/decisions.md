@@ -518,3 +518,19 @@ it). Direct beta login and OTP verify now use `window.location` to move into
 the app. e2e signs in with Direct beta login (`#beta-login`); the lockout
 test now proves the OTP 5-try, 15-minute lock (D4); `SEEDHA_DEMO=1` is set
 for the e2e API.
+
+**D-084 Layouts by route group.** The root layout renders only the html,
+body, skip link and providers. The app frame (header, `main#main`, footer)
+is `components/AppFrame.tsx`, used by `app/(app)/layout.tsx` (Desk, guest
+pages, plans, sign-in) and `app/(owner)/layout.tsx`; the public website and
+World B pages (hotel site, rate card, agent deck) render their own frames.
+Two dead ends on the way: deciding chrome from `usePathname()` in the root
+layout either left a second hidden `main#main` (inside a Suspense boundary,
+React's streamed copy lingered) or broke prerendering (outside Suspense,
+Cache Components treats the pathname as URL data). Landmarks therefore
+stay outside every Suspense boundary. Legal pages wrap AppFrame until the
+website's own layout lands.
+
+**D-085 Flip share tile.** The flip shows "Commission-free share 16.7%" as
+the figure with "Direct bookings 10.7%" beneath it, as on Overview (D1);
+ruling 3 requires both labels and neither as the bare word "direct share".

@@ -2,19 +2,9 @@
    Selectors that must win over older global classes (.toggle, .stat, .item,
    .row) are written with two classes. */
 
+/* The shell's ScreenEnter runs the enter motion; screens do not repeat it. */
 .screen {
-  animation: enter var(--dur-enter) var(--spring) both;
   max-width: 1080px;
-}
-@keyframes enter {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 
 .head {
@@ -257,7 +247,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .screen,
   .segWrap .seg .pill,
   .segWrap .seg .segBtn {
     animation: none;
