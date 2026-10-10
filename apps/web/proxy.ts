@@ -21,7 +21,6 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
 export const config = {
   matcher: [
-    "/",
     "/home",
     "/upload",
     "/flip",
@@ -37,5 +36,10 @@ export const config = {
     "/desk",
     "/rate-card",
     "/onboard",
+    "/my-place",
+    "/inbox",
+    "/assistant",
+    "/calendar",
+    "/billing",
   ],
 };

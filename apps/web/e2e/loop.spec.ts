@@ -8,7 +8,8 @@ import { signIn } from "./helpers";
  */
 test("the full 8-step loop", async ({ page, context }) => {
   await signIn(page);
-  await expect(page.getByText("0 of 8 steps done. Tap any step to run it.")).toBeVisible();
+  await expect(page.getByText("0 of 8 done")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Start with your statements" })).toBeVisible();
 
   // 1-2. Upload and read the six sample statements.
   await page.goto("/upload");
@@ -84,7 +85,12 @@ test("the full 8-step loop", async ({ page, context }) => {
   await expect(rahul.locator("b.num")).toHaveText("+₹2,199");
 
   await page.goto("/home");
-  await expect(page.getByText("All 8 steps done. The full loop works.")).toBeVisible();
+  // The "Set up the direct loop" checklist hides once all 8 steps are done.
+  const pipeline = (await (await page.request.get("/api/pipeline")).json()) as {
+    steps: { done: boolean }[];
+  };
+  expect(pipeline.steps.filter((s) => s.done)).toHaveLength(8);
+  await expect(page.getByRole("progressbar", { name: "Direct loop steps done" })).toHaveCount(0);
 });
 
 test("a perk code cannot be redeemed twice", async ({ page }) => {

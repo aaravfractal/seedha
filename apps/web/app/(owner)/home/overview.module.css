@@ -337,7 +337,8 @@
   flex-direction: column;
   justify-content: space-between;
   background: var(--fill);
-  color: var(--ink2);
+  /* empty rooms: ink on the grey fill keeps 4.5:1 */
+  color: var(--ink);
 }
 .room b {
   font-size: 17px;

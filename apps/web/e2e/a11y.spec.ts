@@ -22,6 +22,11 @@ const OWNER_PAGES = [
   "/settings",
   "/desk",
   "/onboard",
+  "/my-place",
+  "/inbox",
+  "/assistant",
+  "/calendar",
+  "/billing",
 ];
 const PUBLIC_PAGES = [
   "/link",

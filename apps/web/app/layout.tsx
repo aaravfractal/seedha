@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import "./globals.css";
-import { TopNav } from "@/components/TopNav";
-import { SiteFooter } from "@/components/SiteFooter";
+import { AppChrome } from "@/components/AppChrome";
 import { ToastProvider } from "@/components/Toast";
 import { ShellProvider } from "@/components/shell/ShellData";
 import { THEME_BOOT_SCRIPT } from "@/components/ThemeToggle";
@@ -36,13 +35,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </a>
         <ToastProvider>
           <ShellProvider>
-            <Suspense fallback={<header className="site-header" style={{ height: 61 }} />}>
-              <TopNav />
+            <Suspense fallback={null}>
+              <AppChrome>{children}</AppChrome>
             </Suspense>
-            <main id="main" className="page" tabIndex={-1}>
-              <Suspense fallback={null}>{children}</Suspense>
-            </main>
-            <SiteFooter />
           </ShellProvider>
         </ToastProvider>
       </body>
