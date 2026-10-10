@@ -1,6 +1,7 @@
 /**
- * Optimistic page guard: owner screens redirect to /login without a valid
- * session. The real check happens again in /api/* for every data request.
+ * Optimistic page guard: owner screens (and onboarding) redirect to /login
+ * without a valid session. The real check happens again in /api/* for every
+ * data request. /login, /signup, /otp and /demo stay public.
  */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -35,5 +36,6 @@ export const config = {
     "/settings",
     "/desk",
     "/rate-card",
+    "/onboard",
   ],
 };

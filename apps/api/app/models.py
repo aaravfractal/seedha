@@ -37,6 +37,8 @@ __all__ = [
     "DirectBooking",
     "ErasureRequest",
     "OptOutEvent",
+    "OtpChallenge",
+    "OwnerAccount",
     "Guest",
     "Message",
     "PerkCode",
@@ -516,3 +518,57 @@ class ErasureRequest(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     outcome: Mapped[str] = mapped_column(String(12))
+
+
+class OwnerAccount(Base):
+    """The hotel owner's own login (single property in this build).
+
+    The WhatsApp number is the owner's own, stored to sign them in. Onboarding
+    answers are kept here and never written to the property or its channel
+    contracts, so the sample hotel's locked numbers cannot change.
+    """
+
+    __tablename__ = "owner_account"
+    __table_args__ = (
+        UniqueConstraint("phone", name="uq_owner_account_phone"),
+        CheckConstraint("rooms BETWEEN 1 AND 500", name="ck_owner_account_rooms"),
+        CheckConstraint(
+            "cost_per_room IS NULL OR cost_per_room >= 0", name="ck_owner_account_cost"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(80))
+    hotel_name: Mapped[str] = mapped_column(String(120))
+    phone: Mapped[str] = mapped_column(String(10))
+    terms_accepted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    updates_opt_in: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    property_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    town: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    rooms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    contracts: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    cost_per_room: Mapped[int | None] = mapped_column(Money, nullable=True)
+    whatsapp_connected_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    onboarded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class OtpChallenge(Base):
+    """One sign-in code per phone. Only a salted hash of the code is stored."""
+
+    __tablename__ = "otp_challenge"
+    __table_args__ = (UniqueConstraint("phone", name="uq_otp_challenge_phone"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    phone: Mapped[str] = mapped_column(String(10))
+    code_hash: Mapped[str] = mapped_column(String(64))
+    salt: Mapped[str] = mapped_column(String(32))
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    last_sent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
