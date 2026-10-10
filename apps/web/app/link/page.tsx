@@ -1,25 +1,30 @@
 "use client";
 
 import { LinkBooking } from "@/components/LinkBooking";
+import { usePrefill } from "@/components/guest/usePrefill";
 import { useToast } from "@/components/Toast";
+import styles from "./link.module.css";
 
 export default function LinkDemoPage() {
   const toast = useToast();
+  const prefill = usePrefill();
   return (
-    <section className="view two">
+    <section className={`view ${styles.layout}`}>
       <div>
-        <h2 className="title">Seedha Link.</h2>
-        <p className="sub">
+        <h1 className={styles.h1}>Seedha Link.</h1>
+        <p className={styles.lede}>
           The page a returning guest opens from the WhatsApp message. Dates, room, perk, UPI. Booked directly
           with the hotel.
         </p>
-        <p className="sub">Approve a message in Owner, or type a code from a checkout slip.</p>
+        <p className={styles.lede}>Approve a message in Owner, or type a code from a checkout slip.</p>
       </div>
-      <div className="phone" style={{ position: "relative" }}>
-        <div className="notch" />
-        <div className="in">
+      <div className={styles.phone} role="region" aria-label="Guest phone">
+        <div className={styles.island} aria-hidden="true" />
+        <div className={styles.screen}>
           <LinkBooking
-            initialCode=""
+            initialCode={prefill.code ?? ""}
+            prefill={prefill}
+            contained
             onBooked={(r) =>
               toast(
                 r.perk_applied

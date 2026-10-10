@@ -5,9 +5,21 @@ import type { FormEvent } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import type { ConsentPage } from "@/lib/types";
 import { Loading } from "@/components/States";
+import styles from "@/components/guest/Guest.module.css";
 
 const MOBILE = /^(?:\+?91)?[6-9]\d{9}$/;
 
+function Tick() {
+  return (
+    <div className={styles.check} aria-hidden="true">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" strokeWidth="3">
+        <path d="M5 12l5 5 9-10" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </div>
+  );
+}
+
+/** The guest's consent page, opened from the Desk QR. Unticked by default (rule 5). */
 export default function ConsentScreen({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params);
   const page = useApi<ConsentPage>(`public/consent/${encodeURIComponent(token)}`);
@@ -35,55 +47,58 @@ export default function ConsentScreen({ params }: { params: Promise<{ token: str
 
   if (page.loading && !page.data) {
     return (
-      <section className="guest-shell">
+      <section className={styles.shell}>
         <Loading rows={2} label="Opening" />
       </section>
     );
   }
   if (page.error || !page.data) {
+    const code = page.error?.code ?? "";
+    const used = code === "link_used";
+    const ended = used || code === "link_expired" || code === "invalid_link";
     return (
-      <section className="guest-shell" role="alert">
-        <h2 className="title" style={{ fontSize: 26 }}>
-          {page.error?.code === "link_used" ? "Already done." : "This link has ended."}
-        </h2>
-        <p className="sub">{page.error?.message ?? "Ask the desk for a new QR."}</p>
+      <section className={`${styles.shell} ${styles.ended}`} role="alert">
+        <h1 className={styles.welcome}>
+          {used ? "Already done." : ended ? "This link has ended." : "That did not load."}
+        </h1>
+        <p className={styles.doneSub}>
+          {used
+            ? "Your answer is saved. Your perk arrives after checkout."
+            : ended
+              ? "Links from the Desk work for 10 minutes. Ask the front desk for a new QR."
+              : (page.error?.message ?? "No connection. Try again.")}
+        </p>
+        {ended ? null : (
+          <button type="button" className={styles.secondary} onClick={page.reload}>
+            Try again
+          </button>
+        )}
       </section>
     );
   }
   const p = page.data;
   if (done) {
     return (
-      <section className="guest-shell" style={{ textAlign: "center", marginTop: 60 }}>
-        <div className="check" style={{ background: "var(--accent)" }}>
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="3"
-            aria-hidden="true"
-          >
-            <path d="M5 12l5 5 9-10" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <h3 className="sub-title">You&apos;re in.</h3>
-        <p className="sub">Your perk arrives after checkout. Reply STOP to any message to stop them.</p>
+      <section className={`${styles.shell} ${styles.done}`} role="status" aria-live="polite">
+        <Tick />
+        <h1 className={styles.doneTitle}>You are in.</h1>
+        <p className={styles.doneSub}>Your perk arrives after checkout.</p>
+        <p className={styles.stop}>Reply STOP to any message to opt out.</p>
       </section>
     );
   }
   return (
-    <form className="guest-shell" onSubmit={submit} noValidate>
-      <p className="tag">
+    <form className={styles.shell} onSubmit={submit} noValidate>
+      <p className={styles.hotelTag}>
         {p.hotel} · {p.city}
       </p>
-      <h3 className="sub-title" style={{ marginTop: 14, fontSize: 24 }}>
-        Welcome, {p.guest_short_name}.
-      </h3>
-      <div className="perk" style={{ marginTop: 14 }}>
-        {p.perk}
+      <h1 className={styles.welcome}>Welcome, {p.guest_short_name}.</h1>
+      <div className={styles.perkCard}>
+        <p className={styles.perkEyebrow}>Your perk</p>
+        <p className={styles.perkText}>{p.perk}</p>
+        <p className={styles.perkNote}>Same price as always. The perk is extra.</p>
       </div>
-      <label className="fl" htmlFor="whatsapp">
+      <label className={styles.label} htmlFor="whatsapp">
         Your WhatsApp number
       </label>
       <input
@@ -97,26 +112,24 @@ export default function ConsentScreen({ params }: { params: Promise<{ token: str
         aria-invalid={number !== "" && !valid ? true : undefined}
         aria-describedby="number-help"
       />
-      <p id="number-help" className="calc" style={{ marginTop: 6 }}>
+      <p id="number-help" className={`${styles.help} ${number !== "" && !valid ? styles.helpBad : ""}`}>
         {number !== "" && !valid
           ? "Enter a 10-digit Indian mobile number."
           : "Only this hotel will message you."}
       </p>
-      <label className="chk">
+      <label className={styles.tick}>
         <input type="checkbox" checked={ticked} onChange={(e) => setTicked(e.target.checked)} />
         <span>{p.wording}</span>
       </label>
       {error ? (
-        <p role="alert" style={{ color: "var(--loss)", fontSize: 15 }}>
+        <p role="alert" className={styles.error}>
           {error}
         </p>
       ) : null}
-      <button className="btn" type="submit" style={{ width: "100%" }} disabled={!ticked || !valid || busy}>
-        Yes, send me offers
+      <button className={styles.primary} type="submit" disabled={!ticked || !valid || busy}>
+        {busy ? "Saving" : "Yes, send me offers"}
       </button>
-      <p className="calc" style={{ textAlign: "center" }}>
-        No tick, no messages. Your number stays with the hotel.
-      </p>
+      <p className={styles.stop}>No tick, no messages. Reply STOP to any message to opt out.</p>
     </form>
   );
 }

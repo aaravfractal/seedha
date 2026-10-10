@@ -1,66 +1,118 @@
 "use client";
 
 import QRCode from "qrcode";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+import type { Ref } from "react";
 import { api, postJson } from "@/lib/api";
-import type { DeskCommand } from "@/lib/types";
+import type { DeskCommand, Slip } from "@/lib/types";
+import { armChime, chime } from "./desk/chime";
+import { ThermalSlip } from "./desk/ThermalSlip";
+import type { PrintJob } from "./desk/ThermalSlip";
+import styles from "./desk/Desk.module.css";
 
-/** What the Desk screen shows. */
+/** What the Desk screen shows (480 x 320). */
 type Screen =
   | { kind: "idle" }
   | { kind: "qr"; svg: string; text: string; expiresAt: number }
   | { kind: "ok"; text: string; sub: string }
   | { kind: "text"; text: string; sub: string };
 
+type Led = "white" | "green" | "red";
+
+/** Actions the page can run on the simulated box. */
+export type DeskHandle = {
+  /** Print a slip made in the browser (Test print). */
+  printLocal: (slip: Slip) => void;
+  /** Paper is back: print whatever waited. */
+  paperLoaded: () => void;
+};
+
 const POLL_MS = 2000;
 const IDLE_AFTER_PRINT_MS = 2600;
-
-function chime(): void {
-  try {
-    const ctx = new AudioContext();
-    [880, 1320].forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.frequency.value = freq;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      const t = ctx.currentTime + i * 0.12;
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(0.15, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
-      osc.start(t);
-      osc.stop(t + 0.32);
-    });
-  } catch {
-    // Sound is a nicety; browsers may block it before a user gesture.
-  }
-}
+const LED_LABEL: Record<Led, string> = {
+  white: "Desk light white: ready",
+  green: "Desk light green: consent saved",
+  red: "Desk light red: printer needs paper",
+};
 
 function str(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
 }
 
+function Check({ tone }: { tone: "ok" | "bad" }) {
+  return (
+    <div className={`${styles.badge} ${tone === "ok" ? styles.badgeOk : styles.badgeBad}`} aria-hidden="true">
+      {tone === "ok" ? (
+        <svg width="44%" height="44%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+          <path d="M5 12l5 5 9-10" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ) : (
+        <svg width="40%" height="40%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+          <path d="M12 5v9M12 19v.5" strokeLinecap="round" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
 /**
  * The Desk box, simulated in the browser. It behaves like the firmware: polls
  * the API every 2 seconds with its device key (added by the server proxy),
- * runs each command, then acknowledges it.
+ * runs each command, then acknowledges it. "No paper" is a simulator-only
+ * state: slips wait in the box until paper is loaded.
  */
-export function DeskDevice({ hotel, onEvent }: { hotel: string; onEvent: (kind: string) => void }) {
+export function DeskDevice({
+  hotel,
+  noPaper,
+  knownSlips,
+  onEvent,
+  onOnline,
+  ref,
+}: {
+  hotel: string;
+  noPaper: boolean;
+  knownSlips: readonly Slip[];
+  onEvent: (kind: string) => void;
+  onOnline?: (online: boolean) => void;
+  ref?: Ref<DeskHandle>;
+}) {
   const [screen, setScreen] = useState<Screen>({ kind: "idle" });
   const [ring, setRing] = useState(false);
-  const [paper, setPaper] = useState<string | null>(null);
-  const [paperOut, setPaperOut] = useState(false);
+  const [paper, setPaper] = useState<{ seq: number; job: PrintJob } | null>(null);
   const [online, setOnline] = useState<boolean | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const onEventRef = useRef(onEvent);
+  const latest = useRef({ onEvent, onOnline, knownSlips, noPaper });
+  const pending = useRef<PrintJob | null>(null);
 
   useEffect(() => {
-    onEventRef.current = onEvent;
-  }, [onEvent]);
+    latest.current = { onEvent, onOnline, knownSlips, noPaper };
+  }, [onEvent, onOnline, knownSlips, noPaper]);
+
+  useEffect(() => armChime(), []);
 
   const later = useCallback((fn: () => void, ms: number) => {
     timers.current.push(setTimeout(fn, ms));
   }, []);
+
+  const print = useCallback((job: PrintJob, force = false) => {
+    if (latest.current.noPaper && !force) {
+      pending.current = job;
+      return;
+    }
+    pending.current = null;
+    setPaper((prev) => ({ seq: (prev?.seq ?? 0) + 1, job }));
+  }, []);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      printLocal: (slip) => print({ slip, text: slip.text }),
+      paperLoaded: () => {
+        if (pending.current) print(pending.current, true);
+      },
+    }),
+    [print],
+  );
 
   const run = useCallback(
     async (command: DeskCommand) => {
@@ -70,9 +122,8 @@ export function DeskDevice({ hotel, onEvent }: { hotel: string; onEvent: (kind: 
           const svg = await QRCode.toString(str(p.url), {
             type: "svg",
             margin: 1,
-            color: { dark: "#0E1512", light: "#FFFFFF" },
+            color: { dark: "#000000", light: "#FFFFFF" },
           });
-          setPaperOut(false);
           setScreen({ kind: "qr", svg, text: str(p.text), expiresAt: Date.parse(str(p.expires_at)) });
           break;
         }
@@ -94,42 +145,46 @@ export function DeskDevice({ hotel, onEvent }: { hotel: string; onEvent: (kind: 
         case "beep":
           chime();
           break;
-        case "print_slip":
-          setPaper(str(p.text));
-          setPaperOut(false);
-          requestAnimationFrame(() => requestAnimationFrame(() => setPaperOut(true)));
+        case "print_slip": {
+          const text = str(p.text);
+          print({ slip: latest.current.knownSlips.find((s) => s.text === text) ?? null, text });
           break;
+        }
         default:
           break;
       }
-      onEventRef.current(command.kind);
+      latest.current.onEvent(command.kind);
     },
-    [later],
+    [later, print],
   );
 
   useEffect(() => {
     let alive = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const report = (value: boolean) => {
+      setOnline(value);
+      latest.current.onOnline?.(value);
+    };
     async function tick() {
       try {
         const body = await api<{ commands: DeskCommand[] }>("desk/poll");
         if (!alive) return;
-        setOnline(true);
+        report(true);
         for (const command of body.commands) await run(command);
         if (body.commands.length) {
           await postJson("desk/ack", { ids: body.commands.map((c) => c.id) });
         }
       } catch {
-        if (alive) setOnline(false);
+        if (alive) report(false);
       }
       if (alive) timer = setTimeout(tick, POLL_MS);
     }
     void tick();
-    const pending = timers.current;
+    const owned = timers.current;
     return () => {
       alive = false;
       if (timer) clearTimeout(timer);
-      pending.forEach(clearTimeout);
+      owned.forEach(clearTimeout);
     };
   }, [run]);
 
@@ -140,65 +195,71 @@ export function DeskDevice({ hotel, onEvent }: { hotel: string; onEvent: (kind: 
     return () => clearTimeout(t);
   }, [screen]);
 
+  const led: Led = noPaper ? "red" : ring ? "green" : "white";
+  const last = paper?.job ?? null;
+
   return (
-    <div>
-      <div className="device">
-        <div className={`ring${ring ? " green" : ""}`} aria-hidden="true" />
-        <div className="screen" aria-live="polite" aria-label="Desk screen">
-          {screen.kind === "idle" ? (
-            <div className="s">
-              <div style={{ fontSize: 26, fontWeight: 700 }}>Seedha</div>
-              <small>{hotel} · Ready</small>
-            </div>
-          ) : null}
-          {screen.kind === "qr" ? (
-            <div className="s">
-              <div
-                className="qrbox"
-                role="img"
-                aria-label="Consent QR code"
-                dangerouslySetInnerHTML={{ __html: screen.svg }}
-              />
-              <small>{screen.text}</small>
-            </div>
-          ) : null}
-          {screen.kind === "ok" ? (
-            <div className="s">
-              <div className="check">
-                <svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#fff"
-                  strokeWidth="3"
-                  aria-hidden="true"
-                >
-                  <path d="M5 12l5 5 9-10" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+    <div className={styles.deviceCol}>
+      <div className={styles.device}>
+        <div className={`${styles.led} ${styles[`led_${led}`]}`} role="img" aria-label={LED_LABEL[led]} />
+        <div className={styles.panel}>
+          <div className={styles.screen} role="status" aria-live="polite" aria-label="Desk screen">
+            {noPaper ? (
+              <div className={styles.state} key="err">
+                <Check tone="bad" />
+                <p className={styles.big}>Printer needs paper</p>
+                <p className={styles.small}>Load a 58 mm roll to keep printing.</p>
               </div>
-              <div style={{ fontSize: 22, fontWeight: 600 }}>{screen.text}</div>
-              <small>{screen.sub}</small>
-              <small style={{ fontSize: 12, opacity: 0.85 }}>Proof added tonight</small>
-            </div>
-          ) : null}
-          {screen.kind === "text" ? (
-            <div className="s">
-              <div style={{ fontSize: 22, fontWeight: 600 }}>{screen.text}</div>
-              <small>{screen.sub}</small>
-            </div>
-          ) : null}
+            ) : screen.kind === "idle" ? (
+              <div className={styles.state} key="idle">
+                <p className={styles.huge}>Seedha</p>
+                <p className={styles.small}>{hotel} · Ready</p>
+              </div>
+            ) : screen.kind === "qr" ? (
+              <div className={`${styles.state} ${styles.qrState}`} key="qr">
+                <div
+                  className={styles.qr}
+                  role="img"
+                  aria-label="Consent QR code"
+                  dangerouslySetInnerHTML={{ __html: screen.svg }}
+                />
+                <p className={styles.mid}>{screen.text}</p>
+              </div>
+            ) : screen.kind === "ok" ? (
+              <div className={styles.state} key="ok">
+                <Check tone="ok" />
+                <p className={styles.big}>{screen.text}</p>
+                <p className={styles.small}>{screen.sub ? `${screen.sub} · ` : ""}Proof added tonight</p>
+              </div>
+            ) : (
+              <div className={styles.state} key="text">
+                <p className={styles.big}>{screen.text}</p>
+                <p className={styles.small}>{screen.sub}</p>
+              </div>
+            )}
+          </div>
+          <div className={styles.panelFoot}>
+            <span className={styles.brand}>Seedha</span>
+            <button
+              type="button"
+              className={styles.printBtn}
+              disabled={!last || noPaper}
+              onClick={() => last && print(last)}
+            >
+              Print
+            </button>
+          </div>
         </div>
-        <div className="printslot" aria-hidden="true" />
-        <div className="paperwrap">
-          {paper ? (
-            <pre className={`paper${paperOut ? " out" : ""}`} aria-label="Printed slip">
-              {paper}
-            </pre>
-          ) : null}
-        </div>
+        <div className={styles.slot} aria-hidden="true" />
       </div>
-      <p className="calc" role="status">
+      <div className={styles.paperWell}>
+        {paper ? (
+          <figure key={paper.seq} className={styles.paper} aria-label="Printed slip">
+            <ThermalSlip job={paper.job} />
+          </figure>
+        ) : null}
+      </div>
+      <p className={styles.status} role="status">
         Desk box (simulated in the browser):{" "}
         {online === null
           ? "connecting"

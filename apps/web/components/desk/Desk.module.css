@@ -1,0 +1,475 @@
+/* Seedha Desk simulator. The box is a physical product: its case, pine
+   panel, black screen and white paper keep the same colours in light and
+   dark. Everything around it uses the World A tokens from globals.css.
+   prefers-reduced-motion is handled globally (every animation instant). */
+
+.page {
+  max-width: 1180px;
+}
+.h1 {
+  font-size: var(--t-large);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  font-weight: 700;
+  margin: 24px 0 24px;
+}
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding: 14px 14px 14px 24px;
+  max-width: 760px;
+}
+.bannerText {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 17px;
+}
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+.dotOn {
+  background: var(--gainFill);
+}
+.dotWait {
+  background: var(--hint);
+}
+.dotOff {
+  background: var(--lossFill);
+}
+.pill {
+  min-height: 48px;
+  padding: 0 22px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  flex: none;
+  transition: transform 0.2s var(--spring);
+}
+.pill:active {
+  transform: scale(0.97);
+}
+.pill[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.intro {
+  color: var(--ink2);
+  font-size: 19px;
+  max-width: 640px;
+  margin: 24px 0 40px;
+}
+.notice {
+  margin: 12px 0 0;
+  font-size: 15px;
+  color: var(--ink2);
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 979px) {
+  .stage {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+}
+
+/* the device */
+.deviceCol {
+  max-width: 560px;
+  width: 100%;
+}
+.device {
+  position: relative;
+  background: linear-gradient(180deg, #f1ede4, #e3ded2);
+  border-radius: 40px;
+  padding: 36px 28px 44px;
+  box-shadow:
+    inset 0 -6px 0 rgba(0, 0, 0, 0.06),
+    0 30px 60px rgba(0, 0, 0, 0.12);
+}
+.led {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  width: 46%;
+  height: 6px;
+  transform: translateX(-50%);
+  border-radius: 6px;
+  transition:
+    background 0.4s var(--spring),
+    box-shadow 0.4s var(--spring);
+}
+.led_white {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.led_green {
+  background: #34c759;
+  animation: glow 1.2s ease-in-out infinite;
+}
+.led_red {
+  background: #ff3b30;
+  box-shadow: 0 0 14px rgba(255, 59, 48, 0.8);
+}
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(52, 199, 89, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(52, 199, 89, 1);
+  }
+}
+.panel {
+  background: #1b4632;
+  border-radius: 28px;
+  padding: 22px 22px 18px;
+}
+.screen {
+  container-type: inline-size;
+  aspect-ratio: 480 / 320;
+  background: #000;
+  border-radius: 20px;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 4cqw;
+  overflow: hidden;
+}
+.state {
+  display: grid;
+  justify-items: center;
+  gap: 1.6cqw;
+  animation: rise 0.45s var(--spring);
+}
+.state p {
+  margin: 0;
+}
+.huge {
+  font-size: max(22px, 7.5cqw);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.big {
+  font-size: max(17px, 5.4cqw);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.mid {
+  font-size: max(14px, 4.2cqw);
+  font-weight: 600;
+}
+.small {
+  font-size: max(13px, 3.8cqw);
+  color: #a1a1a6;
+}
+.qrState {
+  gap: 2.4cqw;
+}
+.qr {
+  background: #fff;
+  padding: 1.4cqw;
+  border-radius: 2.4cqw;
+  width: 34cqw;
+  height: 34cqw;
+}
+.qr svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.badge {
+  width: max(44px, 14cqw);
+  height: max(44px, 14cqw);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  animation: pop 0.5s var(--spring);
+}
+.badgeOk {
+  background: #34c759;
+}
+.badgeBad {
+  background: #ff3b30;
+  animation: none;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.panelFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+.brand {
+  color: #e8a33d;
+  font-weight: 700;
+  font-size: 19px;
+}
+.printBtn {
+  min-height: 56px;
+  min-width: 112px;
+  padding: 0 26px;
+  border-radius: var(--r-pill);
+  background: #f1ede4;
+  color: #143726;
+  font-weight: 700;
+  font-size: 21px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s var(--spring);
+}
+.printBtn:active {
+  transform: translateY(1px) scale(0.98);
+}
+.printBtn[disabled] {
+  cursor: not-allowed;
+  color: #3d5a4b;
+  background: #d9d4c8;
+}
+.printBtn:focus-visible {
+  outline-color: #e8a33d;
+}
+.slot {
+  height: 12px;
+  width: 64%;
+  margin: 28px auto 0;
+  border-radius: 12px;
+  background: #1d1d1f;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* the paper coming out of the 58 mm slot */
+.paperWell {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  width: min(280px, 60%);
+  min-width: 248px;
+  margin: -50px auto 0;
+  padding: 0 8px 16px;
+}
+.paper {
+  margin: 0;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+  animation: slipOut 1.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+@keyframes slipOut {
+  from {
+    transform: translateY(-102%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.slipBody,
+.slipText {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #000;
+  padding: 18px 14px 22px;
+}
+.slipText {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.slipBody p {
+  margin: 0;
+}
+.slipTitle {
+  font-weight: 700;
+  text-align: center;
+}
+.slipSub {
+  text-align: center;
+}
+.slipRule {
+  border: 0;
+  border-top: 1px dashed #000;
+  margin: 10px 0;
+}
+.slipLines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.slipLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.slipBold {
+  font-weight: 700;
+  border-top: 1px solid #000;
+  margin-top: 4px;
+  padding-top: 4px;
+}
+.slipNote {
+  padding: 1px 0;
+}
+.slipFoot {
+  text-align: center;
+}
+.status {
+  font-size: 13px;
+  color: var(--ink3);
+  margin: 12px 0 0;
+}
+
+/* controls */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+.ctl {
+  min-height: 56px;
+  padding: 0 26px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  transition: transform 0.2s var(--spring);
+}
+.ctl:active {
+  transform: scale(0.97);
+}
+.ctlPrimary {
+  background: var(--accent);
+  color: var(--onAccent);
+  border-color: transparent;
+}
+.ctl[disabled] {
+  background: var(--fill);
+  color: var(--ink2);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+.ctlWarn {
+  border-color: var(--loss);
+  color: var(--loss);
+}
+.guestRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 28px;
+}
+.guestRow label {
+  font-size: 15px;
+  color: var(--ink2);
+}
+.guestRow select {
+  width: auto;
+  max-width: 100%;
+  min-width: 240px;
+}
+.hint {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 14px 0 0;
+  max-width: 520px;
+}
+.footnote {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 56px 0 0;
+}
+
+/* guest phone */
+.phone {
+  width: min(100%, 380px);
+  margin: 0 auto;
+  border: 14px solid #1c1c1e;
+  border-radius: 60px;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.14);
+}
+.island {
+  width: 120px;
+  height: 32px;
+  border-radius: 20px;
+  background: #1c1c1e;
+  margin: 12px auto 0;
+}
+.phone iframe {
+  display: block;
+  width: 100%;
+  height: 640px;
+  border: 0;
+}
+.phoneEmpty {
+  height: 640px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  text-align: center;
+  color: var(--ink2);
+  font-size: 17px;
+}
+
+@media (max-width: 759px) {
+  .banner {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  .device {
+    padding: 30px 16px 40px;
+    border-radius: 32px;
+  }
+  .panel {
+    padding: 14px 14px 12px;
+    border-radius: 22px;
+  }
+  .ctl {
+    flex: 1 1 100%;
+  }
+  .phone {
+    border-width: 10px;
+    border-radius: 48px;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

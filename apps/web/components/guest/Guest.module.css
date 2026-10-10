@@ -1,0 +1,426 @@
+/* Guest mode: the consent page and Seedha Link. Phone first, World A tokens.
+   prefers-reduced-motion is handled globally (every animation instant). */
+
+.shell {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 8px 0 24px;
+  animation: rise 0.52s var(--spring);
+}
+.hotelTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: var(--bg2);
+  color: var(--ink2);
+  font-size: 14px;
+  font-weight: 600;
+}
+.hotelTag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.welcome {
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin: 16px 0 18px;
+}
+.perkCard {
+  background: var(--graphite);
+  color: #fff;
+  border-radius: var(--r-card);
+  padding: 20px 20px 22px;
+}
+.perkEyebrow {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f2b54e;
+}
+.perkText {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.perkNote {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #c7c7cc;
+}
+.label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 18px 0 8px;
+}
+.help {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 6px 0 0;
+}
+.helpBad {
+  color: var(--loss);
+}
+.tick {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--r-row);
+  background: var(--bg2);
+  margin: 18px 0;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1.4;
+  min-height: 48px;
+}
+.tick input {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--onAccent);
+  font-weight: 600;
+  font-size: 17px;
+  transition: transform 0.2s var(--spring);
+}
+.primary:active {
+  transform: scale(0.98);
+}
+.primary[disabled] {
+  background: var(--fill);
+  color: var(--ink2);
+  cursor: not-allowed;
+}
+.secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border-radius: var(--r-pill);
+  background: var(--bg2);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 17px;
+}
+.stop {
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 14px 0 0;
+}
+.error {
+  color: var(--loss);
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+.done {
+  text-align: center;
+  padding-top: 56px;
+}
+.doneTitle {
+  font-size: 30px;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin: 16px 0 6px;
+}
+.doneSub {
+  color: var(--ink2);
+  margin: 0 0 6px;
+}
+.check {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  animation: pop 0.5s var(--spring);
+}
+.check svg {
+  stroke: var(--onAccent);
+}
+.ended {
+  padding-top: 40px;
+}
+
+/* Seedha Link */
+.trust {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.hotelName {
+  font-size: 28px;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  font-weight: 700;
+  margin: 0;
+}
+.address {
+  color: var(--ink2);
+  margin: 2px 0 14px;
+  font-size: 15px;
+}
+.photo {
+  position: relative;
+  height: 150px;
+  border-radius: var(--r-card);
+  background:
+    radial-gradient(120% 80% at 80% 10%, rgba(255, 255, 255, 0.35), transparent 60%),
+    linear-gradient(165deg, #2c5e48 0%, #1e6b4e 45%, #9cbfac 100%);
+  overflow: hidden;
+}
+.photoLabel {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.row2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: 10px;
+}
+.stayLine {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 8px 0 0;
+}
+.code {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.codeMsg {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 14px;
+  margin: 8px 0 0;
+  color: var(--ink2);
+}
+.codeGood {
+  color: var(--gain);
+  font-weight: 600;
+}
+.codeBad {
+  color: var(--loss);
+}
+.linkBtn {
+  min-height: 44px;
+  padding: 0 4px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+}
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 20px 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+}
+.total b {
+  font-size: 24px;
+  white-space: nowrap;
+}
+.totalLabel {
+  white-space: nowrap;
+}
+.note {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 0 0 16px;
+}
+
+/* UPI bottom sheet */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 29;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.5s var(--spring),
+    visibility 0s linear 0.5s;
+}
+.scrimOn {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s var(--spring);
+}
+.sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--card);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  padding: 10px 22px calc(22px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(105%);
+  visibility: hidden;
+  transition:
+    transform 0.5s var(--spring),
+    visibility 0s linear 0.5s;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.15);
+}
+.sheetUp {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.5s var(--spring);
+}
+.contained .scrim,
+.contained .sheet {
+  position: absolute;
+}
+.grabber {
+  width: 40px;
+  height: 5px;
+  border-radius: 5px;
+  background: var(--fill);
+  margin: 0 auto 14px;
+}
+.sheetTitle {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.sheetSub {
+  color: var(--ink2);
+  margin: 4px 0 14px;
+  font-size: 15px;
+}
+.apps {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+.app {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: var(--r-row);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 17px;
+  text-align: left;
+}
+.app[aria-pressed="true"] {
+  border: 2px solid var(--accent);
+  background: var(--accentSoft);
+}
+.appMark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+.appTick {
+  margin-left: auto;
+  color: var(--accent);
+}
+.fee {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 10px 0 0;
+  text-align: center;
+}
+.sim {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  border: 1px dashed var(--ink3);
+  color: var(--ink2);
+  margin: 0 0 12px;
+}
+.processing {
+  text-align: center;
+  padding: 18px 0 8px;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  border: 4px solid var(--fill);
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pop {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
