@@ -24,6 +24,7 @@ from app.routers import (
     ledger,
     link,
     messages,
+    myplace,
     overview,
     pipeline,
     proof,
@@ -133,4 +134,5 @@ def create_app(
     app.include_router(public_site.router)
     app.include_router(owner_settings.router)
     app.include_router(calendar.router)
+    app.include_router(myplace.router)
     return app

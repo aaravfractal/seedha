@@ -35,6 +35,7 @@ const RULES: ReadonlyArray<readonly [string, Access]> = [
   ["demo", "owner"],
   ["settings", "owner"],
   ["calendar", "owner"],
+  ["my-place", "owner"],
 ];
 
 const SAFE_SEGMENT = /^[A-Za-z0-9._~-]+$/;
