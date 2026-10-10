@@ -39,6 +39,8 @@ __all__ = [
     "OptOutEvent",
     "OtpChallenge",
     "OwnerAccount",
+    "OwnerSettings",
+    "PlanEntry",
     "Guest",
     "InboxAway",
     "InboxMessage",
@@ -53,6 +55,7 @@ __all__ = [
     "Room",
     "Saving",
     "SiteConfig",
+    "StaffInvite",
     "StatementFile",
 ]
 
@@ -619,3 +622,64 @@ class InboxAway(Base):
     body: Mapped[str] = mapped_column(Text)
     approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+STAFF_ROLES = ("front_desk", "manager", "accounts")
+
+
+class OwnerSettings(Base):
+    """Settings of one signed-in subject ("demo" or "a<account id>").
+
+    Business details (GSTIN, PAN, address) are the owner's own and are only
+    written for real accounts; the demo row only ever holds notification
+    choices. GSTIN and PAN are never logged (FRONTEND_MASTER D12).
+    """
+
+    __tablename__ = "owner_settings"
+    __table_args__ = (UniqueConstraint("subject", name="uq_owner_settings_subject"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    subject: Mapped[str] = mapped_column(String(16))
+    email: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    business_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    gstin: Mapped[str | None] = mapped_column(String(15), nullable=True)
+    pan: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    address: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    pin: Mapped[str | None] = mapped_column(String(6), nullable=True)
+    notify_morning: Mapped[bool] = mapped_column(Boolean, default=True)
+    notify_close: Mapped[bool] = mapped_column(Boolean, default=True)
+    notify_approvals: Mapped[bool] = mapped_column(Boolean, default=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class StaffInvite(Base):
+    """A staff login the owner invited. In this build an invite is only a
+    record: no SMS or WhatsApp is sent and staff cannot sign in yet."""
+
+    __tablename__ = "staff_invite"
+    __table_args__ = (
+        UniqueConstraint("subject", "mobile", name="uq_staff_invite_subject_mobile"),
+        CheckConstraint(f"role IN {STAFF_ROLES}", name="ck_staff_invite_role"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    subject: Mapped[str] = mapped_column(String(16), index=True)
+    name: Mapped[str] = mapped_column(String(80))
+    role: Mapped[str] = mapped_column(String(12))
+    mobile: Mapped[str] = mapped_column(String(10))
+    invited_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PlanEntry(Base):
+    """A Pulse calendar event the owner added to their plan (a channel
+    decision to act on; never a demand prediction)."""
+
+    __tablename__ = "plan_entry"
+    __table_args__ = (
+        UniqueConstraint("property_id", "event_key", name="uq_plan_entry_property_id_event_key"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"))
+    event_key: Mapped[str] = mapped_column(String(40))
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
