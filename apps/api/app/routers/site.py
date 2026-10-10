@@ -325,9 +325,10 @@ def reset_demo(
     if not prop.is_sample:
         raise ApiError(403, "not_sample", "Reset is only available for the sample hotel")
     day = business_date(session, prop.id, utc_now().date())
-    # Sign-in records survive a reset: anyone can press it on the sample
-    # hotel, and it must not wipe accounts or OTP locks (security review S6).
-    keep = {"owner_account", "otp_challenge"}
+    # Account records survive a reset: anyone can press it on the sample
+    # hotel, and it must not wipe accounts, their saved details and staff
+    # invites, or OTP locks (security review S6).
+    keep = {"owner_account", "otp_challenge", "owner_settings", "staff_invite"}
     for table in reversed(Base.metadata.sorted_tables):
         if table.name not in keep:
             session.execute(delete(table))

@@ -15,8 +15,8 @@ export type OwnerScreen = {
 export const OWNER_SCREENS: OwnerScreen[] = [
   { key: "overview", label: "Overview", href: "/home", icon: "overview" },
   { key: "myplace", label: "My Place", href: "/my-place", icon: "house", built: false },
-  { key: "inbox", label: "Guest inbox", href: "/inbox", icon: "inbox", built: false },
-  { key: "assistant", label: "Assistant", href: "/assistant", icon: "sparkle", built: false },
+  { key: "inbox", label: "Guest inbox", href: "/inbox", icon: "inbox" },
+  { key: "assistant", label: "Assistant", href: "/assistant", icon: "sparkle" },
   { key: "upload", label: "Upload", href: "/upload", icon: "upload" },
   { key: "flip", label: "Money kept", href: "/flip", icon: "updown" },
   { key: "repeat", label: "Repeat guests", href: "/repeat", icon: "repeat" },
@@ -24,11 +24,11 @@ export const OWNER_SCREENS: OwnerScreen[] = [
   { key: "approvals", label: "Approvals", href: "/approvals", icon: "check" },
   { key: "savings", label: "Savings", href: "/savings", icon: "rupee" },
   { key: "ask", label: "Ask on WhatsApp", href: "/ask", icon: "phone" },
-  { key: "calendar", label: "Calendar", href: "/calendar", icon: "grid", built: false },
+  { key: "calendar", label: "Calendar", href: "/calendar", icon: "grid" },
   { key: "site", label: "Website", href: "/site", icon: "ring" },
   { key: "proof", label: "Consent proof", href: "/proof", icon: "diamond" },
   { key: "pro", label: "Pro", href: "/pro", icon: "star", tag: "Pro" },
-  { key: "billing", label: "Billing", href: "/billing", icon: "card", built: false },
+  { key: "billing", label: "Billing", href: "/billing", icon: "card" },
   { key: "settings", label: "Settings", href: "/settings", icon: "gear" },
 ];
 

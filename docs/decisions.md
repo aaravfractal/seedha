@@ -584,3 +584,19 @@ session has ended". /link, /link/* and /consent/* are now guest pages that
 never call owner routes. The flip timing e2e passed 6 of 7 recent runs; the
 one miss (1.58 s against 1 s) was under heavy machine load from parallel
 builders, and the threshold stays.
+
+**D-088 Settings, Billing and Calendar (P6b).** The Direct beta login
+(demo) session is read-only for personal details, staff logins and account
+deletion (403 `demo_read_only`). It may change notification switches and
+calendar plan entries, which hold no personal data. GSTIN and PAN are
+optional, upper-cased and checked with the handoff regexes; the PAN must
+equal characters 3 to 12 of the GSTIN. They are never logged or echoed in
+errors (D12). Billing is web-only (D7): "Pay ₹1,499 now" and "Add payment
+method" open a sheet saying payments open after launch, with no input
+fields. The demo shows sample invoices labelled "Sample". Contracts compare
+each channel's contract rate with commission ÷ (list − discount) on counted
+statement stays, 1 Apr to 30 Sep 2026; on the sample hotel all four OTAs
+match exactly. Calendar events are samples labelled "Sample", and each
+carries a channel decision, never a demand prediction. Demo reset keeps
+owner accounts, their settings and staff invites (S6) but wipes plan
+entries, which are property data.
