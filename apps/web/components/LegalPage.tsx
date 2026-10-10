@@ -1,9 +1,10 @@
 import type { ReactNode } from "react";
 import { KeyPoints } from "./KeyPoints";
+import styles from "./website/site.module.css";
 
 export const LAST_UPDATED = "9 October 2026";
 
-/** Shared frame for legal and static pages: notice, date, key points, body. */
+/** Shared frame for legal and static pages on the website: notice, date, key points, body. */
 export function LegalPage({
   title,
   lede,
@@ -18,17 +19,15 @@ export function LegalPage({
   children: ReactNode;
 }) {
   return (
-    <article className="view legal">
+    <article className={`legal ${styles.legal}`}>
       {legal ? (
-        <p className="notice" role="note">
+        <p className={styles.legalNotice} role="note">
           Draft for the hackathon prototype. Not legal advice. To be reviewed by a lawyer before launch.
         </p>
       ) : null}
-      <h1 className="display" style={{ fontSize: "clamp(32px, 5vw, 48px)" }}>
-        {title}
-      </h1>
-      {lede ? <p className="lede">{lede}</p> : null}
-      <p className="calc">Last updated {LAST_UPDATED}</p>
+      <h1>{title}</h1>
+      {lede ? <p className={styles.legalLede}>{lede}</p> : null}
+      <p className={styles.legalDate}>Last updated {LAST_UPDATED}</p>
       {points ? <KeyPoints points={points} /> : null}
       {children}
     </article>

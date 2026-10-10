@@ -27,6 +27,7 @@ from app.routers import (
     pipeline,
     proof,
     public,
+    public_sample,
     public_site,
     repeat,
     scenario,
@@ -115,6 +116,7 @@ def create_app(
     app.include_router(scenario.router)
     app.include_router(desk.router)
     app.include_router(public.router)
+    app.include_router(public_sample.router)
     app.include_router(messages.router)
     app.include_router(webhooks.router)
     app.include_router(link.public_router)

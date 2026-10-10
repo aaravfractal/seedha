@@ -40,6 +40,8 @@ export const PLANS: Plan[] = [
 ];
 
 export const SITE_SETUP_RUPEES = 4999;
+/** One-time clean-up of six months of old statements. */
+export const STATEMENT_CLEANUP_RUPEES = 2999;
 export const YEARLY_MONTHS_PAID = 10;
 
 /** Yearly billing: 2 months free. Returns whole rupees (per month shown rounded half-up). */

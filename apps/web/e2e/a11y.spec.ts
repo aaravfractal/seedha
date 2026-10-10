@@ -29,6 +29,8 @@ const OWNER_PAGES = [
   "/billing",
 ];
 const PUBLIC_PAGES = [
+  "/",
+  "/careers",
   "/link",
   "/link/DEODAR-RS26",
   "/plans",
@@ -49,6 +51,9 @@ const PUBLIC_PAGES = [
 
 test("no axe violations on any page, both themes, laptop and phone", async ({ page, context }) => {
   test.setTimeout(300_000);
+  // Final states only: entrance motion (hero blur-in, screen enter) would let
+  // axe measure text mid-fade. Contrast is the same once motion settles.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   // One login for the whole sweep: owner login is rate limited.
   await signIn(page);
 

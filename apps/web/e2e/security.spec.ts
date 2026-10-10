@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 /** M11 security pass, checked on the production build. */
 
-const GUEST_PAGES = ["/link", "/link/DEODAR-RS26", "/data-deletion", "/privacy", "/plans", "/login"];
+const GUEST_PAGES = ["/", "/link", "/link/DEODAR-RS26", "/data-deletion", "/privacy", "/plans", "/login"];
 
 test("pages send security headers and load without CSP violations", async ({ page }) => {
   const violations: string[] = [];

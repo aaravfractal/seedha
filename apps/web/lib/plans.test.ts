@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { PLANS, yearlyPrice } from "./plans.ts";
+import { PLANS, SITE_SETUP_RUPEES, STATEMENT_CLEANUP_RUPEES, yearlyPrice } from "./plans.ts";
 
 test("yearly plans are 10 months, shown per month rounded half up", () => {
   assert.deepEqual(yearlyPrice(1499), { perMonth: 1249, perYear: 14990 });
@@ -14,4 +14,9 @@ test("Pro is the recommended plan", () => {
     PLANS.filter((p) => p.recommended).map((p) => p.name),
     ["Pro"],
   );
+});
+
+test("one-time prices are the handoff's early estimates", () => {
+  assert.equal(SITE_SETUP_RUPEES, 4999);
+  assert.equal(STATEMENT_CLEANUP_RUPEES, 2999);
 });

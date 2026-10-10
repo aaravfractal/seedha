@@ -17,13 +17,10 @@
   gap: 8px;
   padding: 14px 20px;
   border-bottom: 1px solid var(--line);
-  overflow-x: auto;
-  scrollbar-width: none;
+  /* Wraps rather than scrolls: a hidden scroll area is unreachable by keyboard. */
+  flex-wrap: wrap;
   font-size: 14px;
   color: var(--ink2);
-}
-.reading::-webkit-scrollbar {
-  display: none;
 }
 .reading span {
   flex: none;

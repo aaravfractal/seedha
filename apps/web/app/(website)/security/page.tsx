@@ -37,6 +37,20 @@ export default function SecurityPage() {
         <li>We will not take legal action against good-faith research that follows these rules.</li>
       </ul>
 
+      <h2 className="section">What is built and what is planned</h2>
+      <p>We only claim what this prototype does today.</p>
+      <ul>
+        <li>
+          Built: guest consent logged. Each yes is stored with the wording the guest saw and sealed nightly.
+        </li>
+        <li>Built: no OTA scraping. Seedha reads only the statements the owner uploads.</li>
+        <li>Planned: two-step sign-in.</li>
+        <li>Planned: encryption at rest for the database.</li>
+        <li>
+          Planned: a PCI DSS payment gateway. Payments in this prototype are simulated or run in test mode.
+        </li>
+      </ul>
+
       <h2 className="section">Especially interesting to us</h2>
       <ul>
         <li>Any way to message a guest who did not consent, or after they replied STOP.</li>
