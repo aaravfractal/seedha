@@ -5,6 +5,7 @@ from __future__ import annotations
 import secrets
 from datetime import date, datetime
 from typing import Annotated, Literal
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
@@ -14,12 +15,16 @@ from app.deps import OwnerDep, PropertyDep, SessionDep
 from app.errors import ApiError
 from app.models import Channel, DirectBooking, Saving
 from app.ratelimit import rate_limited
+from app.services.consent import as_utc
 from app.services.desk import business_date, utc_now
+from app.services.ledger import DEFAULT_END, DEFAULT_START
 from app.services.link import BookingRequest, LinkError, book, code_status, date_options, room_rates
+from app.services.savings import season_review
 
 public_router = APIRouter(prefix="/public/link", tags=["link"])
 savings_router = APIRouter(prefix="/savings", tags=["savings"])
 
+IST = ZoneInfo("Asia/Kolkata")
 MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
 
@@ -149,6 +154,15 @@ class SavingOut(BaseModel):
     booked_at: datetime
 
 
+class SeasonOut(BaseModel):
+    """Season in review: coded bookings booked in the ledger season (Apr to Sep)."""
+
+    start: date
+    end: date
+    count: int
+    total_net_saving: int
+
+
 class SavingsOut(BaseModel):
     """The savings ledger."""
 
@@ -156,6 +170,7 @@ class SavingsOut(BaseModel):
     total_avoided: int
     count: int
     items: list[SavingOut]
+    season: SeasonOut
 
 
 @savings_router.get("", response_model=SavingsOut)
@@ -184,9 +199,17 @@ def get_savings(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> Sav
         )  # fmt: skip
         for s, d, name in rows
     ]
+    booked = [(as_utc(i.booked_at).astimezone(IST).date(), i.net_saving) for i in items]
+    season = season_review(booked, DEFAULT_START, DEFAULT_END)
     return SavingsOut(
         total_net_saving=sum(i.net_saving for i in items),
         total_avoided=sum(i.commission_avoided + i.gst_avoided for i in items),
         count=len(items),
         items=items,
+        season=SeasonOut(
+            start=season.start,
+            end=season.end,
+            count=season.count,
+            total_net_saving=season.total_net_saving,
+        ),  # fmt: skip
     )

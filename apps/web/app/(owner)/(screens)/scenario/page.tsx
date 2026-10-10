@@ -4,13 +4,17 @@ import Link from "next/link";
 import { useState } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { inr } from "@/lib/format";
-import type { SaturdayMove } from "@/lib/types";
+import type { OwnerSaturday } from "@/lib/types-owner";
 import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
+import { CalcNote, Screen, ui } from "@/components/owner/ui";
+import c from "./scenario.module.css";
+
+const TITLE = "One move for Saturday.";
 
 export default function ScenarioPage() {
   const [rooms, setRooms] = useState<number | null>(null);
-  const move = useApi<SaturdayMove>(
+  const move = useApi<OwnerSaturday>(
     rooms === null ? "scenario/saturday" : `scenario/saturday?rooms=${rooms}`,
   );
   const toast = useToast();
@@ -18,16 +22,11 @@ export default function ScenarioPage() {
   const data = move.data;
   const current = rooms ?? data?.rooms ?? 6;
 
-  async function decide(decision: "accepted" | "later") {
+  async function send(path: string, body: unknown, note: string) {
     setBusy(true);
     try {
-      const result = await postJson<SaturdayMove>("scenario/saturday", { decision, rooms: current });
-      move.setData(result);
-      toast(
-        decision === "accepted"
-          ? `${current} Saturday rooms held for direct guests`
-          : "Okay. It stays here for later.",
-      );
+      move.setData(await postJson<OwnerSaturday>(path, body));
+      toast(note);
     } catch (err) {
       toast(err instanceof ApiError ? err.message : "Could not save that");
     } finally {
@@ -35,11 +34,16 @@ export default function ScenarioPage() {
     }
   }
 
-  const title = <h2 className="title">One move for Saturday.</h2>;
-  if (move.data && !move.data.available) {
+  if (move.error) {
     return (
-      <>
-        {title}
+      <Screen title={TITLE}>
+        <ErrorState message={move.error.message} code={move.error.code} onRetry={move.reload} />
+      </Screen>
+    );
+  }
+  if (data && !data.available) {
+    return (
+      <Screen title={TITLE}>
         <EmptyState
           title="Nothing to compare yet"
           action={
@@ -48,112 +52,158 @@ export default function ScenarioPage() {
             </Link>
           }
         >
-          {move.data.reason}. The move compares what an OTA and a direct guest leave you per room.
+          {data.reason}. The move compares what an OTA and a direct guest leave you per room.
         </EmptyState>
-      </>
+      </Screen>
     );
   }
-  if (move.error) {
+  if (
+    !data ||
+    data.channel_net_adr === null ||
+    data.direct_net_adr === null ||
+    data.before_per_saturday === null ||
+    data.after_per_saturday === null
+  ) {
     return (
-      <>
-        {title}
-        <ErrorState message={move.error.message} code={move.error.code} onRetry={move.reload} />
-      </>
-    );
-  }
-  if (!data || data.channel_net_adr === null || data.direct_net_adr === null) {
-    return (
-      <>
-        {title}
+      <Screen title={TITLE}>
         <Loading rows={2} label="Working out the Saturday move" />
-      </>
+      </Screen>
     );
   }
 
-  const accepted = data.decision === "accepted" && data.rooms === current;
+  const channel = data.channel_name ?? "the lowest OTA";
+  const extra = data.extra_per_saturday ?? 0;
+  const before = data.before_per_saturday;
+  const after = data.after_per_saturday;
+  const top = Math.max(before, after, 1);
+  const decided = data.decision !== null && data.rooms === current ? data.decision : null;
+
   return (
-    <>
-      {title}
-      <p className="sub">
-        {data.channel_name} leaves you the least per room. Keep a few Saturday rooms for guests who book you
-        directly.
-      </p>
-      <div className="card">
-        <h3 className="sub-title">
-          Hold {current} Saturday rooms off {data.channel_name}
-        </h3>
-        <p className="sub" style={{ margin: "6px 0 12px" }}>
-          Keep them for direct and walk-in guests. The other rooms stay on OTAs so you are never empty.
+    <Screen title={TITLE}>
+      <div className={ui.card}>
+        <p className={c.sentence}>
+          Hold {current} Saturday rooms off {channel}. Keep them for direct and walk-in guests. Expected extra
+          kept: <span className={c.money}>{inr(extra)}</span> per Saturday if they sell direct.
         </p>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-          <span className="meta" id="rooms-label">
+
+        <div className={c.layout}>
+          <div
+            className={c.chart}
+            role="img"
+            aria-label={`Before ${inr(before)}, after ${inr(after)} per Saturday`}
+          >
+            <div className={c.col}>
+              <span className={c.colLabel}>
+                Before · {current} rooms on {channel}
+              </span>
+              <span className={c.colValue}>{inr(before)}</span>
+              <div className={`${c.bar} ${c.before}`} style={{ height: `${(before / top) * 150}px` }} />
+            </div>
+            <div className={c.col}>
+              <span className={c.colLabel}>After · {current} rooms direct</span>
+              <span className={c.colValue}>{inr(after)}</span>
+              <div className={`${c.bar} ${c.after}`} style={{ height: `${(after / top) * 150}px` }} />
+            </div>
+          </div>
+          <div className={c.extra}>
+            <span className={c.extraLabel}>Extra kept per Saturday</span>
+            <b className={c.extraValue}>+{inr(extra)}</b>
+            <span className={c.extraNote}>
+              {current} rooms × ({inr(data.direct_net_adr)} direct − {inr(data.channel_net_adr)} on {channel})
+            </span>
+          </div>
+        </div>
+
+        <div className={c.rooms}>
+          <span className={c.colLabel} id="rooms-label">
             Rooms to hold
           </span>
-          <div className="toggle" role="group" aria-labelledby="rooms-label" style={{ margin: 0 }}>
+          <div className={c.stepper} role="group" aria-labelledby="rooms-label">
             <button
               type="button"
               aria-label="One room fewer"
-              disabled={current <= 1 || move.loading}
+              disabled={current <= 1 || move.loading || busy}
               onClick={() => setRooms(current - 1)}
             >
-              &minus;
+              −
             </button>
-            <span className="num" style={{ padding: "9px 14px", fontWeight: 700 }} aria-live="polite">
-              {current}
-            </span>
+            <output aria-live="polite">{current}</output>
             <button
               type="button"
               aria-label="One room more"
-              disabled={current >= data.max_rooms || move.loading}
+              disabled={current >= data.max_rooms || move.loading || busy}
               onClick={() => setRooms(current + 1)}
             >
               +
             </button>
           </div>
         </div>
-        <div className="stats" style={{ margin: "0 0 18px" }}>
-          <div className="stat">
-            <b className="num">{inr(data.channel_net_adr)}</b>
-            <span>kept per room on {data.channel_name}</span>
+
+        {decided === null ? (
+          <div className={ui.actions}>
+            <button
+              type="button"
+              className="btn"
+              disabled={busy}
+              onClick={() =>
+                send(
+                  "scenario/saturday",
+                  { decision: "accepted", rooms: current },
+                  `${current} Saturday rooms held for direct guests`,
+                )
+              }
+            >
+              Accept
+            </button>
+            <button
+              type="button"
+              className="btn ghost"
+              disabled={busy}
+              onClick={() =>
+                send(
+                  "scenario/saturday",
+                  { decision: "later", rooms: current },
+                  "Okay. It stays here for later.",
+                )
+              }
+            >
+              Not now
+            </button>
           </div>
-          <div className="stat">
-            <b className="num">{inr(data.direct_net_adr)}</b>
-            <span>kept per room direct</span>
+        ) : (
+          <div className={c.done} role="status">
+            <span className={`${c.check}${decided === "later" ? ` ${c.later}` : ""}`} aria-hidden="true">
+              {decided === "accepted" ? "✓" : "·"}
+            </span>
+            <div>
+              <p className={c.doneTitle}>
+                {decided === "accepted"
+                  ? `Accepted. ${current} Saturday rooms are held for direct guests.`
+                  : "Not now. This move stays here for later."}
+              </p>
+              <p className={c.doneText}>
+                {decided === "accepted"
+                  ? `Seedha does not change your OTA settings. Close these ${current} rooms for Saturdays in your ${channel} extranet.`
+                  : "Nothing changes on your OTAs."}
+              </p>
+            </div>
+            <div className={c.doneActions}>
+              <button
+                type="button"
+                className="btn small ghost"
+                disabled={busy}
+                onClick={() => send("scenario/saturday/undo", undefined, "Undone")}
+              >
+                Undo
+              </button>
+            </div>
           </div>
-          <div className="stat">
-            <b className="num" style={{ color: "var(--gain)" }}>
-              +{inr(data.extra_per_saturday ?? 0)}
-            </b>
-            <span>extra kept per Saturday if they sell direct</span>
-            <small>
-              {current} rooms × {inr(data.extra_per_room ?? 0)}
-            </small>
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button
-            type="button"
-            className="btn"
-            disabled={busy || accepted}
-            onClick={() => decide("accepted")}
-          >
-            {accepted ? "Accepted" : "Accept"}
-          </button>
-          <button type="button" className="btn ghost" disabled={busy} onClick={() => decide("later")}>
-            Not now
-          </button>
-        </div>
-        {accepted ? (
-          <p className="calc">
-            Seedha does not change your OTA settings. Close these {current} rooms for Saturdays in your{" "}
-            {data.channel_name} extranet.
-          </p>
-        ) : null}
+        )}
       </div>
-      <p className="calc">
-        Computed from what each channel left you per room in your statements. It assumes the held rooms sell
+      <CalcNote>
+        From what each channel left you per room night in your statements. It assumes the held rooms sell
         direct; a held room that stays empty earns nothing.
-      </p>
-    </>
+      </CalcNote>
+    </Screen>
   );
 }

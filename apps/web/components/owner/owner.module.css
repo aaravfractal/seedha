@@ -1,0 +1,266 @@
+/* Shared building blocks for the owner screens (World A tokens from globals.css).
+   Selectors that must win over older global classes (.toggle, .stat, .item,
+   .row) are written with two classes. */
+
+.screen {
+  animation: enter var(--dur-enter) var(--spring) both;
+  max-width: 1080px;
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.head {
+  margin: 0 0 20px;
+}
+.title {
+  font-size: clamp(30px, 3.4vw, 40px);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.sub {
+  color: var(--ink2);
+  font-size: 17px;
+  margin: 0;
+  max-width: 680px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+@media (max-width: 759px) {
+  .card {
+    padding: 18px;
+  }
+}
+.stack {
+  display: grid;
+  gap: 16px;
+}
+.section {
+  margin-top: 24px;
+}
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+/* stat tiles */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 12px;
+}
+.tiles.two {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+@media (min-width: 560px) {
+  .tiles.quad {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.tiles .tile {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  min-width: 0;
+}
+.tiles .tile.dark {
+  background: var(--graphite);
+  border-color: transparent;
+  color: #fff;
+}
+.tiles .tile .value {
+  display: block;
+  font-size: clamp(28px, 3vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.tile .label {
+  display: block;
+  font-size: 14px;
+  color: var(--ink2);
+  margin-top: 6px;
+}
+.tiles .tile.dark .label,
+.tiles .tile.dark .note {
+  color: rgba(255, 255, 255, 0.78);
+}
+.tile .note {
+  display: block;
+  font-size: 13px;
+  color: var(--ink2);
+  margin-top: 4px;
+}
+.muted {
+  font-size: 14px;
+  color: var(--ink2);
+}
+.gain {
+  color: var(--gain);
+}
+.loss {
+  color: var(--loss);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.calc {
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+.calcLead {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* chips and tags: never wrap inside a pill */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  color: var(--ink);
+}
+.chip.ok {
+  background: var(--accentSoft);
+  color: var(--accent);
+}
+.chip.bad {
+  background: var(--lossSoft);
+  color: var(--loss);
+}
+.chip.sample {
+  background: transparent;
+  border: 1px dashed var(--ink2);
+  color: var(--ink2);
+}
+.chip .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 16px;
+}
+.linkBtn {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* segmented control with a white pill that slides (300ms) */
+.segWrap {
+  display: inline-block;
+  max-width: 100%;
+}
+.segWrap .seg {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  background: var(--fill);
+  border-radius: 12px;
+  padding: 3px;
+  margin: 0;
+}
+.segWrap .seg .pill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  border-radius: 9px;
+  background: var(--card);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 1px rgba(0, 0, 0, 0.04);
+  transition: transform var(--dur-seg) var(--spring);
+}
+.segWrap .seg .segBtn {
+  position: relative;
+  z-index: 1;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink2);
+  white-space: nowrap;
+  background: transparent;
+  box-shadow: none;
+  transition: color var(--dur-seg) var(--spring);
+}
+.segWrap .seg .segBtn[aria-pressed="true"] {
+  color: var(--ink);
+  background: transparent;
+  box-shadow: none;
+}
+
+/* WhatsApp-style bubble */
+.bubble {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px 18px 18px 6px;
+  padding: 12px 14px;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen,
+  .segWrap .seg .pill,
+  .segWrap .seg .segBtn {
+    animation: none;
+    transition: none;
+  }
+}

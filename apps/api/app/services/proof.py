@@ -22,6 +22,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.models import Booking, Consent, Message, ProofBundle, ProofBundleItem
+from app.services.consent import as_utc, fingerprint
 
 
 class ProofError(ValueError):
@@ -129,6 +130,50 @@ def write_bundle(
     return bundle
 
 
+def record_intact(consent: Consent) -> bool:
+    """The consent row still hashes to its own fingerprint.
+
+    An erased consent has no salt left to check and counts as intact: it can
+    no longer be messaged anyway.
+    """
+    if consent.salt is None:
+        return True
+    recomputed = fingerprint(
+        consent.salt, consent.booking_id, as_utc(consent.given_at), consent.wording_version
+    )
+    return recomputed == consent.fingerprint
+
+
+def item_status(item: ProofBundleItem, consent: Consent | None, leaves: list[str]) -> str:
+    """'verified', 'deleted' (erased after STOP, leaf kept) or 'mismatch'
+    (the record no longer hashes to the leaf sealed in the root)."""
+    if consent is None or consent.erased_at is not None:
+        return "deleted"
+    path = merkle_path(leaves, item.leaf_index)
+    sealed = verify_path(item.fingerprint, path, item.bundle.merkle_root)
+    same = consent.fingerprint == item.fingerprint and record_intact(consent)
+    return "verified" if sealed and same else "mismatch"
+
+
+@dataclass(frozen=True, slots=True)
+class Entry:
+    """One line of a bundle (or of tonight's pending list) on the proof screen."""
+
+    consent: Consent | None
+    status: str
+
+
+def bundle_entries(session: Session, bundle: ProofBundle) -> list[Entry]:
+    """Every sealed leaf of a bundle with its status, in leaf order."""
+    items = sorted(bundle.items, key=lambda x: x.leaf_index)
+    leaves = [i.fingerprint for i in items]
+    entries = []
+    for item in items:
+        consent = session.get(Consent, item.consent_id) if item.consent_id else None
+        entries.append(Entry(consent, item_status(item, consent, leaves)))
+    return entries
+
+
 @dataclass(frozen=True, slots=True)
 class ConsentProof:
     """Everything the proof dialog shows for one consent."""
@@ -150,9 +195,8 @@ def consent_proof(session: Session, property_id: int, consent_id: int) -> Consen
     bundle = item.bundle
     leaves = [i.fingerprint for i in sorted(bundle.items, key=lambda x: x.leaf_index)]
     path = merkle_path(leaves, item.leaf_index)
-    return ConsentProof(
-        consent, bundle, path, verify_path(consent.fingerprint, path, bundle.merkle_root)
-    )
+    matches = verify_path(consent.fingerprint, path, bundle.merkle_root) and record_intact(consent)
+    return ConsentProof(consent, bundle, path, matches)
 
 
 def erase_consent(session: Session, consent: Consent, now: datetime) -> None:

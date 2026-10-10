@@ -1,0 +1,189 @@
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: var(--r-card);
+  background: var(--card);
+  padding: 36px 20px;
+  text-align: center;
+  transition:
+    border-color 0.2s var(--spring),
+    background 0.2s var(--spring);
+}
+.drop.over {
+  border-color: var(--accent);
+  background: var(--accentSoft);
+}
+.dropTitle {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+.dropHint {
+  color: var(--ink2);
+  font-size: 15px;
+  margin: 0 0 18px;
+}
+.dropActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.sampleNote {
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 14px 0 0;
+}
+
+.files {
+  margin-top: 16px;
+}
+.filesHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 4px;
+}
+.filesTitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+}
+.filesCount {
+  font-size: 14px;
+  color: var(--ink2);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.file {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+.file:last-child {
+  border-bottom: 0;
+}
+.type {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 7px;
+  border-radius: 7px;
+  background: var(--fill);
+  color: var(--ink);
+  min-width: 42px;
+  text-align: center;
+}
+.fileName {
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fileNote {
+  font-size: 14px;
+  white-space: nowrap;
+  text-align: right;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+.fileNote.done {
+  color: var(--accent);
+}
+.fileNote.error {
+  color: var(--loss);
+}
+.fileError {
+  grid-column: 2 / -1;
+  font-size: 14px;
+  color: var(--loss);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: center;
+}
+.track {
+  grid-column: 1 / -1;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  border-radius: 4px;
+  transition: width 0.8s var(--spring);
+}
+.fill.reading {
+  width: 60%;
+  animation: pulse 1.2s ease-in-out infinite alternate;
+}
+.fill.done {
+  width: 100%;
+}
+.fill.error {
+  width: 100%;
+  background: var(--lossFill);
+}
+@keyframes pulse {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.summary {
+  margin-top: 16px;
+}
+.summaryTitle {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+.tick {
+  color: var(--accent);
+}
+.flag {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 16px;
+  align-items: start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.flag:last-of-type {
+  border-bottom: 0;
+}
+.flagRef {
+  font-weight: 600;
+}
+.flagDetail {
+  font-size: 14px;
+  color: var(--ink2);
+}
+.flagActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill,
+  .fill.reading,
+  .drop {
+    animation: none;
+    transition: none;
+  }
+}

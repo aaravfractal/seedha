@@ -1,0 +1,138 @@
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin: 0 0 14px;
+}
+.phone {
+  max-width: 520px;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  background: var(--bg2);
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: #1d1d1f;
+  color: #fff;
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #1d1d1f;
+  font-weight: 700;
+  flex: none;
+}
+.who {
+  display: grid;
+  line-height: 1.25;
+  min-width: 0;
+}
+.who b {
+  font-size: 16px;
+  white-space: nowrap;
+}
+.who span {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.78);
+  white-space: nowrap;
+}
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  min-height: 320px;
+  max-height: 56vh;
+  overflow-y: auto;
+}
+.day {
+  align-self: center;
+  font-size: 13px;
+  color: var(--ink2);
+  background: var(--card);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+}
+.msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  font-size: 15px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  animation: in 0.35s var(--spring) both;
+}
+.bot {
+  align-self: flex-start;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px 18px 18px 6px;
+}
+.me {
+  align-self: flex-end;
+  background: var(--accent);
+  color: var(--onAccent);
+  border-radius: 18px 18px 6px 18px;
+}
+.foot {
+  display: block;
+  font-size: 13px;
+  color: var(--ink2);
+  margin-top: 4px;
+}
+.me .foot {
+  color: inherit;
+  opacity: 0.85;
+}
+.typing {
+  align-self: flex-start;
+  font-size: 13px;
+  color: var(--ink2);
+}
+.replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--card);
+}
+.reply {
+  min-height: 44px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  color: var(--accent);
+}
+.reply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+@keyframes in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .msg {
+    animation: none;
+  }
+}

@@ -18,7 +18,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.models import Booking, Channel, DirectBooking, Property, Saving
-from app.money import ZERO_LINES, format_inr, share_tenths_of_percent
+from app.money import ZERO_LINES, LineItems, format_inr, share_tenths_of_percent
 from app.services.desk import in_house, month_start, saved_this_month
 from app.services.ledger import DEFAULT_END, DEFAULT_START, booking_lines, load_ledger
 from app.services.repeats import list_matches, scan
@@ -198,6 +198,30 @@ def answer_saved_direct(session: Session, prop: Property, day: date) -> Answer:
         hi=f"Is mahine {money} bache, {count} coded direct booking se.",
         en=f"This month you saved {money} from {count} coded direct {plural}.",
         figures=(money, str(count)),
+    )
+
+
+def close_lines(session: Session, prop: Property, day: date) -> tuple[int, LineItems]:
+    """Rooms sold on `day` and the sum of their line items."""
+    stays = in_house(session, prop.id, day)
+    lines = ZERO_LINES
+    for stay in stays:
+        lines = lines + booking_lines(stay.booking)
+    return len(stays), lines
+
+
+def morning_line(session: Session, prop: Property, day: date) -> Answer:
+    """The 8 AM line: last close's rooms and what the hotel kept on them."""
+    rooms, lines = close_lines(session, prop, day)
+    owner = prop.owner_name
+    if rooms == 0:
+        return Answer(f"Suprabhat {owner} ji. Kal koi room nahi bika.",
+                      f"Good morning, {owner} ji. No rooms sold yesterday.", ())  # fmt: skip
+    net = format_inr(lines.net_kept)
+    return Answer(
+        hi=f"Suprabhat {owner} ji. Kal {rooms} room bike, aapke paas {net} bache.",
+        en=f"Good morning, {owner} ji. Yesterday {rooms} rooms sold and you kept {net}.",
+        figures=(str(rooms), net),
     )
 
 

@@ -1,0 +1,133 @@
+.notice {
+  margin: 0 0 16px;
+}
+.list {
+  display: grid;
+  gap: 16px;
+}
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px 12px;
+}
+.name {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.proof {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 5px 10px;
+  border-radius: var(--r-pill);
+  background: var(--fill);
+  color: var(--ink2);
+  min-height: 28px;
+  transition:
+    background-color 400ms var(--spring),
+    color 400ms var(--spring);
+}
+.proof .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink2);
+  transition: background-color 400ms var(--spring);
+}
+.proof.verified {
+  background: var(--accentSoft);
+  color: var(--accent);
+}
+.proof.verified .dot {
+  background: var(--accent);
+}
+.proof.mismatch {
+  background: var(--lossSoft);
+  color: var(--loss);
+}
+.proof.mismatch .dot {
+  background: var(--loss);
+}
+.bundle {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px 12px;
+  background: var(--bg2);
+  border-radius: 14px;
+  padding: 8px 14px;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+.preview {
+  margin-top: 14px;
+  background: var(--bg2);
+  border-radius: 18px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+.previewLabel {
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 0 0 8px;
+}
+.preview :global(.bub) {
+  max-width: min(100%, 560px);
+}
+.editor {
+  margin-top: 14px;
+}
+.textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-input);
+  padding: 12px 14px;
+}
+.textarea[aria-invalid="true"] {
+  border-color: var(--loss);
+}
+.hint {
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 6px 0 0;
+}
+.error {
+  font-size: 14px;
+  color: var(--loss);
+  margin: 6px 0 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .proof,
+  .proof .dot {
+    transition: none;
+  }
+}

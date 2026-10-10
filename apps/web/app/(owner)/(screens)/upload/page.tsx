@@ -8,10 +8,21 @@ import { count } from "@/lib/format";
 import type { FlaggedRow, IngestOutcome, SampleFile, StatementsSummary } from "@/lib/types";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
+import { Chip, Screen, ui } from "@/components/owner/ui";
+import u from "./upload.module.css";
 
-type FileState = { name: string; state: "waiting" | "reading" | "done" | "error"; note: string };
+type FileStatus = "waiting" | "reading" | "done" | "error";
+type FileRow = { name: string; status: FileStatus; note: string };
+type Task = () => Promise<IngestOutcome>;
 
 const MAX_BYTES = 10 * 1024 * 1024;
+
+/** "MakeMyTrip Apr to Jun.pdf" -> ["PDF", "MakeMyTrip Apr to Jun"]. */
+function splitName(filename: string): [string, string] {
+  const dot = filename.lastIndexOf(".");
+  if (dot <= 0) return ["FILE", filename];
+  return [filename.slice(dot + 1).toUpperCase(), filename.slice(0, dot)];
+}
 
 function outcomeNote(outcome: IngestOutcome): string {
   if (outcome.status === "already_imported") return "Already read";
@@ -21,35 +32,44 @@ function outcomeNote(outcome: IngestOutcome): string {
 }
 
 function errorNote(err: unknown): string {
-  if (err instanceof ApiError) {
-    return err.code === "needs_claude" ? `${err.message}` : err.message;
-  }
-  return "Could not read this file";
+  return err instanceof ApiError ? err.message : "This file could not be read.";
 }
 
 export default function UploadPage() {
   const summary = useApi<StatementsSummary>("statements");
   const toast = useToast();
-  const [files, setFiles] = useState<FileState[]>([]);
+  const [rows, setRows] = useState<FileRow[]>([]);
   const [busy, setBusy] = useState(false);
   const [over, setOver] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const tasks = useRef<Task[]>([]);
 
-  const setState = (i: number, patch: Partial<FileState>) =>
-    setFiles((list) => list.map((f, j) => (j === i ? { ...f, ...patch } : f)));
+  const patch = (i: number, next: Partial<FileRow>) =>
+    setRows((list) => list.map((f, j) => (j === i ? { ...f, ...next } : f)));
 
-  async function runAll(names: string[], read: (i: number) => Promise<IngestOutcome>) {
-    setBusy(true);
-    setFiles(names.map((name) => ({ name, state: "waiting", note: "Waiting" })));
-    for (let i = 0; i < names.length; i += 1) {
-      setState(i, { state: "reading", note: "Reading" });
-      try {
-        const outcome = await read(i);
-        setState(i, { state: "done", note: outcomeNote(outcome) });
-      } catch (err) {
-        setState(i, { state: "error", note: errorNote(err) });
-      }
+  async function runOne(i: number) {
+    const task = tasks.current[i];
+    if (!task) return;
+    patch(i, { status: "reading", note: "Reading" });
+    try {
+      patch(i, { status: "done", note: outcomeNote(await task()) });
+    } catch (err) {
+      patch(i, { status: "error", note: errorNote(err) });
     }
+  }
+
+  async function runAll(names: string[], list: Task[]) {
+    setBusy(true);
+    tasks.current = list;
+    setRows(names.map((name) => ({ name, status: "waiting", note: "Waiting" })));
+    for (let i = 0; i < names.length; i += 1) await runOne(i);
+    setBusy(false);
+    summary.reload();
+  }
+
+  async function retry(i: number) {
+    setBusy(true);
+    await runOne(i);
     setBusy(false);
     summary.reload();
   }
@@ -59,7 +79,7 @@ export default function UploadPage() {
       const samples = await api<SampleFile[]>("statements/samples");
       await runAll(
         samples.map((s) => s.filename),
-        (i) => postJson<IngestOutcome>(`statements/samples/${samples[i]?.index ?? 0}`),
+        samples.map((s) => () => postJson<IngestOutcome>(`statements/samples/${s.index}`)),
       );
     } catch (err) {
       toast(errorNote(err));
@@ -71,15 +91,13 @@ export default function UploadPage() {
     const chosen = Array.from(list);
     await runAll(
       chosen.map((f) => f.name),
-      async (i) => {
-        const file = chosen[i];
-        if (!file) throw new ApiError(0, "missing", "File missing");
+      chosen.map((file) => async () => {
         if (file.size > MAX_BYTES)
-          throw new ApiError(413, "file_too_large", "Files must be 10 MB or smaller");
+          throw new ApiError(413, "file_too_large", "Files must be 10 MB or smaller.");
         const form = new FormData();
         form.append("file", file);
         return api<IngestOutcome>("statements", { method: "POST", body: form });
-      },
+      }),
     );
     if (input.current) input.current.value = "";
   }
@@ -92,24 +110,25 @@ export default function UploadPage() {
 
   const data = summary.data;
   const hasStatements = (data?.files.length ?? 0) > 0;
-  const shownFiles: FileState[] =
-    files.length > 0
-      ? files
+  const shown: FileRow[] =
+    rows.length > 0
+      ? rows
       : (data?.files ?? []).map((f) => ({
           name: f.filename,
-          state: "done",
+          status: "done",
           note: `${count(f.row_count)} rows${f.parse_method.startsWith("claude") ? " · read by Claude" : ""}`,
         }));
+  const reading = busy && rows.some((r) => r.status === "waiting" || r.status === "reading");
+  const failed = shown.filter((r) => r.status === "error").length;
+  const readOk = shown.length - failed;
 
   return (
-    <>
-      <h2 className="title">Bring your statements.</h2>
-      <p className="sub">
-        Drop MakeMyTrip, Booking.com and Agoda payouts with your hotel register. Seedha reads every format and
-        checks that each row adds up.
-      </p>
+    <Screen
+      title="Bring your statements."
+      sub="MakeMyTrip, Booking.com and Agoda payouts with your hotel register. Seedha checks that every row adds up."
+    >
       <div
-        className={`drop${over ? " over" : ""}`}
+        className={`${u.drop}${over ? ` ${u.over}` : ""}`}
         onDragOver={(e) => {
           e.preventDefault();
           setOver(true);
@@ -117,11 +136,9 @@ export default function UploadPage() {
         onDragLeave={() => setOver(false)}
         onDrop={onDrop}
       >
-        <h3 className="sub-title">Drop files here</h3>
-        <p className="sub" style={{ margin: "4px auto 18px" }}>
-          PDF, Excel or CSV, up to 10 MB each
-        </p>
-        <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+        <h2 className={u.dropTitle}>Drop files here</h2>
+        <p className={u.dropHint}>PDF, Excel or CSV, up to 10 MB each</p>
+        <div className={u.dropActions}>
           <button type="button" className="btn" onClick={useSamples} disabled={busy}>
             {busy ? "Reading files" : hasStatements ? "Use sample statements again" : "Use sample statements"}
           </button>
@@ -138,42 +155,64 @@ export default function UploadPage() {
             />
           </label>
         </div>
-        <p className="calc">Sample statements are fictional data for Hotel Deodar View.</p>
+        <p className={u.sampleNote}>Sample statements are fictional data for Hotel Deodar View.</p>
       </div>
 
       {summary.error ? (
-        <div style={{ marginTop: 16 }}>
+        <div className={u.files}>
           <ErrorState message={summary.error.message} code={summary.error.code} onRetry={summary.reload} />
         </div>
-      ) : summary.loading && !data ? (
-        <div style={{ marginTop: 16 }}>
+      ) : summary.loading && !data && rows.length === 0 ? (
+        <div className={u.files}>
           <Loading rows={2} label="Loading your statements" />
         </div>
       ) : null}
 
-      {shownFiles.length > 0 ? (
-        <div className="card" style={{ marginTop: 16 }} aria-live="polite">
-          {shownFiles.map((f) => (
-            <div className="file" key={f.name}>
-              <span>{f.name}</span>
-              <span
-                className="num meta"
-                style={{ color: f.state === "error" ? "var(--loss)" : "var(--ink2)", textAlign: "right" }}
-              >
-                {f.note}
-              </span>
-              <div className="progress" style={{ gridColumn: "1 / -1" }} aria-hidden="true">
-                <i
-                  className={f.state === "reading" ? "busy" : undefined}
-                  style={f.state === "done" || f.state === "error" ? { width: "100%" } : undefined}
-                />
+      {shown.length > 0 ? (
+        <div className={`${ui.card} ${u.files}`} aria-live="polite" aria-busy={reading}>
+          <div className={u.filesHead}>
+            <h2 className={u.filesTitle}>
+              {reading
+                ? `Reading ${count(shown.length)} file${shown.length === 1 ? "" : "s"}`
+                : `${count(readOk)} file${readOk === 1 ? "" : "s"} read`}
+            </h2>
+            {failed ? <span className={u.filesCount}>{count(failed)} could not be read</span> : null}
+          </div>
+          {shown.map((f, i) => {
+            const [type, name] = splitName(f.name);
+            return (
+              <div className={u.file} key={`${f.name}-${i}`}>
+                <span className={u.type}>{type}</span>
+                <span className={u.fileName}>{name}</span>
+                <span className={`${u.fileNote} ${f.status === "done" ? u.done : ""}`}>
+                  {f.status === "error" ? "Not read" : f.note}
+                </span>
+                {f.status === "error" ? (
+                  <div className={u.fileError} role="alert">
+                    <span>
+                      {f.name} could not be read. {f.note}
+                    </span>
+                    <button
+                      type="button"
+                      className="btn small ghost"
+                      disabled={busy}
+                      onClick={() => void retry(i)}
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : null}
+                <span className={u.track} aria-hidden="true">
+                  <i className={`${u.fill} ${f.status === "waiting" ? "" : u[f.status]}`} />
+                </span>
               </div>
-            </div>
-          ))}
-          {!busy && data && data.rows > 0 ? <Summary data={data} onChange={summary.setData} /> : null}
+            );
+          })}
         </div>
       ) : null}
-    </>
+
+      {!reading && data && data.rows > 0 ? <Summary data={data} onChange={summary.setData} /> : null}
+    </Screen>
   );
 }
 
@@ -189,20 +228,26 @@ function Summary({ data, onChange }: { data: StatementsSummary; onChange: (s: St
     }
   }
   return (
-    <div style={{ paddingTop: 16 }}>
-      <h3 className="sub-title">
+    <div className={`${ui.card} ${u.summary}`}>
+      <h2 className={u.summaryTitle}>
+        <span className={u.tick} aria-hidden="true">
+          ✓{" "}
+        </span>
         {count(data.rows)} rows matched.{" "}
         {need ? `${need} need${need === 1 ? "s" : ""} a look.` : "All checked."}
-      </h3>
+      </h2>
+      {data.flagged_rows.length ? (
+        <p className={ui.sub}>These rows do not add up. They stay out of your numbers until you decide.</p>
+      ) : null}
       {data.flagged_rows.map((row) => (
-        <div className="item" key={row.id}>
+        <div className={u.flag} key={row.id}>
           <div>
-            <b>
+            <div className={u.flagRef}>
               {row.channel} #{row.external_ref}
-            </b>
-            <div className="meta">{row.detail}</div>
+            </div>
+            <div className={u.flagDetail}>{row.detail}</div>
             {row.review_status === "pending" ? (
-              <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+              <div className={u.flagActions}>
                 <button type="button" className="btn small ghost" onClick={() => review(row, "exclude")}>
                   Keep it out
                 </button>
@@ -212,19 +257,22 @@ function Summary({ data, onChange }: { data: StatementsSummary; onChange: (s: St
               </div>
             ) : null}
           </div>
-          <span className={`tag ${row.review_status === "pending" ? "bad" : "ok"}`}>
-            {row.review_status === "pending"
-              ? "Check"
-              : row.review_status === "accepted"
-                ? "Counted"
-                : "Kept out"}
-          </span>
+          {row.review_status === "pending" ? (
+            <Chip tone="bad">
+              <span aria-hidden="true">⚠</span> Check
+            </Chip>
+          ) : (
+            <Chip tone={row.review_status === "accepted" ? "ok" : "plain"}>
+              {row.review_status === "accepted" ? "Counted" : "Kept out"}
+            </Chip>
+          )}
         </div>
       ))}
-      <p className="calc">Flagged rows stay out of your numbers until you decide.</p>
-      <Link className="btn" href="/flip" style={{ marginTop: 14 }}>
-        See my real money
-      </Link>
+      <div className={ui.actions}>
+        <Link className="btn" href="/flip">
+          See my real money
+        </Link>
+      </div>
     </div>
   );
 }

@@ -1,0 +1,172 @@
+.sentence {
+  font-size: clamp(19px, 2vw, 22px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  margin: 0;
+  max-width: 760px;
+}
+.money {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: end;
+  margin-top: 24px;
+}
+@media (max-width: 759px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+.chart {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: end;
+  height: 240px;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+  min-width: 0;
+}
+.colLabel {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.colValue {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  margin: 2px 0 8px;
+  white-space: nowrap;
+}
+.bar {
+  border-radius: 10px 10px 6px 6px;
+  transform-origin: bottom;
+  animation: grow 0.7s var(--spring) both;
+}
+.before {
+  background: var(--ch-agoda);
+}
+.after {
+  background: var(--gainFill);
+  animation-delay: 0.08s;
+}
+@keyframes grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: none;
+  }
+}
+.extra {
+  background: var(--accentSoft);
+  border-radius: var(--r-card);
+  padding: 20px;
+}
+.extraValue {
+  display: block;
+  font-size: clamp(32px, 3.6vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--gain);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.extraLabel {
+  font-size: 14px;
+  color: var(--ink);
+}
+.extraNote {
+  display: block;
+  font-size: 13px;
+  color: var(--ink2);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.rooms {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  background: var(--fill);
+  border-radius: 12px;
+  padding: 3px;
+}
+.stepper button {
+  width: 44px;
+  height: 40px;
+  border-radius: 9px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.stepper button:not(:disabled):hover {
+  background: var(--card);
+}
+.stepper button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.stepper output {
+  min-width: 36px;
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.done {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 14px;
+  align-items: start;
+}
+.check {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: var(--onAccent);
+  font-weight: 700;
+}
+.check.later {
+  background: var(--fill);
+  color: var(--ink);
+}
+.doneTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+.doneText {
+  font-size: 15px;
+  color: var(--ink2);
+  margin: 2px 0 0;
+}
+.doneActions {
+  grid-column: 2;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    animation: none;
+  }
+}

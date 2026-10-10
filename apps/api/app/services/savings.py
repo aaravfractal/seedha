@@ -14,7 +14,9 @@ Rahul (originally MakeMyTrip, 22%), Rs 8,600: commission Rs 1,892 + GST Rs 341
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
+from datetime import date
 
 from app.money import bps_of, gst_on_commission, upi_fee
 
@@ -51,3 +53,19 @@ def compute_saving(amount: int, commission_bps: int, gst_applies: bool) -> Savin
         gst_avoided=gst_on_commission(commission) if gst_applies else 0,
         upi_fee=upi_fee(amount),
     )
+
+
+@dataclass(frozen=True, slots=True)
+class Season:
+    """Coded direct bookings booked inside a season, and their net saving."""
+
+    start: date
+    end: date
+    count: int
+    total_net_saving: int
+
+
+def season_review(booked: Iterable[tuple[date, int]], start: date, end: date) -> Season:
+    """Count and sum the savings whose booking date falls in [start, end]."""
+    inside = [net for day, net in booked if start <= day <= end]
+    return Season(start=start, end=end, count=len(inside), total_net_saving=sum(inside))

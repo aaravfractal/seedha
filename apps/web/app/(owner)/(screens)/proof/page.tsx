@@ -1,27 +1,23 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { count } from "@/lib/format";
-import type { Messages, ProofOverview } from "@/lib/types";
-import { ErrorState, Loading } from "@/components/States";
+import type { OwnerProof, ProofEntry } from "@/lib/types-owner";
+import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { ProofDialog } from "@/components/ProofDialog";
 import { useToast } from "@/components/Toast";
+import { Chip, Screen, ui } from "@/components/owner/ui";
+import { istStamp, proofStatus, shortHash } from "@/components/owner/proofStatus";
+import p from "./proof.module.css";
 
-function when(iso: string): string {
-  return new Date(iso).toLocaleString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "Asia/Kolkata",
-  });
-}
+const TITLE = "Consent proof.";
+const SUB =
+  "Every night at 9 PM, Seedha seals the day's Desk consents into one bundle. Anyone can later check a consent was given and not changed. No guest names or numbers leave Seedha.";
 
 export default function ProofPage() {
-  const proof = useApi<ProofOverview>("proof");
-  const messages = useApi<Messages>("messages");
+  const proof = useApi<OwnerProof>("proof");
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
@@ -29,111 +25,156 @@ export default function ProofPage() {
   async function bundle() {
     setBusy(true);
     try {
-      const result = await postJson<ProofOverview>("proof/bundle");
+      const result = await postJson<OwnerProof>("proof/bundle");
       proof.setData(result);
-      messages.reload();
-      toast(`Tonight's proof written. ${result.bundles[0]?.item_count ?? 0} consents verified`);
+      toast(`Tonight's bundle written. ${count(result.bundles[0]?.item_count ?? 0)} consents sealed.`);
     } catch (err) {
-      toast(err instanceof ApiError ? err.message : "Could not write the proof");
+      toast(err instanceof ApiError ? err.message : "Could not write the bundle");
     } finally {
       setBusy(false);
     }
   }
 
-  const header = (
-    <>
-      <h2 className="title">Every yes, provable.</h2>
-      <p className="sub">
-        Each consent becomes a fingerprint. Every night the fingerprints are written to a record that nobody
-        can change.
-      </p>
-    </>
-  );
   if (proof.error) {
     return (
-      <>
-        {header}
+      <Screen title={TITLE} sub={SUB}>
         <ErrorState message={proof.error.message} code={proof.error.code} onRetry={proof.reload} />
-      </>
+      </Screen>
     );
   }
   if (!proof.data) {
     return (
-      <>
-        {header}
-        <Loading rows={2} label="Loading proofs" />
-      </>
+      <Screen title={TITLE} sub={SUB}>
+        <Loading rows={3} label="Checking every sealed consent" />
+      </Screen>
     );
   }
-  const p = proof.data;
-  const consents = new Map((messages.data?.messages ?? []).map((m) => [m.consent_id, m.guest_name]));
+  const data = proof.data;
+  const pending = data.entries.filter((e) => e.bundle_id === null);
+  const byBundle = new Map<number, ProofEntry[]>();
+  for (const e of data.entries) {
+    if (e.bundle_id === null) continue;
+    byBundle.set(e.bundle_id, [...(byBundle.get(e.bundle_id) ?? []), e]);
+  }
+
   return (
-    <>
-      {header}
-      <div className="stats" style={{ margin: "0 0 16px" }}>
-        <div className="stat">
-          <b className="num">{count(p.consents_this_month)}</b>
-          <span>consents this month</span>
+    <Screen title={TITLE} sub={SUB}>
+      <div className={`${ui.tiles} ${ui.quad}`}>
+        <div className={ui.tile}>
+          <b className={ui.value}>{count(data.sealed)}</b>
+          <span className={ui.label}>consents sealed</span>
         </div>
-        <div className="stat">
-          <b className="num" style={{ color: "var(--gain)" }}>
-            {count(p.proven)}
-          </b>
-          <span>proven</span>
+        <div className={ui.tile}>
+          <b className={ui.value}>{count(data.bundles.length)}</b>
+          <span className={ui.label}>nightly bundles</span>
         </div>
-        <div className="stat">
-          <b className="num">{count(p.pending)}</b>
-          <span>pending tonight</span>
+        <div className={ui.tile}>
+          <b className={ui.value}>0</b>
+          <span className={ui.label}>guest names stored outside Seedha</span>
+        </div>
+        <div className={ui.tile}>
+          <b className={`${ui.value}${data.mismatches ? ` ${ui.loss}` : ""}`}>{count(data.mismatches)}</b>
+          <span className={ui.label}>records to check</span>
         </div>
       </div>
-      <button type="button" className="btn" disabled={busy || p.pending === 0} onClick={bundle}>
-        {p.pending === 0 ? "Nothing new to prove tonight" : "Write tonight's proof"}
-      </button>
-      {!p.chain_live ? (
-        <p className="calc">
-          Simulated chain: roots are stored and checked by Seedha. Add Polygon Amoy testnet keys to publish
-          them.
-        </p>
-      ) : null}
-      <div className="card" style={{ marginTop: 16 }}>
-        {p.bundles.length === 0 ? (
-          <p className="sub" style={{ margin: 0 }}>
-            No bundles yet. Consents from the Desk are bundled each night at 12:00 AM.
-          </p>
-        ) : (
-          p.bundles.map((b) => (
-            <div className="item" key={b.id}>
-              <div>
-                <b>{when(b.created_at)}</b>
-                <div className="meta">
-                  Bundle of {count(b.item_count)} consent{b.item_count === 1 ? "" : "s"} · root{" "}
-                  <span className="mono">
-                    {b.merkle_root.slice(0, 8)}…{b.merkle_root.slice(-6)}
-                  </span>
+
+      {data.entries.length === 0 ? (
+        <div className={ui.section}>
+          <EmptyState
+            title="No consents yet"
+            action={
+              <Link className="btn small" href="/desk">
+                Open Seedha Desk
+              </Link>
+            }
+          >
+            Guests say yes on their phone at check-in. Each yes is sealed here that night.
+          </EmptyState>
+        </div>
+      ) : (
+        <div className={p.bundles}>
+          {pending.length ? (
+            <section className={ui.card} aria-labelledby="tonight">
+              <div className={p.bundleHead}>
+                <div>
+                  <h2 className={p.when} id="tonight">
+                    Tonight, 9:00 PM
+                  </h2>
+                  <p className={p.fp}>Fingerprint: not sealed yet</p>
                 </div>
+                <Chip>Opens at 9 PM</Chip>
               </div>
-              <span className="tag ok">{b.chain_tx ? "✓ On chain" : "✓ Verified"}</span>
-            </div>
-          ))
-        )}
-      </div>
-      {consents.size > 0 ? (
-        <div className="card" style={{ marginTop: 16 }}>
-          <h3 className="sub-title">Check a consent</h3>
-          <div className="chips">
-            {[...consents.entries()].map(([id, name]) => (
-              <button key={id} type="button" className="chip" onClick={() => setOpen(id)}>
-                {name}
-              </button>
-            ))}
-          </div>
+              <Entries entries={pending} onOpen={setOpen} />
+              <div className={p.write}>
+                <button type="button" className="btn small" disabled={busy} onClick={() => void bundle()}>
+                  Write tonight&apos;s bundle now
+                </button>
+                <span className={ui.muted}>The 9 PM job does the same.</span>
+              </div>
+            </section>
+          ) : null}
+          {data.bundles.map((b) => (
+            <section className={ui.card} key={b.id} aria-labelledby={`bundle-${b.id}`}>
+              <div className={p.bundleHead}>
+                <div>
+                  <h2 className={p.when} id={`bundle-${b.id}`}>
+                    {istStamp(b.created_at)}
+                  </h2>
+                  <p className={p.fp}>
+                    Fingerprint <span className={p.mono}>{shortHash(b.merkle_root)}</span> ·{" "}
+                    {count(b.item_count)} consent{b.item_count === 1 ? "" : "s"}
+                  </p>
+                </div>
+                <Chip tone={b.chain_tx ? "ok" : "plain"}>
+                  {b.chain_tx ? "On public chain" : "Stored by Seedha"}
+                </Chip>
+              </div>
+              <Entries entries={byBundle.get(b.id) ?? []} onOpen={setOpen} />
+            </section>
+          ))}
         </div>
-      ) : null}
-      <p className="calc">
-        Only a fingerprint is public. No name, phone or booking detail is ever stored on the blockchain.
-        Monthly statement summaries can be proven the same way.
+      )}
+
+      <p className={`${ui.calc} ${p.chainNote}`}>
+        {data.chain_live
+          ? "Bundle fingerprints are written to a public test chain. Only fingerprints are public: no name, phone or booking detail."
+          : "Bundle fingerprints are stored by Seedha on this server and are not yet written to a public chain. Only fingerprints would ever be published: no name, phone or booking detail."}
       </p>
       {open !== null ? <ProofDialog consentId={open} onClose={() => setOpen(null)} /> : null}
-    </>
+    </Screen>
+  );
+}
+
+function Entries({ entries, onOpen }: { entries: ProofEntry[]; onOpen: (id: number) => void }) {
+  return (
+    <ul className={p.entries}>
+      {entries.map((e, i) => {
+        const s = proofStatus(e.status);
+        const inner = (
+          <>
+            <span className={p.entryName}>{e.guest_name ?? "Deleted at the guest's request"}</span>
+            <span className={p.entryWhen}>
+              {e.given_at ? `Said yes ${istStamp(e.given_at)}` : "Leaf kept, link removed"}
+            </span>
+            <span className={p.entryChip}>
+              <Chip tone={s.tone} dot>
+                {s.label}
+              </Chip>
+            </span>
+          </>
+        );
+        return (
+          <li key={e.consent_id ?? `deleted-${i}`}>
+            {e.consent_id !== null ? (
+              <button type="button" className={p.entry} onClick={() => onOpen(e.consent_id as number)}>
+                {inner}
+              </button>
+            ) : (
+              <div className={p.entry}>{inner}</div>
+            )}
+          </li>
+        );
+      })}
+    </ul>
   );
 }

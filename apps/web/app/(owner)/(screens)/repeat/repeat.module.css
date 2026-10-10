@@ -1,0 +1,85 @@
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+.guest {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px 16px;
+  align-items: start;
+}
+.name {
+  font-weight: 600;
+  font-size: 17px;
+  margin: 0;
+}
+.trip {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 2px 0 0;
+}
+.alias {
+  font-size: 13px;
+  color: var(--ink2);
+  margin: 2px 0 0;
+}
+.chips {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.amount {
+  text-align: right;
+}
+.amount b {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--loss);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.amount span {
+  font-size: 13px;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+.decide {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.decideNote {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.privacy {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 15px;
+}
+.lock {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: var(--fill);
+  font-size: 14px;
+}
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  margin-top: 16px;
+}

@@ -13,7 +13,15 @@ from app.errors import ApiError
 from app.models import Booking, Consent, ProofBundle
 from app.services.consent import as_utc
 from app.services.desk import month_start, utc_now
-from app.services.proof import LocalOnly, ProofError, consent_proof, write_bundle
+from app.services.proof import (
+    Entry,
+    LocalOnly,
+    ProofError,
+    bundle_entries,
+    consent_proof,
+    pending_consents,
+    write_bundle,
+)
 
 router = APIRouter(prefix="/proof", tags=["proof"])
 EXPLORER_TX = "https://amoy.polygonscan.com/tx/"
@@ -31,14 +39,31 @@ class BundleOut(BaseModel):
     explorer_url: str | None
 
 
+class EntryOut(BaseModel):
+    """One consent in a bundle (bundle_id) or waiting for tonight's (None).
+
+    The guest's name is for the owner's screen only and never part of a
+    bundle; an erased entry has no name or time left.
+    """
+
+    bundle_id: int | None
+    consent_id: int | None
+    guest_name: str | None
+    given_at: datetime | None
+    status: str
+
+
 class ProofOut(BaseModel):
     """Proof overview."""
 
     consents_this_month: int
     proven: int
     pending: int
+    sealed: int
+    mismatches: int
     chain_live: bool
     bundles: list[BundleOut]
+    entries: list[EntryOut]
 
 
 class PathStepOut(BaseModel):
@@ -70,6 +95,16 @@ def bundle_out(b: ProofBundle) -> BundleOut:
     )  # fmt: skip
 
 
+def entry_out(bundle_id: int | None, entry: Entry) -> EntryOut:
+    """Shape one entry."""
+    c = entry.consent
+    if c is None:
+        return EntryOut(bundle_id=bundle_id, consent_id=None, guest_name=None, given_at=None,
+                        status=entry.status)  # fmt: skip
+    return EntryOut(bundle_id=bundle_id, consent_id=c.id, guest_name=c.guest.display_name,
+                    given_at=c.given_at, status=entry.status)  # fmt: skip
+
+
 def overview(session: SessionDep, property_id: int, chain_live: bool) -> ProofOut:
     """Counts and bundles, newest first."""
     consents = (
@@ -84,12 +119,17 @@ def overview(session: SessionDep, property_id: int, chain_live: bool) -> ProofOu
         .where(ProofBundle.property_id == property_id)
         .order_by(ProofBundle.id.desc())
     ).all()
+    sealed = [entry_out(b.id, e) for b in bundles for e in bundle_entries(session, b)]
+    pending = [entry_out(None, Entry(c, "pending")) for c in pending_consents(session, property_id)]
     return ProofOut(
         consents_this_month=sum(1 for c in rows if as_utc(c.given_at) >= since),
         proven=sum(1 for c in rows if c.proof_status == "verified"),
         pending=sum(1 for c in rows if c.proof_status == "pending"),
+        sealed=sum(b.item_count for b in bundles),
+        mismatches=sum(1 for e in sealed if e.status == "mismatch"),
         chain_live=chain_live,
         bundles=[bundle_out(b) for b in bundles],
+        entries=pending + sealed,
     )
 
 
@@ -128,7 +168,7 @@ def get_consent_proof(
         guest_name=c.guest.display_name,
         given_at=c.given_at,
         fingerprint=c.fingerprint,
-        status=c.proof_status,
+        status="mismatch" if proof.matches is False else c.proof_status,
         bundle=bundle_out(proof.bundle) if proof.bundle else None,
         path=[PathStepOut(side=side, hash=h) for side, h in proof.path],
         matches=proof.matches,

@@ -1,0 +1,59 @@
+.dlg {
+  display: grid;
+  gap: 0;
+  justify-items: start;
+}
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 12px 0 6px;
+}
+.body {
+  color: var(--ink2);
+  font-size: 15px;
+  margin: 0;
+}
+.rows {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 16px;
+  margin: 16px 0 0;
+  font-size: 15px;
+}
+.rows dt,
+.rows dd {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  margin: 0;
+}
+.rows dt {
+  color: var(--ink2);
+}
+.rows dd {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 14px;
+}
+.chain {
+  font-size: 13px;
+  color: var(--ink2);
+  background: var(--bg2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 14px 0 0;
+}
+.actions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.done {
+  margin-left: auto;
+}

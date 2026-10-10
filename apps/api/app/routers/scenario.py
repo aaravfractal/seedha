@@ -17,6 +17,7 @@ from app.services.scenario import SaturdayMove, ScenarioError, saturday_move
 
 router = APIRouter(prefix="/scenario", tags=["scenario"])
 DEFAULT_ROOMS = 6
+UNDONE = "undone"
 
 
 class SaturdayOut(BaseModel):
@@ -36,6 +37,8 @@ class SaturdayOut(BaseModel):
     direct_net_adr: int | None = None
     extra_per_room: int | None = None
     extra_per_saturday: int | None = None
+    before_per_saturday: int | None = None
+    after_per_saturday: int | None = None
     decision: str | None = None
     decided_at: datetime | None = None
 
@@ -69,12 +72,15 @@ def latest_decision(session: SessionDep, property_id: int) -> ScenarioDecision |
 
 
 def saturday_out(move: SaturdayMove, max_rooms: int, last: ScenarioDecision | None) -> SaturdayOut:
-    """Shape the card."""
+    """Shape the card. An undone answer reads as no answer."""
+    if last is not None and last.decision == UNDONE:
+        last = None
     return SaturdayOut(
         available=True, rooms=move.rooms, max_rooms=max_rooms, channel_key=move.channel_key,
         channel_name=move.channel_name, channel_net_adr=move.channel_net_adr,
         direct_net_adr=move.direct_net_adr, extra_per_room=move.extra_per_room,
         extra_per_saturday=move.extra_per_saturday,
+        before_per_saturday=move.before_per_saturday, after_per_saturday=move.after_per_saturday,
         decision=last.decision if last else None, decided_at=last.decided_at if last else None,
     )  # fmt: skip
 
@@ -119,4 +125,27 @@ def decide_saturday(
         )  # fmt: skip
     )
     session.flush()
+    return saturday_out(move, prop.rooms_count, latest_decision(session, prop.id))
+
+
+@router.post("/saturday/undo", response_model=SaturdayOut)
+def undo_saturday(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> SaturdayOut:
+    """Take back the owner's last answer. The log keeps it, marked undone."""
+    last = latest_decision(session, prop.id)
+    if last is None or last.decision == UNDONE:
+        raise ApiError(409, "nothing_to_undo", "There is no answer to undo")
+    session.add(
+        ScenarioDecision(
+            property_id=prop.id,
+            kind="saturday",
+            rooms=last.rooms,
+            channel_key=last.channel_key,
+            decision=UNDONE,
+        )  # fmt: skip
+    )
+    session.flush()
+    try:
+        move = compute(session, prop.id, last.rooms)
+    except ScenarioError as exc:
+        raise ApiError(422, "no_saturday_move", str(exc)) from exc
     return saturday_out(move, prop.rooms_count, latest_decision(session, prop.id))
