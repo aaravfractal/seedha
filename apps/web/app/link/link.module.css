@@ -1,0 +1,52 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+  gap: 48px;
+  align-items: start;
+}
+@media (max-width: 859px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+}
+.h1 {
+  font-size: var(--t-large);
+  line-height: 1.04;
+  letter-spacing: -0.045em;
+  font-weight: 700;
+  margin: 24px 0 16px;
+}
+.lede {
+  color: var(--ink2);
+  font-size: 19px;
+  max-width: 520px;
+  margin: 0 0 16px;
+}
+.phone {
+  position: relative;
+  width: min(100%, 400px);
+  margin: 0 auto;
+  border: 14px solid #1c1c1e;
+  border-radius: 60px;
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.14);
+}
+.island {
+  width: 120px;
+  height: 32px;
+  border-radius: 20px;
+  background: #1c1c1e;
+  margin: 12px auto 0;
+}
+.screen {
+  padding: 16px 20px 28px;
+  min-height: 720px;
+}
+@media (max-width: 759px) {
+  .phone {
+    border-width: 10px;
+    border-radius: 48px;
+  }
+}
