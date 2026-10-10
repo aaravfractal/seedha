@@ -1,89 +1,95 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { ApiError, postJson, useApi } from "@/lib/api";
-import type { Health, PropertyInfo } from "@/lib/types";
-import { useToast } from "@/components/Toast";
+import { useRef, useState } from "react";
+import type { KeyboardEvent } from "react";
+import { useApi } from "@/lib/api";
+import type { SettingsData } from "@/lib/types-settings";
+import { ErrorState, Loading } from "@/components/States";
+import { Screen } from "@/components/owner/ui";
+import { NotificationsTab, PrivacyTab, SecurityTab } from "@/components/settings/AccountTabs";
+import { ContractsTab, HotelTab, PlanTab } from "@/components/settings/HotelTabs";
+import { PersonalTab } from "@/components/settings/PersonalTab";
+import { StaffTab } from "@/components/settings/StaffTab";
+import s from "@/components/settings/settings.module.css";
 
-const LABELS: [keyof Health, string][] = [
-  ["llm", "Claude (statement reading, wording)"],
-  ["whatsapp", "WhatsApp messages"],
-  ["payments", "UPI payments"],
-  ["proof_chain", "Public proof chain"],
-];
+const TABS = [
+  { key: "personal", label: "Personal details" },
+  { key: "hotel", label: "Hotel" },
+  { key: "plan", label: "Plan and billing" },
+  { key: "contracts", label: "Contracts" },
+  { key: "staff", label: "Staff logins" },
+  { key: "notifications", label: "Notifications" },
+  { key: "security", label: "Security" },
+  { key: "privacy", label: "Privacy and data" },
+] as const;
+
+type TabKey = (typeof TABS)[number]["key"];
 
 export default function SettingsPage() {
-  const health = useApi<Health>("health");
-  const property = useApi<PropertyInfo>("property");
-  const toast = useToast();
-  const router = useRouter();
-  const [confirming, setConfirming] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const settings = useApi<SettingsData>("settings");
+  const [tab, setTab] = useState<TabKey>("personal");
+  const refs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  async function reset() {
-    setBusy(true);
-    try {
-      const result = await postJson<{ ok: boolean; demo_date: string }>("demo/reset");
-      toast(`Sample hotel reset. Desk date ${result.demo_date}.`);
-      setConfirming(false);
-    } catch (err) {
-      toast(err instanceof ApiError ? err.message : "Reset failed");
-    } finally {
-      setBusy(false);
-    }
+  function onKey(e: KeyboardEvent<HTMLDivElement>) {
+    const i = TABS.findIndex((t) => t.key === tab);
+    let next = -1;
+    if (e.key === "ArrowRight") next = (i + 1) % TABS.length;
+    else if (e.key === "ArrowLeft") next = (i - 1 + TABS.length) % TABS.length;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = TABS.length - 1;
+    if (next < 0) return;
+    e.preventDefault();
+    const key = TABS[next]!.key;
+    setTab(key);
+    refs.current[key]?.focus();
   }
 
-  async function logout() {
-    await fetch("/api/session", { method: "DELETE" });
-    router.push("/login");
-  }
-
+  const data = settings.data;
   return (
-    <>
-      <h2 className="title">Settings.</h2>
-      <p className="sub">{property.data ? `${property.data.name}, ${property.data.city}` : " "}</p>
-      <div className="card">
-        <h3 className="sub-title">Connections</h3>
-        {LABELS.map(([key, label]) => (
-          <div className="item" key={key}>
-            <span>{label}</span>
-            <span className={`tag ${health.data?.[key] === "live" ? "ok" : "sim"}`}>
-              {health.data ? (health.data[key] === "live" ? "Live" : "Simulated") : "…"}
-            </span>
-          </div>
+    <Screen title="Settings." sub={data ? `${data.hotel.name}, ${data.hotel.town}` : undefined}>
+      <div className={s.tabs} role="tablist" aria-label="Settings sections" onKeyDown={onKey}>
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            ref={(el) => {
+              refs.current[t.key] = el;
+            }}
+            type="button"
+            role="tab"
+            id={`tab-${t.key}`}
+            aria-selected={tab === t.key}
+            aria-controls={`panel-${t.key}`}
+            tabIndex={tab === t.key ? 0 : -1}
+            className={s.tab}
+            onClick={() => setTab(t.key)}
+          >
+            {t.label}
+          </button>
         ))}
-        <p className="calc">Add keys in .env to switch a connection from simulated to live.</p>
       </div>
-      {property.data?.is_sample ? (
-        <div className="card" style={{ marginTop: 16 }}>
-          <h3 className="sub-title">Reset the sample hotel</h3>
-          <p className="sub" style={{ margin: "6px 0 14px" }}>
-            Clears uploads, consents, messages, bookings from Seedha Link and proofs, and reloads Hotel Deodar
-            View as it was before the demo.
-          </p>
-          {confirming ? (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button type="button" className="btn" disabled={busy} onClick={reset}>
-                {busy ? "Resetting" : "Yes, reset everything"}
-              </button>
-              <button type="button" className="btn ghost" onClick={() => setConfirming(false)}>
-                Keep my data
-              </button>
-            </div>
-          ) : (
-            <button type="button" className="btn ghost" onClick={() => setConfirming(true)}>
-              Reset demo data
-            </button>
-          )}
-        </div>
-      ) : null}
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3 className="sub-title">Session</h3>
-        <button type="button" className="btn ghost small" style={{ marginTop: 8 }} onClick={logout}>
-          Log out
-        </button>
+      <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`} tabIndex={0}>
+        {settings.error && !data ? (
+          <ErrorState message={settings.error.message} code={settings.error.code} onRetry={settings.reload} />
+        ) : !data ? (
+          <Loading rows={3} label="Loading settings" />
+        ) : tab === "personal" ? (
+          <PersonalTab key={data.kind} data={data} onSaved={settings.setData} />
+        ) : tab === "hotel" ? (
+          <HotelTab data={data} />
+        ) : tab === "plan" ? (
+          <PlanTab />
+        ) : tab === "contracts" ? (
+          <ContractsTab />
+        ) : tab === "staff" ? (
+          <StaffTab />
+        ) : tab === "notifications" ? (
+          <NotificationsTab data={data} onSaved={(n) => settings.setData({ ...data, notifications: n })} />
+        ) : tab === "security" ? (
+          <SecurityTab data={data} />
+        ) : (
+          <PrivacyTab data={data} />
+        )}
       </div>
-    </>
+    </Screen>
   );
 }

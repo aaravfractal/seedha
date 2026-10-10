@@ -18,6 +18,7 @@ from app.routers import (
     ask,
     assistant,
     auth,
+    calendar,
     desk,
     inbox,
     ledger,
@@ -34,6 +35,7 @@ from app.routers import (
     statements,
     webhooks,
 )
+from app.routers import settings as owner_settings
 
 logger = logging.getLogger("seedha")
 
@@ -127,4 +129,6 @@ def create_app(
     app.include_router(site.pro_router)
     app.include_router(site.demo_router)
     app.include_router(public_site.router)
+    app.include_router(owner_settings.router)
+    app.include_router(calendar.router)
     return app
