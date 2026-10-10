@@ -5,7 +5,7 @@ export const metadata: Metadata = { title: "Cookie policy · Seedha" };
 
 export default function CookiesPage() {
   return (
-    <LegalPage title="Cookie policy" lede="Seedha uses two small cookies, both strictly necessary.">
+    <LegalPage title="Cookie policy" lede="Seedha uses three small cookies, all strictly necessary.">
       <h2 className="section">The cookies we use</h2>
       <div className="card">
         <div className="item">
@@ -28,6 +28,16 @@ export default function CookiesPage() {
           </div>
           <span className="tag ok">Necessary</span>
         </div>
+        <div className="item">
+          <div>
+            <b>seedha_cookies</b>
+            <div className="meta">
+              Remembers your answer to the cookie banner on the Seedha website, so it is not shown again.
+              Expires after six months. Set only when you answer the banner.
+            </div>
+          </div>
+          <span className="tag ok">Necessary</span>
+        </div>
       </div>
 
       <h2 className="section">What we do not use</h2>
@@ -36,17 +46,19 @@ export default function CookiesPage() {
         pages (the consent page and Seedha Link) set no cookies at all unless you change the theme.
       </p>
 
-      <h2 className="section">Why there is no cookie banner</h2>
+      <h2 className="section">About the cookie banner</h2>
       <p>
-        Both cookies are strictly necessary for something you asked for: staying logged in, or keeping the
-        theme you chose. Because we use no optional cookies, there is nothing to accept or reject, so we do
-        not show a cookie banner.
+        The website shows a short banner so you can see this for yourself. Whatever you choose, Accept all,
+        Necessary only or your own settings, the same necessary cookies are used and nothing else loads. There
+        is no analytics or advertising cookie to switch on. Open Cookie settings in the website footer to see
+        it again.
       </p>
 
       <h2 className="section">Removing them</h2>
       <p>
-        You can delete both cookies in your browser settings at any time. Deleting seedha_owner logs you out;
-        deleting seedha_theme returns the theme to automatic.
+        You can delete these cookies in your browser settings at any time. Deleting seedha_owner logs you out;
+        deleting seedha_theme returns the app to automatic and the website to dark; deleting seedha_cookies
+        shows the banner again.
       </p>
     </LegalPage>
   );

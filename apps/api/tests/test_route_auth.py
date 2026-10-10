@@ -15,6 +15,7 @@ PUBLIC = {
     ("GET", "/public/link"),
     ("POST", "/public/link/book"),
     ("POST", "/public/data-deletion"),
+    ("GET", "/public/sample"),
     ("GET", "/webhooks/whatsapp"),
     ("POST", "/webhooks/whatsapp"),
 }
