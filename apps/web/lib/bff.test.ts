@@ -11,6 +11,10 @@ test("owner routes", () => {
   assert.equal(accessFor("pro"), "owner");
   assert.equal(accessFor("site/publish"), "owner");
   assert.equal(accessFor("demo/reset"), "owner");
+  assert.equal(accessFor("inbox/threads"), "owner");
+  assert.equal(accessFor("inbox/threads/3/messages"), "owner");
+  assert.equal(accessFor("inbox/away"), "owner");
+  assert.equal(accessFor("assistant"), "owner");
 });
 
 test("device routes win over the owner desk prefix", () => {
@@ -28,6 +32,8 @@ test("unknown or unsafe paths are refused", () => {
   assert.equal(accessFor("pipelines"), null);
   assert.equal(accessFor("overviews"), null);
   assert.equal(accessFor("product"), null);
+  assert.equal(accessFor("inboxes"), null);
+  assert.equal(accessFor("assistants"), null);
   assert.equal(accessFor("public/../pipeline"), null);
   assert.equal(accessFor("ledger/%2e%2e"), null);
   assert.equal(accessFor(""), null);

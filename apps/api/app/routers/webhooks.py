@@ -1,4 +1,5 @@
-"""WhatsApp Cloud API webhook: verification handshake and inbound STOP."""
+"""WhatsApp Cloud API webhook: verification handshake, inbound STOP, and inbound
+texts stored for the Guest inbox (Desk-consented numbers only)."""
 
 from __future__ import annotations
 
@@ -11,7 +12,9 @@ from fastapi.responses import PlainTextResponse
 
 from app.deps import SessionDep, SettingsDep
 from app.errors import ApiError
+from app.routers.messages import SenderDep
 from app.services.desk import utc_now
+from app.services.inbox import record_inbound
 from app.services.messages import handle_inbound
 from app.services.whatsapp import inbound_texts, valid_signature
 
@@ -41,9 +44,11 @@ async def inbound(
     request: Request,
     session: SessionDep,
     settings: SettingsDep,
+    sender: SenderDep,
     signature: Annotated[str | None, Header(alias="X-Hub-Signature-256")] = None,
 ) -> dict[str, int]:
-    """Signed inbound messages. STOP withdraws consent (rule 5)."""
+    """Signed inbound messages. STOP withdraws consent (rule 5); other texts
+    are stored only for numbers with an active Desk consent (rule 4)."""
     if not settings.whatsapp_app_secret:
         raise ApiError(503, "webhook_not_configured", "WHATSAPP_APP_SECRET is not set")
     raw = bytearray()
@@ -59,5 +64,7 @@ async def inbound(
         raise ApiError(422, "invalid_json", "Body is not JSON") from exc
     withdrawn = 0
     for number, text in inbound_texts(payload):
-        withdrawn += handle_inbound(session, number, text, "webhook", utc_now())
+        now = utc_now()
+        withdrawn += handle_inbound(session, number, text, "webhook", now)
+        record_inbound(session, number, text, sender, now)
     return {"withdrawn": withdrawn}
