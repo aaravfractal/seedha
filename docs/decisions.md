@@ -600,3 +600,23 @@ match exactly. Calendar events are samples labelled "Sample", and each
 carries a channel decision, never a demand prediction. Demo reset keeps
 owner accounts, their settings and staff invites (S6) but wipes plan
 entries, which are property data.
+
+**D-089 Approved ideas, minimal versions (docs/ideas.md).**
+- Seedha Recover: a dispute letter per flagged row, built by a fixed
+  template in the API with no LLM. Amounts come from the stored row and
+  contract (rule 1), the letter uses the booking reference only, and TDS is
+  a credit that is never claimed (rule 2). Drafting leaves the row pending
+  and out of the flip (rule 3); nothing is sent or scraped (rule 8). The
+  Recover total and the Pro Audit figure come from one function
+  (`pro.audit_lines`): ₹802 on the sample. The ₹120 MakeMyTrip payout
+  shortfall is shown separately.
+- Split the Commission: Savings shows what the OTA would have taken, the
+  perk's cost (₹400 per night, labelled "Sample cost" until an owner
+  setting exists) and what the hotel keeps beyond it. The guest pays the
+  public rate (rule 6), and ruling 5's ₹2,233 / ₹2,199 are unchanged and
+  locked by a test.
+- Direct Booking Score: three parts with formulas and owner goals, no
+  rupees. Goals are a per-browser convenience (localStorage, try/catch);
+  the score itself is computed from the API's figures.
+The D6 scorecard and commission lever stay proposals in docs/ideas.md for
+Aarav.
