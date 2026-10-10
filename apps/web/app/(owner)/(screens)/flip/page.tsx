@@ -212,7 +212,7 @@ export default function FlipPage() {
 
       <div className={`${ui.tiles} ${ui.quad} ${f.stats}`}>
         <div className={ui.tile}>
-          <b className={`${ui.value} ${ui.loss}`}>{inr(data.totals.paid_to_channels)}</b>
+          <b className={`${ui.value} ${ui.loss}`}>{minus(data.totals.paid_to_channels)}</b>
           <span className={ui.label}>Paid to channels</span>
           <span className={ui.note}>
             {data.paid_to_channels_share_tenths !== null

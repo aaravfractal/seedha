@@ -57,7 +57,7 @@ def template(facts: DraftFacts) -> str:
     """The fixed wording, as in the prototype."""
     return (
         f"Namaste {facts.short_name}, thank you for staying at {facts.hotel}. Book your next "
-        f"stay directly with us and {facts.perk_promise}. Code {facts.code}: {facts.link} "
+        f"stay directly with us and {facts.perk_promise}. Code {facts.code}: {facts.link}\n"
         f"{STOP_LINE}"
     )
 
