@@ -73,3 +73,20 @@ original date (9 Oct 16:30), so that delete did not happen. To stop
 touching it, commits from here on run with `PRE_COMMIT_HOME` set to
 `.pre-commit-home/` in the repo (gitignored). Remaining for Aarav:
 `rm -rf ~/.cache/pre-commit`.
+
+## B-004 Frontend build inputs missing (10 Oct 2026) — needs Aarav
+
+The autonomous frontend build (docs/AUTONOMOUS_FRONTEND.md) depends on files
+that are not in the repo:
+
+- `docs/FRONTEND_MASTER.md` (phases P1 to P9, decisions in section 3, the
+  per-screen steps in section 6)
+- `design/Design_Handoff.pdf`, `design/handoff-pages/`,
+  `design/video-screens/`, `design/VIDEO_SPEC.md`, and optionally
+  `design/claude-design-files/`
+
+A read-only search of ~/Projects, ~/Downloads, ~/Desktop and ~/Documents
+found none of them. The only design handoff folder found,
+`~/Downloads/design_handoff_fractal_labs_site`, is for a different project.
+Every phase depends on these files, so nothing was built and no code was
+changed. To unblock: add them at those paths and restart the build.
