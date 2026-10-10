@@ -22,10 +22,11 @@ RESET_DB := $(VENV)/bin/alembic downgrade base && $(VENV)/bin/alembic upgrade he
 MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py,app/services/savings.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
-        check check-api check-web check-e2e dev api web demo build-web e2e firmware check-firmware setup-firmware proof-nightly secrets-history clean
+        check check-api check-web check-e2e dev api web demo demo-prod build-web e2e firmware check-firmware setup-firmware proof-nightly secrets-history clean
 
 help:
 	@echo "make demo       - first run: .env, install, seed, build and start everything"
+	@echo "make demo-prod  - seeded sample hotel on a production build (after make setup)"
 	@echo "make dev        - start API (8000) and web (3000) in dev mode"
 	@echo "make seed       - fresh database with the sample hotel (no statements yet)"
 	@echo "make seed-full  - same, plus the 1,500 statement lines already loaded"
@@ -112,6 +113,12 @@ build-web:
 
 demo: setup seed build-web
 	@echo "Open http://localhost:3000 and tap Direct beta login (SEEDHA_DEMO=1 shows sign-in codes on screen)"
+	trap 'kill 0' EXIT INT TERM; $(MAKE) api & ( $(LOAD_ENV) && cd $(WEB) && npx next start --port 3000 ) & wait
+
+# The production demo for judging: freshly seeded sample hotel, production
+# build (no dev badge), API without reload. Assumes `make setup` has run once.
+demo-prod: env seed build-web
+	@echo "Open http://localhost:3000 and tap Try the live demo (or Direct beta login on /login)"
 	trap 'kill 0' EXIT INT TERM; $(MAKE) api & ( $(LOAD_ENV) && cd $(WEB) && npx next start --port 3000 ) & wait
 
 e2e:
