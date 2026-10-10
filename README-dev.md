@@ -37,6 +37,12 @@ with the sample hotel, makes a production build of the web app, and starts:
   last 30 days; otherwise it ends with the browser session (and after 12
   hours at most). New accounts go through the 4-step onboarding on `/onboard`;
   its answers are saved on the account and never change the sample hotel.
+- Who may run the hotel: the sample hotel opens for Direct beta login and
+  any signed-in account (its data is fictional, and its WhatsApp sender is
+  always simulated). A hotel with real data opens only for accounts whose
+  number is listed in `OWNER_PHONES`. Codes appear on screen only for the
+  sample hotel, at most 5 codes go to one number per hour, and the published
+  demo secrets are refused in a production build unless `SEEDHA_DEMO=1`.
 
 Stop with Ctrl+C. For development with reload use `make dev` instead.
 

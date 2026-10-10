@@ -19,7 +19,11 @@ logger = logging.getLogger("seedha.drafter")
 
 STOP_LINE = "Reply STOP to opt out."
 MAX_LENGTH = 600
-MONEY_PATTERN = re.compile(r"(₹|\brs\.?\s*\d|\binr\b|\d\s*%|\brupees?\b)", re.IGNORECASE)
+# ₹, "rs"/"inr"/"rupee", percentages, and (D6) any number of 3 or more
+# digits, so a money figure cannot slip in without a currency sign.
+MONEY_PATTERN = re.compile(
+    r"(₹|\brs\.?\s*\d|\binr\b|\d\s*%|\brupees?\b|\d[\d,]*\d[\d,]*\d)", re.IGNORECASE
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,7 +61,7 @@ def acceptable(body: str, facts: DraftFacts) -> bool:
         and facts.code in without_link
         and facts.link in body
         and body.rstrip().endswith(STOP_LINE)
-        and MONEY_PATTERN.search(body.replace(facts.code, "").replace(facts.link, "")) is None
+        and MONEY_PATTERN.search(body.replace(facts.link, "").replace(facts.code, "")) is None
     )
 
 

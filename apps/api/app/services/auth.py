@@ -28,7 +28,7 @@ import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.models import Channel, ChannelContract, OtpChallenge, OwnerAccount, Property
@@ -198,8 +198,15 @@ def check_code(session: Session, raw_phone: str, code: str, now: datetime) -> st
     if as_utc(challenge.expires_at) <= now:
         raise AuthError(410, "expired", "This code has expired. Ask for a new one.")
     if not hmac.compare_digest(challenge.code_hash, hash_code(challenge.salt, phone, code)):
-        challenge.attempts += 1
-        left = MAX_TRIES - challenge.attempts
+        # One atomic UPDATE, so parallel guesses cannot share a count (review S9).
+        attempts = session.execute(
+            update(OtpChallenge)
+            .where(OtpChallenge.id == challenge.id)
+            .values(attempts=OtpChallenge.attempts + 1)
+            .returning(OtpChallenge.attempts)
+        ).scalar_one()
+        session.refresh(challenge, ["attempts"])
+        left = MAX_TRIES - attempts
         if left <= 0:
             challenge.locked_until = now + LOCK_FOR
             raise AuthError(

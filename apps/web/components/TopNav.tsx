@@ -6,9 +6,12 @@ import { ThemeToggle } from "./ThemeToggle";
 import { AppHeader } from "./shell/AppHeader";
 import { isAppRoute } from "@/lib/screens";
 
-/** Pages a guest opens on their own phone: no owner navigation. */
+/**
+ * Pages a guest opens on their own phone: no owner navigation and no owner
+ * data calls (Seedha Link is public with or without a code).
+ */
 export function isGuestPage(pathname: string): boolean {
-  return pathname.startsWith("/consent/") || /^\/link\/[^/]+/.test(pathname);
+  return pathname.startsWith("/consent/") || pathname === "/link" || pathname.startsWith("/link/");
 }
 
 /**

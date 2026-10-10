@@ -12,6 +12,6 @@ export async function POST(request: NextRequest): Promise<Response> {
   // API for its records, but never block sign out on it.
   await callApi("auth/logout", { method: "POST", client: clientAddress(request.headers) }).catch(() => null);
   const response = Response.json({ ok: true });
-  response.headers.append("set-cookie", clearSessionCookie(isSecure(request.url)));
+  response.headers.append("set-cookie", clearSessionCookie(isSecure(request)));
   return response;
 }

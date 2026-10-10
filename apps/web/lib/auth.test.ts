@@ -52,6 +52,11 @@ test("next path stays on this site", () => {
   assert.equal(safeNext("/\\evil.example"), "/home");
   assert.equal(safeNext("https://evil.example"), "/home");
   assert.equal(safeNext(null), "/home");
+  // Browsers drop tabs and newlines: these would become //evil.example (review S3).
+  for (const raw of ["/\t/evil.example", "/\n/evil.example", "/%09/evil.example", "/\r//evil.example"]) {
+    assert.equal(safeNext(raw), "/home", JSON.stringify(raw));
+  }
+  assert.equal(safeNext("/link/DEODAR-RS26?nights=2"), "/link/DEODAR-RS26?nights=2");
 });
 
 test("pending code state is validated", () => {

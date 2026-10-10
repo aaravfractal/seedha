@@ -5,13 +5,14 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy import delete
 
-from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
+from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep, require_owner_session
 from app.errors import ApiError
 from app.models import Base, Property
+from app.ratelimit import rate_limited
 from app.services.desk import business_date, utc_now
 from app.services.link import room_rates
 from app.services.pro import active_consents, audit
@@ -180,7 +181,11 @@ class ResetOut(BaseModel):
     demo_date: str
 
 
-@demo_router.post("/reset", response_model=ResetOut)
+@demo_router.post(
+    "/reset",
+    response_model=ResetOut,
+    dependencies=[Depends(require_owner_session), Depends(rate_limited("demo_reset"))],
+)
 def reset_demo(
     _owner: OwnerDep, session: SessionDep, prop: PropertyDep, settings: SettingsDep
 ) -> ResetOut:
@@ -190,8 +195,12 @@ def reset_demo(
     if not prop.is_sample:
         raise ApiError(403, "not_sample", "Reset is only available for the sample hotel")
     day = business_date(session, prop.id, utc_now().date())
+    # Sign-in records survive a reset: anyone can press it on the sample
+    # hotel, and it must not wipe accounts or OTP locks (security review S6).
+    keep = {"owner_account", "otp_challenge"}
     for table in reversed(Base.metadata.sorted_tables):
-        session.execute(delete(table))
+        if table.name not in keep:
+            session.execute(delete(table))
     session.flush()
     session.expunge_all()  # forget objects whose rows were just deleted
     load_sample(session, settings.demo_date or day, with_statements=False,

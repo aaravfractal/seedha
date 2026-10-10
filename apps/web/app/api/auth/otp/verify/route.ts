@@ -46,6 +46,6 @@ export async function POST(request: NextRequest): Promise<Response> {
     ttlSeconds: remember ? LONG_SESSION_TTL_SECONDS : SESSION_TTL_SECONDS,
   });
   const response = Response.json({ ok: true, onboarded: account.onboarded });
-  response.headers.append("set-cookie", sessionCookie(value, { remember, secure: isSecure(request.url) }));
+  response.headers.append("set-cookie", sessionCookie(value, { remember, secure: isSecure(request) }));
   return response;
 }

@@ -1,16 +1,21 @@
 /**
- * Fonts loaded with next/font (self-hosted at build time, no runtime requests
- * to Google, so the CSP font-src 'self' holds).
+ * Fonts. World A uses the system stack; Mukta covers Devanagari.
  *
- * World A uses the system stack; Mukta covers Devanagari. The World B mood
- * fonts (Cormorant Garamond, DM Serif Display, Outfit) are loaded only by the
- * hotel-site components that use them.
+ * Mukta (SIL Open Font License, lib/fonts/OFL-Mukta.txt) is bundled in the
+ * repo and loaded with next/font/local, so the app never needs Google Fonts
+ * at runtime: with next/font/google a server without internet answered 500 on
+ * every page (accessibility review A1, D-087). Only the Devanagari subset is
+ * bundled; Latin text keeps the system font. World B fonts load in the
+ * hotel-site components.
  */
-import { Mukta } from "next/font/google";
+import localFont from "next/font/local";
 
-export const mukta = Mukta({
-  subsets: ["devanagari", "latin"],
-  weight: ["400", "600", "700"],
+export const mukta = localFont({
+  src: [
+    { path: "./fonts/mukta-devanagari-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/mukta-devanagari-600.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/mukta-devanagari-700.woff2", weight: "700", style: "normal" },
+  ],
   variable: "--font-mukta",
   display: "swap",
 });

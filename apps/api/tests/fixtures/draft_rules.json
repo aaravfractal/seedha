@@ -1,0 +1,16 @@
+{
+  "code": "DEODAR-RS26",
+  "link": "http://localhost:3000/link/DEODAR-RS26",
+  "cases": [
+    {"text": "Namaste Rahul ji, breakfast is on us. Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26 Reply STOP to opt out.", "problem": null},
+    {"text": "", "problem": "The message cannot be empty."},
+    {"text": "Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26", "problem": "Keep \"Reply STOP to opt out.\" in the message."},
+    {"text": "Code DEODAR-RS26 Reply STOP to opt out.", "problem": "Keep the booking link http://localhost:3000/link/DEODAR-RS26 in the message."},
+    {"text": "Your 4500 stay. Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26 Reply STOP to opt out.", "problem": "Offer a perk, not a price. Remove amounts, percentages and long numbers."},
+    {"text": "Save ₹500. Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26 Reply STOP to opt out.", "problem": "Offer a perk, not a price. Remove amounts, percentages and long numbers."},
+    {"text": "10% off. Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26 Reply STOP to opt out.", "problem": "Offer a perk, not a price. Remove amounts, percentages and long numbers."},
+    {"text": "Verify at https://evil.example. Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26 Reply STOP to opt out.", "problem": "Keep only the booking link. Other links are not allowed."},
+    {"text": "See evil.com. Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26 Reply STOP to opt out.", "problem": "Keep only the booking link. Other links are not allowed."},
+    {"text": "Stay 2 nights in room 42. Code DEODAR-RS26: http://localhost:3000/link/DEODAR-RS26 Reply STOP to opt out.", "problem": null}
+  ]
+}

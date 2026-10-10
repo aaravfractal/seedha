@@ -171,3 +171,19 @@ def test_drafts_coded_bookings_and_proof_show_up(client: TestClient, owner: dict
     assert after["pending_approvals"] == 0
     assert after["savings"]["count"] >= 1
     assert any(n["id"].startswith("saving-") for n in after["notifications"])
+
+
+@pytest.mark.usefixtures("sample")
+def test_saturday_move_returns_to_needs_you_after_undo(
+    client: TestClient, owner: dict[str, str]
+) -> None:
+    def scenario_listed() -> bool:
+        items = client.get("/overview", headers=owner).json()["needs_you"]
+        return any(i["id"] == "scenario" for i in items)
+
+    assert scenario_listed()
+    accepted = {"decision": "accepted", "rooms": 6}
+    assert client.post("/scenario/saturday", headers=owner, json=accepted).status_code == 200
+    assert not scenario_listed(), "answered"
+    assert client.post("/scenario/saturday/undo", headers=owner).status_code == 200
+    assert scenario_listed(), "undone: the card and Overview agree again (review Q1)"

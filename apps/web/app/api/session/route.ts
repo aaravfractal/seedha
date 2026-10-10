@@ -9,6 +9,6 @@ import { clearSessionCookie } from "@/lib/session";
 
 export async function DELETE(request: NextRequest): Promise<Response> {
   const response = Response.json({ ok: true });
-  response.headers.append("set-cookie", clearSessionCookie(isSecure(request.url)));
+  response.headers.append("set-cookie", clearSessionCookie(isSecure(request)));
   return response;
 }

@@ -55,9 +55,13 @@ export function triesText(left: number): string {
   return `${left} of ${OTP_MAX_TRIES} tries left`;
 }
 
-/** A same-site path to return to after sign in, else Overview. */
+/**
+ * A same-site path to return to after sign in, else Overview. Only plain
+ * paths pass: browsers drop tabs and newlines, so "/\t/evil.example" would
+ * otherwise become "//evil.example" (security review S3).
+ */
 export function safeNext(raw: string | null | undefined): string {
-  return raw && raw.startsWith("/") && !raw.startsWith("//") && !raw.startsWith("/\\") ? raw : "/home";
+  return raw && /^\/(?!\/)[A-Za-z0-9/_\-.]*(\?[A-Za-z0-9=&_\-.%]*)?$/.test(raw) ? raw : "/home";
 }
 
 /** Sign-in state carried from /login or /signup to /otp in sessionStorage. */

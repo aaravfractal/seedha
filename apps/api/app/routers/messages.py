@@ -22,7 +22,7 @@ from app.services.messages import (
     perk_link,
     reject,
 )
-from app.services.whatsapp import Sender, sender_for
+from app.services.whatsapp import Sender, SimulatedSender, sender_for
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -69,10 +69,17 @@ class ReplyIn(BaseModel):
     text: str = Field(min_length=1, max_length=200)
 
 
-def get_sender(request: Request, settings: SettingsDep) -> Sender:
-    """WhatsApp sender, overridable in tests via app.state.sender."""
+def get_sender(request: Request, settings: SettingsDep, prop: PropertyDep) -> Sender:
+    """WhatsApp sender, overridable in tests via app.state.sender.
+
+    The sample hotel always uses the simulated sender, whatever keys are set:
+    its guests are fictional and anyone can open it with Direct beta login, so
+    it must never reach a real phone (security review S2, rule 11).
+    """
     override: Sender | None = getattr(request.app.state, "sender", None)
-    return override if override is not None else sender_for(settings)
+    if override is not None:
+        return override
+    return SimulatedSender() if prop.is_sample else sender_for(settings)
 
 
 SenderDep = Annotated[Sender, Depends(get_sender)]

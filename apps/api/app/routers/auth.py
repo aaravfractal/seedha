@@ -17,10 +17,13 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Header, Request
 from pydantic import BaseModel, Field, StringConstraints
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
+from app.config import Settings
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
-from app.models import OwnerAccount
+from app.models import OwnerAccount, Property
 from app.ratelimit import GLOBAL_FACTOR, Limit, RateLimiter
 from app.services.auth import (
     CONTRACT_KEYS,
@@ -31,6 +34,7 @@ from app.services.auth import (
     account_onboarding,
     check_code,
     mask_phone,
+    normalise_phone,
     sample_onboarding,
     save_onboarding,
     send_code,
@@ -46,6 +50,9 @@ AUTH_LIMITS: dict[str, Limit] = {
     "otp_verify": Limit(10, 60),
     "auth_demo": Limit(30, 60),
 }
+# Codes per WhatsApp number, whoever asks (security review S7): stops anyone
+# pumping codes at a number. 5 an hour.
+PER_NUMBER_SENDS = Limit(5, 60 * 60)
 DEMO_SUBJECT = "demo"
 MAX_PERCENT = 50
 MAX_COST_RUPEES = 100_000
@@ -58,6 +65,31 @@ def get_now(request: Request) -> datetime:
 
 
 NowDep = Annotated[datetime, Depends(get_now)]
+
+
+def demo_codes(settings: Settings, session: Session) -> bool:
+    """Show sign-in codes on screen only for the sample hotel (SEEDHA_DEMO=1)."""
+    if not settings.seedha_demo:
+        return False
+    prop = session.scalar(select(Property).order_by(Property.id).limit(1))
+    return prop is None or prop.is_sample
+
+
+def number_cap(request: Request, raw_phone: str) -> None:
+    """429 when this number has had too many codes this hour."""
+    try:
+        phone = normalise_phone(raw_phone)
+    except AuthError:
+        return  # the service reports the bad number
+    limiter: RateLimiter = request.app.state.rate_limiter
+    wait = limiter.check("otp_number", phone, PER_NUMBER_SENDS)
+    if wait > 0:
+        raise ApiError(
+            429,
+            "too_many_codes",
+            "Too many codes for this number. Try again later.",
+            headers={"Retry-After": str(math.ceil(wait))},
+        )
 
 
 def limited(bucket: str) -> Callable[[Request], None]:
@@ -262,14 +294,21 @@ def _sent(sent: SentCode, demo: bool) -> OtpSentOut:
     dependencies=[Depends(limited("otp_send"))],
 )
 def request_code(
-    body: OtpRequestIn, _owner: OwnerDep, session: SessionDep, settings: SettingsDep, now: NowDep
+    request: Request,
+    body: OtpRequestIn,
+    _owner: OwnerDep,
+    session: SessionDep,
+    settings: SettingsDep,
+    now: NowDep,
 ) -> OtpSentOut:
     """Send a sign-in code (simulated sender)."""
+    demo = demo_codes(settings, session)
     try:
-        sent = send_code(session, body.phone, now, demo=settings.seedha_demo)
+        number_cap(request, body.phone)
+        sent = send_code(session, body.phone, now, demo=demo)
     except AuthError as exc:
         raise as_api_error(exc) from None
-    return _sent(sent, settings.seedha_demo)
+    return _sent(sent, demo)
 
 
 @router.post(
@@ -308,17 +347,24 @@ def verify_code(
     dependencies=[Depends(limited("otp_send"))],
 )
 def signup(
-    body: SignupIn, _owner: OwnerDep, session: SessionDep, settings: SettingsDep, now: NowDep
+    request: Request,
+    body: SignupIn,
+    _owner: OwnerDep,
+    session: SessionDep,
+    settings: SettingsDep,
+    now: NowDep,
 ) -> OtpSentOut:
     """Create the account (unverified) and send the first code."""
+    demo = demo_codes(settings, session)
     try:
         sign_up(session, name=body.name, hotel=body.hotel, raw_phone=body.phone,
                 updates=body.updates, now=now)  # fmt: skip
-        sent = send_code(session, body.phone, now, demo=settings.seedha_demo)
+        number_cap(request, body.phone)
+        sent = send_code(session, body.phone, now, demo=demo)
     except AuthError as exc:
         session.commit()  # the account details stay; only the send was refused
         raise as_api_error(exc) from None
-    return _sent(sent, settings.seedha_demo)
+    return _sent(sent, demo)
 
 
 @router.post("/auth/demo", response_model=DemoOut, dependencies=[Depends(limited("auth_demo"))])

@@ -5,13 +5,13 @@
  */
 import type { NextRequest } from "next/server";
 import { accessFor } from "@/lib/bff";
+import { sameOrigin } from "@/lib/authServer";
+import { API_BODY_BYTES, readCapped } from "@/lib/body";
 import { clientAddress } from "@/lib/ratelimit";
-import { SESSION_COOKIE, nowSeconds, verifySession } from "@/lib/session";
+import { SESSION_COOKIE, nowSeconds, readSession } from "@/lib/session";
 
 const FORWARD_REQUEST_HEADERS = ["content-type", "accept"];
 const FORWARD_RESPONSE_HEADERS = ["content-type", "content-disposition"];
-// The largest statement upload the API takes is 10 MB; leave room for the form.
-const MAX_BODY_BYTES = 11 * 1024 * 1024;
 
 function errorResponse(status: number, code: string, message: string): Response {
   return Response.json({ error: { code, message } }, { status });
@@ -30,28 +30,35 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
   // The API rate-limits public routes per guest; uvicorn trusts this header
   // from the loopback BFF and resolves it into the client address.
   headers.set("x-forwarded-for", clientAddress(request.headers));
+  const hasBody = request.method !== "GET" && request.method !== "HEAD";
+  // Writes must come from this site (security review S4; cookies are SameSite=Lax too).
+  if (hasBody && !sameOrigin(request.headers, request.url)) {
+    return errorResponse(403, "cross_site", "This request came from another site.");
+  }
   if (access !== "public") {
-    const ok = await verifySession(
+    const session = await readSession(
       process.env.SESSION_SECRET ?? "",
       request.cookies.get(SESSION_COOKIE)?.value,
       nowSeconds(),
     );
-    if (!ok) return errorResponse(401, "login_required", "Please log in again");
+    if (!session) return errorResponse(401, "login_required", "Please log in again");
+    // The API decides what this session may run (security review S1).
+    headers.set("x-seedha-subject", session.subject);
   }
   if (access === "owner") headers.set("authorization", `Bearer ${process.env.OWNER_API_TOKEN ?? ""}`);
   if (access === "device") headers.set("x-device-key", process.env.DESK_DEVICE_KEY ?? "");
 
   const target = new URL(`${process.env.API_URL ?? "http://localhost:8000"}/${joined}`);
   target.search = request.nextUrl.search;
-  const hasBody = request.method !== "GET" && request.method !== "HEAD";
-  if (Number(request.headers.get("content-length") ?? 0) > MAX_BODY_BYTES) {
+  const body = hasBody ? await readCapped(request, API_BODY_BYTES) : undefined;
+  if (body === null) {
     return errorResponse(413, "body_too_large", "That file is too large. The limit is 10 MB.");
   }
   try {
     const upstream = await fetch(target, {
       method: request.method,
       headers,
-      body: hasBody ? await request.arrayBuffer() : undefined,
+      body: body ? Buffer.from(body) : undefined,
       cache: "no-store",
     });
     const responseHeaders = new Headers();

@@ -42,6 +42,10 @@ class Settings:
     # SEEDHA_DEMO=1: the simulated OTP sender returns the code to the web app,
     # which shows it in a labelled demo banner. Local demo only.
     seedha_demo: bool = False
+    # Owner WhatsApp numbers (10 digits, comma-separated) allowed to run a
+    # property that is not sample data. The sample hotel is open to any
+    # signed-in session (all of its data is fictional).
+    owner_phones: frozenset[str] = frozenset()
 
     @property
     def llm_enabled(self) -> bool:
@@ -85,4 +89,7 @@ def load_settings() -> Settings:
         demo_date=date.fromisoformat(raw_demo_date) if raw_demo_date else None,
         desk_device_key=_env("DESK_DEVICE_KEY"),
         seedha_demo=_env("SEEDHA_DEMO") == "1",
+        owner_phones=frozenset(
+            p.strip()[-10:] for p in _env("OWNER_PHONES").split(",") if p.strip()
+        ),
     )

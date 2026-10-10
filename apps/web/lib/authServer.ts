@@ -3,6 +3,7 @@
  * FastAPI auth routes with OWNER_API_TOKEN (never sent to the browser) and
  * tell the API who is signed in with X-Seedha-Subject.
  */
+import { AUTH_BODY_BYTES, readCapped } from "./body.ts";
 import { type Limit, RateLimiter, clientAddress } from "./ratelimit.ts";
 
 /** Per client address on the web server, in front of the API's own limits. */
@@ -18,6 +19,7 @@ export const AUTH_LIMITS = {
 export type AuthBucket = keyof typeof AUTH_LIMITS;
 
 const limiter = new RateLimiter();
+const GLOBAL_FACTOR = 20;
 
 export function jsonError(
   status: number,
@@ -31,7 +33,10 @@ export function jsonError(
 
 /** A 429 response when this client is over the bucket's limit, else null. */
 export function overLimit(bucket: AuthBucket, headers: Headers, rl: RateLimiter = limiter): Response | null {
-  const wait = rl.check(`${bucket}:${clientAddress(headers)}`, AUTH_LIMITS[bucket]);
+  const limit = AUTH_LIMITS[bucket];
+  // Per client, and a ceiling for everyone together (a client can fake its address: S10).
+  const ceiling = { count: limit.count * GLOBAL_FACTOR, seconds: limit.seconds };
+  const wait = rl.check(`${bucket}:${clientAddress(headers)}`, limit) || rl.check(`${bucket}:*`, ceiling);
   if (wait <= 0) return null;
   const minutes = Math.ceil(wait / 60);
   return jsonError(
@@ -62,7 +67,9 @@ export function sameOrigin(headers: Headers, url: string): boolean {
 /** Read a JSON object body, or null. */
 export async function readJson(request: Request): Promise<Record<string, unknown> | null> {
   try {
-    const body: unknown = await request.json();
+    const bytes = await readCapped(request, AUTH_BODY_BYTES);
+    if (bytes === null) return null;
+    const body: unknown = JSON.parse(new TextDecoder().decode(bytes));
     return typeof body === "object" && body !== null && !Array.isArray(body)
       ? (body as Record<string, unknown>)
       : null;
@@ -123,14 +130,33 @@ export function unreachable(): Response {
   return jsonError(502, "api_unreachable", "Seedha API is not reachable. Is it running?");
 }
 
-export function isSecure(url: string): boolean {
-  return new URL(url).protocol === "https:";
+/**
+ * Whether the session cookie gets `Secure`: on https, behind a TLS proxy, and
+ * always in production except on localhost (security review S12).
+ */
+export function isSecure(request: Request): boolean {
+  const url = new URL(request.url);
+  if (url.protocol === "https:" || request.headers.get("x-forwarded-proto") === "https") return true;
+  const local = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+  return process.env.NODE_ENV === "production" && !local;
 }
+
+/** The values published in .env.example; nobody may run a real site with them. */
+const DEMO_SECRETS = new Set(["demo-session-secret-change-me-32chars", "demo-owner-token-change-me"]);
 
 /** 503 when the web server lacks the secrets it needs to sign anyone in. */
 export function notConfigured(): Response | null {
-  if (process.env.OWNER_API_TOKEN && process.env.SESSION_SECRET) return null;
-  return jsonError(503, "login_not_configured", "OWNER_API_TOKEN or SESSION_SECRET is not set");
+  const token = process.env.OWNER_API_TOKEN ?? "";
+  const secret = process.env.SESSION_SECRET ?? "";
+  if (!token || !secret) {
+    return jsonError(503, "login_not_configured", "OWNER_API_TOKEN or SESSION_SECRET is not set");
+  }
+  // Published demo secrets would let anyone forge a session (security review S14).
+  const demoSecrets = DEMO_SECRETS.has(token) || DEMO_SECRETS.has(secret) || secret.length < 32;
+  if (demoSecrets && process.env.NODE_ENV === "production" && process.env.SEEDHA_DEMO !== "1") {
+    return jsonError(503, "login_not_configured", "Set your own OWNER_API_TOKEN and SESSION_SECRET");
+  }
+  return null;
 }
 
 /** Shared guard for auth POSTs: configuration, same origin, rate limit. */

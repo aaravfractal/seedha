@@ -10,6 +10,7 @@ Rules enforced here:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -150,6 +151,12 @@ def perk_link(web_origin: str, code: str) -> str:
     return f"{web_origin.rstrip('/')}/link/{code}"
 
 
+# Any web address other than the perk link (security review S2: no phishing links).
+OTHER_LINK = re.compile(
+    r"(https?://|www\.|\b[a-z0-9-]+\.(?:com|in|net|org|io|co|me|ly|app)\b)", re.I
+)
+
+
 def edit_problem(text: str, code: str, link: str) -> str | None:
     """Why an owner's edit cannot be saved, or None when it keeps every rule.
 
@@ -165,7 +172,11 @@ def edit_problem(text: str, code: str, link: str) -> str | None:
         (code not in text.replace(link, ""), f"Keep the code {code} in the message."),
         (
             MONEY_PATTERN.search(text.replace(link, "").replace(code, "")) is not None,
-            "Offer a perk, not a price. Remove amounts and percentages.",
+            "Offer a perk, not a price. Remove amounts, percentages and long numbers.",
+        ),
+        (
+            OTHER_LINK.search(text.replace(link, "")) is not None,
+            "Keep only the booking link. Other links are not allowed.",
         ),
     )
     return next((problem for failed, problem in checks if failed), None)

@@ -8,7 +8,7 @@ import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
 import { ProofDialog } from "@/components/ProofDialog";
 import { Chip, Screen, ui } from "@/components/owner/ui";
-import { STOP_LINE, editProblem } from "@/components/owner/draftRules";
+import { STOP_LINE, editProblem } from "@/lib/draftRules";
 import a from "./approvals.module.css";
 
 const TITLE = "Messages waiting for you.";

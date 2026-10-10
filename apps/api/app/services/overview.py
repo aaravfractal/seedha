@@ -26,7 +26,7 @@ from app.models import (
 )
 from app.money import per_unit_rounded, share_tenths_of_percent
 from app.routers.pipeline import STEP_KEYS, compute_steps
-from app.routers.scenario import DEFAULT_ROOMS, latest_decision
+from app.routers.scenario import DEFAULT_ROOMS, current_answer
 from app.services.consent import as_utc
 from app.services.desk import business_date, in_house, utc_now
 from app.services.insight import build_insight
@@ -346,7 +346,7 @@ def needs_you(
                 "repeat",
             )
         )
-    if ledger is not None and latest_decision(session, prop.id) is None:
+    if ledger is not None and current_answer(session, prop.id) is None:
         try:
             move = saturday_move(ledger, min(DEFAULT_ROOMS, prop.rooms_count))
         except ScenarioError:

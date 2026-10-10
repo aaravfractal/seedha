@@ -61,6 +61,12 @@ def compute(session: SessionDep, property_id: int, rooms: int) -> SaturdayMove:
     return saturday_move(load_ledger(session, property_id), rooms)
 
 
+def current_answer(session: SessionDep, property_id: int) -> ScenarioDecision | None:
+    """The owner's standing answer: the latest one, unless it was undone."""
+    last = latest_decision(session, property_id)
+    return None if last is None or last.decision == UNDONE else last
+
+
 def latest_decision(session: SessionDep, property_id: int) -> ScenarioDecision | None:
     """The owner's most recent answer to the Saturday move."""
     return session.scalar(

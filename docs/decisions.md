@@ -534,3 +534,53 @@ website's own layout lands.
 **D-085 Flip share tile.** The flip shows "Commission-free share 16.7%" as
 the figure with "Direct bookings 10.7%" beneath it, as on Overview (D1);
 ruling 3 requires both labels and neither as the bare word "direct share".
+
+**D-086 Security review fixes (P1 to P4).** From
+docs/agent-reports/review-security.md:
+- S1: the BFF forwards the session subject (`X-Seedha-Subject`) on owner
+  routes. The API (`deps.require_owner_session`) lets "demo" and any
+  verified account run only a sample property; a property with real data
+  needs an account whose number is in `OWNER_PHONES`. Calls without the
+  header are server-side token holders. Codes are returned on screen only
+  for the sample hotel.
+- S2: the sample hotel always uses the simulated WhatsApp sender, whatever
+  keys exist. Edited drafts may carry no web address except the perk link.
+- S3: `safeNext` accepts only plain same-site paths.
+- S4: the BFF refuses cross-site writes (Origin check).
+- S5 (D6): the money guard also rejects any number of 3 or more digits. The
+  link is stripped before the code (stripping the code first left ":3000"
+  behind).
+- S6: demo reset keeps owner accounts and OTP locks, and is limited to 2
+  per minute.
+- S7: at most 5 codes per number per hour.
+- S9: wrong tries count with one atomic UPDATE.
+- S10: the web auth limits have an all-clients ceiling.
+- S11: request bodies are read with a byte cap (16 KB auth, 11 MB API),
+  chunked or not.
+- S12: `Secure` on https, behind a TLS proxy, and in production off
+  localhost.
+- S14: published demo secrets are refused in a production build unless
+  `SEEDHA_DEMO=1`.
+
+Accepted for now, documented:
+- S7: the D4 lock (5 wrong codes lock the number for 15 minutes) can still
+  be triggered by someone who knows the number. D4 is final, and the
+  per-number send cap stops the code pumping.
+- S8: a new code after expiry resets the tries; still about 1e-6 per guess.
+- S13: sessions are stateless, so logout clears only this browser.
+  Revocation needs a session store, which is planned.
+- S15: sign-up on an unverified number can set its name; the owner sees
+  and can correct it in onboarding step 1.
+
+**D-087 Fonts bundled; guest pages stay guest.** With next/font/google the
+dev server fetched Mukta from Google at runtime and answered 500 on every
+page when it had no internet (accessibility review A1), which would sink a
+demo on venue wifi. Mukta's Devanagari subset (400, 600, 700; SIL OFL, with
+its licence) now ships in apps/web/lib/fonts and loads with
+next/font/local. The World B fonts get the same treatment when P5 merges.
+Separately, the public /link page was treated as an app page, so it loaded
+the owner shell, got 401 and covered the guest's booking page with "Your
+session has ended". /link, /link/* and /consent/* are now guest pages that
+never call owner routes. The flip timing e2e passed 6 of 7 recent runs; the
+one miss (1.58 s against 1 s) was under heavy machine load from parallel
+builders, and the threshold stays.

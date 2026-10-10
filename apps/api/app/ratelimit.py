@@ -41,6 +41,8 @@ LIMITS: dict[str, Limit] = {
     "link": Limit(30, 60),
     "link_book": Limit(10, 60),
     "data_deletion": Limit(5, 60),
+    # Anyone signed in to the sample hotel can press reset (review S6).
+    "demo_reset": Limit(2, 60),
 }
 
 

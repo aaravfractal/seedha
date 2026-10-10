@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 from app.errors import ApiError
-from app.models import DeskDevice, Property
+from app.models import DeskDevice, OwnerAccount, Property
 from app.services.desk import device_for_key
 from app.services.drafter import ClaudeWording, Wording
 
@@ -58,7 +58,50 @@ def require_owner(
         raise ApiError(401, "unauthorised", "Owner token missing or wrong")
 
 
-OwnerDep = Annotated[None, Depends(require_owner)]
+def require_subject_access(
+    request: Request,
+    settings: SettingsDep,
+    x_seedha_subject: Annotated[str | None, Header()] = None,
+) -> None:
+    """Which signed-in session may run this property (security review S1).
+
+    The web BFF forwards the session's subject on owner routes: "demo" for
+    Direct beta login or "a<id>" for an owner account. Without the header the
+    caller is a server-side token holder (jobs, tests). A demo session and any
+    account may run only a sample property; a property with real data needs an
+    account whose WhatsApp number is in OWNER_PHONES.
+    """
+    if x_seedha_subject is None:
+        return
+    factory: sessionmaker[Session] = request.app.state.session_factory
+    with factory() as session:
+        prop = session.scalar(select(Property).order_by(Property.id).limit(1))
+        if prop is None or prop.is_sample:
+            if x_seedha_subject == "demo" or _account(session, x_seedha_subject) is not None:
+                return
+            raise ApiError(401, "session_ended", "Please sign in again")
+        if x_seedha_subject != "demo":
+            account = _account(session, x_seedha_subject)
+            if account is not None and account.phone in settings.owner_phones:
+                return
+    raise ApiError(403, "not_owner", "This account cannot open this hotel")
+
+
+def _account(session: Session, subject: str) -> OwnerAccount | None:
+    if not subject.startswith("a") or not subject[1:].isdigit():
+        return None
+    account = session.get(OwnerAccount, int(subject[1:]))
+    return account if account is not None and account.verified_at is not None else None
+
+
+def require_owner_session(
+    _token: Annotated[None, Depends(require_owner)],
+    _subject: Annotated[None, Depends(require_subject_access)],
+) -> None:
+    """Owner token plus, when present, a session allowed to run this property."""
+
+
+OwnerDep = Annotated[None, Depends(require_owner_session)]
 
 
 def get_property(session: SessionDep) -> Property:
