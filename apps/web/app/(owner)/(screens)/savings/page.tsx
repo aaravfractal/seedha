@@ -2,25 +2,15 @@
 
 import Link from "next/link";
 import { useApi } from "@/lib/api";
-import { count, inr, pctTenths } from "@/lib/format";
+import { count, inr, monthRange, pctTenths } from "@/lib/format";
 import type { SavingItem } from "@/lib/types";
-import type { OwnerSavings, SavingsSeason } from "@/lib/types-owner";
+import type { OwnerSavings } from "@/lib/types-owner";
 import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { CalcNote, Screen, ui } from "@/components/owner/ui";
 import { useCountUp } from "@/components/owner/motion";
 import v from "./savings.module.css";
 
 const TITLE = "Saved by booking direct.";
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function seasonLabel(season: SavingsSeason): string {
-  const [sy, sm] = season.start.split("-").map(Number);
-  const [ey, em] = season.end.split("-").map(Number);
-  const s = MONTHS[(sm ?? 1) - 1];
-  const e = MONTHS[(em ?? 1) - 1];
-  return sy === ey ? `${s} to ${e} ${ey}` : `${s} ${sy} to ${e} ${ey}`;
-}
-
 function plural(n: number, word: string): string {
   return `${count(n)} ${word}${n === 1 ? "" : "s"}`;
 }
@@ -92,7 +82,7 @@ export default function SavingsPage() {
           </div>
           <div className={v.season}>
             <h2 className={v.seasonTitle}>Season in review</h2>
-            <p className={v.seasonRange}>{seasonLabel(s.season)}</p>
+            <p className={v.seasonRange}>{monthRange(s.season.start, s.season.end)}</p>
             <b className={v.seasonValue}>+{inr(s.season.total_net_saving)}</b>
             <span className={v.seasonLabel}>
               saved by {plural(s.season.count, "coded direct booking")} booked this season

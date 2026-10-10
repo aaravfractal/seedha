@@ -1134,8 +1134,7 @@ label.fl {
 }
 .bub .foot {
   display: block;
-  font-size: 12px;
-  opacity: 0.75;
+  font-size: 13px;
   margin-top: 4px;
 }
 .chipv {
@@ -1323,7 +1322,7 @@ label.fl {
   margin: 8px 0;
 }
 .hs .foot {
-  font-size: 11px;
+  font-size: 13px;
   color: #6b6b6b;
   text-align: center;
   padding: 10px;

@@ -1,5 +1,6 @@
 "use client";
 
+import { istStamp } from "@/lib/format";
 import Link from "next/link";
 import { useId, useState } from "react";
 import { ApiError, api, postJson, useApi } from "@/lib/api";
@@ -22,20 +23,9 @@ const STATUS_CHIP: Record<string, { tone: "ok" | "bad" | "plain"; label: string 
   failed: { tone: "bad", label: "Not sent" },
 };
 
-/** "7:42 PM at Desk, 14 Jun 2026" in India time. */
+/** "7:42 PM at Desk, 13 Oct 2026" (India time). */
 function deskStamp(iso: string): string {
-  const at = new Date(iso);
-  const time = at.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "Asia/Kolkata",
-  });
-  const day = at.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Kolkata",
-  });
+  const [day, time] = istStamp(iso).split(", ");
   return `${time} at Desk, ${day}`;
 }
 

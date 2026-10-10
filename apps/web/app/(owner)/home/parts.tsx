@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { ApiError, postJson } from "@/lib/api";
 import { count, inr, pctTenths } from "@/lib/format";
-import { compactInr, monthRange, wholePct } from "@/lib/format-overview";
+import { channelColour } from "@/lib/channels";
+import { compactInr, monthRange, wholePct } from "@/lib/format";
 import type { Overview, OverviewItem, OverviewKpis } from "@/lib/types-overview";
 import type { Slip } from "@/lib/types";
 import { useToast } from "@/components/Toast";
@@ -12,16 +13,7 @@ import { Icon } from "@/components/shell/Icons";
 import type { IconName } from "@/components/shell/Icons";
 import styles from "./overview.module.css";
 
-/** Channel chart colour tokens (neutral greys, pine for Direct). */
-const CHANNEL_COLOUR: Record<string, string> = {
-  mmt: "var(--ch-mmt)",
-  bcom: "var(--ch-bcom)",
-  agoda: "var(--ch-agoda)",
-  ta: "var(--ch-agent)",
-  walkin: "var(--ch-walkin)",
-  direct: "var(--ch-direct)",
-};
-const colour = (key: string) => CHANNEL_COLOUR[key] ?? "var(--ink2)";
+const colour = channelColour;
 
 const ROOM_LEGEND: [string, string][] = [
   ["mmt", "MakeMyTrip"],

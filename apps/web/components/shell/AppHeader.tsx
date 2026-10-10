@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { OWNER_SCREENS, isCurrent } from "@/lib/screens";
-import { timeLabel } from "@/lib/format-overview";
+import { timeLabel } from "@/lib/format";
 import type { OverviewItem } from "@/lib/types-overview";
 import { useDialogFocus } from "@/components/useDialogFocus";
 import { ThemeToggle } from "@/components/ThemeToggle";

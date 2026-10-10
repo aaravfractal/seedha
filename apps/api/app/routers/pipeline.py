@@ -7,28 +7,16 @@ consent saved, a message sent, a coded booking). Steps that are only "seen"
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Literal
 
 from fastapi import APIRouter
 from pydantic import BaseModel
-from sqlalchemy import Select, select
-from sqlalchemy.orm import Session
 
 from app.deps import OwnerDep, PropertyDep, SessionDep
-from app.models import (
-    SAMPLE_HISTORY_PAYMENT,
-    Booking,
-    Consent,
-    DirectBooking,
-    Message,
-    PipelineStep,
-    Saving,
-    StatementFile,
-)
+from app.services.pipeline import STEP_KEYS, compute_steps, record_step
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
-STEP_KEYS = ("up", "ai", "flip", "rep", "desk", "slip", "msg", "book")
 RecordedStep = Literal["flip", "rep", "slip"]
 
 
@@ -44,45 +32,6 @@ class PipelineOut(BaseModel):
 
     steps: list[StepOut]
     done_count: int
-
-
-def _has(session: Session, statement: Select[Any]) -> bool:
-    return bool(session.scalar(select(statement.exists())))
-
-
-def compute_steps(session: Session, property_id: int) -> dict[str, bool]:
-    """Derive each step from stored data or recorded events."""
-    recorded = set(session.scalars(select(PipelineStep.key)).all())
-    statements = _has(
-        session,
-        select(StatementFile.id).where(
-            StatementFile.property_id == property_id,
-            StatementFile.parse_method != "seed",
-        ),
-    ) or _has(session, select(Booking.id).where(Booking.source == "statement"))
-    return {
-        "up": statements,
-        "ai": _has(session, select(Booking.id).where(Booking.source == "statement")),
-        "flip": "flip" in recorded,
-        "rep": "rep" in recorded,
-        "desk": _has(session, select(Consent.id)),
-        "slip": "slip" in recorded,
-        "msg": _has(session, select(Message.id).where(Message.status == "sent")),
-        # The sample hotel's earlier coded bookings (seed, D-080) do not count:
-        # this step is the demo loop's own guest booking with a code.
-        "book": _has(
-            session,
-            select(Saving.id)
-            .join(DirectBooking, DirectBooking.id == Saving.direct_booking_id)
-            .where(DirectBooking.payment_method != SAMPLE_HISTORY_PAYMENT),
-        ),
-    }
-
-
-def record_step(session: Session, key: str) -> None:
-    """Mark a seen-only step done (idempotent)."""
-    if session.get(PipelineStep, key) is None:
-        session.add(PipelineStep(key=key))
 
 
 @router.get("", response_model=PipelineOut)

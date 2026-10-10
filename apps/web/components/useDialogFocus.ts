@@ -36,6 +36,13 @@ export function useDialogFocus(ref: RefObject<HTMLElement | null>, open: boolean
       const first = list[0];
       const last = list.at(-1);
       if (!first || !last) return;
+      // Focus can leave through a click on the dialog's padding or backdrop:
+      // bring it back instead of letting Tab walk the page behind (review A9).
+      if (!dialog.contains(document.activeElement)) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+        return;
+      }
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
         last.focus();

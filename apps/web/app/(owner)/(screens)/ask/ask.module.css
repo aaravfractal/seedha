@@ -18,7 +18,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 18px;
-  background: #1d1d1f;
+  background: var(--graphite);
   color: #fff;
 }
 .avatar {
@@ -27,8 +27,8 @@
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #fff;
-  color: #1d1d1f;
+  background: var(--card);
+  color: var(--ink);
   font-weight: 700;
   flex: none;
 }

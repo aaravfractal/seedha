@@ -25,14 +25,14 @@ from app.models import (
     StatementFile,
 )
 from app.money import per_unit_rounded, share_tenths_of_percent
-from app.routers.pipeline import STEP_KEYS, compute_steps
-from app.routers.scenario import DEFAULT_ROOMS, current_answer
 from app.services.consent import as_utc
 from app.services.desk import business_date, in_house, utc_now
 from app.services.insight import build_insight
 from app.services.ledger import LedgerSummary, booking_lines, load_ledger
+from app.services.pipeline import STEP_KEYS, compute_steps
 from app.services.repeats import list_matches
 from app.services.scenario import ScenarioError, saturday_move
+from app.services.scenario_answers import DEFAULT_ROOMS, current_answer
 
 # Short room-tile codes as printed on the Last night grid.
 CHANNEL_CODES = {

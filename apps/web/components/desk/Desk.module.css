@@ -250,9 +250,6 @@
   color: #3d5a4b;
   background: #d9d4c8;
 }
-.printBtn:focus-visible {
-  outline-color: #e8a33d;
-}
 .slot {
   height: 12px;
   width: 64%;

@@ -13,7 +13,6 @@ from sqlalchemy import select
 from app.deps import DeviceDep, OwnerDep, PropertyDep, SessionDep, SettingsDep, WordingDep
 from app.errors import ApiError
 from app.models import PerkCode, Property
-from app.routers.pipeline import record_step
 from app.services.desk import (
     InHouse,
     ack,
@@ -30,6 +29,7 @@ from app.services.desk import (
     utc_now,
 )
 from app.services.messages import draft_for_booking
+from app.services.pipeline import record_step
 from app.services.slips import Slip
 
 router = APIRouter(prefix="/desk", tags=["desk"])

@@ -14,9 +14,9 @@ from pydantic import BaseModel
 
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
-from app.routers.pipeline import record_step
 from app.services.llm import tie_breaker
 from app.services.matcher import TieBreaker
+from app.services.pipeline import record_step
 from app.services.repeats import RepeatRow, decide, list_matches, scan
 
 router = APIRouter(prefix="/repeat", tags=["repeat"])

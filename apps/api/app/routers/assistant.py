@@ -8,10 +8,10 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
-from app.routers.scenario import DEFAULT_ROOMS, latest_decision
 from app.services.ask import Phraser
 from app.services.assistant import ClaudeAssistantPhraser, ask_assistant, chips_after
 from app.services.desk import business_date, utc_now
+from app.services.scenario_answers import DEFAULT_ROOMS, latest_decision
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 

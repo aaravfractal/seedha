@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { postJson, useApi } from "@/lib/api";
-import { count, inr, pctTenths } from "@/lib/format";
+import { channelColour } from "@/lib/channels";
+import { count, inr, monthRange, pctTenths } from "@/lib/format";
 import type { Ledger, LedgerChannel } from "@/lib/types";
 import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
@@ -13,26 +14,8 @@ import { useReducedMotion } from "@/components/owner/motion";
 import f from "./flip.module.css";
 
 type Sort = "bookings" | "kept";
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const FLIP_MS = 700;
 const ROW_GAP = 10;
-const CHANNEL_COLOUR: Record<string, string> = {
-  mmt: "var(--ch-mmt)",
-  bcom: "var(--ch-bcom)",
-  agoda: "var(--ch-agoda)",
-  ta: "var(--ch-agent)",
-  walkin: "var(--ch-walkin)",
-  direct: "var(--ch-direct)",
-};
-
-/** "Apr to Sep 2026" from ISO dates. */
-function rangeLabel(start: string, end: string): string {
-  const [sy, sm] = start.split("-").map(Number);
-  const [ey, em] = end.split("-").map(Number);
-  const s = MONTHS[(sm ?? 1) - 1];
-  const e = MONTHS[(em ?? 1) - 1];
-  return sy === ey ? `${s} to ${e} ${ey}` : `${s} ${sy} to ${e} ${ey}`;
-}
 
 /** "−₹9,07,358" for a cost, "₹0" when there is none. */
 function minus(paise: number): string {
@@ -133,7 +116,7 @@ export default function FlipPage() {
   }
 
   const topKey = data.rank_by_bookings[0];
-  const period = rangeLabel(data.start, data.end);
+  const period = monthRange(data.start, data.end);
   const direct = data.channels.find((c) => c.kind === "direct" && c.room_nights > 0) ?? null;
   const valueLabel = sort === "bookings" ? "Room nights" : "Net ADR";
 
@@ -303,11 +286,7 @@ function ChannelRow({
       </span>
       <div className={f.nameCell}>
         <div className={f.name}>
-          <i
-            className={f.swatch}
-            style={{ background: CHANNEL_COLOUR[c.key] ?? "var(--ch-agoda)" }}
-            aria-hidden="true"
-          />
+          <i className={f.swatch} style={{ background: channelColour(c.key) }} aria-hidden="true" />
           <span className="nm">{c.name}</span>
         </div>
         <div className={`${f.lost}${lost ? "" : ` ${f.none}`}`}>{minus(lost)} lost vs list price</div>

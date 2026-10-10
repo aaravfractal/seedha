@@ -7,17 +7,15 @@ from typing import Annotated, Literal
 
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import select
 
 from app.deps import OwnerDep, PropertyDep, SessionDep
 from app.errors import ApiError
 from app.models import ScenarioDecision
 from app.services.ledger import load_ledger
 from app.services.scenario import SaturdayMove, ScenarioError, saturday_move
+from app.services.scenario_answers import DEFAULT_ROOMS, UNDONE, latest_decision
 
 router = APIRouter(prefix="/scenario", tags=["scenario"])
-DEFAULT_ROOMS = 6
-UNDONE = "undone"
 
 
 class SaturdayOut(BaseModel):
@@ -59,22 +57,6 @@ def check_rooms(rooms: int, max_rooms: int) -> None:
 def compute(session: SessionDep, property_id: int, rooms: int) -> SaturdayMove:
     """The move for the default ledger range; ScenarioError if not computable."""
     return saturday_move(load_ledger(session, property_id), rooms)
-
-
-def current_answer(session: SessionDep, property_id: int) -> ScenarioDecision | None:
-    """The owner's standing answer: the latest one, unless it was undone."""
-    last = latest_decision(session, property_id)
-    return None if last is None or last.decision == UNDONE else last
-
-
-def latest_decision(session: SessionDep, property_id: int) -> ScenarioDecision | None:
-    """The owner's most recent answer to the Saturday move."""
-    return session.scalar(
-        select(ScenarioDecision)
-        .where(ScenarioDecision.property_id == property_id, ScenarioDecision.kind == "saturday")
-        .order_by(ScenarioDecision.id.desc())
-        .limit(1)
-    )
 
 
 def saturday_out(move: SaturdayMove, max_rooms: int, last: ScenarioDecision | None) -> SaturdayOut:

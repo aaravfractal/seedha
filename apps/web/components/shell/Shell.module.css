@@ -479,6 +479,11 @@
   padding: 0 !important;
   color: var(--ink);
 }
+.paletteInput:focus-within {
+  /* the input has no ring of its own; the whole field shows focus (review A8) */
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
 .paletteInput input:focus-visible {
   outline: none;
 }
