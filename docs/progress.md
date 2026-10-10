@@ -594,10 +594,26 @@ ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 1
 - D9 data (e7621c7): four earlier coded bookings, ₹12,600 (D-080). API 313
   tests pass.
 
-## Team status
-- Builders running in worktrees `.worktrees/<name>` on branches `fe/<name>`:
-  shell (P1), desk (P3), owner (P2), auth (P4). Reports land in
-  `docs/agent-reports/P<n>-<name>.md` inside each worktree. The lead merges,
-  runs make check, applies e2e changes and commits.
-- Next: merge P1 and P3, then P2 and P4, then reviewers (design QA, code
-  quality, security, a11y/perf), then P5 to P9.
+## Merged (10 Oct 2026)
+- P3 Front desk and Guest (c118d90) + follow-ups (04b6388): Desk test print
+  API, handoff QR copy (firmware fixture and native test updated), checkout
+  without consent (D-081), CSS modules fixed (D-082: the Turbopack Tailwind
+  rule had turned every *.module.css global).
+- P4 Auth (WhatsApp OTP simulated, sign up, onboarding, Direct beta login,
+  migration 0007) + follow-ups (f0bda9f): full navigation after sign-in
+  (D-083), e2e signs in with Direct beta login, OTP lockout e2e.
+- P1 App shell and Overview (GET /overview) + follow-ups (4c726fc):
+  contrast fixes found by axe, proxy for the five placeholder routes.
+- P2 Owner screens (scenario undo, draft edit, proof states, season in
+  review, 8 AM line) + follow-ups and layouts by route group (11c15df,
+  D-084, D-085).
+- After each merge: API, web, e2e 7/7 green; firmware native + device build
+  green.
+
+## Running
+- Builders: P5 Site (fe/site), P7 Website (fe/web), P6a Guest inbox and
+  Assistant (fe/inbox).
+- Reviewers on merged P1 to P4, one at a time in the fourth slot: security
+  (running), then code quality, accessibility and performance, design QA.
+- Queued: P6b Calendar, Billing, Settings (after P6a's migration 0008
+  merges), ideas agent after P5 to P7, P8 if time allows, then P9.
