@@ -291,6 +291,11 @@
   width: 56px;
   height: 56px;
   font-size: 18px;
+  color: #f5f5f7; /* light initials on the dark fill (review A27) */
+}
+/* The selected row sits on the pine tint: its preview needs ink (review A27). */
+.row[aria-current="true"] .rowPrev {
+  color: var(--ink);
 }
 .presence {
   position: absolute;

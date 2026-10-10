@@ -89,7 +89,7 @@
 .extraNote {
   display: block;
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--ink); /* on the pine tint, ink2 misses 4.5:1 (review A25) */
   margin-top: 4px;
   font-variant-numeric: tabular-nums;
 }

@@ -653,3 +653,8 @@
     transition: none;
   }
 }
+
+/* The preview frame is dark; the pine ring falls below 3:1 on it (review A28). */
+.viewport:focus-visible {
+  outline-color: #4cc38a;
+}

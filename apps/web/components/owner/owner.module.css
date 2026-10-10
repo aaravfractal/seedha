@@ -219,7 +219,8 @@
   border-radius: 9px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--ink2);
+  /* ink, not ink2: grey on the grey track misses 4.5:1 (review A24) */
+  color: var(--ink);
   white-space: nowrap;
   background: transparent;
   box-shadow: none;

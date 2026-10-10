@@ -434,3 +434,8 @@
   color: var(--ink2);
   display: grid;
 }
+
+/* On the near-black banner the pine ring falls below 3:1; use the light accent (review A28). */
+.insight :focus-visible {
+  outline-color: #4cc38a;
+}
