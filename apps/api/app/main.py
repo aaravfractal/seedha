@@ -25,6 +25,7 @@ from app.routers import (
     pipeline,
     proof,
     public,
+    public_site,
     repeat,
     scenario,
     site,
@@ -121,4 +122,5 @@ def create_app(
     app.include_router(site.site_router)
     app.include_router(site.pro_router)
     app.include_router(site.demo_router)
+    app.include_router(public_site.router)
     return app

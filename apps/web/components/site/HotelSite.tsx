@@ -1,0 +1,353 @@
+"use client";
+
+import { useId, useRef, useState } from "react";
+import type { FormEvent } from "react";
+import { api } from "@/lib/api";
+import { inr } from "@/lib/format";
+import { addDays } from "@/lib/linkPrefill";
+import type { Availability, Lang, Mood, PublicPackage, SiteContent } from "@/lib/types-site";
+import { COPY, defaultCheckIn, linkHref, nightsLabel, waNumber } from "./copy";
+import s from "./worldb.module.css";
+
+const ROOM_PHOTOS = [
+  "linear-gradient(160deg,#4A6B4E,#33503B)",
+  "linear-gradient(160deg,#7E7262,#9BAF94)",
+  "linear-gradient(160deg,#BBA98A,#5E5A50)",
+];
+const GALLERY_PHOTOS = [
+  "linear-gradient(160deg,#9DB59A,#D9CBA6)",
+  "linear-gradient(160deg,#6E7A45,#2F4F38)",
+  "linear-gradient(160deg,#A8B49A,#E3D7BC)",
+  "linear-gradient(160deg,#5B5E4E,#3B5A40)",
+  "linear-gradient(160deg,#6F9A72,#A9BFA0)",
+  "linear-gradient(160deg,#8A6E5E,#5D5A63)",
+];
+const MAX_NIGHTS = 14;
+
+type Status = { kind: "idle" } | { kind: "checking" } | { kind: "open" } | { kind: "closed"; reason: string };
+
+/** A gradient placeholder for one of the hotel's own photos, labelled as a sample. */
+export function Photo({
+  background,
+  label,
+  chip,
+  className,
+}: {
+  background: string;
+  label?: string;
+  chip?: string;
+  className?: string;
+}) {
+  return (
+    <div className={`${s.photo} ${className ?? ""}`} style={{ background }}>
+      {chip ? <span className={s.chip}>{chip}</span> : null}
+      {label ? <span className={s.photoLabel}>{label}</span> : null}
+    </div>
+  );
+}
+
+/** Mood colours and fonts for a World B page. */
+export function moodProps(mood: Mood, lang: Lang) {
+  return { "data-mood": mood, lang: lang === "hi" ? "hi" : "en" } as const;
+}
+
+/**
+ * The hotel's own website (World B). Rooms at public rates and approved
+ * packages, all priced by the API. Booking goes to Seedha Link. In `preview`
+ * (the owner's Website screen) nothing calls the API and the header does not stick.
+ */
+export function HotelSite({
+  site,
+  packages,
+  lang,
+  mood,
+  today,
+  onLang,
+  preview = false,
+}: {
+  site: SiteContent;
+  packages: PublicPackage[];
+  lang: Lang;
+  mood: Mood;
+  today: string;
+  onLang?: (lang: Lang) => void;
+  preview?: boolean;
+}) {
+  const t = COPY[lang];
+  const firstRoom = site.rooms[0]?.room_type ?? "";
+  const [checkIn, setCheckIn] = useState(() => defaultCheckIn(today));
+  const [nights, setNights] = useState(2);
+  const [room, setRoom] = useState(firstRoom);
+  const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const asked = useRef(0);
+  const uid = useId();
+  const id = (part: string) => `${uid}-${part}`;
+  const name = lang === "hi" ? site.hotel_hi : site.hotel;
+  const roomName = (r: SiteContent["rooms"][number]) => (lang === "hi" ? r.name_hi : r.room_type);
+
+  async function check(day: string, n: number, type: string): Promise<boolean> {
+    if (preview || !day || !type) return true;
+    const ticket = ++asked.current;
+    setStatus({ kind: "checking" });
+    const q = new URLSearchParams({ check_in: day, nights: String(n), room_type: type });
+    try {
+      const res = await api<Availability>(`public/site/${encodeURIComponent(site.slug)}/availability?${q}`);
+      if (ticket === asked.current) {
+        setStatus(res.open ? { kind: "open" } : { kind: "closed", reason: res.reason ?? "full" });
+      }
+      return res.open;
+    } catch {
+      // Seedha Link checks again when booking; do not block the guest here.
+      if (ticket === asked.current) setStatus({ kind: "idle" });
+      return true;
+    }
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (preview) return;
+    if (status.kind === "closed") return;
+    if (await check(checkIn, nights, room)) window.location.assign(linkHref(room, checkIn, nights));
+  }
+
+  const closedReason = status.kind === "closed" ? (status.reason as keyof typeof t.closed) : null;
+  const message =
+    status.kind === "checking"
+      ? t.checking
+      : status.kind === "open"
+        ? t.open
+        : closedReason
+          ? (t.closed[closedReason] ?? t.closed.full)
+          : "";
+
+  return (
+    <div className={`${s.wb} ${preview ? s.preview : ""}`} {...moodProps(mood, lang)}>
+      <header className={s.head}>
+        {preview ? (
+          <span className={s.backBtn} aria-hidden="true">
+            ‹
+          </span>
+        ) : (
+          <button type="button" className={s.backBtn} aria-label={t.back} onClick={() => history.back()}>
+            ‹
+          </button>
+        )}
+        <span className={`${s.brand} ${s.display}`}>{name}</span>
+        <div className={s.langSwitch} role="group" aria-label={t.language}>
+          {(["en", "hi"] as const).map((code) => (
+            <button
+              key={code}
+              type="button"
+              lang={code}
+              aria-pressed={lang === code}
+              onClick={() => onLang?.(code)}
+            >
+              {code === "en" ? "EN" : "हि"}
+            </button>
+          ))}
+        </div>
+        <a className={`${s.pill} ${s.headBook}`} href={`#${id("book")}`}>
+          {t.book}
+        </a>
+      </header>
+
+      <section className={s.hero} aria-labelledby={id("hotel-name")}>
+        <span className={s.chip}>{t.samplePhoto}</span>
+        <div className={s.heroText}>
+          <p className={s.kicker}>{site.location[lang]}</p>
+          <h1 id={id("hotel-name")} className={`${s.display} ${s.h1}`}>
+            {name}
+          </h1>
+          <p className={s.tagline}>{site.tagline[lang]}</p>
+          <a className={`${s.pill} ${s.pillLight}`} href={`#${id("book")}`}>
+            {t.book}
+          </a>
+        </div>
+      </section>
+
+      <form id={id("book")} className={s.bar} onSubmit={submit} noValidate>
+        <label className={s.field}>
+          <span>{t.checkIn}</span>
+          <input
+            type="date"
+            value={checkIn}
+            min={addDays(today, 1)}
+            max={addDays(today, 365)}
+            required
+            onChange={(e) => {
+              setCheckIn(e.target.value);
+              void check(e.target.value, nights, room);
+            }}
+          />
+        </label>
+        <label className={s.field}>
+          <span>{t.nights}</span>
+          <select
+            value={nights}
+            onChange={(e) => {
+              const n = Number(e.target.value);
+              setNights(n);
+              void check(checkIn, n, room);
+            }}
+          >
+            {Array.from({ length: MAX_NIGHTS }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>
+                {nightsLabel(n, lang)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className={s.field}>
+          <span>{t.room}</span>
+          <select
+            value={room}
+            onChange={(e) => {
+              setRoom(e.target.value);
+              void check(checkIn, nights, e.target.value);
+            }}
+          >
+            {site.rooms.map((r) => (
+              <option key={r.room_type} value={r.room_type}>
+                {roomName(r)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="submit" className={s.barBook} aria-disabled={status.kind === "closed"}>
+          {t.bookShort}
+        </button>
+        <p className={`${s.barNote} ${closedReason ? s.closed : ""}`} role="status" aria-live="polite">
+          {message}
+        </p>
+      </form>
+
+      <section className={s.section} aria-labelledby={id("why")}>
+        <h2 id={id("why")} className={`${s.display} ${s.h2}`}>
+          {t.why}
+        </h2>
+        <div className={s.why}>
+          {t.whyItems.map(([title, body]) => (
+            <div key={title}>
+              <h3>{title}</h3>
+              <p>{body}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={s.section} aria-labelledby={id("rooms")}>
+        <h2 id={id("rooms")} className={`${s.display} ${s.h2}`}>
+          {t.rooms}
+        </h2>
+        <div className={s.rooms}>
+          {site.rooms.map((r, i) => (
+            <article key={r.room_type} className={s.room}>
+              <Photo
+                background={ROOM_PHOTOS[i % ROOM_PHOTOS.length] ?? ""}
+                chip={t.samplePhoto}
+                className={s.roomPhoto}
+              />
+              <div className={s.roomBody}>
+                <h3 className={s.display}>{roomName(r)}</h3>
+                {r.detail[lang] ? <p className={s.muted}>{r.detail[lang]}</p> : null}
+                <div className={s.priceRow}>
+                  <p className={s.price}>
+                    <b className={s.num}>{inr(r.nightly_rate)}</b> <span>{t.aNight}</span>
+                  </p>
+                  <a
+                    className={s.pill}
+                    href={linkHref(r.room_type, checkIn, nights)}
+                    aria-label={`${t.bookShort}: ${roomName(r)}`}
+                  >
+                    {t.bookShort}
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className={s.section} aria-labelledby={id("packages")}>
+        <h2 id={id("packages")} className={`${s.display} ${s.h2}`}>
+          {t.packages}
+        </h2>
+        {packages.length ? (
+          <>
+            <div className={s.packages}>
+              {packages.map((p) => (
+                <article key={p.key} className={s.pkg}>
+                  <h3 className={s.display}>{p.name[lang]}</h3>
+                  <p className={s.muted}>{p.includes[lang]}</p>
+                  <p className={`${s.pkgPrice} ${s.num}`}>{inr(p.price)}</p>
+                </article>
+              ))}
+            </div>
+            <p className={s.note}>{t.packagesNote}</p>
+          </>
+        ) : (
+          <div className={s.soon}>
+            <p className={s.soonTitle}>{t.comingSoon}</p>
+            <p className={s.muted}>{t.comingSoonSub}</p>
+          </div>
+        )}
+      </section>
+
+      <section className={s.section} aria-labelledby={id("photos")}>
+        <div className={s.headRow}>
+          <h2 id={id("photos")} className={`${s.display} ${s.h2}`}>
+            {t.photos}
+          </h2>
+          <span className={s.chipQuiet}>{t.samplePhotos}</span>
+        </div>
+        <div className={s.gallery}>
+          {site.gallery.map((g, i) => (
+            <Photo key={g.en} background={GALLERY_PHOTOS[i % GALLERY_PHOTOS.length] ?? ""} label={g[lang]} />
+          ))}
+        </div>
+      </section>
+
+      <section className={s.section} aria-labelledby={id("nearby")}>
+        <h2 id={id("nearby")} className={`${s.display} ${s.h2}`}>
+          {t.nearby}
+        </h2>
+        <ul className={s.list}>
+          {site.nearby.map((n) => (
+            <li key={n.place.en}>
+              <span>{n.place[lang]}</span>
+              <span className={s.muted}>{n.distance[lang]}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className={s.section} aria-labelledby={id("contact")}>
+        <h2 id={id("contact")} className={`${s.display} ${s.h2}`}>
+          {t.contact}
+        </h2>
+        <ul className={s.list}>
+          <li>
+            <span>{t.whatsapp}</span>
+            <a
+              className={s.link}
+              href={`https://wa.me/${waNumber(site.contact.phone)}`}
+              rel="noopener noreferrer"
+            >
+              {site.contact.phone}
+            </a>
+          </li>
+          <li>
+            <span>{t.upi}</span>
+            <span className={s.num}>{site.contact.upi}</span>
+          </li>
+        </ul>
+        {site.contact.placeholder ? <p className={s.note}>{t.placeholders}</p> : null}
+      </section>
+
+      <footer className={s.foot}>
+        {site.sample ? <p>{t.sampleHotel}</p> : null}
+        <p lang="en">{t.madeWith}</p>
+      </footer>
+    </div>
+  );
+}

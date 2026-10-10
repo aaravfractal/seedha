@@ -41,6 +41,7 @@ LIMITS: dict[str, Limit] = {
     "link": Limit(30, 60),
     "link_book": Limit(10, 60),
     "data_deletion": Limit(5, 60),
+    "site": Limit(60, 60),
 }
 
 
