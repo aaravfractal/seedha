@@ -1433,6 +1433,10 @@ label.fl {
   padding: 1px 6px;
 }
 .site-footer a {
+  /* 44px tap targets for dense secondary links (accessibility review A14) */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--ink2);
 }
 .site-footer a:hover {

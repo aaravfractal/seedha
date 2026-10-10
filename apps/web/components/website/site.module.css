@@ -1757,8 +1757,11 @@
 
 .footCol a,
 .linkBtn {
-  display: inline-block;
-  padding: 6px 0;
+  /* 44px tap targets for dense secondary links (accessibility review A12) */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
   color: var(--ink2) !important;
   text-decoration: none;
   font-size: 14px;
@@ -1829,6 +1832,9 @@
 }
 
 .bottomLinks a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px; /* review A13 */
   color: var(--ink2) !important;
   text-decoration: none;
 }

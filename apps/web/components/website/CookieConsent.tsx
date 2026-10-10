@@ -45,8 +45,10 @@ export function CookieConsent() {
 
   return (
     <>
-      {banner && !dialog ? (
-        <section className={styles.cookieBanner} aria-labelledby="cookie-title">
+      {banner ? (
+        // Hidden, not unmounted, while the dialog is open, so focus can return
+        // to "Choose" when the dialog closes (accessibility review A11).
+        <section className={styles.cookieBanner} aria-labelledby="cookie-title" hidden={dialog}>
           <h2 id="cookie-title">Cookies</h2>
           <p>
             Seedha uses only necessary cookies: to keep you signed in, to remember light or dark, and to

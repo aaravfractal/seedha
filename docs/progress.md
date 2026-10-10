@@ -610,10 +610,25 @@ ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 1
 - After each merge: API, web, e2e 7/7 green; firmware native + device build
   green.
 
+- Security review (15 findings) fixed in ff16894 (D-086); Saturday undo
+  on Overview (Q1); shared draft rules web/API; Mukta and World B fonts
+  bundled (D-087); /link stays a guest page.
+- P6a Guest inbox and Assistant (migration 0008) merged + follow-ups
+  (1d04c4d): one web-address guard, every erasure deletes inbox texts.
+- P5 Seedha Site and World B merged (b75e826), P7 Public website merged
+  (965938d): website frame, interim legal layouts removed, World B layouts
+  suspend inside main.
+- Quality and accessibility fixes (0224e7a, e4b2b5e and the next commit):
+  13px floor, focus ring and trap, theme-aware colours, one format/channel
+  helper set, services no longer import routers, 44px footer links, cookie
+  dialog focus return, functional e2e for sign-up and owner flows (10 e2e
+  tests green), public sample always served, API start migrates the DB.
+- Ideas: docs/ideas.md (5 proposals). Building only the approved three
+  within 2 h each (Recover, Split the Commission minimal, Score minimal).
+
 ## Running
-- Builders: P5 Site (fe/site), P7 Website (fe/web), P6a Guest inbox and
-  Assistant (fe/inbox).
-- Reviewers on merged P1 to P4, one at a time in the fourth slot: security
-  (running), then code quality, accessibility and performance, design QA.
-- Queued: P6b Calendar, Billing, Settings (after P6a's migration 0008
-  merges), ideas agent after P5 to P7, P8 if time allows, then P9.
+- P6b Calendar, Billing, Settings (fe/settings); ideas builder (fe/ideas);
+  design QA and accessibility reviewers re-running the owner pass (their
+  first runs could not reach the API).
+- Next: merge P6b and the ideas, fix review findings, P8 only if time
+  allows, then P9 (3 x Playwright, make check, demo-prod, summary).
