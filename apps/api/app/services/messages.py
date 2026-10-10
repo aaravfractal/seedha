@@ -18,7 +18,15 @@ from sqlalchemy.orm import Session
 
 from app.models import Booking, Consent, Message, OptOutEvent, PerkCode, Property
 from app.services.consent import normalise_mobile
-from app.services.drafter import DraftFacts, Wording, draft_body
+from app.services.drafter import (
+    MAX_LENGTH,
+    MONEY_PATTERN,
+    STOP_LINE,
+    DraftFacts,
+    Wording,
+    draft_body,
+)
+from app.services.proof import record_intact
 from app.services.whatsapp import Sender, is_stop
 
 
@@ -78,7 +86,7 @@ def draft_for_booking(
         hotel=prop.short_name,
         perk_promise=prop.perk_promise,
         code=item.perk.code,
-        link=f"{web_origin.rstrip('/')}/link/{item.perk.code}",
+        link=perk_link(web_origin, item.perk.code),
     )
     message = Message(consent_id=item.consent.id, perk_code_id=item.perk.id,
                       body=draft_body(facts, wording), status="draft")  # fmt: skip
@@ -119,6 +127,12 @@ def approve_and_send(message: Message, sender: Sender, now: datetime) -> Message
     consent = message.consent
     if not consent.is_active or not consent.whatsapp_number:
         raise MessageError(409, "consent_withdrawn", "The guest has opted out. Nothing was sent.")
+    if not record_intact(consent):
+        raise MessageError(
+            409,
+            "consent_mismatch",
+            "This consent record changed after it was saved. Nothing was sent.",
+        )
     message.status = "approved"
     message.approved_at = now
     result = sender.send(consent.whatsapp_number, message.body, message.id)
@@ -128,6 +142,45 @@ def approve_and_send(message: Message, sender: Sender, now: datetime) -> Message
         raise MessageError(502, "send_failed", result.error or "Sending failed. Try again.")
     message.status = "sent"
     message.sent_at = now
+    return message
+
+
+def perk_link(web_origin: str, code: str) -> str:
+    """The guest's Seedha Link for a perk code, as every draft carries it."""
+    return f"{web_origin.rstrip('/')}/link/{code}"
+
+
+def edit_problem(text: str, code: str, link: str) -> str | None:
+    """Why an owner's edit cannot be saved, or None when it keeps every rule.
+
+    The edited text must still carry the STOP line (rule 5), the perk code and
+    the link, fit one WhatsApp message, and name no amount or percentage
+    (perks, never a lower rate: rule 6). Checks run in this order.
+    """
+    checks = (
+        (not text, "The message cannot be empty."),
+        (len(text) > MAX_LENGTH, f"Keep the message under {MAX_LENGTH} characters."),
+        (STOP_LINE not in text, f'Keep "{STOP_LINE}" in the message.'),
+        (link not in text, f"Keep the booking link {link} in the message."),
+        (code not in text.replace(link, ""), f"Keep the code {code} in the message."),
+        (
+            MONEY_PATTERN.search(text.replace(link, "").replace(code, "")) is not None,
+            "Offer a perk, not a price. Remove amounts and percentages.",
+        ),
+    )
+    return next((problem for failed, problem in checks if failed), None)
+
+
+def edit_draft(message: Message, text: str, web_origin: str) -> Message:
+    """Owner rewords a draft. Editing never sends (rule 7)."""
+    if message.status != "draft":
+        raise MessageError(409, "not_a_draft", f"This message is already {message.status}")
+    cleaned = text.strip()
+    code = message.perk_code.code
+    problem = edit_problem(cleaned, code, perk_link(web_origin, code))
+    if problem is not None:
+        raise MessageError(422, "invalid_edit", problem)
+    message.body = cleaned
     return message
 
 

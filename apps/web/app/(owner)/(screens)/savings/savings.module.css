@@ -1,0 +1,109 @@
+.gold {
+  background: var(--gold);
+  color: var(--onGold);
+  border-radius: var(--r-card-lg);
+  padding: clamp(22px, 3vw, 32px);
+  box-shadow: var(--shadow);
+}
+.goldLabel {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+.goldValue {
+  display: block;
+  font-size: clamp(48px, 7vw, 84px);
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  margin: 8px 0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.goldSub {
+  font-size: 15px;
+  margin: 0;
+}
+.rule {
+  margin: 14px 0 0;
+  font-size: 16px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 20px;
+}
+@media (max-width: 979px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ledgerTitle {
+  margin-bottom: 4px;
+}
+.ledger :global(.item).row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 16px;
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ledger :global(.item).row:last-of-type {
+  border-bottom: 0;
+}
+.guest {
+  font-weight: 600;
+}
+.line {
+  font-size: 14px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+.net {
+  text-align: right;
+}
+.net b {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--gain);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.net span {
+  font-size: 13px;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+.season {
+  background: var(--goldSoft);
+  border-radius: var(--r-card);
+  padding: 22px;
+}
+.seasonTitle {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.seasonRange {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 2px 0 14px;
+}
+.seasonValue {
+  display: block;
+  font-size: clamp(32px, 3.6vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--goldText);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.seasonLabel {
+  font-size: 15px;
+}

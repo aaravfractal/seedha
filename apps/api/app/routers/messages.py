@@ -15,9 +15,11 @@ from app.services.desk import utc_now
 from app.services.messages import (
     MessageError,
     approve_and_send,
+    edit_draft,
     get_message,
     handle_inbound,
     list_messages,
+    perk_link,
     reject,
 )
 from app.services.whatsapp import Sender, sender_for
@@ -33,6 +35,9 @@ class MessageOut(BaseModel):
     guest_name: str
     short_name: str
     perk_code: str
+    perk: str
+    link: str
+    language: str
     body: str
     status: str
     transport: str | None
@@ -52,6 +57,12 @@ class MessagesOut(BaseModel):
     messages: list[MessageOut]
 
 
+class EditIn(BaseModel):
+    """The owner's new wording for a draft."""
+
+    text: str = Field(min_length=1, max_length=2_000)
+
+
 class ReplyIn(BaseModel):
     """A guest reply to simulate (demo without WhatsApp keys)."""
 
@@ -67,7 +78,12 @@ def get_sender(request: Request, settings: SettingsDep) -> Sender:
 SenderDep = Annotated[Sender, Depends(get_sender)]
 
 
-def message_out(m: Message) -> MessageOut:
+def language_of(text: str) -> str:
+    """'Hindi' when the text has Devanagari letters, else 'English'."""
+    return "Hindi" if any("\u0900" <= ch <= "\u097f" for ch in text) else "English"
+
+
+def message_out(m: Message, web_origin: str) -> MessageOut:
     """Shape one message. The phone number is never returned."""
     consent = m.consent
     return MessageOut(
@@ -76,6 +92,9 @@ def message_out(m: Message) -> MessageOut:
         guest_name=consent.guest.display_name,
         short_name=consent.guest.short_name,
         perk_code=m.perk_code.code,
+        perk=m.perk_code.perk,
+        link=perk_link(web_origin, m.perk_code.code),
+        language=language_of(m.body),
         body=m.body,
         status=m.status,
         transport=m.transport,
@@ -88,13 +107,13 @@ def message_out(m: Message) -> MessageOut:
     )
 
 
-def messages_out(session: SessionDep, property_id: int, simulated: bool) -> MessagesOut:
+def messages_out(session: SessionDep, property_id: int, settings: SettingsDep) -> MessagesOut:
     """The approvals list."""
     messages = list_messages(session, property_id)
     return MessagesOut(
         pending=sum(1 for m in messages if m.status == "draft"),
-        simulated=simulated,
-        messages=[message_out(m) for m in messages],
+        simulated=not settings.whatsapp_enabled,
+        messages=[message_out(m, settings.web_origin) for m in messages],
     )
 
 
@@ -108,7 +127,7 @@ def get_messages(
     _owner: OwnerDep, session: SessionDep, prop: PropertyDep, settings: SettingsDep
 ) -> MessagesOut:
     """Drafts and sent messages. Drafts are created at checkout or consent."""
-    return messages_out(session, prop.id, not settings.whatsapp_enabled)
+    return messages_out(session, prop.id, settings)
 
 
 @router.post("/{message_id}/approve", response_model=MessagesOut)
@@ -121,7 +140,20 @@ def approve(
         approve_and_send(get_message(session, prop.id, message_id), sender, utc_now())
     except MessageError as exc:
         raise as_api_error(exc) from exc
-    return messages_out(session, prop.id, not settings.whatsapp_enabled)
+    return messages_out(session, prop.id, settings)
+
+
+@router.patch("/{message_id}", response_model=MessagesOut)
+def edit_message(
+    message_id: int, body: EditIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep,
+    settings: SettingsDep,
+) -> MessagesOut:  # fmt: skip
+    """Owner rewords a draft. It stays a draft: nothing is sent (rule 7)."""
+    try:
+        edit_draft(get_message(session, prop.id, message_id), body.text, settings.web_origin)
+    except MessageError as exc:
+        raise as_api_error(exc) from exc
+    return messages_out(session, prop.id, settings)
 
 
 @router.post("/{message_id}/reject", response_model=MessagesOut)
@@ -134,7 +166,7 @@ def reject_message(
         reject(get_message(session, prop.id, message_id))
     except MessageError as exc:
         raise as_api_error(exc) from exc
-    return messages_out(session, prop.id, not settings.whatsapp_enabled)
+    return messages_out(session, prop.id, settings)
 
 
 @router.post("/{message_id}/simulate-reply", response_model=MessagesOut)
@@ -150,4 +182,4 @@ def simulate_reply(
     number = message.consent.whatsapp_number
     if number:
         handle_inbound(session, number, body.text, "simulated", utc_now())
-    return messages_out(session, prop.id, not settings.whatsapp_enabled)
+    return messages_out(session, prop.id, settings)

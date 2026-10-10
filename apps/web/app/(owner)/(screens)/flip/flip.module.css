@@ -1,0 +1,289 @@
+/* Money kept (the flip). Rows are absolutely positioned and glide to
+   translateY(rank x (rowHeight + 10px)) over 700ms; they never fade. */
+
+.insightRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 16px;
+  margin: 0 0 16px;
+}
+.insight {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  margin: 0;
+  flex: 1 1 320px;
+  min-width: 0;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+  margin: 0 0 14px;
+}
+.period {
+  font-size: 14px;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+.colHead {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 16px;
+  padding: 0 20px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
+}
+.colHead .right {
+  text-align: right;
+}
+
+.list {
+  --rowH: 84px;
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: calc(var(--n) * (var(--rowH) + 10px) - 10px);
+}
+.list > .r {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: var(--rowH);
+  transform: translateY(calc(var(--rank) * (var(--rowH) + 10px)));
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1.5fr) minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-areas: "rank name bar value";
+  gap: 0 16px;
+  align-items: center;
+  padding: 0 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--r-row);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.4s var(--spring);
+  will-change: transform;
+}
+.list > .r.ringed {
+  box-shadow:
+    0 0 0 2px var(--ink),
+    0 10px 28px rgba(0, 0, 0, 0.14);
+  z-index: 1;
+}
+.rankNo {
+  grid-area: rank;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+}
+.nameCell {
+  grid-area: name;
+  min-width: 0;
+}
+.name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex: none;
+  border: 1px solid var(--line);
+}
+.lost {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--loss);
+  font-variant-numeric: tabular-nums;
+}
+.lost.none {
+  color: var(--ink2);
+}
+.barCell {
+  grid-area: bar;
+  min-width: 0;
+}
+.bar {
+  display: flex;
+  height: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--fill);
+}
+.kept {
+  background: var(--gainFill);
+}
+.away {
+  background: var(--lossFill);
+  opacity: 0.55;
+}
+.barNote {
+  display: block;
+  font-size: 13px;
+  color: var(--ink2);
+  margin-top: 4px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.valueCell {
+  grid-area: value;
+  text-align: right;
+  min-width: 0;
+}
+.value {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.valueCap {
+  display: block;
+  font-size: 13px;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+@media (max-width: 759px) {
+  .colHead {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    padding: 0 16px 8px;
+    gap: 10px;
+  }
+  .colHead .barHead {
+    display: none;
+  }
+  .list {
+    --rowH: 104px;
+  }
+  .list > .r {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "rank name value"
+      "rank bar bar";
+    gap: 6px 10px;
+    padding: 0 16px;
+    align-content: center;
+  }
+  .value {
+    font-size: 19px;
+  }
+  .valueCap {
+    display: none;
+  }
+}
+
+.maths {
+  margin-top: 16px;
+}
+.maths summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 15px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.tableWrap {
+  contain: inline-size;
+  overflow-x: auto;
+  margin-top: 8px;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.table th,
+.table td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+}
+.table thead th {
+  font-weight: 600;
+  color: var(--ink2);
+  font-size: 13px;
+}
+
+.stats {
+  margin-top: 24px;
+}
+
+.directCard {
+  margin-top: 16px;
+}
+.compare {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+.compareRow {
+  display: grid;
+  grid-template-columns: minmax(0, 150px) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  font-size: 14px;
+}
+.compareLabel {
+  color: var(--ink2);
+  white-space: nowrap;
+}
+.track {
+  height: 12px;
+  border-radius: 12px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.fillList {
+  display: block;
+  height: 100%;
+  background: var(--ch-agoda);
+  border-radius: 12px;
+}
+.fillKept {
+  display: block;
+  height: 100%;
+  background: var(--gainFill);
+  border-radius: 12px;
+}
+.compareValue {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.build {
+  margin-top: 14px;
+}
+@media (max-width: 759px) {
+  .compareRow {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .compareRow .track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

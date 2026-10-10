@@ -1,0 +1,72 @@
+.write {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-top: 16px;
+}
+.bundles {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+.bundleHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px 16px;
+}
+.when {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+.fp {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 2px 0 0;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+.entries {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.entries li {
+  border-top: 1px solid var(--line);
+}
+.entry {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  align-items: center;
+  padding: 12px 0;
+  min-height: 48px;
+  text-align: left;
+}
+button.entry:hover .entryName {
+  color: var(--accent);
+}
+.entryName {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.entryWhen {
+  grid-column: 1;
+  font-size: 13px;
+  color: var(--ink2);
+}
+.entryChip {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+.chainNote {
+  margin-top: 16px;
+}

@@ -15,6 +15,7 @@ from app.services.ask import (
     ClaudePhraser,
     Phraser,
     compute_answer,
+    morning_line,
     phrased,
 )
 from app.services.desk import business_date, utc_now
@@ -52,6 +53,24 @@ def get_phraser(request: Request, settings: SettingsDep) -> Phraser | None:
 
 
 PhraserDep = Annotated[Phraser | None, Depends(get_phraser)]
+
+
+class MorningOut(BaseModel):
+    """The 8 AM WhatsApp line, computed from the last Desk close."""
+
+    hi: str
+    en: str
+    figures: list[str]
+    source: str
+
+
+@router.get("/morning", response_model=MorningOut)
+def morning(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> MorningOut:
+    """Template sentence only: no LLM wording, every number from code."""
+    day = business_date(session, prop.id, utc_now().date())
+    line = morning_line(session, prop, day)
+    return MorningOut(hi=line.hi, en=line.en, figures=list(line.figures),
+                      source="From your statements")  # fmt: skip
 
 
 @router.get("", response_model=list[QuestionOut])

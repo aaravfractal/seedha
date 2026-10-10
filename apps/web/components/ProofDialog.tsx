@@ -4,24 +4,38 @@ import { useRef } from "react";
 import { useApi } from "@/lib/api";
 import type { ConsentProof } from "@/lib/types";
 import { useToast } from "./Toast";
-import { Loading } from "./States";
+import { ErrorState, Loading } from "./States";
 import { useDialogFocus } from "./useDialogFocus";
+import { Chip } from "./owner/ui";
+import { istStamp, proofStatus, shortHash } from "./owner/proofStatus";
+import d from "./owner/proofDialog.module.css";
 
-function when(iso: string): string {
-  return new Date(iso).toLocaleString("en-IN", {
-    day: "numeric",
-    month: "short",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "Asia/Kolkata",
-  });
+function copy(p: ConsentProof): { title: string; body: string } {
+  if (p.status === "erased") {
+    return {
+      title: "Consent deleted",
+      body: "This consent was erased after the guest asked. Its fingerprint stays in the sealed bundle, but nothing links it to anyone now.",
+    };
+  }
+  if (p.status === "mismatch") {
+    return {
+      title: "Record changed after sealing",
+      body: `${p.guest_name}'s consent record no longer hashes to the fingerprint sealed in its bundle. Messages to this guest are blocked until you check it.`,
+    };
+  }
+  if (p.bundle && p.matches) {
+    return {
+      title: "Consent verified",
+      body: `${p.guest_name} said yes at the Desk. The record still hashes to the fingerprint sealed in the bundle, so it has not been changed.`,
+    };
+  }
+  return {
+    title: "Waiting for tonight's bundle",
+    body: `${p.guest_name} said yes at the Desk. The fingerprint is sealed into tonight's bundle at 9 PM.`,
+  };
 }
 
-function short(hash: string): string {
-  return `${hash.slice(0, 4)}…${hash.slice(-4)}`;
-}
-
-/** One consent's proof: recorded, fingerprinted, bundled, and re-checked now. */
+/** One consent's proof, re-checked against its bundle right now. */
 export function ProofDialog({ consentId, onClose }: { consentId: number; onClose: () => void }) {
   const proof = useApi<ConsentProof>(`proof/consents/${consentId}`);
   const toast = useToast();
@@ -29,89 +43,68 @@ export function ProofDialog({ consentId, onClose }: { consentId: number; onClose
   useDialogFocus(dialog, true, onClose);
 
   const p = proof.data;
-  const verified = p?.status === "verified" && p.matches === true;
+  const status = p
+    ? proofStatus(p.status === "verified" && p.matches === false ? "mismatch" : p.status)
+    : null;
+  const text = p ? copy(p) : null;
   return (
     <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={dialog}
         tabIndex={-1}
-        className="dlg"
+        className={`dlg ${d.dlg}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="proofTitle"
       >
-        <h3 id="proofTitle" className="sub-title" style={{ fontSize: 24 }}>
-          Consent proof
-        </h3>
-        {!p ? (
-          <Loading rows={2} label="Checking the proof" />
+        {proof.error ? (
+          <>
+            <h2 id="proofTitle" className={d.title}>
+              Consent proof
+            </h2>
+            <ErrorState message={proof.error.message} code={proof.error.code} onRetry={proof.reload} />
+            <div className={d.actions}>
+              <button type="button" className="btn small" onClick={onClose}>
+                Done
+              </button>
+            </div>
+          </>
+        ) : !p || !status || !text ? (
+          <>
+            <h2 id="proofTitle" className={d.title}>
+              Consent proof
+            </h2>
+            <Loading rows={2} label="Checking the proof" />
+          </>
         ) : (
           <>
-            <p className="sub" style={{ margin: "6px 0 0" }}>
-              {p.status === "erased"
-                ? "This consent was erased at the guest's request. Its fingerprint stays in the public record but can no longer be linked to anyone."
-                : `${p.guest_name} said yes at the Desk on ${when(p.given_at)}. ${
-                    verified
-                      ? "This record has not been changed since."
-                      : "It will be written to the record tonight."
-                  }`}
+            <Chip tone={status.tone} dot>
+              {status.label}
+            </Chip>
+            <h2 id="proofTitle" className={d.title}>
+              {text.title}
+            </h2>
+            <p className={d.body}>{text.body}</p>
+            <dl className={d.rows}>
+              <dt>Guest</dt>
+              <dd>{p.status === "erased" ? "Deleted" : p.guest_name}</dd>
+              <dt>Given</dt>
+              <dd>{istStamp(p.given_at)}</dd>
+              <dt>Bundle</dt>
+              <dd>
+                {p.bundle
+                  ? `${istStamp(p.bundle.created_at)} · root ${shortHash(p.bundle.merkle_root)}`
+                  : "Not sealed yet"}
+              </dd>
+              <dt>Fingerprint</dt>
+              <dd className={d.mono}>{shortHash(p.fingerprint)}</dd>
+            </dl>
+            <p className={d.chain}>
+              {p.bundle?.chain_tx
+                ? "The bundle fingerprint is written to a public test chain. Only the fingerprint is public: no name, phone or booking detail."
+                : "The bundle fingerprint is stored by Seedha on this server. It is not yet written to a public chain. Only fingerprints would ever be published: no name, phone or booking detail."}
             </p>
-            <ol className="tl">
-              <li>
-                <span className="dot on" aria-hidden="true">
-                  1
-                </span>
-                <span>
-                  Consent recorded at the Desk
-                  <br />
-                  <span className="meta">{when(p.given_at)}</span>
-                </span>
-              </li>
-              <li>
-                <span className="dot on" aria-hidden="true">
-                  2
-                </span>
-                <span>
-                  Fingerprint created
-                  <br />
-                  <span className="mono">{short(p.fingerprint)}</span>
-                </span>
-              </li>
-              <li>
-                <span className={`dot${p.bundle ? " on" : ""}`} aria-hidden="true">
-                  3
-                </span>
-                <span>
-                  {p.bundle
-                    ? p.bundle.chain_tx
-                      ? "Written to a public blockchain"
-                      : "Bundled under tonight's proof root"
-                    : "Waiting for tonight's bundle"}
-                  <br />
-                  <span className="meta">
-                    {p.bundle
-                      ? `${when(p.bundle.created_at)} · root ${short(p.bundle.merkle_root)}`
-                      : "Scheduled 12:00 AM"}
-                  </span>
-                </span>
-              </li>
-            </ol>
-            <p
-              style={{
-                fontSize: 20,
-                fontWeight: 600,
-                color: verified ? "var(--gain)" : "var(--ink2)",
-                margin: "0 0 14px",
-              }}
-            >
-              {verified ? "✓ Matches. Not changed." : "◷ Pending proof"}
-            </p>
-            {p.bundle && !p.bundle.chain_tx ? (
-              <p className="tag sim" style={{ marginBottom: 12 }}>
-                Stored by Seedha. Not yet on a public chain (simulated).
-              </p>
-            ) : null}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <div className={d.actions}>
               <button
                 type="button"
                 className="btn small ghost"
@@ -132,13 +125,10 @@ export function ProofDialog({ consentId, onClose }: { consentId: number; onClose
                   View public record
                 </a>
               ) : null}
-              <button type="button" className="btn small" style={{ marginLeft: "auto" }} onClick={onClose}>
+              <button type="button" className={`btn small ${d.done}`} onClick={onClose}>
                 Done
               </button>
             </div>
-            <p className="calc">
-              Only a fingerprint is public. No name, phone or booking detail is ever stored on the blockchain.
-            </p>
           </>
         )}
       </div>

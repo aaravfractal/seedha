@@ -28,6 +28,8 @@ class SaturdayMove:
     direct_net_adr: int
     extra_per_room: int
     extra_per_saturday: int
+    before_per_saturday: int
+    after_per_saturday: int
 
 
 def lowest_ota(ledger: LedgerSummary) -> ChannelSummary:
@@ -61,4 +63,6 @@ def saturday_move(ledger: LedgerSummary, rooms: int) -> SaturdayMove:
         direct_net_adr=direct.net_adr,
         extra_per_room=per_room,
         extra_per_saturday=per_room * rooms,
+        before_per_saturday=ota.net_adr * rooms,
+        after_per_saturday=direct.net_adr * rooms,
     )
