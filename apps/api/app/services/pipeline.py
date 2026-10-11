@@ -45,7 +45,8 @@ def compute_steps(session: Session, property_id: int) -> dict[str, bool]:
         "ai": _has(session, select(Booking.id).where(Booking.source == "statement")),
         "flip": "flip" in recorded,
         "rep": "rep" in recorded,
-        "desk": _has(session, select(Consent.id)),
+        # Seeded sample inbox threads are not the demo loop's own Desk consent.
+        "desk": _has(session, select(Consent.id).where(Consent.seeded.is_(False))),
         "slip": "slip" in recorded,
         "msg": _has(session, select(Message.id).where(Message.status == "sent")),
         # The sample hotel's earlier coded bookings (seed, D-080) do not count:

@@ -86,7 +86,10 @@ def test_demo_reset(client: TestClient, owner: dict[str, str], sample: Session) 
     )
     assert client.post("/demo/reset", headers=owner).json()["ok"] is True
     sample.expire_all()
-    assert sample.scalar(select(func.count()).select_from(Consent)) == 0
+    # The guest's own consent is gone; only the 8 sample inbox threads are re-seeded.
+    assert sample.scalar(select(func.count()).where(Consent.seeded.is_(False))) == 0
+    assert sample.scalar(select(func.count()).where(Consent.seeded.is_(True))) == 8
+    assert len(client.get("/inbox/threads", headers=owner).json()["threads"]) == 8
     assert sample.scalar(select(func.count()).where(Booking.source == "statement")) == 0
     assert client.get("/desk/state", headers=owner).json()["guests"][0]["name"] == "Neha Gupta"
     assert client.post("/demo/reset").status_code == 401

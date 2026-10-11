@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from datetime import date, datetime
 from typing import Annotated, Literal
 
@@ -11,6 +12,7 @@ from pydantic import BaseModel, Field
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
 from app.models import Consent, InboxAway
+from app.ratelimit import GLOBAL_FACTOR, Limit, RateLimiter
 from app.routers.messages import SenderDep
 from app.services.consent import as_utc
 from app.services.desk import utc_now
@@ -24,14 +26,18 @@ from app.services.inbox import (
     forget,
     get_away,
     get_thread,
+    guest_language,
+    last_invoice_number,
     latest_direct,
     list_threads,
     mark_read,
+    memories,
     owner_send,
     perk_of,
     rate_card,
     record_inbound,
     set_away,
+    simulate_target,
     stays_of,
     suggestions,
     summarise,
@@ -90,6 +96,7 @@ class ThreadsOut(BaseModel):
     away: AwayOut
     rate_card: list[RateLineOut]
     simulated: bool
+    is_sample: bool
 
 
 class EntryOut(BaseModel):
@@ -125,7 +132,11 @@ class StayOut(BaseModel):
 
 
 class ProfileOut(BaseModel):
-    """What Seedha remembers: only data actually stored."""
+    """What Seedha remembers: only data actually stored.
+
+    `remembers` holds preferences only and `notes` the owner's notes (never
+    money or documents); both are erased with the consent.
+    """
 
     guest_name: str
     city: str | None
@@ -135,6 +146,10 @@ class ProfileOut(BaseModel):
     language: str | None
     perk_code: str | None
     stays: list[StayOut]
+    stays_count: int
+    last_invoice: str | None
+    notes: list[str]
+    remembers: list[str]
 
 
 class ThreadDetailOut(BaseModel):
@@ -175,12 +190,28 @@ class AwayIn(BaseModel):
     enabled: bool | None = None
 
 
+class AttachOut(BaseModel):
+    """A document the owner may attach: built by code, never by the AI."""
+
+    kind: Literal["stay_invoice"]
+    consent_id: int
+
+
 class DraftOut(BaseModel):
     """A suggestion for the composer. Seedha never sends it."""
 
     text: str
     source: Literal["ai", "template"]
     label: str
+    topic: str
+    attach: AttachOut | None
+
+
+class SimulatedOut(BaseModel):
+    """The thread that just received one simulated guest message."""
+
+    consent_id: int
+    guest_name: str
 
 
 def get_reply_wording(request: Request, settings: SettingsDep) -> ReplyWording | None:
@@ -264,6 +295,7 @@ def detail_out(
     summary = summarise(session, consent, now)
     perk = perk_of(session, consent)
     link = f"{origin.rstrip('/')}/link/{perk.code}" if perk else None
+    stays = stays_of(session, consent)
     note = (
         "You can reply until the 24-hour window closes."
         if summary.window_open
@@ -283,7 +315,7 @@ def detail_out(
             consent_given_at=as_utc(consent.given_at),
             consent_wording=consent.wording_version,
             proof_status=consent.proof_status,
-            language=None,
+            language=guest_language(session, consent),
             perk_code=perk.code if perk else None,
             stays=[
                 StayOut(
@@ -292,8 +324,12 @@ def detail_out(
                     channel=b.channel.name,
                     room_type=b.room.room_type if b.room else None,
                 )  # fmt: skip
-                for b in stays_of(session, consent)
+                for b in stays
             ],
+            stays_count=len(stays),
+            last_invoice=last_invoice_number(session, consent),
+            notes=memories(session, consent, "note"),
+            remembers=memories(session, consent, "preference"),
         ),
     )
 
@@ -318,6 +354,7 @@ def get_threads(
             for r in rate_card(session, prop.id)
         ],  # fmt: skip
         simulated=not settings.whatsapp_enabled,
+        is_sample=prop.is_sample,
     )
 
 
@@ -357,7 +394,11 @@ def draft(
     consent = thread_or_404(session, prop.id, consent_id)
     result = draft_reply(session, prop, consent, wording)
     source: Literal["ai", "template"] = "ai" if result.source == "ai" else "template"
-    return DraftOut(text=result.text, source=source, label="Bot drafts, you send.")
+    attach = (
+        AttachOut(kind="stay_invoice", consent_id=consent.id) if result.attach_invoice else None
+    )
+    return DraftOut(text=result.text, source=source, label="Bot drafts, you send.",
+                    topic=result.topic, attach=attach)  # fmt: skip
 
 
 @router.post("/threads/{consent_id}/read", response_model=ThreadOut)
@@ -409,3 +450,42 @@ def patch_away(body: AwayIn, _owner: OwnerDep, session: SessionDep, prop: Proper
     except InboxError as exc:
         raise as_api_error(exc) from exc
     return away_out(away)
+
+
+SIMULATE_LIMIT = Limit(10, 60)
+SIMULATE_BUCKET = "inbox_simulate"
+
+
+def simulate_limited(request: Request) -> None:
+    """429 when this client (or every client together) is over 10 simulations a minute."""
+    limiter: RateLimiter = request.app.state.rate_limiter
+    client = request.client.host if request.client else "unknown"
+    ceiling = Limit(SIMULATE_LIMIT.count * GLOBAL_FACTOR, SIMULATE_LIMIT.seconds)
+    wait = limiter.check(SIMULATE_BUCKET, client, SIMULATE_LIMIT) or limiter.check(
+        SIMULATE_BUCKET, "*", ceiling
+    )
+    if wait > 0:
+        raise ApiError(
+            429,
+            "too_many_requests",
+            "Too many tries. Please wait a minute and try again.",
+            headers={"Retry-After": str(math.ceil(wait))},
+        )
+
+
+@router.post("/simulate", response_model=SimulatedOut, dependencies=[Depends(simulate_limited)])
+def simulate_incoming(
+    _owner: OwnerDep, session: SessionDep, prop: PropertyDep, sender: SenderDep
+) -> SimulatedOut:
+    """Sample hotel demo: one realistic guest text from a fixed rotating set
+    arrives on a seeded thread, through the same path as the WhatsApp webhook.
+    Nothing is sent and no draft is stored (rule 7)."""
+    now = utc_now()
+    try:
+        consent, text = simulate_target(session, prop, now)
+    except InboxError as exc:
+        raise as_api_error(exc) from exc
+    number = consent.whatsapp_number or ""
+    handle_inbound(session, number, text, "simulated", now)
+    record_inbound(session, number, text, sender, now)
+    return SimulatedOut(consent_id=consent.id, guest_name=consent.guest.display_name)

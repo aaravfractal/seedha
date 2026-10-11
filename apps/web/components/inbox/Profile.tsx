@@ -93,8 +93,36 @@ export function Profile({
         </div>
         <div className={styles.kv}>
           <span>Stays on record</span>
-          <span>{p.stays.length}</span>
+          <span>{p.stays_count}</span>
         </div>
+        <div className={styles.kv}>
+          <span>Last invoice</span>
+          <span>{p.last_invoice ?? "None yet"}</span>
+        </div>
+        {p.remembers.length ? (
+          <ul className={styles.memory} aria-label="Preferences">
+            {p.remembers.map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.note}>No preferences saved yet.</p>
+        )}
+      </section>
+
+      <section className={styles.block} aria-labelledby="notesHead">
+        <div className={styles.blockHead}>
+          <h4 id="notesHead">Notes</h4>
+        </div>
+        {p.notes.length ? (
+          <ul className={styles.memory}>
+            {p.notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.note}>No notes.</p>
+        )}
       </section>
 
       <section className={styles.block} aria-labelledby="staysHead">

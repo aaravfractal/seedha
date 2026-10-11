@@ -18,9 +18,11 @@ Rules enforced here:
 from __future__ import annotations
 
 import logging
+import re
+import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Protocol
+from typing import Literal, Protocol
 
 import anthropic
 from sqlalchemy import func, select
@@ -30,17 +32,21 @@ from app.models import (
     Booking,
     Consent,
     DirectBooking,
+    GuestMemory,
     InboxAway,
     InboxMessage,
     Message,
     PerkCode,
+    ProofBundle,
+    ProofBundleItem,
     Property,
+    StayInvoice,
 )
 from app.money import format_inr
-from app.services.consent import as_utc, normalise_mobile
+from app.services.consent import WORDING_VERSION, as_utc, fingerprint, normalise_mobile
 from app.services.drafter import MONEY_PATTERN, STOP_LINE, WEB_ADDRESS
 from app.services.link import room_rates
-from app.services.proof import erase_consent
+from app.services.proof import erase_consent, merkle_root
 from app.services.whatsapp import CloudApiSender, Sender, SimulatedSender, is_stop
 
 logger = logging.getLogger("seedha.inbox")
@@ -498,27 +504,158 @@ def canned_reply(prop: Property, consent: Consent) -> str:
     )
 
 
+# --- topics and fixed reply templates (no AI, no money, no 3+ digit numbers) ----
+
+Language = Literal["en", "hi", "hinglish"]
+DEVANAGARI = re.compile(r"[\u0900-\u097F]")
+HINGLISH = re.compile(
+    r"\b(hai|hain|kya|kaise|hum|aap|ji|nahi|chahiye|mil|sakta|sakte|jayega|jayenge|"
+    r"rahe|raha|wala|wale|kal|subah|saath|aana|aane|pe|toh|bhi|sabse|zyada|kaafi|thik)\b",
+    re.IGNORECASE,
+)
+HINGLISH_MIN = 2
+
+# Checked in this order; the first topic whose pattern matches wins.
+TOPIC_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
+    ("invoice", re.compile(r"invoice|\bbill\b|receipt|बिल|इनवॉइस|रसीद", re.IGNORECASE)),
+    ("refund", re.compile(r"refund|money back|paise wapas|रिफंड|पैसे वापस", re.IGNORECASE)),
+    ("wifi", re.compile(r"wi-?fi|internet|वाई-?फाई|इंटरनेट", re.IGNORECASE)),
+    ("late_checkout", re.compile(r"late check-?\s?out|लेट चेक ?आउट|देर से चेक", re.IGNORECASE)),
+    ("early_checkin", re.compile(r"early check-?\s?in|अर्ली चेक|जल्दी चेक", re.IGNORECASE)),
+    ("parking", re.compile(r"parking|\bcars?\b|gaadi|गाड़ी|गाड़ियों|पार्किंग", re.IGNORECASE)),
+    (
+        "directions",
+        re.compile(
+            r"direction|route|ras?ta\b|raasta|how to reach|pahunch|रास्ता|पहुँच|पहुंच",
+            re.IGNORECASE,
+        ),
+    ),
+    (
+        "booking",
+        re.compile(
+            r"diwali|\bbook|availab|free on|rooms? chahiye|दिवाली|बुक|खाली|कमरे चाहिए",
+            re.IGNORECASE,
+        ),
+    ),
+)
+
+# {name} is the guest's short name, {owner} the owner's first name, {hotel}
+# the hotel's short name and {address} its address. Written by people, so a
+# fixed template is always a safe draft (D6 holds for every one, tested).
+TEMPLATES: dict[str, dict[str, str]] = {
+    "invoice": {
+        "en": "Namaste {name}, thank you for staying with us at {hotel}. Your stay invoice is "
+        "attached to this message. Tell us if anything on it needs a change.",
+        "hi": "नमस्ते {name}, {hotel} में ठहरने के लिए धन्यवाद। आपकी स्टे इनवॉइस इस संदेश के "
+        "साथ है। कुछ बदलना हो तो बताइए।",
+    },
+    "late_checkout": {
+        "en": "Namaste {name}, happy to help. A late checkout depends on the next arrival for "
+        "your room, so {owner} ji will confirm it the day before.",
+        "hi": "नमस्ते {name}, लेट चेकआउट अगली बुकिंग पर निर्भर करता है। {owner} जी एक दिन पहले पक्का बता देंगे।",
+    },
+    "early_checkin": {
+        "en": "Namaste {name}, we will try to have your room ready early. If it is not ready "
+        "yet, relax in the lobby with tea and leave your bags with us.",
+        "hi": "नमस्ते {name}, हम कोशिश करेंगे कि आपका कमरा जल्दी तैयार हो। तब तक लॉबी में चाय "
+        "लीजिए और सामान हमारे पास रख दीजिए।",
+    },
+    "parking": {
+        "en": "Namaste {name}, yes, we will keep parking ready for your cars. Please share your "
+        "arrival time so the spaces are free when you reach.",
+        "hi": "नमस्ते {name}, जी हाँ, आपकी गाड़ियों के लिए पार्किंग का इंतज़ाम हो जाएगा। कृपया "
+        "पहुँचने का समय बता दीजिए।",
+    },
+    "booking": {
+        "en": "Namaste {name}, thank you for thinking of us again. {owner} ji will check the "
+        "rooms for your dates and come back to you shortly.",
+        "hi": "नमस्ते {name}, हमें फिर याद करने के लिए धन्यवाद। {owner} जी आपकी तारीखों के लिए "
+        "कमरे देखकर जल्द ही बताएँगे।",
+    },
+    "wifi": {
+        "en": "Namaste {name}, sorry about the Wi-Fi trouble. We are checking the router near "
+        "your room now and will tell you as soon as it works.",
+        "hi": "नमस्ते {name}, वाई-फाई की परेशानी के लिए माफ़ी। हम अभी राउटर देख रहे हैं और ठीक "
+        "होते ही बताएँगे।",
+    },
+    "refund": {
+        "en": "Namaste {name}, thank you for writing. {owner} ji is checking the refund for the "
+        "cancelled night and will update you today.",
+        "hi": "नमस्ते {name}, संदेश के लिए धन्यवाद। {owner} जी रद्द हुई रात के रिफंड की स्थिति "
+        "देखकर आज ही बताएँगे।",
+    },
+    "directions": {
+        "en": "Namaste {name}, a cab is easiest; ask the driver for {hotel}, {address}. Share "
+        "your arrival time and our staff will meet you and help with the luggage.",
+        "hi": "नमस्ते {name}, टैक्सी सबसे आसान है; ड्राइवर को {hotel}, {address} बताइए। पहुँचने "
+        "का समय बता दीजिए, हमारा स्टाफ़ सामान में मदद करेगा।",
+    },
+    "other": {
+        "en": "Namaste {name}, thank you for your message. {owner} ji will reply shortly from "
+        "{hotel}.",
+        "hi": "नमस्ते {name}, संदेश के लिए धन्यवाद। {owner} जी {hotel} से जल्द ही जवाब देंगे।",
+    },
+}
+LANGUAGE_LABEL = {"en": "English", "hi": "Hindi", "hinglish": "Hinglish"}
+
+
+def language_of(text: str) -> Language:
+    """Hindi (Devanagari script), Hinglish (Hindi in Latin script) or English."""
+    if DEVANAGARI.search(text):
+        return "hi"
+    return "hinglish" if len(HINGLISH.findall(text)) >= HINGLISH_MIN else "en"
+
+
+def topic_of(text: str) -> str:
+    """What the guest asks about, from fixed keywords; 'other' if none match."""
+    return next((topic for topic, pattern in TOPIC_PATTERNS if pattern.search(text)), "other")
+
+
+def template_reply(prop: Property, consent: Consent, topic: str, language: Language) -> str:
+    """The fixed reply for a topic, in Hindi for Devanagari messages else English."""
+    texts = TEMPLATES.get(topic, TEMPLATES["other"])
+    text = texts["hi" if language == "hi" else "en"]
+    return text.format(name=consent.guest.short_name, owner=prop.owner_name,
+                       hotel=prop.short_name, address=prop.address)  # fmt: skip
+
+
 @dataclass(frozen=True, slots=True)
 class Draft:
-    """A suggestion for the owner's composer. Never sent by Seedha."""
+    """A suggestion for the owner's composer. Never sent by Seedha.
+
+    `attach_invoice` asks the owner's screen to offer the stay invoice: the
+    invoice itself is built by code from the booking row, never by the AI.
+    """
 
     text: str
     source: str
+    topic: str = "other"
+    attach_invoice: bool = False
 
 
 def draft_reply(
     session: Session, prop: Property, consent: Consent, wording: ReplyWording | None
 ) -> Draft:
-    """Claude's suggestion when it passes D6, else the canned reply."""
+    """Claude's suggestion when it passes D6, else a fixed template.
+
+    With no guest message yet the canned reply is used. A guest text in
+    Devanagari gets a Hindi template; Latin script gets the English one.
+    """
     inbound = [e for e in thread_entries(session, consent) if e.direction == "in"]
-    if wording is not None and inbound:
-        candidate = (
-            wording.reply(consent.guest.short_name, prop.short_name, inbound[-1].body) or ""
-        ).strip()
+    if not inbound:
+        return Draft(canned_reply(prop, consent), "template")
+    last = inbound[-1].body
+    topic = topic_of(last)
+    invoice = topic == "invoice"
+    if wording is not None:
+        candidate = (wording.reply(consent.guest.short_name, prop.short_name, last) or "").strip()
         if candidate and len(candidate) <= MAX_DRAFT and d6_ok(candidate):
-            return Draft(candidate, "ai")
-        logger.info("Inbox draft rejected or unavailable; using the canned reply")
-    return Draft(canned_reply(prop, consent), "template")
+            return Draft(candidate, "ai", topic, invoice)
+        logger.info("Inbox draft rejected or unavailable; using the fixed template")
+    if topic == "other" and language_of(last) != "hi":
+        return Draft(canned_reply(prop, consent), "template", topic, invoice)
+    return Draft(template_reply(prop, consent, topic, language_of(last)), "template", topic,
+                 invoice)  # fmt: skip
 
 
 REPLY_SYSTEM = (
@@ -526,7 +663,10 @@ REPLY_SYSTEM = (
     "returning guest who wrote to them. The owner will read and edit it before sending. "
     "Never mention prices, amounts, rupees, discounts, percentages, phone numbers or any "
     "number with three or more digits; if the guest asks about price or availability, say "
-    "the owner will confirm. Plain text, no emojis, at most 50 words. Return only the reply."
+    "the owner will confirm. If the guest asks for a bill or invoice, say their stay invoice is "
+    "attached, without any figure or invoice number. Reply in the guest's language (Hindi in "
+    "Devanagari if they wrote in Devanagari). Plain text, no emojis, at most 50 words. Return "
+    "only the reply."
 )
 
 
@@ -553,3 +693,139 @@ class ClaudeReplyWording:
         if message.stop_reason != "end_turn":
             return None
         return next((b.text for b in message.content if b.type == "text"), None)
+
+
+# --- profile: what Seedha remembers -------------------------------------------
+
+
+def memories(session: Session, consent: Consent, kind: str) -> list[str]:
+    """The guest's stored preferences or notes, oldest first (no money, no documents)."""
+    return list(
+        session.scalars(
+            select(GuestMemory.text)
+            .where(GuestMemory.guest_id == consent.guest_id, GuestMemory.kind == kind)
+            .order_by(GuestMemory.created_at, GuestMemory.id)
+        )
+    )
+
+
+def last_invoice_number(session: Session, consent: Consent) -> str | None:
+    """The newest stay invoice number issued for any of the guest's stays."""
+    return session.scalar(
+        select(StayInvoice.number)
+        .join(Booking, Booking.id == StayInvoice.booking_id)
+        .where(Booking.guest_id == consent.guest_id)
+        .order_by(StayInvoice.created_at.desc(), StayInvoice.id.desc())
+        .limit(1)
+    )
+
+
+def guest_language(session: Session, consent: Consent) -> str | None:
+    """The language of the guest's latest message, or None before they write."""
+    rows = [m for m in inbox_rows(session, consent.id) if m.direction == "in"]
+    return LANGUAGE_LABEL[language_of(rows[-1].body)] if rows else None
+
+
+# --- sample hotel: seeded threads and "Simulate incoming message" -------------
+
+# Fictional numbers for the sample hotel's seeded guests: +91 90000 001NN.
+SEEDED_NUMBER_PREFIX = "+91900000"
+SEEDED_NUMBER_FIRST = 101
+
+# A rotating set of realistic guest texts. Never STOP and never a money
+# figure, so a demo click can only ever add one ordinary message.
+SIMULATE_TEXTS: tuple[str, ...] = (
+    "Hi, could you please send the bill for my last stay? I need it for the office.",
+    "Namaste ji, kya kal subah early check-in ho sakta hai? Train jaldi aa rahi hai.",
+    "क्या दिवाली वाले हफ़्ते में दो कमरे खाली हैं? परिवार के साथ आना है।",
+    "The Wi-Fi is very slow in our room since the morning, can someone check?",
+    "Parking milegi kya? Hum apni gaadi se aa rahe hain, do log hain.",
+    "Is a late checkout possible tomorrow? Our cab comes only in the afternoon.",
+    "मेरी एक रात की बुकिंग रद्द हुई थी, उसका रिफंड कब तक आएगा?",
+    "Dehradun se aane ka sabse aasaan rasta kya hai? Saamaan kaafi zyada hai.",
+    "Thank you for the warm stay, the kids loved the view from the balcony.",
+    "कृपया मेरे पिछले स्टे का बिल भेज दीजिए।",
+)
+
+
+def seeded_number(index: int) -> str:
+    """The index-th fictional sample number, normalised like a real consent."""
+    return f"{SEEDED_NUMBER_PREFIX}{SEEDED_NUMBER_FIRST + index:04d}"
+
+
+def add_seeded_consent(
+    session: Session, booking: Booking, number: str, given_at: datetime
+) -> Consent:
+    """A sample Desk consent, salted and fingerprinted exactly like the real flow."""
+    if booking.guest_id is None:
+        raise InboxError(409, "no_guest", "This stay has no guest record")
+    salt = secrets.token_hex(32)
+    consent = Consent(guest_id=booking.guest_id, booking_id=booking.id,
+                      wording_version=WORDING_VERSION, given_at=given_at, salt=salt,
+                      fingerprint=fingerprint(salt, booking.id, given_at, WORDING_VERSION),
+                      whatsapp_number=normalise_mobile(number), proof_status="pending",
+                      seeded=True)  # fmt: skip
+    session.add(consent)
+    session.flush()
+    return consent
+
+
+def seal_seeded(session: Session, property_id: int, consents: list[Consent], at: datetime) -> None:
+    """Seal only these sample consents under their own local root (never real
+    pending ones, which wait for the owner's own proof write)."""
+    bundle = ProofBundle(property_id=property_id, created_at=at,
+                         merkle_root=merkle_root([c.fingerprint for c in consents]),
+                         item_count=len(consents), chain_status="stored")  # fmt: skip
+    session.add(bundle)
+    session.flush()
+    for index, consent in enumerate(consents):
+        session.add(ProofBundleItem(bundle_id=bundle.id, consent_id=consent.id,
+                                    leaf_index=index, fingerprint=consent.fingerprint))  # fmt: skip
+        consent.proof_status = "verified"
+    session.flush()
+
+
+def seeded_threads(session: Session, property_id: int) -> list[Consent]:
+    """The sample hotel's seeded threads still in the inbox, oldest first."""
+    return sorted(
+        (c for c in active_consents(session, property_id) if c.seeded), key=lambda c: c.id
+    )
+
+
+def _new_seeded_guest(session: Session, prop: Property, now: datetime) -> Consent:
+    """A fresh sample thread on the newest checked-out Desk stay with no consent."""
+    consented = select(Consent.guest_id)
+    booking = session.scalar(
+        select(Booking)
+        .where(
+            Booking.property_id == prop.id,
+            Booking.source == "desk",
+            Booking.checked_out_at.is_not(None),
+            Booking.guest_id.is_not(None),
+            Booking.guest_id.not_in(consented),
+        )
+        .order_by(Booking.check_in.desc(), Booking.id)
+        .limit(1)
+    )
+    if booking is None:
+        raise InboxError(409, "no_sample_guest", "Every sample guest already has a thread")
+    used = session.scalar(select(func.count(Consent.id)).where(Consent.seeded.is_(True))) or 0
+    consent = add_seeded_consent(session, booking, seeded_number(int(used)), now)
+    seal_seeded(session, prop.id, [consent], now)
+    return consent
+
+
+def simulate_target(session: Session, prop: Property, now: datetime) -> tuple[Consent, str]:
+    """The next seeded thread and text, rotating through both fixed lists."""
+    if not prop.is_sample:
+        raise InboxError(403, "not_sample", "Simulated messages are only for the sample hotel")
+    threads = seeded_threads(session, prop.id)
+    if not threads:
+        threads = [_new_seeded_guest(session, prop, now)]
+    sent = session.scalar(
+        select(func.count(InboxMessage.id))
+        .join(Consent, Consent.id == InboxMessage.consent_id)
+        .where(Consent.seeded.is_(True), InboxMessage.direction == "in")
+    )
+    turn = int(sent or 0)
+    return threads[turn % len(threads)], SIMULATE_TEXTS[turn % len(SIMULATE_TEXTS)]
