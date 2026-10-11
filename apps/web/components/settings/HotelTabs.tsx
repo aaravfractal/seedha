@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
+import type { ReactNode } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { inr } from "@/lib/format";
 import { PLANS } from "@/lib/plans";
@@ -33,7 +34,7 @@ function useOnThisMachine(): boolean {
 }
 
 /** Hotel: property facts (read-only for the sample hotel), connections, demo reset. */
-export function HotelTab({ data }: { data: SettingsData }) {
+export function HotelTab({ data, beforeReset }: { data: SettingsData; beforeReset?: ReactNode }) {
   const health = useApi<Health>("health");
   const toast = useToast();
   const [confirming, setConfirming] = useState(false);
@@ -112,6 +113,7 @@ export function HotelTab({ data }: { data: SettingsData }) {
         Add keys in .env to switch a connection from simulated to live.
       </p>
 
+      {beforeReset}
       {h.is_sample && canReset ? (
         <>
           <div className={s.sectionHead}>

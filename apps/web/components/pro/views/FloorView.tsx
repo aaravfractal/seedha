@@ -55,7 +55,13 @@ export function FloorView() {
       {error ? <ErrorState message={error.message} code={error.code} onRetry={reload} /> : null}
       {!data && !error ? <Loading rows={3} label="Loading floors" /> : null}
       {data ? (
-        <div className={`${s.tableWrap} ${stale ? s.busy : ""}`} aria-busy={stale}>
+        <div
+          className={`${s.tableWrap} ${stale ? s.busy : ""}`}
+          tabIndex={0}
+          role="region"
+          aria-label="Floor table"
+          aria-busy={stale}
+        >
           <table className={s.table}>
             <caption>
               At {inr(data.rate)} a night. Floors at a minimum of {inr(data.target)} kept.

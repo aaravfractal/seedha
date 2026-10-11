@@ -31,7 +31,7 @@ export function KhataView() {
           no agent names, so the names are samples.
         </p>
       </div>
-      <div className={s.tableWrap}>
+      <div className={s.tableWrap} tabIndex={0} role="region" aria-label="Agent khata table">
         <table className={s.table}>
           <caption>Travel agents, April to September 2026</caption>
           <thead>

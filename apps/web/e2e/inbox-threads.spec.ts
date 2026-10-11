@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { signIn } from "./helpers";
 
 /**
@@ -8,6 +8,29 @@ import { signIn } from "./helpers";
  * "Simulate incoming message", the /inbox?thread=<id> deep link and the
  * invoice slot under a bill request's draft. Nothing is sent automatically.
  */
+
+/**
+ * The Send button sits fully inside the viewport, not clipped under the
+ * invoice slot (review F1). On a phone the inbox panel sits under the screen
+ * title, so the owner scrolls the page to the conversation first.
+ */
+async function sendInView(page: Page, convo: Locator, scrollPage: boolean): Promise<void> {
+  if (scrollPage) await convo.evaluate((el) => el.scrollIntoView({ block: "end", behavior: "instant" }));
+  const send = convo.getByRole("button", { name: "Send" });
+  await expect(send).toBeVisible();
+  const view = page.viewportSize() ?? { width: 0, height: 0 };
+  // One read of the box and the element at its centre (nothing covers or clips it).
+  await expect
+    .poll(() =>
+      send.evaluate((el, v) => {
+        const r = el.getBoundingClientRect();
+        const top = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+        const inside = r.top >= 0 && r.left >= 0 && r.bottom <= v.height && r.right <= v.width;
+        return inside && (top === el || el.contains(top));
+      }, view),
+    )
+    .toBe(true);
+}
 
 type ThreadRow = { consent_id: number; guest_name: string; unread: number };
 type Bubble = { direction: "in" | "out"; body: string };
@@ -43,8 +66,20 @@ test("seeded threads, profile, draft and send, invoice slot", async ({ page }) =
   const slot = convo.getByTestId("invoice-slot");
   await expect(slot).toBeVisible();
   await expect(slot).toContainText("Stay invoice ready to attach");
-  // The invoice preview: numbered by code, PDF download, attach to the reply.
-  const invoice = slot.getByRole("region", { name: /Stay invoice [A-Z]+\/\d{4}\/\d{4}/ });
+  await expect(slot).toContainText(/[A-Z]+\/\d{4}\/\d{4}/);
+  // The log keeps its room and Send stays reachable on desktop and phone.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await sendInView(page, convo, false);
+  expect((await convo.getByRole("log").boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(150);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await sendInView(page, convo, true);
+  expect((await convo.getByRole("log").boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(150);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  // The invoice preview opens in a dialog: numbered by code, PDF download, attach to the reply.
+  await slot.getByRole("button", { name: "Preview" }).click();
+  const sheet = page.getByRole("dialog", { name: "Stay invoice preview" });
+  await expect(sheet).toBeVisible();
+  const invoice = sheet.getByRole("region", { name: /Stay invoice [A-Z]+\/\d{4}\/\d{4}/ });
   await expect(invoice).toBeVisible();
   const download = invoice.getByRole("link", { name: /Download PDF/ });
   const href = (await download.getAttribute("href")) ?? "";
@@ -55,6 +90,10 @@ test("seeded threads, profile, draft and send, invoice slot", async ({ page }) =
   expect((await pdf.body()).subarray(0, 4).toString()).toBe("%PDF");
   await invoice.getByRole("button", { name: "Attach to reply" }).click();
   await expect(invoice.getByRole("button", { name: "Attached" })).toBeDisabled();
+  await page.keyboard.press("Escape");
+  await expect(sheet).toHaveCount(0);
+  await expect(slot.getByRole("button", { name: "Preview" })).toBeFocused();
+  await expect(slot.getByRole("button", { name: "Attached" })).toBeDisabled();
   await expect(slot.getByRole("status")).toContainText("Attached.");
   await expect(convo.getByText("Suggested reply in the box. Edit it, then send.")).toBeVisible();
 

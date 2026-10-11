@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { inr } from "@/lib/format";
@@ -157,12 +157,31 @@ function Loaded({ night, room }: { night: string; room: number }) {
  */
 export function RoomSheet({ night, tile, onClose }: { night: string; tile: RoomTile; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
+  const scrim = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  // The page behind the sheet is inert while it is open (review F9). Declared
+  // before the focus hook so inert is lifted before focus returns to the tile.
+  useEffect(() => {
+    const own = scrim.current;
+    const made = Array.from(document.body.children).filter(
+      (el): el is HTMLElement =>
+        el instanceof HTMLElement &&
+        el !== own &&
+        !el.inert &&
+        // Toasts stay announced while the sheet is open.
+        !el.matches("[aria-live], [role=status], [role=alert]") &&
+        !["SCRIPT", "STYLE", "NEXT-ROUTE-ANNOUNCER"].includes(el.tagName),
+    );
+    for (const el of made) el.inert = true;
+    return () => {
+      for (const el of made) el.inert = false;
+    };
+  }, []);
   useDialogFocus(ref, true, onClose);
   // Portalled to <body>: the screen's enter transform would otherwise trap
   // the fixed scrim inside the content column.
   return createPortal(
-    <div className={s.scrim} onClick={(e) => e.target === e.currentTarget && onClose()}>
+    <div ref={scrim} className={s.scrim} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div
         ref={ref}
         tabIndex={-1}

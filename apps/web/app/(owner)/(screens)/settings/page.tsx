@@ -79,10 +79,7 @@ export default function SettingsPage() {
         ) : tab === "personal" ? (
           <PersonalTab key={data.kind} data={data} onSaved={settings.setData} />
         ) : tab === "hotel" ? (
-          <>
-            <HotelTab data={data} />
-            <InvoiceGstSetting />
-          </>
+          <HotelTab data={data} beforeReset={<InvoiceGstSetting />} />
         ) : tab === "plan" ? (
           <PlanTab />
         ) : tab === "contracts" ? (

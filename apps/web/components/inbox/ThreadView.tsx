@@ -4,6 +4,9 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import type { DraftAttach, InboxDraft, InboxEntry, RateLine, ThreadDetail } from "@/lib/types-inbox";
 import { awaitingReply, wantsInvoice } from "@/lib/inboxRules";
+import { useApi } from "@/lib/api";
+import type { StayInvoice } from "@/lib/types-invoice";
+import { Dialog } from "./Dialogs";
 import { InvoicePanel } from "./InvoicePanel";
 import { avatarFill, clock, dayLabel, initials, stayRange } from "./format";
 import styles from "./Inbox.module.css";
@@ -35,7 +38,8 @@ function Stream({ detail, drafting }: { detail: ThreadDetail; drafting: boolean 
       className={styles.stream}
       role="log"
       aria-live="polite"
-      aria-label={`Conversation with ${detail.thread.guest_name}`}
+      aria-label={`Messages with ${detail.thread.guest_name}`}
+      tabIndex={0}
     >
       {count === 0 ? (
         <p className={styles.divider}>
@@ -146,11 +150,16 @@ function RateButton({
 }
 
 /**
- * Where the stay invoice goes when the guest asked for a bill. The invoice is
- * built by code from the booking row; the AI only wrote the covering text.
+ * Where the stay invoice goes when the guest asked for a bill: one compact row
+ * in the compose area (so the log and Send stay on screen) and the full
+ * preview in a dialog. The invoice is built by code from the booking row; the
+ * AI only wrote the covering text.
  */
 function InvoiceSlot({ attach }: { attach: DraftAttach }) {
   const [attached, setAttached] = useState(false);
+  const [open, setOpen] = useState(false);
+  const invoice = useApi<StayInvoice>(`inbox/threads/${attach.consent_id}/invoice`);
+  const number = invoice.data?.number;
   return (
     <div
       className={styles.invoiceSlot}
@@ -159,11 +168,57 @@ function InvoiceSlot({ attach }: { attach: DraftAttach }) {
       role="group"
       aria-label="Invoice"
     >
-      <span className={styles.kicker}>Invoice</span>
-      <p>Stay invoice ready to attach</p>
-      <InvoicePanel consentId={attach.consent_id} attached={attached} onAttach={() => setAttached(true)} />
+      <div className={styles.invoiceRow}>
+        <div className={styles.invoiceWhat}>
+          <span className={styles.kicker}>Invoice</span>
+          <p>
+            Stay invoice ready to attach
+            {number ? <span className={styles.invoiceNo}> · {number}</span> : null}
+          </p>
+        </div>
+        <div className={styles.invoiceActions}>
+          <button
+            type="button"
+            className={styles.slotBtn}
+            aria-haspopup="dialog"
+            onClick={() => setOpen(true)}
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            className={`${styles.slotBtn} ${styles.slotPrimary}`}
+            disabled={attached}
+            aria-pressed={attached}
+            onClick={() => setAttached(true)}
+          >
+            {attached ? "Attached" : "Attach"}
+          </button>
+        </div>
+      </div>
       {attached ? (
-        <p role="status">Attached. The guest gets the stay invoice with this reply (simulated send).</p>
+        <p role="status" className={styles.invoiceStatus}>
+          Attached. The guest gets the stay invoice with this reply (simulated send).
+        </p>
+      ) : null}
+      {open ? (
+        <Dialog
+          id="invoiceTitle"
+          title="Stay invoice preview"
+          className={styles.invoiceDlg}
+          onClose={() => setOpen(false)}
+        >
+          <InvoicePanel
+            consentId={attach.consent_id}
+            attached={attached}
+            onAttach={() => setAttached(true)}
+          />
+          <div className={styles.dlgActions}>
+            <button type="button" className="btn ghost" onClick={() => setOpen(false)}>
+              Close
+            </button>
+          </div>
+        </Dialog>
       ) : null}
     </div>
   );
@@ -294,40 +349,42 @@ export function ThreadView({
       <Stream detail={detail} drafting={drafting} />
 
       <div className={styles.compose}>
-        {can ? (
-          <div className={styles.suggest} role="group" aria-label="Suggested replies">
-            <span className={styles.suggestLabel}>
-              <span aria-hidden="true">✦ </span>Suggested
+        <div className={styles.composeTop}>
+          {can ? (
+            <div className={styles.suggest} role="group" aria-label="Suggested replies">
+              <span className={styles.suggestLabel}>
+                <span aria-hidden="true">✦ </span>Suggested
+              </span>
+              {detail.suggestions.map((s) => (
+                <button key={s} type="button" className={styles.suggestion} title={s} onClick={() => fill(s)}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className={styles.windowNote}>{detail.reply_note}</p>
+          )}
+          <div className={styles.botNote}>
+            <span>
+              <strong>Bot drafts, you send.</strong>{" "}
+              {draftSource === "ai"
+                ? "AI suggestion in the box. Edit it, then send."
+                : draftSource === "template"
+                  ? "Suggested reply in the box. Edit it, then send."
+                  : "Nothing goes out until you tap send."}
             </span>
-            {detail.suggestions.map((s) => (
-              <button key={s} type="button" className={styles.suggestion} title={s} onClick={() => fill(s)}>
-                {s}
-              </button>
-            ))}
+            <button
+              type="button"
+              className={styles.draftBtn}
+              disabled={!can || drafting}
+              onClick={() => void draft()}
+            >
+              <span aria-hidden="true">✦ </span>
+              {drafting ? "Drafting" : "Draft with AI"}
+            </button>
           </div>
-        ) : (
-          <p className={styles.windowNote}>{detail.reply_note}</p>
-        )}
-        <div className={styles.botNote}>
-          <span>
-            <strong>Bot drafts, you send.</strong>{" "}
-            {draftSource === "ai"
-              ? "AI suggestion in the box. Edit it, then send."
-              : draftSource === "template"
-                ? "Suggested reply in the box. Edit it, then send."
-                : "Nothing goes out until you tap send."}
-          </span>
-          <button
-            type="button"
-            className={styles.draftBtn}
-            disabled={!can || drafting}
-            onClick={() => void draft()}
-          >
-            <span aria-hidden="true">✦ </span>
-            {drafting ? "Drafting" : "Draft with AI"}
-          </button>
+          {attach ? <InvoiceSlot attach={attach} /> : null}
         </div>
-        {attach ? <InvoiceSlot attach={attach} /> : null}
         <div className={styles.composer}>
           <RateButton lines={rateCard} disabled={!can} onPick={insert} />
           <label htmlFor="composer" className="sr-only-text">
