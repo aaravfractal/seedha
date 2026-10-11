@@ -1,7 +1,9 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
+import { roomParam } from "@/lib/rooms";
 import type { DeskState, PropertyInfo, Slip } from "@/lib/types";
 import { DeskDevice } from "@/components/DeskDevice";
 import type { DeskHandle } from "@/components/DeskDevice";
@@ -20,7 +22,9 @@ export default function DeskPage() {
   const property = useApi<PropertyInfo>("property");
   const toast = useToast();
   const device = useRef<DeskHandle>(null);
-  const [room, setRoom] = useState<number | null>(null);
+  // ?room=204 (from the Overview room board) preselects that guest when they are in house.
+  const roomQuery = useSearchParams().get("room");
+  const [room, setRoom] = useState<number | null>(() => roomParam(roomQuery));
   const [consentPath, setConsentPath] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [noPaper, setNoPaper] = useState(false);

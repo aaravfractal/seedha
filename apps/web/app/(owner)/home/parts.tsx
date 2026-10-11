@@ -2,27 +2,16 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ApiError, postJson } from "@/lib/api";
 import { count, inr, pctTenths } from "@/lib/format";
 import { channelColour } from "@/lib/channels";
 import { compactInr, monthRange, wholePct } from "@/lib/format";
 import type { Overview, OverviewItem, OverviewKpis } from "@/lib/types-overview";
-import type { Slip } from "@/lib/types";
-import { useToast } from "@/components/Toast";
+import { RoomBoard } from "@/components/owner/RoomBoard";
 import { Icon } from "@/components/shell/Icons";
 import type { IconName } from "@/components/shell/Icons";
 import styles from "./overview.module.css";
 
 const colour = channelColour;
-
-const ROOM_LEGEND: [string, string][] = [
-  ["mmt", "MakeMyTrip"],
-  ["bcom", "Booking.com"],
-  ["agoda", "Agoda"],
-  ["ta", "Agent"],
-  ["walkin", "Walk-in"],
-  ["direct", "Direct"],
-];
 
 const share = (tenths: number | null) => (tenths === null ? "0.0%" : pctTenths(tenths));
 
@@ -249,64 +238,9 @@ export function ChannelMix({ mix, kpis }: { mix: Overview["channel_mix"]; kpis: 
   );
 }
 
-/** Last night's rooms from the desk register, and the close slip button. */
+/** Last night's rooms and the six nights before, as a room board (POLISH_BUILD A). */
 export function LastNight({ night }: { night: Overview["last_night"] }) {
-  const toast = useToast();
-  const [busy, setBusy] = useState(false);
-  async function printClose() {
-    setBusy(true);
-    try {
-      await postJson<Slip>("desk/close-slip");
-      toast("Close slip sent to the Desk printer.");
-    } catch (err) {
-      toast(err instanceof ApiError ? err.message : "The close slip did not print. Try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-  const sub =
-    night.sold === 0
-      ? `No rooms sold of ${night.rooms_count}`
-      : `${night.sold} of ${night.rooms_count} rooms sold · net ${inr(night.net_kept)}${
-          night.direct_share_pct === null ? "" : ` · direct share ${night.direct_share_pct}%`
-        }`;
-  return (
-    <section className={styles.card} aria-labelledby="night-title">
-      <div className={styles.cardHead}>
-        <h2 id="night-title" className={styles.cardTitle}>
-          Last night
-        </h2>
-        {night.is_sample ? <span className={styles.cardNote}>Sample close</span> : null}
-      </div>
-      <div className={styles.nightBar}>
-        <p className={styles.cardSub}>{sub}</p>
-        <button type="button" className="btn ghost small" onClick={printClose} disabled={busy}>
-          {busy ? "Sending" : "Print close slip on Desk"}
-        </button>
-      </div>
-      <ul className={styles.rooms} aria-label="Rooms">
-        {night.rooms.map((room) => (
-          <li
-            key={room.number}
-            className={styles.room}
-            data-ch={room.channel_key ?? "empty"}
-            style={room.channel_key ? { background: colour(room.channel_key) } : undefined}
-          >
-            <b>{room.number}</b>
-            <span>{room.code ?? "Empty"}</span>
-          </li>
-        ))}
-      </ul>
-      <ul className={styles.roomLegend} aria-label="Room colours">
-        {ROOM_LEGEND.map(([key, name]) => (
-          <li key={key}>
-            <i style={{ background: colour(key) }} aria-hidden="true" />
-            {name}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
+  return <RoomBoard fallback={night} />;
 }
 
 /** Things only the owner can do, each linking to its screen. */
