@@ -505,7 +505,7 @@ export function Inbox() {
             infoOpen={profileOpen}
             onSend={send}
             onDraft={draft}
-            onSimulate={() => setDialog("simulate")}
+            onSimulate={data.is_sample ? () => setDialog("simulate") : undefined}
           />
         )}
 

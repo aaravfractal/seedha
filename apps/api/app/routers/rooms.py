@@ -9,11 +9,12 @@ from __future__ import annotations
 from datetime import date
 from typing import Annotated, Literal
 
-from fastapi import APIRouter, Path
+from fastapi import APIRouter, Depends, Path
 from pydantic import BaseModel
 
 from app.deps import OwnerDep, PropertyDep, SessionDep
 from app.errors import ApiError
+from app.public_mode import print_guarded
 from app.routers.desk import SlipOut, slip_out, today
 from app.services.desk import enqueue, property_device
 from app.services.rooms import (
@@ -197,7 +198,7 @@ def get_room(
     return detail_out(find_stay(session, prop, night, room))
 
 
-@router.post("/{night}/{room}/slip", response_model=SlipOut)
+@router.post("/{night}/{room}/slip", response_model=SlipOut, dependencies=[Depends(print_guarded)])
 def print_room_slip(
     night: date,
     room: RoomNumber,

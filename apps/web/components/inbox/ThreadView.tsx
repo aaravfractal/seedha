@@ -186,7 +186,8 @@ export function ThreadView({
   infoOpen: boolean;
   onSend: (body: string) => Promise<boolean>;
   onDraft: () => Promise<InboxDraft | null>;
-  onSimulate: () => void;
+  /** Only for the sample hotel: a real hotel never invents a guest message. */
+  onSimulate?: () => void;
 }) {
   const t = detail.thread;
   const [text, setText] = useState("");
@@ -356,9 +357,11 @@ export function ThreadView({
         </div>
         <div className={styles.composeFoot}>
           <span>Prices from your rate card, never AI · every message ends with Reply STOP to opt out</span>
-          <button type="button" className={styles.textBtn} onClick={onSimulate}>
-            Simulate guest
-          </button>
+          {onSimulate ? (
+            <button type="button" className={styles.textBtn} onClick={onSimulate}>
+              Simulate guest
+            </button>
+          ) : null}
         </div>
       </div>
     </section>

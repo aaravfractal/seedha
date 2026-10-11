@@ -335,7 +335,12 @@ def maybe_away_reply(
 
 
 def record_inbound(
-    session: Session, from_number: str, text: str, sender: Sender, now: datetime
+    session: Session,
+    from_number: str,
+    text: str,
+    sender: Sender,
+    now: datetime,
+    transport: str = "whatsapp",
 ) -> int:
     """Store an inbound text for each active consent with this number.
 
@@ -358,7 +363,7 @@ def record_inbound(
     ).all()
     for consent in consents:
         row = InboxMessage(consent_id=consent.id, direction="in", body=body[:MAX_BODY],
-                           created_at=now, sent_by="guest", transport="whatsapp")  # fmt: skip
+                           created_at=now, sent_by="guest", transport=transport)  # fmt: skip
         session.add(row)
         session.flush()
         maybe_away_reply(session, consent, sender, now)

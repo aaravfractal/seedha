@@ -414,15 +414,20 @@ def read_thread(
 @router.post("/threads/{consent_id}/simulate", response_model=ThreadDetailOut | None)
 def simulate_guest(
     consent_id: int, body: SimulateIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep,
-    settings: SettingsDep, sender: SenderDep,
+    settings: SettingsDep, sender: SenderDep, request: Request,
 ) -> ThreadDetailOut | None:  # fmt: skip
     """Demo: act as the guest writing on WhatsApp. Same path as the webhook,
-    so STOP withdraws consent (the thread then disappears: returns null)."""
+    so STOP withdraws consent (the thread then disappears: returns null).
+    Sample hotel only, rate-limited, and stored as simulated, so a real
+    hotel can never invent a guest message or open a reply window."""
+    if not prop.is_sample:
+        raise ApiError(403, "not_sample", "Simulated guest messages are for the sample hotel only")
+    simulate_limited(request)
     consent = thread_or_404(session, prop.id, consent_id)
     number = consent.whatsapp_number or ""
     now = utc_now()
     handle_inbound(session, number, body.text, "simulated", now)
-    record_inbound(session, number, body.text, sender, now)
+    record_inbound(session, number, body.text, sender, now, transport="simulated")
     session.refresh(consent)
     if not consent.is_active:
         return None
@@ -487,5 +492,5 @@ def simulate_incoming(
         raise as_api_error(exc) from exc
     number = consent.whatsapp_number or ""
     handle_inbound(session, number, text, "simulated", now)
-    record_inbound(session, number, text, sender, now)
+    record_inbound(session, number, text, sender, now, transport="simulated")
     return SimulatedOut(consent_id=consent.id, guest_name=consent.guest.display_name)

@@ -6,13 +6,14 @@ import json
 from datetime import date, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Depends
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.deps import DeviceDep, OwnerDep, PropertyDep, SessionDep, SettingsDep, WordingDep
 from app.errors import ApiError
 from app.models import PerkCode, Property
+from app.public_mode import print_guarded
 from app.services.desk import (
     InHouse,
     ack,
@@ -219,7 +220,7 @@ def get_close_slip(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> 
     return slip_out(tonight_close(session, prop, today(session, prop)))
 
 
-@router.post("/close-slip", response_model=SlipOut)
+@router.post("/close-slip", response_model=SlipOut, dependencies=[Depends(print_guarded)])
 def print_close_slip(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> SlipOut:
     """Print tonight's close slip on the Desk."""
     slip = tonight_close(session, prop, today(session, prop))

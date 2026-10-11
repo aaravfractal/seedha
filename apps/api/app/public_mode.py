@@ -11,9 +11,13 @@ appears as loopback (see routers/site.py local_reset_only).
 from __future__ import annotations
 
 import ipaddress
+import math
 import os
 
 from fastapi import Request
+
+from app.errors import ApiError
+from app.ratelimit import Limit, RateLimiter
 
 
 def is_loopback(host: str) -> bool:
@@ -32,3 +36,27 @@ def is_remote_public(request: Request) -> bool:
         return False
     host = request.client.host if request.client else ""
     return not is_loopback(host)
+
+
+PRINT_LIMIT = Limit(6, 60)
+PRINT_BUCKET = "desk_print"
+
+
+def print_guarded(request: Request) -> None:
+    """Desk printing (room slips, the close slip): only from the laptop during a
+    public demo, and at most 6 prints a minute per client, so nobody can flood
+    the thermal printer or the command queue."""
+    if is_remote_public(request):
+        raise ApiError(
+            403, "print_local_only", "Printing works only on the computer running the demo"
+        )
+    limiter: RateLimiter = request.app.state.rate_limiter
+    client = request.client.host if request.client else "unknown"
+    wait = limiter.check(PRINT_BUCKET, client, PRINT_LIMIT)
+    if wait > 0:
+        raise ApiError(
+            429,
+            "too_many_requests",
+            "Too many prints. Please wait a minute and try again.",
+            headers={"Retry-After": str(math.ceil(wait))},
+        )
