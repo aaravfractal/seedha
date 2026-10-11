@@ -3,6 +3,26 @@
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
+## Polish build (12 October 2026, in progress)
+
+Brief: docs/POLISH_BUILD.md. Decision D-100. Status files:
+docs/agent-reports/polish/.
+
+- **Research:** R1 rooms and Pro (one night of room data only: added six
+  sample nights after 30 Sep, locked totals untouched); R2 inbox and invoice
+  (seeded consents must not mark the Desk step; reportlab already present).
+- **Migration 0012** (lead): consent.seeded, owner_settings.room_gst_bps,
+  stay_invoice, guest_memory.
+- **Built and merged:** rooms API (7 nights, per-room ledger detail with
+  initials only, if-direct illustration, side-effect-free slip); room board
+  on Overview (sheet, filters, 7-night scrubber, "Direct bookings" label);
+  stay invoice (GST included, numbered per FY, PDF, preview panel, room GST
+  setting); guest inbox (8 seeded consented threads, simulate incoming
+  message, topic drafts with invoice attach, profile column); interactive
+  Pro page with ten live card views and their API.
+- **e2e:** 58/58 on master after the merges.
+- **Next:** Wave 3 tests (T1, T2), Wave 4 reviews (V1 to V3), finish.
+
 ## Pulse section redesign (12 October 2026)
 
 Brief: docs/PULSE_SECTION.md. Reports: docs/agent-reports/pulse-r1.md,
