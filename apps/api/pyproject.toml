@@ -22,6 +22,8 @@ dependencies = [
   # Polygon Amoy proof signing only (wheels only; resolved set in docs/agent-reports/live/b1-chain.md)
   "eth-account==0.14.0",
   "hexbytes==2.0.0",
+  # Stay invoice PDFs (D-100)
+  "reportlab==5.0.1",
 ]
 
 [project.optional-dependencies]
@@ -35,7 +37,6 @@ dev = [
   "pip-audit>=2.10",
   "pre-commit>=4.6",
   "detect-secrets>=1.5",
-  "reportlab>=5.0",
 ]
 
 [tool.setuptools.packages.find]

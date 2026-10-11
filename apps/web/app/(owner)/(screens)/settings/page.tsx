@@ -8,6 +8,7 @@ import { ErrorState, Loading } from "@/components/States";
 import { Screen } from "@/components/owner/ui";
 import { NotificationsTab, PrivacyTab, SecurityTab } from "@/components/settings/AccountTabs";
 import { ContractsTab, HotelTab, PlanTab } from "@/components/settings/HotelTabs";
+import { InvoiceGstSetting } from "@/components/settings/InvoiceGstSetting";
 import { PersonalTab } from "@/components/settings/PersonalTab";
 import { ProofWalletNotice } from "@/components/settings/ProofWalletNotice";
 import { StaffTab } from "@/components/settings/StaffTab";
@@ -77,7 +78,10 @@ export default function SettingsPage() {
         ) : tab === "personal" ? (
           <PersonalTab key={data.kind} data={data} onSaved={settings.setData} />
         ) : tab === "hotel" ? (
-          <HotelTab data={data} />
+          <>
+            <HotelTab data={data} />
+            <InvoiceGstSetting />
+          </>
         ) : tab === "plan" ? (
           <PlanTab />
         ) : tab === "contracts" ? (

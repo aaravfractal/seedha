@@ -13,7 +13,7 @@ from datetime import date, datetime
 from typing import Annotated, Literal
 
 from fastapi import APIRouter
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints
 
 from app.deps import PropertyDep, SessionDep
 from app.errors import ApiError
@@ -21,6 +21,7 @@ from app.models import OwnerAccount, OwnerSettings, Property, StaffInvite
 from app.routers.auth import DEMO_SUBJECT, NowDep, SubjectDep, account_of
 from app.services.auth import mask_phone
 from app.services.calendar import planned_keys
+from app.services.invoice import DEFAULT_ROOM_GST_BPS, MAX_ROOM_GST_BPS
 from app.services.ledger import DEFAULT_END, DEFAULT_START
 from app.services.settings import (
     SettingsError,
@@ -34,6 +35,7 @@ from app.services.settings import (
     remove_staff,
     save_business,
     save_notifications,
+    settings_for_write,
 )
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -109,6 +111,21 @@ class NotificationsOut(BaseModel):
     approvals: bool
 
 
+class InvoiceSettingsOut(BaseModel):
+    """GST on room tariff for stay invoices, in basis points (500 = 5%)."""
+
+    room_gst_bps: int
+    is_default: bool
+    default_bps: int
+    max_bps: int
+
+
+class InvoiceSettingsIn(BaseModel):
+    """The GST rate on room tariff; null goes back to the 5% default."""
+
+    room_gst_bps: Annotated[int, Field(ge=0, le=MAX_ROOM_GST_BPS)] | None
+
+
 class SecurityOut(BaseModel):
     """Only facts that are true in this build."""
 
@@ -129,6 +146,7 @@ class SettingsOut(BaseModel):
     personal: PersonalOut
     hotel: HotelOut
     notifications: NotificationsOut
+    invoice: InvoiceSettingsOut
     security: SecurityOut
 
 
@@ -221,6 +239,13 @@ def _notifications(row: OwnerSettings | None) -> NotificationsOut:
                             approvals=row.notify_approvals)  # fmt: skip
 
 
+def _invoice_settings(row: OwnerSettings | None) -> InvoiceSettingsOut:
+    bps = row.room_gst_bps if row is not None else None
+    return InvoiceSettingsOut(room_gst_bps=DEFAULT_ROOM_GST_BPS if bps is None else bps,
+                              is_default=bps is None, default_bps=DEFAULT_ROOM_GST_BPS,
+                              max_bps=MAX_ROOM_GST_BPS)  # fmt: skip
+
+
 def _personal(
     prop: Property, account: OwnerAccount | None, row: OwnerSettings | None
 ) -> PersonalOut:
@@ -273,6 +298,7 @@ def _settings(session: SessionDep, prop: Property, subject: str) -> SettingsOut:
             is_sample=prop.is_sample,
         ),  # fmt: skip
         notifications=_notifications(row),
+        invoice=_invoice_settings(row),
         security=SecurityOut(
             sign_in="demo" if account is None else "whatsapp_code",
             mobile=None if account is None else mask_phone(account.phone),
@@ -320,6 +346,27 @@ def patch_notifications(
     row = save_notifications(session, subject, choices, now)
     session.flush()
     return _notifications(row)
+
+
+@router.get("/invoice", response_model=InvoiceSettingsOut)
+def get_invoice_settings(subject: SubjectDep, session: SessionDep) -> InvoiceSettingsOut:
+    """The GST rate stay invoices use for this signed-in subject."""
+    account_of(session, subject)
+    return _invoice_settings(find_settings(session, subject))
+
+
+@router.patch("/invoice", response_model=InvoiceSettingsOut)
+def patch_invoice(
+    body: InvoiceSettingsIn, subject: SubjectDep, session: SessionDep, now: NowDep
+) -> InvoiceSettingsOut:
+    """GST rate on room tariff for stay invoices, per signed-in subject (the
+    demo too: a rate is not personal data, like the notification switches)."""
+    account_of(session, subject)  # an ended account session is refused
+    row = settings_for_write(session, subject, now)
+    row.room_gst_bps = body.room_gst_bps
+    row.updated_at = now
+    session.flush()
+    return _invoice_settings(row)
 
 
 @router.get("/contracts", response_model=ContractsOut)

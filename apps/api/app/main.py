@@ -22,6 +22,7 @@ from app.routers import (
     desk,
     events,
     inbox,
+    invoice,
     ledger,
     link,
     messages,
@@ -128,6 +129,7 @@ def create_app(
     app.include_router(proof.router)
     app.include_router(ask.router)
     app.include_router(inbox.router)
+    app.include_router(invoice.router)
     app.include_router(assistant.router)
     app.include_router(site.site_router)
     app.include_router(site.pro_router)
