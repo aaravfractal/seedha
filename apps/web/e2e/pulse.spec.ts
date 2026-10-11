@@ -22,7 +22,8 @@ async function openPulse(page: Page): Promise<Locator> {
 
 /** The channel row for `name` on the decision card. */
 function row(card: Locator, name: string): Locator {
-  return card.getByRole("listitem").filter({ hasText: name });
+  // Match the channel name exactly: other rows' hidden text can mention "direct".
+  return card.getByRole("listitem").filter({ has: card.page().getByText(name, { exact: true }) });
 }
 
 test.describe("desktop 1440", () => {
