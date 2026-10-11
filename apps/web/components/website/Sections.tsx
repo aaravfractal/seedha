@@ -6,7 +6,6 @@ import { useState } from "react";
 import { count, inr } from "@/lib/format";
 import type { Sample } from "@/lib/types-website";
 import { growth } from "@/lib/website";
-import { EventRadar } from "./EventRadar";
 import { useSeenOnce } from "./hooks";
 import styles from "./site.module.css";
 
@@ -369,91 +368,6 @@ export function GuestMap({ data }: { data: Sample }) {
             ))}
           </ul>
         </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------- Pulse calendar strip (sample events, D10) ---------- */
-
-const PULSE: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, string, string]>]> = [
-  [
-    "October 2026",
-    [
-      [
-        "Dussehra",
-        "Tue 20 Oct",
-        "Long weekend for Delhi families. Hold Saturday rooms for direct and repeat guests first.",
-      ],
-    ],
-  ],
-  [
-    "November 2026",
-    [
-      ["Diwali", "Sun 8 Nov", "Families book late. Open OTA rooms only for the quiet weekdays after."],
-      [
-        "Guru Nanak Jayanti",
-        "Tue 24 Nov",
-        "Midweek holiday. Offer the direct perk to every walk-in enquiry.",
-      ],
-    ],
-  ],
-  [
-    "December 2026",
-    [
-      [
-        "Winter Line Carnival",
-        "25 to 30 Dec",
-        "Your busiest week. Sell direct first; open the lowest-net channel only for nights still empty.",
-      ],
-      ["New Year's Eve", "Thu 31 Dec", "Packages sell better than discounts. Keep the public rate."],
-    ],
-  ],
-  [
-    "January 2027",
-    [
-      [
-        "Republic Day weekend",
-        "23 to 26 Jan",
-        "Long weekend with a bridge day. Hold rooms off the channel that leaves the least.",
-      ],
-    ],
-  ],
-];
-
-export function PulseStrip() {
-  return (
-    <section id="pulse" className={styles.section} aria-labelledby="pulse-title">
-      <div className={styles.container}>
-        <p className={styles.kicker}>Seedha Pulse · Pro</p>
-        <h2 id="pulse-title" className={styles.h2}>
-          Every festival, one channel decision.
-        </h2>
-        <p className={styles.lede}>
-          Pulse lists the dates that matter to a hill hotel and suggests which channel to hold back. It is a
-          channel decision. It does not predict demand.
-        </p>
-        <div className={styles.pulseStrip}>
-          {PULSE.map(([month, events]) => (
-            <div key={month} className={styles.month}>
-              <h3 className={styles.monthName}>{month}</h3>
-              {events.map(([name, when, move]) => (
-                <article key={name} className={styles.event}>
-                  <div className={styles.eventTop}>
-                    <h4 className={styles.eventName}>{name}</h4>
-                    <span className={styles.sampleTag}>Sample</span>
-                  </div>
-                  <p className={styles.eventDate}>{when}</p>
-                  <p className={styles.eventMove}>{move}</p>
-                </article>
-              ))}
-            </div>
-          ))}
-        </div>
-        <p className={styles.footnote}>
-          Sample events for a Mussoorie hotel. Confirm dates locally before you act.
-        </p>
-        <EventRadar />
       </div>
     </section>
   );

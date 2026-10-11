@@ -2,9 +2,12 @@
 
 import { useApi } from "@/lib/api";
 import type { Sample } from "@/lib/types-website";
+import { EventRadar } from "./EventRadar";
 import { Hero } from "./Hero";
 import { Metrics } from "./Metrics";
+import { PulseSection } from "./pulse/PulseSection";
 import { SeedhaPass } from "./SeedhaPass";
+import site from "./site.module.css";
 import { Careers, Faq, FinalCta, Pricing } from "./Pricing";
 import {
   DeskSection,
@@ -13,7 +16,6 @@ import {
   GrowthCalculator,
   GuestMap,
   NoWebsiteBand,
-  PulseStrip,
   Trust,
 } from "./Sections";
 
@@ -34,7 +36,10 @@ export function HomePage() {
       <SeedhaPass />
       {data ? <GrowthCalculator data={data} /> : null}
       {data && data.guest_cities.length > 0 ? <GuestMap data={data} /> : null}
-      <PulseStrip />
+      <PulseSection />
+      <div className={site.container}>
+        <EventRadar />
+      </div>
       <DeskSection />
       <NoWebsiteBand />
       <Trust />
