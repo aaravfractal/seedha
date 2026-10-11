@@ -2,14 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ApiError, postJson, useApi } from "@/lib/api";
+import { ApiError, api, postJson, useApi } from "@/lib/api";
 import { count } from "@/lib/format";
+import { bundleStatus, linkHost, readChain } from "@/lib/proofChain";
+import type { ProofBundle } from "@/lib/types";
 import type { OwnerProof, ProofEntry } from "@/lib/types-owner";
 import { EmptyState, ErrorState, Loading } from "@/components/States";
 import { ProofDialog } from "@/components/ProofDialog";
+import { ProofChainCard } from "@/components/owner/ProofChainCard";
 import { useToast } from "@/components/Toast";
 import { Chip, Screen, ui } from "@/components/owner/ui";
 import { istStamp, proofStatus, shortHash } from "@/components/owner/proofStatus";
+import c from "@/components/owner/proofChain.module.css";
 import p from "./proof.module.css";
 
 const TITLE = "Consent proof.";
@@ -20,6 +24,7 @@ export default function ProofPage() {
   const proof = useApi<OwnerProof>("proof");
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  const [refreshing, setRefreshing] = useState<number | null>(null);
   const [open, setOpen] = useState<number | null>(null);
 
   async function bundle() {
@@ -27,11 +32,32 @@ export default function ProofPage() {
     try {
       const result = await postJson<OwnerProof>("proof/bundle");
       proof.setData(result);
-      toast(`Tonight's bundle written. ${count(result.bundles[0]?.item_count ?? 0)} consents sealed.`);
+      const newest = result.bundles[0];
+      const sealed = newest?.item_count ?? 0;
+      toast(
+        `Tonight's proof written. ${count(sealed)} consent${sealed === 1 ? "" : "s"} sealed. ${
+          newest ? bundleStatus(newest).label : "Stored on Seedha"
+        }.`,
+      );
     } catch (err) {
-      toast(err instanceof ApiError ? err.message : "Could not write the bundle");
+      toast(err instanceof ApiError ? err.message : "Could not write tonight's proof");
     } finally {
       setBusy(false);
+    }
+  }
+
+  /** Re-read GET /proof to see whether a sent bundle is confirmed yet. */
+  async function refresh(id: number) {
+    setRefreshing(id);
+    try {
+      const result = await api<OwnerProof>("proof");
+      proof.setData(result);
+      const now = result.bundles.find((b) => b.id === id);
+      toast(now ? `${bundleStatus(now).label}.` : "Checked again");
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : "Could not check the network");
+    } finally {
+      setRefreshing(null);
     }
   }
 
@@ -50,6 +76,7 @@ export default function ProofPage() {
     );
   }
   const data = proof.data;
+  const chain = readChain(data);
   const pending = data.entries.filter((e) => e.bundle_id === null);
   const byBundle = new Map<number, ProofEntry[]>();
   for (const e of data.entries) {
@@ -78,7 +105,28 @@ export default function ProofPage() {
         </div>
       </div>
 
-      {data.entries.length === 0 ? (
+      <div className={p.write}>
+        <button
+          type="button"
+          className="btn small"
+          disabled={busy || pending.length === 0}
+          aria-busy={busy}
+          onClick={() => void bundle()}
+        >
+          {busy ? "Writing tonight's proof…" : "Write tonight's proof"}
+        </button>
+        <span className={ui.muted}>
+          {pending.length
+            ? `${count(pending.length)} consent${pending.length === 1 ? "" : "s"} waiting. The 9 PM job does the same.`
+            : "Nothing new to prove tonight. The 9 PM job does the same."}
+        </span>
+      </div>
+
+      <div className={p.chain}>
+        <ProofChainCard chain={chain} />
+      </div>
+
+      {data.entries.length === 0 && data.bundles.length === 0 ? (
         <div className={ui.section}>
           <EmptyState
             title="No consents yet"
@@ -105,12 +153,6 @@ export default function ProofPage() {
                 <Chip>Opens at 9 PM</Chip>
               </div>
               <Entries entries={pending} onOpen={setOpen} />
-              <div className={p.write}>
-                <button type="button" className="btn small" disabled={busy} onClick={() => void bundle()}>
-                  Write tonight&apos;s bundle now
-                </button>
-                <span className={ui.muted}>The 9 PM job does the same.</span>
-              </div>
             </section>
           ) : null}
           {data.bundles.map((b) => (
@@ -125,23 +167,53 @@ export default function ProofPage() {
                     {count(b.item_count)} consent{b.item_count === 1 ? "" : "s"}
                   </p>
                 </div>
-                <Chip tone={b.chain_tx ? "ok" : "plain"}>
-                  {b.chain_tx ? "On public chain" : "Stored by Seedha"}
-                </Chip>
               </div>
+              <BundleChain bundle={b} refreshing={refreshing === b.id} onRefresh={() => void refresh(b.id)} />
               <Entries entries={byBundle.get(b.id) ?? []} onOpen={setOpen} />
             </section>
           ))}
         </div>
       )}
 
-      <p className={`${ui.calc} ${p.chainNote}`}>
-        {data.chain_live
-          ? "Bundle fingerprints are written to a public test chain. Only fingerprints are public: no name, phone or booking detail."
-          : "Bundle fingerprints are stored by Seedha on this server and are not yet written to a public chain. Only fingerprints would ever be published: no name, phone or booking detail."}
-      </p>
       {open !== null ? <ProofDialog consentId={open} onClose={() => setOpen(null)} /> : null}
     </Screen>
+  );
+}
+
+/** Where one bundle's root is: stored, sent, verified or not confirmed. */
+function BundleChain({
+  bundle,
+  refreshing,
+  onRefresh,
+}: {
+  bundle: ProofBundle;
+  refreshing: boolean;
+  onRefresh: () => void;
+}) {
+  const s = bundleStatus(bundle);
+  const host = linkHost(bundle.explorer_url);
+  return (
+    <div className={c.statusRow}>
+      <p className={`${c.status}${s.tone === "plain" ? "" : ` ${c[s.tone]}`}`} aria-live="polite">
+        {s.label}
+      </p>
+      {s.status === "sent" ? (
+        <button
+          type="button"
+          className="btn small ghost"
+          disabled={refreshing}
+          aria-busy={refreshing}
+          onClick={onRefresh}
+        >
+          {refreshing ? "Checking…" : "Refresh"}
+        </button>
+      ) : null}
+      {bundle.explorer_url && host && s.status !== "stored" ? (
+        <a className={c.link} href={bundle.explorer_url} target="_blank" rel="noopener noreferrer">
+          View on Amoy explorer <span className={c.host}>({host})</span>
+        </a>
+      ) : null}
+    </div>
   );
 }
 

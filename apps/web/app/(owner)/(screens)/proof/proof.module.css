@@ -67,6 +67,6 @@ button.entry:hover .entryName {
   grid-column: 2;
   grid-row: 1 / span 2;
 }
-.chainNote {
+.chain {
   margin-top: 16px;
 }

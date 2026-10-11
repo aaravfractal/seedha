@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { useApi } from "@/lib/api";
+import { bundleStatus, dialogChainText, linkHost } from "@/lib/proofChain";
 import type { ConsentProof } from "@/lib/types";
 import { useToast } from "./Toast";
 import { ErrorState, Loading } from "./States";
@@ -96,14 +97,16 @@ export function ProofDialog({ consentId, onClose }: { consentId: number; onClose
                   ? `${istStamp(p.bundle.created_at)} · root ${shortHash(p.bundle.merkle_root)}`
                   : "Not sealed yet"}
               </dd>
+              {p.bundle ? (
+                <>
+                  <dt>Root</dt>
+                  <dd>{bundleStatus(p.bundle).label}</dd>
+                </>
+              ) : null}
               <dt>Fingerprint</dt>
               <dd className={d.mono}>{shortHash(p.fingerprint)}</dd>
             </dl>
-            <p className={d.chain}>
-              {p.bundle?.chain_tx
-                ? "The bundle fingerprint is written to a public test chain. Only the fingerprint is public: no name, phone or booking detail."
-                : "The bundle fingerprint is stored by Seedha on this server. It is not yet written to a public chain. Only fingerprints would ever be published: no name, phone or booking detail."}
-            </p>
+            <p className={d.chain}>{dialogChainText(p.bundle)}</p>
             <div className={d.actions}>
               <button
                 type="button"
@@ -115,14 +118,14 @@ export function ProofDialog({ consentId, onClose }: { consentId: number; onClose
               >
                 Copy fingerprint
               </button>
-              {p.bundle?.explorer_url ? (
+              {p.bundle?.explorer_url && linkHost(p.bundle.explorer_url) ? (
                 <a
                   className="btn small ghost"
                   href={p.bundle.explorer_url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  View public record
+                  View on Amoy explorer ({linkHost(p.bundle.explorer_url)})
                 </a>
               ) : null}
               <button type="button" className={`btn small ${d.done}`} onClick={onClose}>
