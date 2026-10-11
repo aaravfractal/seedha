@@ -55,6 +55,39 @@ test("an http:// source link is refused before anything is sent", async ({ page 
   await page.keyboard.press("Escape");
   await expect(sheet).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Add events" })).toBeFocused();
+
+  // The API refuses it too, whatever the page does.
+  const direct = await page.request.post("/api/events/extract", {
+    data: { text: NOTICE, source_url: "http://e2e-events.example.org/notice" },
+  });
+  expect(direct.status()).toBe(422);
+  expect(await direct.text()).toContain("bad_source_url");
+});
+
+test("a notice over 6,000 characters is held back by the counter", async ({ page }) => {
+  let extractCalls = 0;
+  page.on("request", (req) => {
+    if (req.url().includes("/api/events/extract")) extractCalls += 1;
+  });
+  await page.goto("/calendar");
+  await page.getByRole("button", { name: "Add events" }).click();
+  const sheet = page.getByRole("dialog", { name: "Add events from your source." });
+  const box = sheet.getByLabel("Paste the event notice");
+  await box.fill("a".repeat(6_010));
+  await expect(sheet.getByText("6,010 / 6,000")).toBeVisible();
+  await expect(sheet.getByText("6,010 of 6,000 characters. Remove 10 to continue.")).toBeVisible();
+  await expect(box).toHaveAttribute("aria-invalid", "true");
+  await sheet.getByLabel("Official source link").fill(SOURCE);
+  await sheet.getByRole("button", { name: "Read events" }).click();
+  await expect(sheet.getByText("Sample extraction")).toHaveCount(0);
+  expect(extractCalls).toBe(0);
+
+  // Back under the limit, the error goes away.
+  await box.fill("a".repeat(6_000));
+  await expect(sheet.getByText("6,000 / 6,000")).toBeVisible();
+  await expect(sheet.getByText(/Remove \d+ to continue/)).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(sheet).toHaveCount(0);
 });
 
 test("paste, read as sample extraction, save, plan, preview and delete", async ({ page }) => {
@@ -76,8 +109,12 @@ test("paste, read as sample extraction, save, plan, preview and delete", async (
   await sheet.getByRole("button", { name: "Save events" }).click();
   await expect(sheet).toHaveCount(0);
 
+  // Saved on the API: still there after a reload, labelled as the owner's own sample read.
+  await page.reload();
   const card = page.locator("article").filter({ hasText: "From your sources" }).first();
   await expect(card).toBeVisible();
+  await expect(card).toContainText("Sample extraction");
+  await expect(card).toContainText(/Likely overnight demand/);
   const link = card.getByRole("link", { name: /e2e-events\.example\.org/ });
   await expect(link).toHaveText("e2e-events.example.org");
   await expect(link).toHaveAttribute("href", SOURCE);
@@ -86,6 +123,8 @@ test("paste, read as sample extraction, save, plan, preview and delete", async (
   await expect(card).not.toContainText("₹");
 
   await card.getByRole("button", { name: "Add to plan" }).click();
+  await expect(card.getByRole("button", { name: "Remove from plan" })).toBeVisible();
+  await page.reload();
   await expect(card.getByRole("button", { name: "Remove from plan" })).toBeVisible();
   await card.getByRole("button", { name: "Remove from plan" }).click();
   await expect(card.getByRole("button", { name: "Add to plan" })).toBeVisible();

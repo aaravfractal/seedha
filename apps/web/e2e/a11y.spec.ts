@@ -49,7 +49,7 @@ const PUBLIC_PAGES = [
   "/no-such-page",
 ];
 
-test("no axe violations on any page, both themes, laptop and phone", async ({ page, context }) => {
+test("no axe violations on any page, both themes, laptop and phone", async ({ page, context, baseURL }) => {
   test.setTimeout(300_000);
   // Final states only: entrance motion (hero blur-in, screen enter) would let
   // axe measure text mid-fade. Contrast is the same once motion settles.
@@ -59,7 +59,9 @@ test("no axe violations on any page, both themes, laptop and phone", async ({ pa
 
   const found: string[] = [];
   for (const theme of ["light", "dark"]) {
-    await context.addCookies([{ name: "seedha_theme", value: theme, url: "http://localhost:3001" }]);
+    await context.addCookies([
+      { name: "seedha_theme", value: theme, url: baseURL ?? "http://localhost:3001" },
+    ]);
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 900 });
       for (const path of [...OWNER_PAGES, ...PUBLIC_PAGES]) {
