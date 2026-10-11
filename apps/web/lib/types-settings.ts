@@ -65,10 +65,17 @@ export type PulseEvent = {
   tag: string;
   start: string;
   end: string;
-  action: "no_discount" | "hold";
+  /** Owner events with low demand use "keep" (keep the usual mix). */
+  action: "no_discount" | "hold" | "keep";
   rooms: number;
   decision: string;
   in_plan: boolean;
+  /** Missing on older API builds: read as "sample". */
+  origin?: EventOrigin;
+  source_url?: string | null;
+  /** Owner events carry the town and the demand read from their source. */
+  town?: string | null;
+  demand?: EventDemand | null;
 };
 
 export type PulseFacts = {
@@ -86,3 +93,59 @@ export type CalendarData = {
   events: PulseEvent[];
   facts: PulseFacts | null;
 };
+
+/** Where a calendar event came from. Older API builds omit it: treat as "sample". */
+export type EventOrigin = "sample" | "owner_source" | "sample_extraction";
+
+export type EventCategory =
+  "festival" | "fair" | "religious" | "sports" | "music" | "conference" | "holiday" | "other";
+
+/** Likely overnight demand as read from the owner's own source text (D-097), never a forecast. */
+export type EventDemand = "low" | "medium" | "high";
+
+/** One event read from a pasted notice. Saved only when the owner taps Save. */
+export type EventDraft = {
+  name: string;
+  start_date: string;
+  end_date: string;
+  town: string;
+  category: EventCategory;
+  demand: EventDemand;
+  source_url: string;
+};
+
+export type RejectReason =
+  | "money_mentioned"
+  | "web_address"
+  | "bad_dates"
+  | "bad_length"
+  | "bad_category"
+  | "bad_demand"
+  | "duplicate"
+  | "too_many"
+  | "already_saved";
+
+/** The API hides a name that mentions money or a link: name is then null. */
+export type RejectedEvent = { index: number; name: string | null; reason: string };
+
+export type ExtractResult = {
+  mode: "claude" | "sample";
+  events: EventDraft[];
+  rejected: RejectedEvent[];
+  note?: string;
+};
+
+export type OwnerEvent = EventDraft & {
+  id: number;
+  origin: "owner_source" | "sample_extraction";
+  created_at: string;
+  in_plan: boolean;
+  plan_key: string;
+};
+
+export type SaveEventsResult = { saved: OwnerEvent[]; rejected: RejectedEvent[] };
+
+/** The morning WhatsApp line. Sending is always simulated. */
+export type MorningPreviewData = { en: string; hi: string; simulated: true; count: number };
+
+export type MorningSendResult = { status: "simulated"; sent_at: string; note: string; count?: number };
