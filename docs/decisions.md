@@ -641,3 +641,13 @@ Aarav.
 - Commit 18da3f5 ("wip") holds the F1 and A1 lines. It was made with
   --no-verify to unblock a merge; the hooks were run on its files
   afterwards and pass.
+
+## Website upgrade (docs/WEBSITE_UPGRADE.md)
+
+**D-091 Globe dependencies.** three@0.160.1 (approved: three@0.160),
+d3-geo@3.1.1 (the d3 module for map projections; the full `d3` bundle is
+far larger and the globe needs only projections and paths),
+topojson-client@3.1.0 and world-atlas@2.0.2 (pinned exactly), plus their
+types as dev dependencies. world-atlas data is imported from node_modules
+and bundled at build time: no runtime CDN or network request. Only the
+`land` topology is drawn, never `countries`, so no border lines appear.
