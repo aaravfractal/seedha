@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.models import Booking, Channel, ChannelContract, StatementFile
 from app.money import bps_of, gst_on_commission, rupees
 from app.services.ledger import LedgerSummary, load_ledger
+from seed.closes import CLOSE_STAYS
 from seed.coded_history import CODED_STAYS
 from seed.load import SeedError, load_sample, resolve_demo_date
 
@@ -131,7 +132,7 @@ def test_gst_is_18_percent_of_commission_on_passing_rows(sample: Session) -> Non
             b.status == "cancelled" and b.commission == 0
         ), b.external_ref
         checked += 1
-    assert checked == 1_497 + 152 + 14 + len(CODED_STAYS)  # D-080 coded history
+    assert checked == 1_497 + 152 + 14 + len(CODED_STAYS) + len(CLOSE_STAYS)  # D-080, closes
 
 
 def test_tds_never_reduces_net(sample: Session) -> None:
@@ -171,7 +172,7 @@ def test_neha_desk_booking_ruling_4(sample: Session) -> None:
 
 def test_desk_guests_are_outside_the_window_decision_d(sample: Session) -> None:
     desk = sample.scalars(select(Booking).where(Booking.source == "desk")).all()
-    assert len(desk) == 14
+    assert len(desk) == 14 + len(CLOSE_STAYS)  # tonight's register + six earlier closes
     assert {b.guest_name for b in desk} >= {"Neha Gupta", "Rahul Sharma", "Arjun Mehta"}
     assert all(b.check_in > date(2026, 9, 30) for b in desk)
     assert all(b.guest_id is not None for b in desk)

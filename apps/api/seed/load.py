@@ -41,6 +41,7 @@ from app.services.ingest import BookingWriter
 from app.services.ledger import DEFAULT_END
 from app.services.parser import ParseResult
 from app.services.rows import ParsedRow
+from seed.closes import load_closes
 from seed.coded_history import load_coded_history
 from seed.spec import CHANNELS, HISTORY_FILE, PROPERTY, ROOM_TYPES, ROOMS
 
@@ -183,6 +184,7 @@ def load_sample(
     loader.load(read_csv("history_rows.csv"), "history")
     load_today(loader, demo_date)
     load_coded_history(session, prop)
+    load_closes(session, prop, demo_date)
     if with_statements:
         loader.load(read_csv("window_rows.csv"), "statement")
     if device_key:
