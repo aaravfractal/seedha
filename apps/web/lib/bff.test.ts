@@ -6,6 +6,9 @@ test("owner routes", () => {
   assert.equal(accessFor("pipeline"), "owner");
   assert.equal(accessFor("pipeline/flip/seen"), "owner");
   assert.equal(accessFor("overview"), "owner");
+  assert.equal(accessFor("rooms/nights"), "owner");
+  assert.equal(accessFor("rooms/2026-10-13/104"), "owner");
+  assert.equal(accessFor("rooms/2026-10-13/104/slip"), "owner");
   assert.equal(accessFor("my-place"), "owner");
   assert.equal(accessFor("ledger/channels"), "owner");
   assert.equal(accessFor("desk/checkin"), "owner");
@@ -41,6 +44,7 @@ test("unknown or unsafe paths are refused", () => {
   assert.equal(accessFor("admin"), null);
   assert.equal(accessFor("pipelines"), null);
   assert.equal(accessFor("overviews"), null);
+  assert.equal(accessFor("roomsx"), null);
   assert.equal(accessFor("product"), null);
   assert.equal(accessFor("inboxes"), null);
   assert.equal(accessFor("assistants"), null);

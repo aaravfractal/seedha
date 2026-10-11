@@ -33,6 +33,7 @@ from app.routers import (
     public_sample,
     public_site,
     repeat,
+    rooms,
     scenario,
     site,
     statements,
@@ -114,6 +115,7 @@ def create_app(
     app.include_router(auth.router)
     app.include_router(pipeline.router)
     app.include_router(overview.router)
+    app.include_router(rooms.router)
     app.include_router(statements.router)
     app.include_router(ledger.router)
     app.include_router(repeat.router)
