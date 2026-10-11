@@ -20,6 +20,7 @@ from app.routers import (
     auth,
     calendar,
     desk,
+    events,
     inbox,
     ledger,
     link,
@@ -134,5 +135,6 @@ def create_app(
     app.include_router(public_site.router)
     app.include_router(owner_settings.router)
     app.include_router(calendar.router)
+    app.include_router(events.router)
     app.include_router(myplace.router)
     return app
