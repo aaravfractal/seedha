@@ -1,0 +1,279 @@
+/* B6 Pro mini views: discount split, floor, displacement, khata, rollup. */
+.view {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+.lead {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ink2);
+  max-width: 60ch;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+/* split bars */
+.bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+.barHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.barName {
+  font-weight: 600;
+}
+.bar {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--bg2);
+}
+.hotelPart {
+  background: var(--ink);
+}
+.otaPart {
+  background: repeating-linear-gradient(135deg, var(--ink3) 0 4px, var(--bg2) 4px 8px);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.legend dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend dd {
+  margin: 0 0 0 4px;
+  display: inline;
+  color: var(--ink);
+}
+.legendItem {
+  display: inline-flex;
+  align-items: baseline;
+}
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+/* slider */
+.sliderRow {
+  display: grid;
+  gap: 6px;
+}
+.sliderLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.slider {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.slider:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* tables */
+.tableWrap {
+  overflow-x: auto;
+  min-width: 0;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.table caption {
+  text-align: left;
+  font-size: 13px;
+  color: var(--ink2);
+  padding-bottom: 6px;
+}
+.table th,
+.table td {
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.table th:first-child,
+.table td:first-child {
+  text-align: left;
+  padding-left: 0;
+}
+.table thead th {
+  font-weight: 600;
+  color: var(--ink2);
+  font-size: 13px;
+}
+.table tfoot td,
+.table tfoot th {
+  font-weight: 700;
+  border-bottom: 0;
+}
+.yes {
+  color: var(--gain);
+  font-weight: 600;
+}
+.no {
+  color: var(--loss);
+  font-weight: 600;
+}
+.busy {
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+/* calculator */
+.fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.field label {
+  display: block;
+  font-size: 14px;
+  color: var(--ink2);
+  margin-bottom: 6px;
+}
+.field input {
+  min-height: 44px;
+}
+.fieldError {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--loss);
+}
+.result {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: var(--r-row);
+  background: var(--bg2);
+}
+.result > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+.result dt {
+  color: var(--ink2);
+}
+.result dd {
+  margin: 0;
+}
+.result > div:last-child {
+  border-bottom: 0;
+  font-weight: 700;
+}
+.result > div:last-child dt {
+  color: var(--ink);
+}
+
+/* toggle */
+.toggle {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-self: start;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--bg2);
+}
+.toggle button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.toggle button[aria-pressed="true"] {
+  background: var(--card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.toggle button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.stats > div {
+  padding: 12px 14px;
+  border-radius: var(--r-row);
+  background: var(--bg2);
+}
+.stats dt {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.stats dd {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+@media (max-width: 620px) {
+  .fields {
+    grid-template-columns: 1fr;
+  }
+  .table th,
+  .table td {
+    padding: 8px 6px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .busy {
+    transition: none;
+  }
+}

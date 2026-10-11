@@ -29,6 +29,7 @@ from app.routers import (
     myplace,
     overview,
     pipeline,
+    pro_views,
     proof,
     public,
     public_sample,
@@ -135,6 +136,7 @@ def create_app(
     app.include_router(assistant.router)
     app.include_router(site.site_router)
     app.include_router(site.pro_router)
+    app.include_router(pro_views.router)
     app.include_router(site.demo_router)
     app.include_router(public_site.router)
     app.include_router(owner_settings.router)
