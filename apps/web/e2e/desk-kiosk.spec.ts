@@ -2,14 +2,16 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Browser, Page } from "@playwright/test";
 import QRCode from "qrcode";
-import { signIn } from "./helpers";
+import { expectedPublicOrigin, resetSampleHotel, signIn } from "./helpers";
 
 /**
  * The full-screen Desk kiosk (/desk/device) on a landscape tablet: idle ->
  * check-in -> the QR carries the URL the API sent -> the guest says yes ->
  * green ring and the slip on screen. These tests write a consent and a
  * checkout, so the sample hotel is reset afterwards and the 8-step loop
- * still starts from "0 of 8 done".
+ * still starts from "0 of 8 done". This is one of the two specs that reset
+ * (proof-live.spec.ts is the other), which keeps the suite inside the API's
+ * limit of two resets a minute.
  */
 
 test.describe.configure({ mode: "serial" });
@@ -19,8 +21,7 @@ test.afterAll(async ({ browser }) => {
   const context = await browser.newContext();
   const page = await context.newPage();
   await signIn(page);
-  const reset = await page.request.post("/api/demo/reset");
-  expect(reset.ok()).toBe(true);
+  await resetSampleHotel(page);
   await context.close();
 });
 
@@ -35,11 +36,15 @@ async function showQr(page: Page, room: string): Promise<string> {
   return (await qr.getAttribute("data-url")) ?? "";
 }
 
-/** The guest opens the link on their own phone and says yes. */
+/**
+ * The guest opens the link on their own phone and says yes. The path is
+ * opened on the e2e web server, so the test also passes when PUBLIC_BASE_URL
+ * points at a tunnel or a LAN address that is not running.
+ */
 async function guestSaysYes(browser: Browser, url: string, phone: string): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const guest = await context.newPage();
-  await guest.goto(url);
+  await guest.goto(new URL(url).pathname);
   await guest.locator("#whatsapp").fill(phone);
   const yes = guest.getByRole("button", { name: "Yes, send me offers" });
   await expect(yes).toBeDisabled();
@@ -49,10 +54,10 @@ async function guestSaysYes(browser: Browser, url: string, phone: string): Promi
   await context.close();
 }
 
-test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page, browser }) => {
+test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page, browser, baseURL }) => {
+  const origin = expectedPublicOrigin(baseURL);
   await signIn(page);
   await page.goto("/desk/device");
-  const origin = new URL(page.url()).origin;
 
   // Own frame: a main landmark, no site header or footer.
   await expect(page.getByRole("main")).toHaveCount(1);
@@ -62,13 +67,16 @@ test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page
   const ring = page.getByTestId("desk-ring");
   await expect(ring).toHaveAccessibleName("Desk light white: ready");
   await expect(page.getByText("Desk ready.")).toBeAttached();
+  await expect(page.getByText(/ · Ready$/)).toBeVisible();
+  await expect(page.getByRole("img", { name: "Consent QR code" })).toHaveCount(0);
 
   const axe = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]).analyze();
   expect(axe.violations.map((v) => v.id)).toEqual([]);
 
-  // Check-in: the QR encodes exactly the API's consent URL on the configured origin.
+  // Check-in: the QR encodes exactly the API's consent URL on PUBLIC_BASE_URL
+  // (or the web origin when it is empty), and the line under it names that host.
   const url = await showQr(page, "101");
-  expect(url.startsWith(`${origin}/consent/`)).toBe(true);
+  expect(url.startsWith(`${origin}/consent/`), `${url} starts with ${origin}/consent/`).toBe(true);
   const expected = await QRCode.toString(url, {
     type: "svg",
     margin: 2,
@@ -79,7 +87,7 @@ test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page
   expect(modules).toBeTruthy();
   const drawn = page.getByRole("img", { name: "Consent QR code" }).locator('path[stroke="#000000"]');
   await expect(drawn).toHaveAttribute("d", modules ?? "");
-  await expect(page.getByText(`Opens ${new URL(url).host}`)).toBeVisible();
+  await expect(page.getByText(`Opens ${new URL(origin).host}`, { exact: true })).toBeVisible();
 
   // The guest says yes on their phone: thank you, green ring, pulsing.
   await guestSaysYes(browser, url, "98111 33355");
@@ -100,6 +108,12 @@ test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page
   await page.getByRole("button", { name: "Simulated: no paper" }).click();
   await expect(ring).toHaveAccessibleName("Desk light red: printer needs paper");
   await expect(page.getByText("Printer needs paper, so the slip is shown here.")).toBeVisible();
+  await expect(slip).toBeVisible();
+
+  // Paper loaded again: the ring is no longer red and the slip stays until put away.
+  await page.getByRole("button", { name: "Simulated: no paper" }).click();
+  await expect(ring).not.toHaveAccessibleName("Desk light red: printer needs paper");
+  await expect(page.getByText("Printer needs paper, so the slip is shown here.")).toHaveCount(0);
   await expect(slip).toBeVisible();
 });
 
