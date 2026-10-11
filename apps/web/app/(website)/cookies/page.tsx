@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
 
-export const metadata: Metadata = { title: "Cookie policy · Seedha" };
+export const metadata: Metadata = {
+  title: "Cookie policy · Seedha",
+  description:
+    "Seedha uses three small first-party cookies, all strictly necessary. No analytics or advertising cookies.",
+};
 
 export default function CookiesPage() {
   return (
@@ -12,8 +17,9 @@ export default function CookiesPage() {
           <div>
             <b>seedha_owner</b>
             <div className="meta">
-              Keeps a hotel owner logged in. Signed, httpOnly, expires after 12 hours. Set only after an owner
-              logs in.
+              Keeps a hotel owner signed in. Signed and httpOnly. It ends with the browser session and after
+              12 hours at most, or after 30 days if the owner ticks &quot;Keep me signed in&quot;. Set only
+              after an owner signs in.
             </div>
           </div>
           <span className="tag ok">Necessary</span>
@@ -56,9 +62,16 @@ export default function CookiesPage() {
 
       <h2 className="section">Removing them</h2>
       <p>
-        You can delete these cookies in your browser settings at any time. Deleting seedha_owner logs you out;
-        deleting seedha_theme returns the app to automatic and the website to dark; deleting seedha_cookies
-        shows the banner again.
+        You can delete these cookies in your browser settings at any time. Deleting seedha_owner signs you
+        out; deleting seedha_theme returns the app to automatic and the website to dark; deleting
+        seedha_cookies shows the banner again.
+      </p>
+
+      <h2 className="section">Changes</h2>
+      <p>
+        If we ever add a cookie, this page and its date change first, and anything beyond strictly necessary
+        cookies would need your choice before it is set. See also the{" "}
+        <Link href="/privacy">privacy policy</Link>.
       </p>
     </LegalPage>
   );

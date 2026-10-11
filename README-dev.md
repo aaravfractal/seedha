@@ -6,7 +6,7 @@ back through an OTA, collects their consent at the front desk, and lets them
 book direct with a perk instead of a discount. `CLAUDE.md` is the source of
 truth for the product and its rules; this file is how to run it.
 
-All data in this repo is fictional sample data for "Deodar Stays", Mussoorie.
+All data in this repo is fictional sample data for "Hotel Deodar View", Mussoorie.
 
 ## Run the demo
 
@@ -113,6 +113,11 @@ code, never by a model, whatever is configured.
 To add a key, put it in `.env` and restart. Never commit `.env`; the
 pre-commit hook and `make check` scan for secrets.
 
+Public contact addresses for the website (`PUBLIC_CONTACT_EMAIL`,
+`PUBLIC_PRIVACY_EMAIL`, `PUBLIC_SECURITY_EMAIL`) are role addresses, never a
+person's own email. The pages are prerendered, so set them before the web
+build; empty values show "Contact details will be published before launch."
+
 The demo values of `OWNER_API_TOKEN`, `SESSION_SECRET` and `DESK_DEVICE_KEY`
 must be changed, and `SEEDHA_DEMO` left empty, for anything beyond a local
 demo.
@@ -128,7 +133,7 @@ apps/web      Next.js 16 (App Router). Owner screens, guest pages, Desk simulato
   app/api/    the BFF: adds the owner token or device key on the server side
   e2e/        Playwright: the 8-step loop, security, accessibility, speed
 firmware/     the Desk box (ESP32, PlatformIO); see its README
-docs/         progress, decisions, rulings, blockers, needs-from-aarav
+docs/         progress, decisions, rulings, blockers, needs-from-owner
 scripts/      repository tools (history secret scan)
 ```
 

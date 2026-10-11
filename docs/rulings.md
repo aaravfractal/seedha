@@ -1,4 +1,4 @@
-# Owner rulings (Aarav), binding alongside CLAUDE.md
+# Owner rulings (product owner), binding alongside CLAUDE.md
 
 1. **Line-item rounding.** Compute in paise, round each line item (discount,
    commission, GST on commission, fees) half-up to the rupee; net = list minus

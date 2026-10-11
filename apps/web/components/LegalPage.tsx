@@ -1,8 +1,23 @@
 import type { ReactNode } from "react";
 import { KeyPoints } from "./KeyPoints";
+import { CONTACT_PENDING, publicEmail, type ContactKind } from "@/lib/contact";
 import styles from "./website/site.module.css";
 
-export const LAST_UPDATED = "9 October 2026";
+export const LAST_UPDATED = "11 October 2026";
+
+/**
+ * A public role address from server config (lib/contact.ts), or the pending
+ * line when it is not set. Server component: the value never reaches client code.
+ */
+export function ContactEmail({ kind }: { kind: ContactKind }) {
+  const email = publicEmail(kind);
+  if (!email) return <span>{CONTACT_PENDING}</span>;
+  return (
+    <a className="link" href={`mailto:${email}`}>
+      {email}
+    </a>
+  );
+}
 
 /** Shared frame for legal and static pages on the website: notice, date, key points, body. */
 export function LegalPage({

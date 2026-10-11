@@ -63,15 +63,15 @@ already existed in the home folder before this project.
 Fixed for the future: the Makefile now sets `PLATFORMIO_CORE_DIR` to
 `firmware/seedha-desk/.pio-core` (gitignored), so firmware builds stay
 inside the repo. I have not deleted `~/.platformio` or `~/.cache/pre-commit`,
-because deleting outside the repo is also off-limits. Aarav: remove them
+because deleting outside the repo is also off-limits. The owner can remove them
 if you want (`rm -rf ~/.platformio ~/.cache/pre-commit`); nothing in the
 repo needs them now.
 
-Update 10 Oct 2026: Aarav deleted `~/.platformio`, and I confirmed it is
+Update 10 Oct 2026: the owner deleted `~/.platformio`, and I confirmed it is
 gone. `~/.cache/pre-commit` is still there: it still exists with its
 original date (9 Oct 16:30), so that delete did not happen. To stop
 touching it, commits from here on run with `PRE_COMMIT_HOME` set to
-`.pre-commit-home/` in the repo (gitignored). Remaining for Aarav:
+`.pre-commit-home/` in the repo (gitignored). Remaining for the owner:
 `rm -rf ~/.cache/pre-commit`.
 
 ## B-004 Frontend build inputs missing (10 Oct 2026) — resolved
@@ -91,7 +91,7 @@ found none of them. The only design handoff folder found,
 Every phase depends on these files, so nothing was built and no code was
 changed. To unblock: add them at those paths and restart the build.
 
-Resolved 10 Oct 2026: Aarav supplied `seedha-frontend-kit.zip`, which was
+Resolved 10 Oct 2026: the owner supplied `seedha-frontend-kit.zip`, which was
 unzipped into the repo root once it had finished copying and passed
 `unzip -t`. It added 77 entries, none of which overwrote an existing file:
 `docs/FRONTEND_MASTER.md`, `docs/CLAUDE_CODE_PROMPTS.md`,
@@ -110,6 +110,6 @@ for good, the repo's git hook (.git/hooks/pre-commit) now defaults
 `git commit`. Both folders can be deleted: `rm -rf ~/.platformio
 ~/.cache/pre-commit`.
 
-Resolved 11 Oct 2026: on Aarav's instruction both `~/.platformio` and
+Resolved 11 Oct 2026: on the owner's instruction both `~/.platformio` and
 `~/.cache/pre-commit` were deleted, and a listing (this time not truncated)
 confirmed both are gone.
