@@ -369,5 +369,5 @@ def reset_demo(
     session.flush()
     session.expunge_all()  # forget objects whose rows were just deleted
     load_sample(session, settings.demo_date or day, with_statements=False,
-                device_key=settings.desk_device_key)  # fmt: skip
+                device_key=settings.desk_device_key, with_inbox=True)  # fmt: skip
     return ResetOut(ok=True, demo_date=(settings.demo_date or day).isoformat())

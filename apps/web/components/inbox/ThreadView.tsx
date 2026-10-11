@@ -2,7 +2,8 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
-import type { InboxEntry, RateLine, ThreadDetail } from "@/lib/types-inbox";
+import type { DraftAttach, InboxDraft, InboxEntry, RateLine, ThreadDetail } from "@/lib/types-inbox";
+import { awaitingReply, wantsInvoice } from "@/lib/inboxRules";
 import { avatarFill, clock, dayLabel, initials, stayRange } from "./format";
 import styles from "./Inbox.module.css";
 
@@ -143,10 +144,28 @@ function RateButton({
   );
 }
 
+/**
+ * Where the stay invoice goes when the guest asked for a bill. The invoice is
+ * built by code from the booking row; the AI only wrote the covering text.
+ */
+function InvoiceSlot({ attach }: { attach: DraftAttach }) {
+  return (
+    <div
+      className={styles.invoiceSlot}
+      data-testid="invoice-slot"
+      data-consent={attach.consent_id}
+      role="group"
+      aria-label="Invoice"
+    >
+      <span className={styles.kicker}>Invoice</span>
+      <p>Stay invoice ready to attach</p>
+    </div>
+  );
+}
+
 export function ThreadView({
   detail,
   rateCard,
-  simulated,
   onBack,
   onInfo,
   infoOpen,
@@ -156,12 +175,11 @@ export function ThreadView({
 }: {
   detail: ThreadDetail;
   rateCard: RateLine[];
-  simulated: boolean;
   onBack: () => void;
   onInfo: () => void;
   infoOpen: boolean;
   onSend: (body: string) => Promise<boolean>;
-  onDraft: () => Promise<{ text: string; source: "ai" | "template" } | null>;
+  onDraft: () => Promise<InboxDraft | null>;
   onSimulate: () => void;
 }) {
   const t = detail.thread;
@@ -169,8 +187,11 @@ export function ThreadView({
   const [sending, setSending] = useState(false);
   const [drafting, setDrafting] = useState(false);
   const [draftSource, setDraftSource] = useState<"ai" | "template" | null>(null);
+  const [attach, setAttach] = useState<DraftAttach | null>(null);
   const field = useRef<HTMLTextAreaElement>(null);
+  const drafted = useRef<string | null>(null);
   const can = detail.can_reply;
+  const waiting = awaitingReply(detail);
 
   function fill(value: string) {
     setText(value);
@@ -199,18 +220,29 @@ export function ThreadView({
     if (ok) {
       setText("");
       setDraftSource(null);
+      setAttach(null);
     }
   }
 
-  async function draft() {
+  async function draft(focus = true) {
     setDrafting(true);
     const result = await onDraft();
     setDrafting(false);
-    if (result) {
-      fill(result.text);
-      setDraftSource(result.source);
-    }
+    if (!result) return;
+    if (focus) fill(result.text);
+    else setText((current) => current || result.text);
+    setDraftSource(result.source);
+    setAttach(wantsInvoice(result) ? result.attach : null);
   }
+
+  // Each new guest message gets one suggested draft in the box when the
+  // owner opens the thread. A suggestion only: nothing is sent (rule 7).
+  useEffect(() => {
+    if (waiting === null || drafted.current === waiting) return;
+    drafted.current = waiting;
+    void draft(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per new guest message
+  }, [waiting]);
 
   function onKey(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -275,7 +307,7 @@ export function ThreadView({
             {draftSource === "ai"
               ? "AI suggestion in the box. Edit it, then send."
               : draftSource === "template"
-                ? "Canned reply in the box. Edit it, then send."
+                ? "Suggested reply in the box. Edit it, then send."
                 : "Nothing goes out until you tap send."}
           </span>
           <button
@@ -288,6 +320,7 @@ export function ThreadView({
             {drafting ? "Drafting" : "Draft with AI"}
           </button>
         </div>
+        {attach ? <InvoiceSlot attach={attach} /> : null}
         <div className={styles.composer}>
           <RateButton lines={rateCard} disabled={!can} onPick={insert} />
           <label htmlFor="composer" className="sr-only-text">
@@ -316,10 +349,7 @@ export function ThreadView({
           </button>
         </div>
         <div className={styles.composeFoot}>
-          <span>
-            Prices from your rate card, never AI · every message ends with Reply STOP to opt out
-            {simulated ? " · simulated sends" : ""}
-          </span>
+          <span>Prices from your rate card, never AI · every message ends with Reply STOP to opt out</span>
           <button type="button" className={styles.textBtn} onClick={onSimulate}>
             Simulate guest
           </button>

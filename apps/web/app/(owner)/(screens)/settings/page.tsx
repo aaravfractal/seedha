@@ -9,6 +9,7 @@ import { Screen } from "@/components/owner/ui";
 import { NotificationsTab, PrivacyTab, SecurityTab } from "@/components/settings/AccountTabs";
 import { ContractsTab, HotelTab, PlanTab } from "@/components/settings/HotelTabs";
 import { PersonalTab } from "@/components/settings/PersonalTab";
+import { SimulateMessage } from "@/components/settings/SimulateMessage";
 import { ProofWalletNotice } from "@/components/settings/ProofWalletNotice";
 import { StaffTab } from "@/components/settings/StaffTab";
 import s from "@/components/settings/settings.module.css";
@@ -85,7 +86,10 @@ export default function SettingsPage() {
         ) : tab === "staff" ? (
           <StaffTab />
         ) : tab === "notifications" ? (
-          <NotificationsTab data={data} onSaved={(n) => settings.setData({ ...data, notifications: n })} />
+          <>
+            <NotificationsTab data={data} onSaved={(n) => settings.setData({ ...data, notifications: n })} />
+            {data.hotel.is_sample ? <SimulateMessage /> : null}
+          </>
         ) : tab === "security" ? (
           <SecurityTab data={data} />
         ) : (

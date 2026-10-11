@@ -14,7 +14,7 @@ import argparse
 import csv
 import hashlib
 import os
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -43,6 +43,7 @@ from app.services.parser import ParseResult
 from app.services.rows import ParsedRow
 from seed.closes import load_closes
 from seed.coded_history import load_coded_history
+from seed.inbox_threads import load_inbox_threads
 from seed.spec import CHANNELS, HISTORY_FILE, PROPERTY, ROOM_TYPES, ROOMS
 
 DATA_DIR = Path(__file__).resolve().parent / "data"
@@ -170,12 +171,20 @@ def load_today(loader: RowLoader, demo_date: date) -> None:
         booking.guest_id = guest.id
 
 
-def load_sample(
-    session: Session, demo_date: date, with_statements: bool, device_key: str = ""
+def load_sample(  # noqa: PLR0913  (each argument is a distinct switch)
+    session: Session,
+    demo_date: date,
+    with_statements: bool,
+    device_key: str = "",
+    *,
+    with_inbox: bool = False,
+    now: datetime | None = None,
 ) -> Property:
     """Load the whole sample hotel into an empty database.
 
     With a device key, also registers the front-desk box (only its hash).
+    With `with_inbox` (the CLI and "Reset demo data"), also seeds the eight
+    sample guest inbox threads, dated relative to `now`.
     """
     if session.scalar(select(Property.id).limit(1)) is not None:
         raise SeedError("database already has data; run make reset first")
@@ -191,6 +200,9 @@ def load_sample(
         session.add(DeskDevice(property_id=prop.id, name="Front desk",
                                device_key_hash=hash_device_key(device_key)))  # fmt: skip
         session.flush()
+    if with_inbox:
+        load_inbox_threads(session, prop, demo_date, now or datetime.now(UTC))
+        session.flush()
     return prop
 
 
@@ -204,7 +216,7 @@ def main() -> None:
     demo_date = resolve_demo_date(settings.demo_date)
     with session_scope(make_session_factory(engine)) as session:
         device_key = os.environ.get("DESK_DEVICE_KEY", "").strip()
-        prop = load_sample(session, demo_date, args.with_statements, device_key)
+        prop = load_sample(session, demo_date, args.with_statements, device_key, with_inbox=True)
         print(f"Loaded sample hotel {prop.name} (demo date {demo_date})")  # noqa: T201
 
 

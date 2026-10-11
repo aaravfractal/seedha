@@ -3,7 +3,16 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError, api, postJson, useApi } from "@/lib/api";
-import type { InboxDraft, InboxFilter, Thread, ThreadDetail, Threads, Away } from "@/lib/types-inbox";
+import type {
+  InboxDraft,
+  InboxFilter,
+  SimulatedIncoming,
+  Thread,
+  ThreadDetail,
+  Threads,
+  Away,
+} from "@/lib/types-inbox";
+import { sentNote, threadFromQuery } from "@/lib/inboxRules";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
 import { useDialogFocus } from "@/components/useDialogFocus";
@@ -75,6 +84,62 @@ function AwaySwitch({
   );
 }
 
+/** The header's overflow menu: demo tools for the sample hotel. */
+function MoreMenu({ busy, onSimulate }: { busy: boolean; onSimulate: () => void }) {
+  const [open, setOpen] = useState(false);
+  const wrap = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    wrap.current?.querySelector<HTMLButtonElement>("[role=menuitem]")?.focus();
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      button.current?.focus();
+    };
+    const onDown = (e: MouseEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
+  }, [open]);
+  return (
+    <div className={styles.moreWrap} ref={wrap}>
+      <button
+        ref={button}
+        type="button"
+        className={styles.more}
+        aria-label="More inbox actions"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls="inboxMore"
+        onClick={() => setOpen(!open)}
+      >
+        ⋯
+      </button>
+      {open ? (
+        <div className={styles.moreMenu} id="inboxMore" role="menu" aria-label="More inbox actions">
+          <button
+            type="button"
+            role="menuitem"
+            disabled={busy}
+            onClick={() => {
+              setOpen(false);
+              onSimulate();
+            }}
+          >
+            Simulate incoming message
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function Inbox() {
   const toast = useToast();
   const [filter, setFilter] = useState<InboxFilter>("all");
@@ -90,6 +155,16 @@ export function Inbox() {
   const profileRef = useRef<HTMLDivElement>(null);
   const reloadThreads = threads.reload;
   const setThreads = threads.setData;
+
+  const opened = useRef(false);
+
+  // Remember the open thread in the address bar, so /inbox?thread=<id> deep-links to it.
+  const showInUrl = useCallback((id: number | null) => {
+    const url = new URL(window.location.href);
+    if (id === null) url.searchParams.delete("thread");
+    else url.searchParams.set("thread", String(id));
+    window.history.replaceState(window.history.state, "", url);
+  }, []);
 
   const loadDetail = useCallback(
     async (id: number, markRead: boolean) => {
@@ -118,6 +193,17 @@ export function Inbox() {
     return () => clearInterval(timer);
   }, [selected, loadDetail, reloadThreads]);
 
+  // Deep link: /inbox?thread=<consent id> opens that thread once on arrival.
+  useEffect(() => {
+    if (opened.current) return;
+    opened.current = true;
+    const id = threadFromQuery(window.location.search);
+    if (id === null) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of the URL on mount
+    setSelected(id);
+    void loadDetail(id, true);
+  }, [loadDetail]);
+
   // Tablet: the profile slides over the thread; Escape closes it.
   useDialogFocus(profileRef, profileOpen && !wide, () => setProfileOpen(false));
 
@@ -132,6 +218,7 @@ export function Inbox() {
     setDetailError(null);
     setProfileOpen(false);
     setSelected(id);
+    showInUrl(id);
     void loadDetail(id, true);
   }
 
@@ -139,6 +226,22 @@ export function Inbox() {
     setSelected(null);
     setDetail(null);
     setProfileOpen(false);
+    showInUrl(null);
+  }
+
+  /** Sample hotel demo: one realistic guest text arrives through the webhook path. */
+  async function simulateIncoming() {
+    setBusy(true);
+    try {
+      const got = await postJson<SimulatedIncoming>("inbox/simulate");
+      reloadThreads();
+      toast(`New message from ${got.guest_name}`);
+      choose(got.consent_id);
+    } catch (err) {
+      toast(message(err));
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function saveAway(body: { text?: string; approved?: boolean; enabled?: boolean }, note: string) {
@@ -173,7 +276,7 @@ export function Inbox() {
       const d = await postJson<ThreadDetail>(`inbox/threads/${selected}/messages`, { body });
       setDetail(d);
       reloadThreads();
-      toast(threads.data?.simulated ? "Sent (simulated, no WhatsApp keys)" : "Sent on WhatsApp");
+      toast(sentNote(threads.data?.simulated ?? true));
       return true;
     } catch (err) {
       toast(message(err));
@@ -234,12 +337,17 @@ export function Inbox() {
         <p className="sub">WhatsApp with guests who said yes at the Desk. Bot drafts, you send.</p>
       </div>
       {threads.data ? (
-        <AwaySwitch
-          away={threads.data.away}
-          busy={busy}
-          onToggle={toggleAway}
-          onEdit={() => setDialog("away")}
-        />
+        <div className={styles.headTools}>
+          <AwaySwitch
+            away={threads.data.away}
+            busy={busy}
+            onToggle={toggleAway}
+            onEdit={() => setDialog("away")}
+          />
+          {threads.data.is_sample ? (
+            <MoreMenu busy={busy} onSimulate={() => void simulateIncoming()} />
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
@@ -392,7 +500,6 @@ export function Inbox() {
             key={detail.thread.consent_id}
             detail={detail}
             rateCard={data.rate_card}
-            simulated={data.simulated}
             onBack={clearSelection}
             onInfo={() => setProfileOpen(!profileOpen)}
             infoOpen={profileOpen}

@@ -33,6 +33,8 @@ export type Threads = {
   away: Away;
   rate_card: RateLine[];
   simulated: boolean;
+  /** The fictional sample hotel: "Simulate incoming message" is offered. */
+  is_sample: boolean;
 };
 
 export type InboxEntry = {
@@ -65,6 +67,12 @@ export type GuestProfile = {
   language: string | null;
   perk_code: string | null;
   stays: Stay[];
+  stays_count: number;
+  /** Number of the newest stay invoice issued, if any. */
+  last_invoice: string | null;
+  notes: string[];
+  /** Preferences only: never money or documents. */
+  remembers: string[];
 };
 
 export type ThreadDetail = {
@@ -77,7 +85,19 @@ export type ThreadDetail = {
   profile: GuestProfile;
 };
 
-export type InboxDraft = { text: string; source: "ai" | "template"; label: string };
+/** A document the owner may attach; built by code from the booking row, never by the AI. */
+export type DraftAttach = { kind: "stay_invoice"; consent_id: number };
+
+export type InboxDraft = {
+  text: string;
+  source: "ai" | "template";
+  label: string;
+  topic: string;
+  attach: DraftAttach | null;
+};
+
+/** POST /inbox/simulate: the thread that received one simulated guest message. */
+export type SimulatedIncoming = { consent_id: number; guest_name: string };
 
 export type AssistantIntro = { greeting: string; reading: string[]; suggestions: string[] };
 
