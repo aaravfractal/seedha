@@ -43,6 +43,19 @@ test("seeded threads, profile, draft and send, invoice slot", async ({ page }) =
   const slot = convo.getByTestId("invoice-slot");
   await expect(slot).toBeVisible();
   await expect(slot).toContainText("Stay invoice ready to attach");
+  // The invoice preview: numbered by code, PDF download, attach to the reply.
+  const invoice = slot.getByRole("region", { name: /Stay invoice [A-Z]+\/\d{4}\/\d{4}/ });
+  await expect(invoice).toBeVisible();
+  const download = invoice.getByRole("link", { name: /Download PDF/ });
+  const href = (await download.getAttribute("href")) ?? "";
+  expect(href).toMatch(/^\/api\/inbox\/threads\/\d+\/invoice\.pdf$/);
+  const pdf = await page.request.get(href);
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()["content-type"]).toContain("application/pdf");
+  expect((await pdf.body()).subarray(0, 4).toString()).toBe("%PDF");
+  await invoice.getByRole("button", { name: "Attach to reply" }).click();
+  await expect(invoice.getByRole("button", { name: "Attached" })).toBeDisabled();
+  await expect(slot.getByRole("status")).toContainText("Attached.");
   await expect(convo.getByText("Suggested reply in the box. Edit it, then send.")).toBeVisible();
 
   // Profile column: consent, stays, last invoice, notes and what Seedha remembers.

@@ -4,6 +4,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import type { DraftAttach, InboxDraft, InboxEntry, RateLine, ThreadDetail } from "@/lib/types-inbox";
 import { awaitingReply, wantsInvoice } from "@/lib/inboxRules";
+import { InvoicePanel } from "./InvoicePanel";
 import { avatarFill, clock, dayLabel, initials, stayRange } from "./format";
 import styles from "./Inbox.module.css";
 
@@ -149,6 +150,7 @@ function RateButton({
  * built by code from the booking row; the AI only wrote the covering text.
  */
 function InvoiceSlot({ attach }: { attach: DraftAttach }) {
+  const [attached, setAttached] = useState(false);
   return (
     <div
       className={styles.invoiceSlot}
@@ -159,6 +161,10 @@ function InvoiceSlot({ attach }: { attach: DraftAttach }) {
     >
       <span className={styles.kicker}>Invoice</span>
       <p>Stay invoice ready to attach</p>
+      <InvoicePanel consentId={attach.consent_id} attached={attached} onAttach={() => setAttached(true)} />
+      {attached ? (
+        <p role="status">Attached. The guest gets the stay invoice with this reply (simulated send).</p>
+      ) : null}
     </div>
   );
 }
