@@ -3,6 +3,26 @@
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
+## Live features (11 October 2026, in progress)
+
+Brief: docs/LIVE_FEATURES.md. Decisions D-097 to D-099. Status files:
+docs/agent-reports/live/.
+
+- **Wave 1 research done:** R1 chain (eth-account from wheels, B-001
+  resolved), R2 tunnel (cookie, origin, reset and PUBLIC_BASE_URL
+  findings), R3 events (schema, guard, data model).
+- **Wave 2 build merged:** B1 Amoy proof writer (chain-ID guard, balance
+  floor, receipt check, `make proof-wallet`), B2 proof UI (chain card,
+  bundle states, explorer link, Settings low-balance notice), B3 Desk kiosk
+  at /desk/device, B4 `make demo-lan` and `make demo-live` (LAN cookie fix,
+  reset only from the laptop in public mode), B5 Event Radar Lite API
+  (owner-pasted notices, Claude with a code guard, sample without a key),
+  B6 Calendar UI (Add events, From your sources, plan toggle, simulated
+  morning preview). PUBLIC_BASE_URL now drives every guest link.
+- **Testnet wallet created** (key in .env only); funding and the first live
+  write are the owner's manual steps (README-dev.md checklist).
+- **Next:** Wave 3 tests, Wave 4 reviews, finish gates, email rewrite.
+
 ## Website upgrade and privacy clean-up (11 October 2026)
 
 Brief: docs/WEBSITE_UPGRADE.md. Decisions D-091 to D-096. Reports:
