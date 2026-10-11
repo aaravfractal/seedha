@@ -138,7 +138,8 @@
 }
 
 .node:hover {
-  background: var(--fill);
+  /* --bg2, not --fill: --ink2 on --fill falls under 4.5:1 in the light theme. */
+  background: var(--bg2);
 }
 
 .node[data-state="active"] {

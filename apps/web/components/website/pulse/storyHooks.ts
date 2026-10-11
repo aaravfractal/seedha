@@ -4,8 +4,10 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
 import type { RefObject } from "react";
 import { stepIndex } from "@/lib/pulse";
 
-/** Width (and a usable height) at which the season story pins. */
-export const STORY_QUERY = "(min-width: 980px) and (min-height: 600px)";
+/** Width (and a usable height) at which the season story pins. Below 1040px
+ * the card stacks taller than the pinned panel, and under 720px of height its
+ * bottom is cut off, so those screens get the month strip instead. */
+export const STORY_QUERY = "(min-width: 1040px) and (min-height: 720px)";
 export const REDUCE_QUERY = "(prefers-reduced-motion: reduce)";
 
 /** Live media query match. False on the server and during hydration. */

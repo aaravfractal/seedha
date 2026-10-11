@@ -37,7 +37,12 @@ export function PlaySeason({
     const stop = (e: Event) => {
       // The button's own press toggles it; let that click decide.
       const own = e.target instanceof Node && button.current?.contains(e.target);
-      if (own && (e.type !== "keydown" || ["Enter", " "].includes((e as KeyboardEvent).key))) return;
+      // Only a press of the button (click or Enter/Space) is left to the button; a wheel over it still stops play.
+      const press =
+        e.type === "pointerdown" ||
+        e.type === "touchstart" ||
+        (e.type === "keydown" && ["Enter", " "].includes((e as KeyboardEvent).key));
+      if (own && press) return;
       setPlaying(false);
     };
     const options = { capture: true, passive: true } as const;
