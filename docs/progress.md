@@ -21,7 +21,23 @@ docs/agent-reports/polish/.
   message, topic drafts with invoice attach, profile column); interactive
   Pro page with ten live card views and their API.
 - **e2e:** 58/58 on master after the merges.
-- **Next:** Wave 3 tests (T1, T2), Wave 4 reviews (V1 to V3), finish.
+- **Wave 3 tests merged:** T1 added 43 API cases (rooms sweep over every
+  board night, invoices for all 1,443 finished stays at five GST rates,
+  consent and D6 guards, reseed, Pro views recompute); T2 added 17
+  Playwright tests (room board against the API, inbox flows and PDF
+  download, Pro calculators, axe on every new screen). No real bugs.
+- **Wave 4 reviews and fixes:** privacy and security (1 high: per-thread
+  guest simulation worked on a real hotel; fixed: sample-only, limited,
+  stored as simulated; 1 medium: Desk printing unthrottled; fixed: 6 a
+  minute and laptop-only in a public demo); honesty and copy (1 high: no
+  visible Sample hotel badge; fixed; 14 medium fixed, except three Pulse
+  lines that are the owner's exact brief copy); design and accessibility
+  (1 high: the invoice slot pushed Send out of reach; fixed with a one-row
+  slot and a preview dialog; 4 medium fixed).
+- **Gates:** make check passes except the perf spec while this Mac is under
+  heavy load from other apps (load average 10 to 18); the same spec fails
+  the same way on the commit before the polish build, so it is the machine,
+  not the code. To be re-run when the load drops.
 
 ## Pulse section redesign (12 October 2026)
 
@@ -65,7 +81,13 @@ docs/agent-reports/live/.
   reset and PUBLIC_BASE_URL); T2 hardened the e2e specs (kiosk QR origin,
   proof states, events persistence, smoke and axe on new screens). No real
   bugs found; 35/35 e2e twice on spare ports.
-- **Next:** Wave 4 reviews, finish gates, email rewrite.
+- **Wave 4 reviews and fixes:** security (3 medium fixed: public-demo
+  visitors never spend Claude credits or testnet POL; demo-lan gets fresh
+  secrets), honesty (4 medium fixed), design and accessibility (2 high, 3
+  medium fixed: QR fits a landscape phone, slip never clipped). Demo
+  reliability review (V4) runs after the polish build.
+- **Next:** finish gates, email rewrite (waiting on the owner's no-reply
+  address).
 
 ## Website upgrade and privacy clean-up (11 October 2026)
 
