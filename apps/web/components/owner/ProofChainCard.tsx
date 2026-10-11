@@ -68,8 +68,15 @@ export function ProofChainCard({ chain }: { chain: ProofChain }) {
                 className="btn small ghost"
                 onClick={() => {
                   const address = chain.address as string;
-                  void navigator.clipboard?.writeText(address).catch(() => undefined);
-                  toast("Wallet address copied");
+                  const copy = navigator.clipboard?.writeText(address);
+                  if (!copy) {
+                    toast("Could not copy the address");
+                    return;
+                  }
+                  copy.then(
+                    () => toast("Wallet address copied"),
+                    () => toast("Could not copy the address"),
+                  );
                 }}
               >
                 Copy address

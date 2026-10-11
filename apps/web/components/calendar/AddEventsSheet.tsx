@@ -65,10 +65,18 @@ export function AddEventsSheet({
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ExtractResult | null>(null);
   const [saveRejected, setSaveRejected] = useState<RejectedEvent[]>([]);
-  const ids = { text: useId(), url: useId(), count: useId(), help: useId(), urlErr: useId() };
+  const ids = {
+    text: useId(),
+    url: useId(),
+    count: useId(),
+    help: useId(),
+    urlErr: useId(),
+    textErr: useId(),
+  };
 
   const resultsHead = useRef<HTMLHeadingElement>(null);
   const textBox = useRef<HTMLTextAreaElement>(null);
+  const urlBox = useRef<HTMLInputElement>(null);
   const shown = result !== null;
   const firstRender = useRef(true);
   // The button that was focused goes away when the view switches: move focus to the new view.
@@ -84,10 +92,19 @@ export function AddEventsSheet({
   const urlError = sourceUrlError(url);
   const textMissing = text.trim().length === 0;
   const showUrlError = touched && urlError !== null;
+  const showTextError = counter.over || (touched && textMissing);
 
   async function read() {
     setTouched(true);
-    if (textMissing || counter.over || urlError) return;
+    // Focus the first field that needs fixing so its error is read with it.
+    if (textMissing || counter.over) {
+      textBox.current?.focus();
+      return;
+    }
+    if (urlError) {
+      urlBox.current?.focus();
+      return;
+    }
     setBusy("read");
     setError(null);
     try {
@@ -148,16 +165,20 @@ export function AddEventsSheet({
               className={c.textarea}
               value={text}
               onChange={(e) => setText(e.target.value)}
-              aria-describedby={`${ids.count} ${ids.help}`}
-              aria-invalid={counter.over || (touched && textMissing) ? true : undefined}
+              aria-describedby={`${showTextError ? `${ids.textErr} ` : ""}${ids.count} ${ids.help}`}
+              aria-invalid={showTextError ? true : undefined}
               required
             />
             <div className={c.counterRow}>
               <div aria-live="polite">
                 {counter.over ? (
-                  <p className={st.error}>{counter.label}</p>
+                  <p className={st.error} id={ids.textErr}>
+                    {counter.label}
+                  </p>
                 ) : touched && textMissing ? (
-                  <p className={st.error}>Paste the notice text first.</p>
+                  <p className={st.error} id={ids.textErr}>
+                    Paste the notice text first.
+                  </p>
                 ) : null}
               </div>
               <p className={c.counter} id={ids.count} data-over={counter.over}>
@@ -173,6 +194,7 @@ export function AddEventsSheet({
               Official source link
             </label>
             <input
+              ref={urlBox}
               id={ids.url}
               className={st.input}
               type="url"
@@ -265,6 +287,9 @@ export function AddEventsSheet({
               }}
             >
               Edit notice
+            </button>
+            <button type="button" className="btn ghost" onClick={onClose}>
+              Cancel
             </button>
           </div>
         </div>

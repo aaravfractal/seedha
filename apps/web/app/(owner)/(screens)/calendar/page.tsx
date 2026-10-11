@@ -375,6 +375,10 @@ export default function CalendarPage() {
                 It comes off your calendar and your plan. You can add it again from your source.
               </p>
               <div className={s.sheetActions}>
+                {/* Keep it comes first, so the dialog opens on the safe choice. */}
+                <button type="button" className="btn ghost" onClick={() => setDeleting(null)}>
+                  Keep it
+                </button>
                 <button
                   type="button"
                   className={`btn ${s.dangerSolid}`}
@@ -382,9 +386,6 @@ export default function CalendarPage() {
                   onClick={() => void remove(deleting)}
                 >
                   Delete event
-                </button>
-                <button type="button" className="btn ghost" onClick={() => setDeleting(null)}>
-                  Keep it
                 </button>
               </div>
             </Modal>,

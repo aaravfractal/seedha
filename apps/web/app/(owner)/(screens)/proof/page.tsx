@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApiError, api, postJson, useApi } from "@/lib/api";
 import { count } from "@/lib/format";
 import { bundleStatus, linkHost, readChain } from "@/lib/proofChain";
@@ -26,6 +26,13 @@ export default function ProofPage() {
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState<number | null>(null);
   const [open, setOpen] = useState<number | null>(null);
+  // After a write the button turns disabled: focus moves to the new bundle instead of the page body.
+  const focusBundle = useRef<number | null>(null);
+  useEffect(() => {
+    if (focusBundle.current === null) return;
+    document.getElementById(`bundle-${focusBundle.current}`)?.focus();
+    focusBundle.current = null;
+  }, [proof.data]);
 
   async function bundle() {
     setBusy(true);
@@ -33,6 +40,7 @@ export default function ProofPage() {
       const result = await postJson<OwnerProof>("proof/bundle");
       proof.setData(result);
       const newest = result.bundles[0];
+      focusBundle.current = newest?.id ?? null;
       const sealed = newest?.item_count ?? 0;
       toast(
         `Tonight's proof written. ${count(sealed)} consent${sealed === 1 ? "" : "s"} sealed. ${
@@ -159,7 +167,7 @@ export default function ProofPage() {
             <section className={ui.card} key={b.id} aria-labelledby={`bundle-${b.id}`}>
               <div className={p.bundleHead}>
                 <div>
-                  <h2 className={p.when} id={`bundle-${b.id}`}>
+                  <h2 className={p.when} id={`bundle-${b.id}`} tabIndex={-1}>
                     {istStamp(b.created_at)}
                   </h2>
                   <p className={p.fp}>
@@ -194,9 +202,7 @@ function BundleChain({
   const host = linkHost(bundle.explorer_url);
   return (
     <div className={c.statusRow}>
-      <p className={`${c.status}${s.tone === "plain" ? "" : ` ${c[s.tone]}`}`} aria-live="polite">
-        {s.label}
-      </p>
+      <p className={`${c.status}${s.tone === "plain" ? "" : ` ${c[s.tone]}`}`}>{s.label}</p>
       {s.status === "sent" ? (
         <button
           type="button"
