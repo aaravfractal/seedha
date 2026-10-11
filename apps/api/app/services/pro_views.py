@@ -71,10 +71,11 @@ SAMPLE_RATE: Final = rupees(4000)
 MAX_RATE: Final = rupees(100_000)
 
 SAMPLE_AGENTS: Final = (
-    "Doon Valley Tours",
-    "Himalayan Trails",
-    "Kumaon Holidays",
-    "Mall Road Travels",
+    # Invented names so no real agency is shown next to a commission figure.
+    "Brindhar Trips",
+    "Kelvaro Tours",
+    "Oskenta Holidays",
+    "Tazimor Travels",
 )
 
 
@@ -425,7 +426,7 @@ def _second_property_lines() -> LineItems:
 
 SECOND_PROPERTY: Final = PropertyTotals(
     key="b",
-    name="Pine Ridge Cottages",
+    name="Vellorin Cottages",  # invented name, sample data
     city="Nainital",
     rooms_count=14,
     is_sample=True,

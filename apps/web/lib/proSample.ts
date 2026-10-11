@@ -47,7 +47,7 @@ export function parityLine(sample: RateWatchSample): string {
   const g = parityGap(sample.ota.price, sample.direct.price);
   if (g.lower === "equal") return `${sample.ota.name} matches your direct price. Nothing to fix.`;
   if (g.lower === "direct")
-    return `Your direct price is ${inr(g.gap)} below ${sample.ota.name}. Guests who compare book direct.`;
+    return `Your direct price is ${inr(g.gap)} below ${sample.ota.name}. Guests who compare see the lower price.`;
   return `${sample.ota.name} shows ${inr(g.gap)} less than your direct price. Ask ${sample.ota.name} to restore parity, and offer returning guests a perk instead of a lower rate.`;
 }
 
@@ -77,7 +77,7 @@ function highest(channels: readonly TonightChannel[]): TonightChannel | null {
 }
 
 /**
- * Rooms left on the latest night and the channel with the highest net ADR
+ * Rooms free on the latest closed night and the channel with the highest net ADR
  * (channels without a net ADR are skipped). The figures come from the API.
  */
 export function tonightCard(
@@ -87,13 +87,13 @@ export function tonightCard(
   const roomsLeft = Math.max(0, night.rooms_total - night.rooms_sold);
   const best = highest(channels);
   const bestOta = highest(channels.filter((c) => c.kind === "ota"));
-  const rooms = `${roomsLeft} room${roomsLeft === 1 ? "" : "s"}`;
+  const rooms = roomsLeft === 1 ? "1 room was" : `${roomsLeft} rooms were`;
   let line: string;
-  if (roomsLeft === 0) line = "Every room is sold. Nothing to open tonight.";
+  if (roomsLeft === 0) line = "Every room was sold at the last close. Nothing to open.";
   else if (!best || best.net_adr === null)
     line = "Upload your statements to see which channel keeps the most.";
   else {
-    line = `Offer the ${rooms} left to ${best.name} guests first: they keep ${inr(best.net_adr)} a night on average.`;
+    line = `${rooms} free at the last close. Offer free rooms to ${best.name} guests first. ${best.name} keeps you ${inr(best.net_adr)} a night on average.`;
     if (bestOta && bestOta.key !== best.key && bestOta.net_adr !== null) {
       line += ` If you open an online channel, ${bestOta.name} keeps the most at ${inr(bestOta.net_adr)}.`;
     }

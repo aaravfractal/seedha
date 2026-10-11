@@ -10,7 +10,7 @@ import { CalcNote } from "@/components/owner/ui";
 import o from "@/app/(owner)/(screens)/pro/pro.module.css";
 
 /**
- * Pro card "tonight": rooms left on the latest night from GET /rooms/nights
+ * Pro card "tonight": rooms free on the latest closed night from GET /rooms/nights
  * and the channel with the highest net ADR from GET /ledger/channels.
  */
 export function TonightView() {
@@ -38,7 +38,7 @@ export function TonightView() {
     <div className={o.view}>
       <dl className={o.stats}>
         <div className={o.stat}>
-          <dt className={o.statLabel}>Rooms left</dt>
+          <dt className={o.statLabel}>Rooms free at the last close</dt>
           <dd className={o.statValue}>{count(t.roomsLeft)}</dd>
           <dd className={o.statSub}>
             of {count(t.roomsTotal)}, {dayLong(night.night)}
@@ -52,7 +52,8 @@ export function TonightView() {
       </dl>
       <p className={o.vText}>{t.line}</p>
       <CalcNote>
-        Net ADR over {monthRange(ledger.data.start, ledger.data.end)}. Rooms left from the latest close.
+        Net ADR over {monthRange(ledger.data.start, ledger.data.end)}. Rooms free from the latest 9 PM close,
+        not live.
       </CalcNote>
     </div>
   );

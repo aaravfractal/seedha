@@ -49,7 +49,7 @@ test("summary uses Direct bookings, never direct share", () => {
   const text = nightSummary(night);
   assert.equal(text, "3 of 4 rooms sold · ₹8,123 net kept · Direct bookings 33%");
   assert.doesNotMatch(text, /direct share/i);
-  assert.equal(nightSummary({ ...night, rooms_sold: 0 }), "No rooms sold of 4");
+  assert.equal(nightSummary({ ...night, rooms_sold: 0 }), "No rooms sold. 4 rooms free.");
   assert.equal(nightSummary({ ...night, direct_bookings_pct: null }), "3 of 4 rooms sold · ₹8,123 net kept");
 });
 

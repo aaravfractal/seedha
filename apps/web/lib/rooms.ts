@@ -77,7 +77,8 @@ export function tileLabel(tile: RoomTile, byChannel: RoomChannelCount[] = []): s
 
 /** "14 of 22 rooms sold · ₹38,120 net kept · Direct bookings 21%". */
 export function nightSummary(night: RoomNight): string {
-  if (night.rooms_sold === 0) return `No rooms sold of ${night.rooms_total}`;
+  if (night.rooms_sold === 0)
+    return `No rooms sold. ${night.rooms_total} room${night.rooms_total === 1 ? "" : "s"} free.`;
   const direct = night.direct_bookings_pct === null ? "" : ` · Direct bookings ${night.direct_bookings_pct}%`;
   return `${night.rooms_sold} of ${night.rooms_total} rooms sold · ${inr(night.net_kept)} net kept${direct}`;
 }

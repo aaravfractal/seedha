@@ -9,10 +9,10 @@ import s from "./settings.module.css";
 
 /** Common GST rates on room tariff. The API accepts any rate from 0% to 28%. */
 const PRESETS: { bps: number; hint: string }[] = [
-  { bps: 500, hint: "rooms up to Rs 7,500 a night" },
+  { bps: 500, hint: "rooms up to ₹7,500 a night" },
   { bps: 1200, hint: "only if your accountant advises it" },
-  { bps: 1800, hint: "rooms above Rs 7,500 a night" },
-  { bps: 0, hint: "rooms under Rs 1,000 a night" },
+  { bps: 1800, hint: "rooms above ₹7,500 a night" },
+  { bps: 0, hint: "rooms under ₹1,000 a night" },
 ];
 
 /** Settings, Hotel tab: the GST rate stay invoices back out of what the guest paid. */

@@ -62,7 +62,7 @@ function Details({ d, night }: { d: RoomDetail; night: string }) {
     setBusy(true);
     try {
       await postJson(`rooms/${night}/${d.room}/slip`);
-      toast("Slip sent to the Desk");
+      toast("Slip sent to the Desk.");
     } catch (err) {
       toast(err instanceof ApiError ? err.message : "The slip did not print. Try again.");
     } finally {
@@ -100,10 +100,10 @@ function Details({ d, night }: { d: RoomDetail; night: string }) {
               {d.if_direct.label || "Illustration"}
             </Chip>
           </div>
-          <p className={s.ifValue}>+{inr(d.if_direct.extra_kept)} more kept</p>
+          <p className={s.ifValue}>{inr(d.if_direct.extra_kept)} more kept if direct</p>
           <p className={s.ifNote}>
-            Commission {inr(d.if_direct.commission_avoided)} and GST on it {inr(d.if_direct.gst_avoided)} stay
-            with you, minus the UPI fee of {inr(d.if_direct.upi_fee)}.
+            Commission {inr(d.if_direct.commission_avoided)} and GST on it {inr(d.if_direct.gst_avoided)}{" "}
+            would have stayed with you, minus the UPI fee of {inr(d.if_direct.upi_fee)}.
           </p>
         </section>
       ) : null}

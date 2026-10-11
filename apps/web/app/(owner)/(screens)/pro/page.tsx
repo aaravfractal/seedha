@@ -6,6 +6,7 @@ import { LayoutGroup } from "framer-motion";
 import { useApi } from "@/lib/api";
 import { count, inr } from "@/lib/format";
 import { RATE_WATCH_SAMPLE, rateWatchHeadline } from "@/lib/proSample";
+import { PULSE_EVENTS } from "@/lib/pulse";
 import type { ProData } from "@/lib/types";
 import { ErrorState, Loading } from "@/components/States";
 import { Chip, Screen } from "@/components/owner/ui";
@@ -30,6 +31,12 @@ function auditDetail(cancelled: number, over: number): string {
   return `${text.charAt(0).toUpperCase()}${text.slice(1)}.`;
 }
 
+/** The Pulse card summary repeats the view's own Winter Line Carnival decision (lib/pulse.ts). */
+function carnivalDetail(): string {
+  const e = PULSE_EVENTS.find((x) => x.id === "winter-line-carnival");
+  return e ? `${e.date}. ${e.decision}` : "";
+}
+
 function bigCards(p: ProData): BigCard[] {
   return [
     {
@@ -44,7 +51,7 @@ function bigCards(p: ProData): BigCard[] {
       id: "pulse",
       name: "Seedha Pulse",
       headline: "Winter Line Carnival",
-      detail: "25 to 30 Dec. Stop OTA discounts for these dates and keep 6 rooms for direct guests.",
+      detail: carnivalDetail(),
       foot: "Town events, not a demand forecast.",
       tag: p.pulse_sample ? "Sample" : null,
     },
@@ -52,8 +59,8 @@ function bigCards(p: ProData): BigCard[] {
       id: "rate-watch",
       name: "Rate Watch",
       headline: rateWatchHeadline(RATE_WATCH_SAMPLE),
-      detail: "From your screenshot today. No scraping.",
-      foot: "Guests who compare book the lower price.",
+      detail: "From a sample screenshot. No scraping.",
+      foot: "Guests who compare see the lower price.",
       tag: p.rate_watch_sample ? "Sample" : null,
     },
   ];
@@ -64,7 +71,7 @@ function smallCards(p: ProData): SmallCard[] {
     {
       id: "tonight",
       name: "Tonight Card",
-      text: "One evening card: rooms left tonight and the channel that keeps the most for them.",
+      text: "One evening card: rooms free at the last close and the channel that keeps the most for them.",
       tag: null,
     },
     {

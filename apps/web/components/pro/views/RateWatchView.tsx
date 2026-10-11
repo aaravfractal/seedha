@@ -14,7 +14,7 @@ export function RateWatchView() {
   return (
     <div className={o.view}>
       <p className={o.vNote}>
-        {s.room}, {s.stayDate}. From your screenshot. No scraping.
+        {s.room}, {s.stayDate}. From a sample screenshot. No scraping.
       </p>
       <div className={o.priceTiles}>
         {[

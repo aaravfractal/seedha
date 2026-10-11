@@ -26,10 +26,6 @@
   font-weight: 700;
   letter-spacing: -0.025em;
 }
-.note {
-  font-size: 15px;
-  color: var(--ink2);
-}
 .bar {
   display: flex;
   align-items: center;

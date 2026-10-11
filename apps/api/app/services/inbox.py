@@ -561,10 +561,10 @@ TEMPLATES: dict[str, dict[str, str]] = {
         "लीजिए और सामान हमारे पास रख दीजिए।",
     },
     "parking": {
-        "en": "Namaste {name}, yes, we will keep parking ready for your cars. Please share your "
-        "arrival time so the spaces are free when you reach.",
-        "hi": "नमस्ते {name}, जी हाँ, आपकी गाड़ियों के लिए पार्किंग का इंतज़ाम हो जाएगा। कृपया "
-        "पहुँचने का समय बता दीजिए।",
+        "en": "Namaste {name}, we will check parking for your cars. Please share your arrival "
+        "time so we can keep space.",
+        "hi": "नमस्ते {name}, हम आपकी गाड़ियों के लिए पार्किंग देख लेंगे। कृपया पहुँचने का समय "
+        "बता दीजिए ताकि जगह रखी जा सके।",
     },
     "booking": {
         "en": "Namaste {name}, thank you for thinking of us again. {owner} ji will check the "
@@ -573,16 +573,16 @@ TEMPLATES: dict[str, dict[str, str]] = {
         "कमरे देखकर जल्द ही बताएँगे।",
     },
     "wifi": {
-        "en": "Namaste {name}, sorry about the Wi-Fi trouble. We are checking the router near "
-        "your room now and will tell you as soon as it works.",
-        "hi": "नमस्ते {name}, वाई-फाई की परेशानी के लिए माफ़ी। हम अभी राउटर देख रहे हैं और ठीक "
-        "होते ही बताएँगे।",
+        "en": "Namaste {name}, sorry about the Wi-Fi trouble, and thank you for telling us. "
+        "If there is anything we can help with, please write to us here.",
+        "hi": "नमस्ते {name}, वाई-फाई की परेशानी के लिए माफ़ी, और बताने के लिए धन्यवाद। किसी भी "
+        "मदद के लिए हमें यहाँ लिख दीजिए।",
     },
     "refund": {
         "en": "Namaste {name}, thank you for writing. {owner} ji is checking the refund for the "
-        "cancelled night and will update you today.",
+        "cancelled night and will update you soon.",
         "hi": "नमस्ते {name}, संदेश के लिए धन्यवाद। {owner} जी रद्द हुई रात के रिफंड की स्थिति "
-        "देखकर आज ही बताएँगे।",
+        "देखकर जल्द ही बताएँगे।",
     },
     "directions": {
         "en": "Namaste {name}, a cab is easiest; ask the driver for {hotel}, {address}. Share "

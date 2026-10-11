@@ -93,7 +93,6 @@ export function RoomBoard({ fallback }: { fallback: Overview["last_night"] }) {
         <h2 id="night-title" className={s.title}>
           {isLast ? "Last night" : `Night of ${dayLabel(night.night)}`}
         </h2>
-        {board.is_sample || fallback.is_sample ? <span className={s.note}>Sample close</span> : null}
       </div>
 
       <div className={s.bar}>

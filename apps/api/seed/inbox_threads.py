@@ -65,7 +65,7 @@ THREADS: tuple[SeedThread, ...] = (
     ), ("Prefers a mountain-view room", "Usually arrives late in the evening"),
         ("Travels for work, mostly on weekdays",)),
     SeedThread(3, 101, False, (
-        Line(9, "guest", "Namaste! Hum next Saturday phir aa rahe hain. Kya Sunday ko late "
+        Line(9, "guest", "Namaste ji, hum next Saturday phir aa rahe hain. Kya Sunday ko late "
              "checkout mil sakta hai? Do baje tak?"),
         Line(8.5, "owner", "Namaste Yamini ji, a late checkout on Sunday should be possible. "
              "I will confirm the day before once I see the arrivals."),
@@ -79,7 +79,7 @@ THREADS: tuple[SeedThread, ...] = (
              "होटल में दोनों गाड़ियों के लिए पार्किंग मिल जाएगी?"),
     ), ("Comes with family in two cars", "Prefers rooms on the ground floor")),
     SeedThread(3, 201, True, (
-        Line(1.2, "guest", "Hi! Diwali pe family ke saath aana hai, do rooms chahiye teen "
+        Line(1.2, "guest", "Hi, Diwali pe family ke saath aana hai, do rooms chahiye teen "
              "raaton ke liye. Kya rooms available hain? Last time wala valley view mil jaye "
              "toh best."),
     ), ("Prefers the valley-view rooms", "Visits around Diwali"),

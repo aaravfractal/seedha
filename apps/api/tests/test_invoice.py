@@ -35,17 +35,21 @@ from app.routers.settings import SAMPLE_GSTIN
 from app.services.inbox import d6_ok
 from app.services.invoice import (
     FOOTER,
+    NO_GSTIN_NOTE,
     THANK_YOU,
     Invoice,
     Issuer,
     build_invoice,
+    detail_lines,
     financial_year,
     format_rs,
     gst_included_split,
+    gst_note,
     half_rate_label,
     invoice_prefix,
     issuer_for,
     last_invoice_number,
+    rate_label,
     render_pdf,
     safe_filename,
 )
@@ -263,6 +267,11 @@ def test_demo_sees_the_sample_gstin_and_the_sample_mark(
     inv = get_invoice(client, owner, consent_for(sample, stay(sample)))
     assert inv["gstin"] == SAMPLE_GSTIN
     assert inv["sample"] is True
+    assert inv["gst_note"] == (
+        "Prices include GST. Taxable value, CGST and SGST are worked back from the total "
+        "paid at 5%."
+    )
+    assert any(line["label"] == "CGST at 2.5%" for line in inv["lines"])  # type: ignore[attr-defined]
     assert inv["hotel_name"] == "Hotel Deodar View"
     assert inv["hotel_address"] == "Mall Road, Mussoorie"
 
@@ -305,13 +314,30 @@ def test_pdf_without_gstin_or_sample_mark() -> None:
     data = render_pdf(invoice_of())
     assert data.startswith(b"%PDF")
     text = pdf_text(data)
-    assert "GSTIN" not in text
+    assert not re.search(r"^GSTIN ", text, re.MULTILINE)  # no GSTIN header line
     assert "SAMPLE" not in text
     assert "PINE/2627/0007" in text
     assert "Rs 9,000" in text
     assert "Discount Rs 0" in text
     assert FOOTER in text
     assert render_pdf(invoice_of()) == data  # deterministic bytes
+
+
+def test_no_gstin_prints_only_the_total_paid() -> None:
+    no_gstin = invoice_of()
+    labels = [label for label, _ in detail_lines(no_gstin)]
+    assert "Total paid" in labels
+    assert not {"Taxable value", "CGST at 2.5%", "SGST at 2.5%"} & set(labels)
+    assert gst_note(no_gstin) == NO_GSTIN_NOTE
+    assert "Tax lines appear once a GSTIN is set in Settings." in pdf_text(render_pdf(no_gstin))
+    assert "CGST" not in pdf_text(render_pdf(no_gstin))
+    # the split is still computed and still adds up, it is only not printed
+    assert no_gstin.taxable + no_gstin.cgst + no_gstin.sgst == no_gstin.total_paid
+    with_gstin = invoice_of(gstin="05AAAAA0000A1Z5", gst_bps=1250)
+    labels = [label for label, _ in detail_lines(with_gstin)]
+    assert labels[7:10] == ["Taxable value", "CGST at 6.25%", "SGST at 6.25%"]
+    assert gst_note(with_gstin).endswith("worked back from the total paid at 12.5%.")
+    assert (rate_label(500), rate_label(1800), rate_label(0)) == ("5%", "18%", "0%")
 
 
 def test_pdf_download(sample: Session, client: TestClient, owner: dict[str, str]) -> None:
