@@ -7,12 +7,13 @@ every external service is optional and falls back to a simulated mode.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 
 API_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DB_PATH = API_ROOT / "seedha.db"
+AMOY_CHAIN_ID = "80002"
 
 
 def _env(name: str, default: str = "") -> str:
@@ -36,7 +37,8 @@ class Settings:
     razorpay_key_id: str
     razorpay_key_secret: str
     proof_rpc_url: str
-    proof_private_key: str
+    # Never in repr, logs or tracebacks: the dataclass repr skips this field.
+    proof_private_key: str = field(repr=False)
     demo_date: date | None
     desk_device_key: str
     # SEEDHA_DEMO=1: the simulated OTP sender returns the code to the web app,
@@ -46,6 +48,8 @@ class Settings:
     # property that is not sample data. The sample hotel is open to any
     # signed-in session (all of its data is fictional).
     owner_phones: frozenset[str] = frozenset()
+    # Polygon Amoy only: anything other than "80002" keeps proofs local.
+    proof_chain_id: str = ""
 
     @property
     def llm_enabled(self) -> bool:
@@ -64,8 +68,11 @@ class Settings:
 
     @property
     def chain_enabled(self) -> bool:
-        """Testnet writes need an RPC URL and a key; otherwise roots stay local."""
-        return bool(self.proof_rpc_url and self.proof_private_key)
+        """Testnet writes need an RPC URL, a key and chain ID 80002 (Polygon
+        Amoy); otherwise roots stay local."""
+        return bool(
+            self.proof_rpc_url and self.proof_private_key and self.proof_chain_id == AMOY_CHAIN_ID
+        )
 
 
 def load_settings() -> Settings:
@@ -91,6 +98,7 @@ def load_settings() -> Settings:
         demo_date=date.fromisoformat(raw_demo_date) if raw_demo_date else None,
         desk_device_key=_env("DESK_DEVICE_KEY"),
         seedha_demo=_env("SEEDHA_DEMO") == "1",
+        proof_chain_id=_env("PROOF_CHAIN_ID"),
         owner_phones=frozenset(
             p.strip()[-10:] for p in _env("OWNER_PHONES").split(",") if p.strip()
         ),

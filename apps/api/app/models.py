@@ -280,6 +280,7 @@ class ProofBundle(Base):
     item_count: Mapped[int] = mapped_column(Integer)
     chain_status: Mapped[str] = mapped_column(String(12), default="stored")
     chain_tx: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    chain_block: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     items: Mapped[list[ProofBundleItem]] = relationship(back_populates="bundle")
 
