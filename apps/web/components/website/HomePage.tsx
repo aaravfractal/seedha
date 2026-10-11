@@ -4,6 +4,7 @@ import { useApi } from "@/lib/api";
 import type { Sample } from "@/lib/types-website";
 import { Hero } from "./Hero";
 import { Metrics } from "./Metrics";
+import { SeedhaPass } from "./SeedhaPass";
 import { Careers, Faq, FinalCta, Pricing } from "./Pricing";
 import {
   DeskSection,
@@ -30,6 +31,7 @@ export function HomePage() {
         </>
       ) : null}
       <Features />
+      <SeedhaPass />
       {data ? <GrowthCalculator data={data} /> : null}
       {data && data.guest_cities.length > 0 ? <GuestMap data={data} /> : null}
       <PulseStrip />

@@ -6,6 +6,7 @@ import { useState } from "react";
 import { count, inr } from "@/lib/format";
 import type { Sample } from "@/lib/types-website";
 import { growth } from "@/lib/website";
+import { EventRadar } from "./EventRadar";
 import { useSeenOnce } from "./hooks";
 import styles from "./site.module.css";
 
@@ -452,6 +453,7 @@ export function PulseStrip() {
         <p className={styles.footnote}>
           Sample events for a Mussoorie hotel. Confirm dates locally before you act.
         </p>
+        <EventRadar />
       </div>
     </section>
   );
