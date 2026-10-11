@@ -22,13 +22,14 @@ RESET_DB := $(VENV)/bin/alembic downgrade base && $(VENV)/bin/alembic upgrade he
 MONEY_CODE := app/money.py,app/services/ledger.py,app/services/scenario.py,app/services/slips.py,app/services/savings.py
 
 .PHONY: help env setup setup-api setup-web seed seed-full reset test test-api test-web \
-        check check-api check-web check-e2e dev api web demo demo-prod demo-lan demo-live build-web e2e firmware check-firmware setup-firmware proof-nightly secrets-history clean
+        check check-api check-web check-e2e dev api web demo demo-prod demo-lan demo-live proof-wallet build-web e2e firmware check-firmware setup-firmware proof-nightly secrets-history clean
 
 help:
 	@echo "make demo       - first run: .env, install, seed, build and start everything"
 	@echo "make demo-prod  - seeded sample hotel on a production build (after make setup)"
 	@echo "make demo-lan   - production demo for phones on this Wi-Fi (http://<wifi-ip>:3000)"
 	@echo "make demo-live  - production demo on a public https link (needs cloudflared)"
+	@echo "make proof-wallet - new Polygon Amoy testnet key in .env (prints only the address)"
 	@echo "make dev        - start API (8000) and web (3000) in dev mode"
 	@echo "make seed       - fresh database with the sample hotel (no statements yet)"
 	@echo "make seed-full  - same, plus the 1,500 statement lines already loaded"
@@ -137,6 +138,11 @@ e2e:
 
 secrets-history:
 	$(PY) $(ROOT)/scripts/scan_history.py
+
+# Fresh Polygon Amoy testnet wallet into .env (mode 0600). Prints only the
+# address and the faucet; refuses if PROOF_PRIVATE_KEY already has a value.
+proof-wallet: env
+	$(PY) $(ROOT)/scripts/proof_wallet.py
 
 proof-nightly: env
 	$(LOAD_ENV) && cd $(API) && $(PY) -m app.jobs nightly-proof

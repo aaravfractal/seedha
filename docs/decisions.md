@@ -706,3 +706,24 @@ coming soon" note, since it is a different map.
   own, never after "Email:". D6: the Event Radar heading sits a step below
   the Pulse heading.
 Low findings are left in the reports.
+
+## Live features (docs/LIVE_FEATURES.md)
+
+**D-097 "Likely overnight demand" on owner events.** The brief asks for it,
+so Event Radar Lite shows low, medium or high for events the owner pastes.
+It is Claude's reading of the owner's own source text, labelled as such,
+never a Seedha forecast, and the decision line is fixed wording chosen by
+code. The owner sets any rate change; no rupee figure is ever suggested.
+
+**D-098 Chain library.** eth-account 0.14.0 alone (wheels only; resolved
+set in docs/agent-reports/live/r1-chain.md) signs the transaction and httpx
+makes the JSON-RPC calls. web3.py is not needed. B-001 is resolved. The
+writer refuses unless PROOF_CHAIN_ID is 80002 and the RPC reports 0x13882,
+keeps a 0.002 POL floor, warns below 0.01 POL, and sends one zero-value
+self-transfer with the Merkle root as data.
+
+**D-099 Amoy values not checked live from this machine.** The public RPC
+host did not resolve from the build sandbox, so chain ID 80002, the
+explorer format and gas figures are the documented values. The code checks
+the chain ID before every send, and the first live write is the owner's
+manual step.

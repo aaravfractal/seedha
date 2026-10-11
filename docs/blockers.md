@@ -1,6 +1,13 @@
 # Blockers
 
-## B-001 Polygon Amoy write (M7) — fallback in place
+## B-001 Polygon Amoy write (M7) — RESOLVED 11 Oct 2026 (D-098)
+
+eth-account 0.14.0 now installs from wheels (bitarray 3.12.0 has a cp312
+macOS arm64 wheel). The Amoy writer is in app/services/chain.py; a testnet
+wallet was created with `make proof-wallet`. Still open: funding it and the
+first live write, which are the owner's manual steps (README-dev.md).
+The original note follows.
+
 
 `eth-account` (needed to sign the testnet transaction that carries the nightly
 Merkle root) cannot be installed in this environment: pip reports
