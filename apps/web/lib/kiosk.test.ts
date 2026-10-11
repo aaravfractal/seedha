@@ -116,3 +116,15 @@ test("copy has no em dashes or exclamation marks", () => {
     }
   }
 });
+
+test("QR URLs with whitespace or control characters are refused", () => {
+  assert.equal(safeUrl(" https://seedha.example/consent/abc"), null);
+  assert.equal(safeUrl("https://seedha.example/consent/a\nb"), null);
+  assert.equal(safeUrl("https://seedha.example/consent/abc"), "https://seedha.example/consent/abc");
+});
+
+test("a show_qr command with no payload shows the bad-link screen instead of throwing", () => {
+  const command = { id: 9, kind: "show_qr", payload: null } as unknown as KioskCommand;
+  const { state } = applyCommand(INITIAL_KIOSK, command);
+  assert.equal(state.screen.kind, "bad_link");
+});

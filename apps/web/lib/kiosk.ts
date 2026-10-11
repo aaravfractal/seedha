@@ -41,7 +41,8 @@ function str(value: unknown, fallback = ""): string {
 
 /** The API's URL if it is an absolute http(s) URL, else null. Never rewritten. */
 export function safeUrl(value: unknown): string | null {
-  if (typeof value !== "string" || value.length > 2048) return null;
+  // Whitespace or control characters would end up inside the QR: refuse them.
+  if (typeof value !== "string" || value.length > 2048 || /[\s\u0000-\u001f\u007f]/.test(value)) return null;
   try {
     const url = new URL(value);
     return url.protocol === "https:" || url.protocol === "http:" ? value : null;
@@ -64,7 +65,9 @@ export function applyCommand(
   state: KioskState,
   command: KioskCommand,
 ): { state: KioskState; effects: KioskEffect[] } {
-  const p = command.payload;
+  // A missing or non-object payload is treated as empty, never thrown on.
+  const p: Record<string, unknown> =
+    command.payload && typeof command.payload === "object" ? command.payload : {};
   switch (command.kind) {
     case "show_qr": {
       const url = safeUrl(p.url);
