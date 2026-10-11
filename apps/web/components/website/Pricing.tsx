@@ -99,7 +99,7 @@ const ROLES = [
   ["Product designer", "Owner app, guest pages and hotel sites, in Hindi and English."],
 ] as const;
 
-/** Four placeholder roles; Apply opens a placeholder email address. */
+/** Four planned roles. Applications open before launch; no address is shown until then. */
 export function Careers({ page = false }: { page?: boolean }) {
   const Title = page ? "h1" : "h2";
   const RoleTitle = page ? "h2" : "h3";
@@ -115,23 +115,15 @@ export function Careers({ page = false }: { page?: boolean }) {
         <Title id="careers-title" className={styles.h2}>
           Help small hotels keep more.
         </Title>
-        <p className={styles.lede}>
-          Placeholder roles for the prototype. The Apply links open a placeholder address.
-        </p>
+        <p className={styles.lede}>Planned roles for after the hackathon. Applications open before launch.</p>
         <div className={styles.roles}>
           {ROLES.map(([title, meta]) => (
             <article key={title} className={styles.role}>
               <div>
                 <RoleTitle className={styles.roleTitle}>{title}</RoleTitle>
-                <p className={styles.roleMeta}>{meta} Dehradun or remote. Placeholder.</p>
+                <p className={styles.roleMeta}>{meta} Dehradun or remote.</p>
               </div>
-              <a
-                className={styles.pillOutline}
-                href={`mailto:careers@example.com?subject=${encodeURIComponent(title)}`}
-                aria-label={`Apply for ${title} (placeholder email)`}
-              >
-                Apply
-              </a>
+              <span className={styles.planned}>Planned</span>
             </article>
           ))}
         </div>

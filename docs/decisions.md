@@ -1,4 +1,4 @@
-# Decisions made without Aarav
+# Decisions made without the owner
 
 Each entry: what was decided, why, and where it lives. Newest at the bottom.
 Binding inputs: CLAUDE.md, docs/rulings.md (rulings 1 to 7, answers A to D).
@@ -12,7 +12,7 @@ commission") is read as applying wherever GST is charged; small agents who
 are not GST-registered invoice commission without GST. Modelled as
 `channel_contract.gst_applies = false` for travel agents. The rule itself is
 unchanged: wherever GST applies it is exactly 18%, rounded per line.
-Flagged for confirmation in needs-from-aarav.md.
+Flagged for confirmation in needs-from-owner.md.
 
 **D-002 Statement lines (answer B).** 1,500 lines: MakeMyTrip Apr-Jun 410
 (330 stays, 79 cancellations, MM48213), MakeMyTrip Jul-Sep 412 (228 stays,
@@ -253,7 +253,7 @@ keys the send is SIMULATED (recorded on the message, logged without number or
 text, labelled in the UI). Live sends use the Cloud API text message;
 `WHATSAPP_API_VERSION` is configurable (default v21.0, to be confirmed).
 WhatsApp requires an approved template for business-initiated messages
-outside a 24-hour window; see needs-from-aarav.md.
+outside a 24-hour window; see needs-from-owner.md.
 
 **D-046 STOP.** STOP, STOP ALL, UNSUBSCRIBE and OPT OUT (any case) withdraw
 every active consent for that number, block unsent drafts and record an
@@ -274,7 +274,7 @@ direct).
 
 **D-049 Razorpay is not built yet.** Only simulated UPI is implemented and
 labelled. Building Razorpay checkout without test keys would mean untested
-payment code; it is listed in needs-from-aarav.md.
+payment code; it is listed in needs-from-owner.md.
 
 **D-050 Playwright e2e** runs its own API (port 8001, fresh `e2e.db`
 seeded by the server command itself) and a production build of the web app
@@ -383,7 +383,7 @@ sees the fresh database. `make dev` clears Turbopack's dev cache on start.
 **D-068 Legal pages.** About, Privacy (DPDP Act 2023 / Rules 2025), Terms,
 Cookies, Delete my data, Security, Contact and FAQ, each with the required
 draft notice and last-updated date, key points switchable to Hindi
-(Hinglish), and only the placeholders Aarav named. Facts come from CLAUDE.md
+(Hinglish), and only the placeholders the owner named. Facts come from CLAUDE.md
 and the built behaviour. Points a lawyer must settle (fiduciary roles, legal
 basis per activity, retention periods) are stated as open, not invented.
 
@@ -428,15 +428,15 @@ from navigation start to ranked rows with a working toggle, under 1,000 ms
 (about 190 ms cold, 85 ms warm locally); re-ranking under 300 ms (about
 5 ms), timed inside the page so Playwright's own checks are not counted.
 
-**D-075 Perk code guessability (open, for Aarav).** Codes follow the
+**D-075 Perk code guessability (open, for the owner).** Codes follow the
 prototype's format, hotel prefix + guest initials + year (DEODAR-RS26), so a
 hotel has about 676 per year. The public link page shows the guest's short
 name for a valid code, and a valid code gives one perk. Rate limits (D-071)
 slow guessing but do not stop it. Not changed unilaterally because the
 format and the named greeting are part of the demo; options are listed in
-needs-from-aarav item 9.
+needs-from-owner item 9.
 
-**D-076 Perk codes with a random part (Aarav approved item 9, 10 Oct
+**D-076 Perk codes with a random part (owner approved item 9, 10 Oct
 2026).** New codes are PREFIX-INITIALS+YY-XXXX, e.g. DEODAR-RS26-7KQ2. The
 four characters are drawn with `secrets` from 31 symbols without 0/O or
 1/I/L, about 920,000 combinations per stem; a clash draws again. The demo
@@ -619,7 +619,7 @@ entries, which are property data.
   rupees. Goals are a per-browser convenience (localStorage, try/catch);
   the score itself is computed from the API's figures.
 The D6 scorecard and commission lever stay proposals in docs/ideas.md for
-Aarav.
+the owner.
 
 **D-090 Design QA resolutions.**
 - Fixed: SH1 (pill row keeps the current screen in view), O2 (the
@@ -651,3 +651,26 @@ topojson-client@3.1.0 and world-atlas@2.0.2 (pinned exactly), plus their
 types as dev dependencies. world-atlas data is imported from node_modules
 and bundled at build time: no runtime CDN or network request. Only the
 `land` topology is drawn, never `countries`, so no border lines appear.
+
+**D-092 Privacy clean-up by roles.** Real people's names, handles and
+personal addresses are removed from the repo files (not from git history or
+commit messages, which the brief forbids rewriting). People are named by
+role: the owner, the team, the hospitality lead. The needs file is now
+docs/needs-from-owner.md. A test (lib/personal-data.test.ts) scans the repo
+for the blocked words and stores only their SHA-256 hashes. detect-secrets
+reads those hashes as high-entropy strings, so each line carries an inline
+`pragma: allowlist secret` comment, the tool's documented marker for a
+false positive. The hook stays on for every other line.
+
+**D-093 Public contact addresses from config.** PUBLIC_CONTACT_EMAIL,
+PUBLIC_PRIVACY_EMAIL and PUBLIC_SECURITY_EMAIL are empty in .env.example.
+When unset, pages show "Contact details will be published before launch."
+No placeholder address or new form appears. The careers section shows its
+four roles as "Planned" with no Apply link, since there is no real address
+to apply to yet.
+
+**D-094 Legal pages are drafts.** Privacy, terms, cookies, security and
+data deletion carry "Draft for the hackathon prototype. Not legal advice.
+To be reviewed by a lawyer before launch." and a last-updated date. India
+data residency is written as "Planned: stored in India before launch."
+Courts are at Dehradun.

@@ -1,7 +1,7 @@
 # Progress
 
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
-docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-aarav.md.
+docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
 ## Frontend build: final summary (11 October 2026)
 
@@ -37,7 +37,7 @@ rows in review-design-qa.md and review-a11y-perf.md.
   earlier reported ~/.platformio as deleted, but my listing was truncated
   and I misread it. The repo now keeps both caches inside itself, and the
   git hook forces that for every commit. Please delete both folders.
-- Everything else needed is in docs/needs-from-aarav.md (keys, hardware,
+- Everything else needed is in docs/needs-from-owner.md (keys, hardware,
   names, D-001).
 
 **Demo click path (`make demo-prod`, then http://localhost:3000).**
@@ -88,13 +88,13 @@ ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 1
 - Simulated and labelled until keys arrive: Claude, WhatsApp, Razorpay UPI,
   the Polygon proof write.
 
-**Needs Aarav** (docs/needs-from-aarav.md): confirm D-001 (agent GST); keys
+**Needs from the owner** (docs/needs-from-owner.md): confirm D-001 (agent GST); keys
 for Claude, WhatsApp (plus an approved template), Razorpay and Amoy; Desk
-hardware; the teammate's name and the legal emails; and deleting
+hardware; the team names and the legal emails; and deleting
 `~/.cache/pre-commit`, which is still there (item 10).
 
 **Rule breach to know about** (B-003): during M8, PlatformIO wrote about
-20 MB to `~/.platformio`, outside the repo. Aarav deleted it on 10 Oct.
+20 MB to `~/.platformio`, outside the repo. The owner deleted it on 10 Oct.
 Firmware builds and pre-commit runs now stay inside the repo.
 
 **Still blocked**: B-001, the testnet write (`eth-account` will not install
@@ -533,14 +533,14 @@ The device build was blocked by PlatformIO downloads (B-002). In M11 it
 downloaded into a repo-local PlatformIO folder, and after turning off
 TFT_eSPI's touch-pin notice (the board has no touch panel) `pio run -e
 seedha_desk` succeeded with zero warnings: RAM 14.5%, flash 74.8%. The 5
-native tests pass. Not tested on real hardware (needs-from-aarav item 6).
+native tests pass. Not tested on real hardware (needs-from-owner item 6).
 
 ---
 
 ## M10 Static and legal pages — passed
 
 **Built**
-- Pages: /about (D6, team with the [Hospitality teammate] placeholder),
+- Pages: /about (D6, team then listed by name, now by role),
   /privacy (DPDP Act 2023 / Rules 2025: data, purposes, legal basis,
   retention, rights incl. STOP and erasure, OTA contacts never used, only
   fingerprints public, processors, [grievance officer name] and
@@ -563,7 +563,7 @@ with 8 links, no horizontal scroll, deletion form round trip works.
 **Tests**: API 283 passed. Web unit 15 passed.
 
 **Simulated / placeholders**: contact, grievance and security emails;
-hospitality teammate name (needs-from-aarav.md items 7 and 8).
+team names (needs-from-owner.md items 7 and 8; now resolved by roles).
 
 **Commit**: combined "M9 completion and M10" commit (see git log).
 
@@ -589,7 +589,7 @@ hospitality teammate name (needs-from-aarav.md items 7 and 8).
   to catch planted AWS and GitHub keys). `.env` never committed.
 - Audits: pip-audit 0; npm audit 0 high in production dependencies.
 - Residual risk recorded, not changed: guessable perk codes (D-075,
-  needs-from-aarav item 9).
+  needs-from-owner item 9).
 
 **Accessibility** (D-073): axe WCAG 2.1 A/AA on all 27 pages, light and
 dark, 1440 and 390 px: 0 violations after fixing the Pro tag contrast in the
@@ -635,7 +635,7 @@ out, the longest code fits the column, no name on the link page for valid
 or unknown codes, name only after a coded booking). Updated: the walk-in
 checkout, win-back flow and loop e2e now expect no name before booking.
 
-**B-003**: `~/.platformio` deleted by Aarav (confirmed). `~/.cache/pre-commit`
+**B-003**: `~/.platformio` deleted by the owner (confirmed). `~/.cache/pre-commit`
 is still present; commits now use a repo-local `PRE_COMMIT_HOME`.
 
 ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 100%) · bandit 0 · pip-audit 0 · tsc 0 · eslint 0 · npm audit 0 high · e2e 7/7
