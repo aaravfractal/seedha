@@ -1,0 +1,281 @@
+/* Website globe. Colours come from the site tokens (site.module.css) plus the
+   globe palette in lib/globe.ts, passed in as --globe* custom properties. */
+
+.root {
+  container-type: inline-size;
+  display: grid;
+  gap: 20px;
+  color: var(--ink);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Segmented toggle ---------- */
+
+.toggle {
+  display: inline-flex;
+  justify-self: start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 980px;
+  background: var(--fill);
+}
+
+.toggleBtn {
+  min-height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 980px;
+  background: transparent;
+  color: var(--ink2);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 300ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toggleBtn[aria-pressed="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.toggleBtn:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Layout ---------- */
+
+.body {
+  display: grid;
+  gap: 20px;
+}
+
+@container (min-width: 720px) {
+  .body {
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 28px;
+  }
+}
+
+.viewport {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 28px;
+  overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 0%, var(--bg2) 0%, var(--bg) 70%);
+  border: 1px solid var(--line);
+}
+
+@container (min-width: 480px) {
+  .viewport {
+    aspect-ratio: 5 / 4;
+  }
+}
+
+.canvasHost,
+.placeholder {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.canvas:active {
+  cursor: grabbing;
+}
+
+.placeholder {
+  background: radial-gradient(
+    closest-side at 50% 78%,
+    color-mix(in srgb, var(--globeOcean) 90%, transparent) 0 92%,
+    color-mix(in srgb, var(--globeRim) 18%, transparent) 96%,
+    transparent 100%
+  );
+  background-size: 180% 160%;
+  background-position: 50% 0;
+  background-repeat: no-repeat;
+}
+
+.hint {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 980px;
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  color: var(--ink2);
+  font-size: 13px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ---------- Static map ---------- */
+
+.map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mapSea {
+  fill: var(--globeOcean);
+}
+
+.mapLand {
+  fill: var(--globeLand);
+  stroke: none;
+}
+
+.mapArcs path {
+  fill: none;
+  stroke: var(--globePass);
+  stroke-width: 2;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+.mapPass {
+  --markerColor: var(--globePass);
+}
+
+.mapRadar {
+  --markerColor: var(--globeRadar);
+}
+
+.mapHalo {
+  fill: var(--markerColor);
+  opacity: 0.22;
+}
+
+.mapDot {
+  fill: var(--markerColor);
+  stroke: var(--globeOcean);
+  stroke-width: 2;
+}
+
+.mapLabel {
+  fill: var(--ink);
+  font-size: 17px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--globeOcean);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+@container (max-width: 440px) {
+  .mapLabel {
+    font-size: 21px;
+  }
+}
+
+/* ---------- Marker list ---------- */
+
+.listWrap {
+  display: grid;
+  gap: 12px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 16px;
+  border-radius: 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.dotPass {
+  background: var(--globePass);
+  color: var(--globePass);
+}
+
+.dotRadar {
+  background: var(--globeRadar);
+  color: var(--globeRadar);
+}
+
+.itemText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.itemMeta {
+  font-size: 14px;
+  color: var(--ink2);
+}
+
+.tag {
+  padding: 3px 10px;
+  border-radius: 980px;
+  background: var(--fill);
+  color: var(--ink2);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggleBtn {
+    transition: none;
+  }
+}
