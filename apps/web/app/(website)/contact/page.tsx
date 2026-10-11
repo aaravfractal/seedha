@@ -1,41 +1,36 @@
-"use client";
-
+import { Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { LegalPage } from "@/components/LegalPage";
+import type { Metadata } from "next";
+import { ContactEmail, LegalPage } from "@/components/LegalPage";
+import { PlanNote } from "./PlanNote";
 
-const PLANS = new Set(["Base", "Pro", "Max"]);
+export const metadata: Metadata = {
+  title: "Contact · Seedha",
+  description:
+    "How to reach the Seedha team about plans, privacy, security or erasing a guest consent record.",
+};
 
 export default function ContactPage() {
-  const params = useSearchParams();
-  const plan = params.get("plan");
-  const chosen = plan && PLANS.has(plan) ? plan : null;
   return (
     <LegalPage legal={false} title="Contact" lede="Talk to the Seedha team.">
-      {chosen ? (
-        <div className="card" role="status" style={{ marginBottom: 16 }}>
-          <h2 className="sub-title">You picked Seedha {chosen}</h2>
-          <p className="sub" style={{ margin: "6px 0 0" }}>
-            Write to us with your hotel&apos;s name, town and number of rooms, and we will set up {chosen}{" "}
-            with you. During the prototype nothing is charged.
-          </p>
-        </div>
-      ) : null}
+      <Suspense fallback={null}>
+        <PlanNote />
+      </Suspense>
       <div className="card">
         <div className="item">
           <span>Email</span>
-          <span className="placeholder">[contact email]</span>
+          <ContactEmail kind="contact" />
         </div>
         <div className="item">
           <span>Privacy and grievances</span>
           <Link className="link" href="/privacy">
-            Privacy policy, section 12
+            Grievance Officer
           </Link>
         </div>
         <div className="item">
           <span>Security reports</span>
           <Link className="link" href="/security">
-            Security page
+            Report a problem
           </Link>
         </div>
         <div className="item">
@@ -46,8 +41,8 @@ export default function ContactPage() {
         </div>
       </div>
       <p className="calc">
-        Seedha is a hackathon prototype. Contact details are placeholders until launch.{" "}
-        <Link href="/plans">See plans</Link>.
+        Seedha is a pre-launch product built for the TBI GEU AI-Tourism Hackathon. During the prototype,
+        nothing is charged. <Link href="/plans">See plans</Link>.
       </p>
     </LegalPage>
   );

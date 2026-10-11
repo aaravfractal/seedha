@@ -1,34 +1,15 @@
-"use client";
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ContactEmail, LegalPage } from "@/components/LegalPage";
+import { DeletionForm } from "./DeletionForm";
 
-import { useState } from "react";
-import type { FormEvent } from "react";
-import { ApiError, postJson } from "@/lib/api";
-import { LegalPage } from "@/components/LegalPage";
-
-type Result = { received: boolean; request_id: number; message: string };
+export const metadata: Metadata = {
+  title: "Delete my data · Seedha",
+  description:
+    "Guests can ask a hotel using Seedha to erase the consent they gave at its Desk, with a booking reference and WhatsApp number.",
+};
 
 export default function DataDeletionPage() {
-  const [ref, setRef] = useState("");
-  const [phone, setPhone] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [result, setResult] = useState<Result | null>(null);
-
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
-    try {
-      setResult(
-        await postJson<Result>("public/data-deletion", { booking_ref: ref.trim(), phone: phone.trim() }),
-      );
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "No connection. Try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
     <LegalPage
       title="Delete my data"
@@ -42,58 +23,11 @@ export default function DataDeletionPage() {
         hi: [
           "Apne bill ya slip ka booking reference aur woh WhatsApp number dijiye jo aapne diya tha.",
           "Aapka number, random salt aur aap tak pahunchne wala har link mita diya jaata hai. Message band.",
-          "Proof record mein anonymous fingerprint rehta hai, par woh aap se jodha nahi ja sakta.",
+          "Proof record mein anonymous fingerprint rehta hai, par woh aap se joda nahi ja sakta.",
         ],
       }}
     >
-      {result ? (
-        <div className="card" role="status">
-          <h2 className="sub-title">Thank you</h2>
-          <p className="sub" style={{ margin: "6px 0 0" }}>
-            {result.message}
-          </p>
-          <p className="calc">Request number {result.request_id}. Keep it if you write to us about this.</p>
-        </div>
-      ) : (
-        <form className="card" onSubmit={submit} noValidate>
-          <label className="fl" htmlFor="ref">
-            Booking reference
-          </label>
-          <input
-            id="ref"
-            type="text"
-            autoComplete="off"
-            value={ref}
-            onChange={(e) => setRef(e.target.value)}
-            placeholder="As printed on your bill or slip"
-          />
-          <label className="fl" htmlFor="phone">
-            WhatsApp number you gave
-          </label>
-          <input
-            id="phone"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="98765 43210"
-          />
-          {error ? (
-            <p role="alert" style={{ color: "var(--loss)", fontSize: 15 }}>
-              {error}
-            </p>
-          ) : null}
-          <button
-            type="submit"
-            className="btn"
-            style={{ marginTop: 16 }}
-            disabled={busy || ref.trim().length < 3 || phone.trim().length < 10}
-          >
-            {busy ? "Sending" : "Erase my consent record"}
-          </button>
-        </form>
-      )}
+      <DeletionForm />
 
       <h2 className="section">What is deleted</h2>
       <ul>
@@ -118,6 +52,14 @@ export default function DataDeletionPage() {
           A note that a deletion request arrived and whether it matched, with no number or reference stored.
         </li>
       </ul>
+
+      <h2 className="section">Your other rights</h2>
+      <p>
+        To withdraw consent without erasing it, reply STOP to any message. For access, correction, a
+        nomination or a complaint, see the <Link href="/privacy">privacy policy</Link> or write to the
+        Grievance Officer. Email: <ContactEmail kind="privacy" />
+      </p>
+
       <p className="calc">
         For privacy, the answer is the same whether or not a record matched, so nobody can use this page to
         find out who stayed at a hotel.

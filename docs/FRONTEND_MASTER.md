@@ -22,7 +22,7 @@ API endpoints where new screens need data. We do not switch stacks.
 
 ## 1. Priority of sources when they disagree
 
-1. CLAUDE.md section 2 rules and Aarav's rulings 1 to 7 in docs/decisions.md
+1. CLAUDE.md section 2 rules and the owner's rulings 1 to 7 in docs/decisions.md
 2. Section 3 of this file (decisions)
 3. The exported design files (if present)
 4. Design_Handoff.pdf text pages (README, SCREENS, BEHAVIOR, DATA, MATCH_THIS)

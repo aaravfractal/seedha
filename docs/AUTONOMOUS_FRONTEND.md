@@ -24,7 +24,7 @@ phase in docs/FRONTEND_MASTER.md is done or only blocked items remain.
    - Never change CLAUDE.md business rules or my rulings.
    - Never lower a quality threshold, disable a rule or skip a test.
    - No paid services. Missing keys: build the simulated fallback, label
-     it, log it in docs/needs-from-aarav.md.
+     it, log it in docs/needs-from-owner.md.
    - New dependencies allowed: framer-motion, three@0.160, d3,
      topojson-client, world-atlas@2.0.2 (bundled locally), fonts via
      next/font (Mukta, Cormorant Garamond, DM Serif Display, Outfit). Log

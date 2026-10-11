@@ -2,9 +2,18 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 
-export const metadata: Metadata = { title: "About · Seedha" };
+export const metadata: Metadata = {
+  title: "About · Seedha",
+  description:
+    "Seedha shows small hill hotels what each booking channel really leaves them. Built by a small team for the TBI GEU AI-Tourism Hackathon, Track D6.",
+};
 
-const TEAM = ["Aarav Sharma", "Ishan Singh", "Madhav Nauriyal"];
+/** The team by role only. No names or personal profiles on the public site. */
+const TEAM: [string, string][] = [
+  ["Founder", "Sets the product direction and the rules Seedha never breaks."],
+  ["Product", "Designs the screens hotel owners and guests see, and checks every number they show."],
+  ["Hardware", "Builds the Seedha Desk box for the reception counter."],
+];
 
 export default function AboutPage() {
   return (
@@ -43,19 +52,23 @@ export default function AboutPage() {
         words messages.
       </p>
 
-      <h2 className="section">Team</h2>
+      <h2 className="section">The team</h2>
+      <p>
+        The Seedha team is a small group building for the TBI GEU AI-Tourism Hackathon, Track D6. We describe
+        ourselves by role.
+      </p>
       <ul>
-        {TEAM.map((name) => (
-          <li key={name}>{name}</li>
+        {TEAM.map(([role, work]) => (
+          <li key={role}>
+            <b>{role}.</b> {work}
+          </li>
         ))}
-        <li>
-          <span className="placeholder">[Hospitality teammate]</span>
-        </li>
       </ul>
 
       <p className="calc">
-        All hotel and guest data in this prototype is fictional sample data. See the{" "}
-        <Link href="/faq">FAQ</Link> or <Link href="/contact">contact us</Link>.
+        All hotel and guest data in this prototype is fictional sample data, including the sample hotel, its
+        owner Rajesh ji and guests such as Rahul S. and Neha Gupta. See the <Link href="/faq">FAQ</Link> or{" "}
+        <Link href="/contact">contact us</Link>.
       </p>
     </LegalPage>
   );

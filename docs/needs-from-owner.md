@@ -1,4 +1,4 @@
-# Needs from Aarav (priority order)
+# Needs from the owner (priority order)
 
 Everything below has a working simulated fallback today. Nothing is blocked.
 
@@ -25,9 +25,11 @@ Everything below has a working simulated fallback today. Nothing is blocked.
 6. **Desk hardware** for M8 on-device testing (ESP32, ILI9488 TFT, NeoPixel
    ring, ESC/POS printer, button, buzzer). Firmware is compiled and tested
    against a mock server only.
-7. **Name of the hospitality teammate** for /about (placeholder until then).
-8. **Contact, grievance officer and security emails** for the legal pages
-   (visible placeholders until then).
+7. **Done (11 Oct 2026).** ~~Team names for /about~~. The About page now describes the team by roles (Founder, Product, Hardware) with no names.
+8. **Contact, privacy and security emails** for the website: set
+   `PUBLIC_CONTACT_EMAIL`, `PUBLIC_PRIVACY_EMAIL` and `PUBLIC_SECURITY_EMAIL`
+   in `.env` before `next build`. Until then the pages say "Contact details
+   will be published before launch."
 9. **Done (10 Oct 2026, D-076).** ~~Perk code guessability~~ (decisions D-075). Codes like DEODAR-RS26 can
    be guessed (about 676 per hotel per year), which would show a guest's short
    name and could spend their one-time perk. Options: (a) add a random part

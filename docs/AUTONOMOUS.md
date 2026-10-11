@@ -42,7 +42,7 @@ Replace "STOP and wait for me" with these rules:
    with the reason, and continue.
 3. When something is blocked (missing API key, unavailable network,
    hardware not present), build the simulated fallback, label it in the UI,
-   add it to docs/needs-from-aarav.md, and move on to the next piece of
+   add it to docs/needs-from-owner.md, and move on to the next piece of
    work that is not blocked.
 4. If a check fails three times in a row on the same issue, record it in
    docs/blockers.md with what you tried, leave the test failing visibly
@@ -84,8 +84,8 @@ for the full 8-step loop by M6, kept green afterwards.
 Build these pages in apps/web, linked from a site footer on every page,
 same design system, readable at large type, Hindi and English toggle where
 the rest of the app has it:
-- /about: what Seedha is, problem D6, team (Aarav Sharma, Ishan Singh,
-  Madhav Nauriyal, [Hospitality teammate]).
+- /about: what Seedha is, problem D6, the team described by roles
+  (Founder, Product, Hardware) with no names.
 - /privacy: privacy policy written for India's DPDP Act 2023 and DPDP Rules
   2025. Cover: what data is collected (owner account data, uploaded
   statements, Desk consent records with WhatsApp number), purpose, legal
@@ -93,8 +93,9 @@ the rest of the app has it:
   correction, erasure, withdraw consent by replying STOP), that OTA-provided
   guest contacts are never used for marketing, that only salted fingerprints
   go on a public chain, processors (hosting, WhatsApp Cloud API, payment
-  gateway, Claude API for statement reading), grievance contact. Use
-  [contact email] and [grievance officer name] as visible placeholders.
+  gateway, Claude API for statement reading), grievance contact. Read
+  contact addresses from PUBLIC_*_EMAIL settings; when unset, say "Contact
+  details will be published before launch."
 - /terms: terms of use for hotel owners (subscription, owner responsible for
   approving every message, no lower public rates via Seedha, acceptable use,
   limitation of liability, governing law India, Dehradun jurisdiction).
@@ -105,7 +106,8 @@ the rest of the app has it:
   record with booking reference and phone; creates a request in the API and
   shows what will and will not be deleted (fingerprint stays but becomes
   unlinkable).
-- /security: responsible disclosure page with [security email] placeholder.
+- /security: responsible disclosure page; the address comes from
+  PUBLIC_SECURITY_EMAIL.
 - /contact and /faq (10 questions a hotel owner would ask, answered from
   CLAUDE.md facts only).
 - Custom 404 and 500 pages in the Seedha style.
@@ -160,7 +162,7 @@ M11 Final hardening:
 - docs/progress.md: one section per milestone with status, what was
   built, test counts, the code quality line, numbers checked, commit hash.
 - docs/decisions.md: every decision you made without me, with the reason.
-- docs/needs-from-aarav.md: API keys, files, hardware or choices only I
+- docs/needs-from-owner.md: API keys, files, hardware or choices only I
   can provide, in priority order.
 - docs/blockers.md: anything stuck, what you tried, what would unblock it.
 

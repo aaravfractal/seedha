@@ -85,7 +85,8 @@ A. Remove real people's identity everywhere in the repo:
 - Replace with role-based wording: "The Seedha team", "Founder",
   "Product", "Hardware". The About page describes the team by roles and
   the event (TBI GEU AI-Tourism Hackathon, Track D6) with no names.
-- Rename docs/needs-from-aarav.md to docs/needs-from-owner.md and update
+- Rename the owner-named needs file in docs/ to docs/needs-from-owner.md
+  (name changed here during the privacy clean-up) and update
   every reference to it, including docs/AUTONOMOUS_FRONTEND.md.
 - Remove links to personal profiles from the website.
 - Keep fictional sample personas (Rajesh ji, Pooja, Neha Gupta, Rahul S.)

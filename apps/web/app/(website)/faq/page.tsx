@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { LegalPage } from "@/components/LegalPage";
 
-export const metadata: Metadata = { title: "FAQ · Seedha" };
+export const metadata: Metadata = {
+  title: "FAQ · Seedha",
+  description:
+    "Short answers for hotel owners about how Seedha works, where its numbers come from and how guest consent works.",
+};
 
 const FAQ: [string, string][] = [
   [
@@ -42,7 +46,7 @@ const FAQ: [string, string][] = [
   ],
   [
     "What goes on the blockchain?",
-    "Only a fingerprint of each consent: a salted hash that identifies no one. No name, phone or booking detail is ever stored there.",
+    "Only fingerprints of consents: salted hashes that identify no one, combined each night into one Merkle root. No name, phone or booking detail ever goes there. In the prototype the root is stored by Seedha and is not yet on a public chain.",
   ],
 ];
 

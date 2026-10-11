@@ -44,7 +44,7 @@ Then in Claude Code type /clear and paste PROMPT 1.
        - Never change CLAUDE.md business rules or my rulings.
        - Never lower a quality threshold, disable a rule or skip a test.
        - No paid services. Missing keys: build the simulated fallback,
-         label it, log it in docs/needs-from-aarav.md.
+         label it, log it in docs/needs-from-owner.md.
        - New dependencies allowed: framer-motion, three@0.160, d3,
          topojson-client, world-atlas@2.0.2 (bundled locally), fonts via
          next/font (Mukta, Cormorant Garamond, DM Serif Display, Outfit).
@@ -79,4 +79,4 @@ Then in Claude Code type /clear and paste PROMPT 1.
     make demo-prod. Give me: the URL, how to use Direct beta login, the click
     path for the full 8-step demo with code DEODAR-RS26, the list of screens
     that still differ from the design with screenshots paths, and anything in
-    docs/needs-from-aarav.md. Do not change code.
+    docs/needs-from-owner.md. Do not change code.

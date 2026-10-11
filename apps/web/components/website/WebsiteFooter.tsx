@@ -11,7 +11,7 @@ const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, s
     [
       ["/#product", "The flip"],
       ["/#growth", "Growth"],
-      ["/#pulse", "Pulse"],
+      ["/#pulse", "Seedha Pulse"],
       ["/#desk", "Seedha Desk"],
     ],
   ],
@@ -45,7 +45,7 @@ const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, s
     "Support",
     [
       ["/faq", "Questions"],
-      ["/contact", "WhatsApp us"],
+      ["/contact", "Get help"],
       ["/data-deletion", "Delete my data"],
     ],
   ],
@@ -104,7 +104,7 @@ export function WebsiteFooter() {
           ))}
         </ul>
         <div className={styles.bottomBar}>
-          <span>© 2026 Seedha. All sample data is fictional.</span>
+          <span>© 2026 The Seedha team. All sample data is fictional.</span>
           <div className={styles.bottomLinks}>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
