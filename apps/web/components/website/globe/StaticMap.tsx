@@ -80,8 +80,9 @@ export default function StaticMap({ layer, active }: { layer: GlobeLayerKey; act
       focusable="false"
     >
       <defs>
-        <radialGradient id="globe-map-glow" cx="50%" cy="38%" r="65%">
-          <stop offset="0%" stopColor="var(--globeRim)" stopOpacity="0.16" />
+        {/* A soft glow over the hill belt, where the towns sit. */}
+        <radialGradient id="globe-map-glow" cx="48%" cy="32%" r="38%">
+          <stop offset="0%" stopColor="var(--globeRim)" stopOpacity="0.28" />
           <stop offset="100%" stopColor="var(--globeRim)" stopOpacity="0" />
         </radialGradient>
       </defs>

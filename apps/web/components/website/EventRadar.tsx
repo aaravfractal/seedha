@@ -20,7 +20,7 @@ export function EventRadar() {
             <li className={styles.tag}>Pro</li>
             <li className={styles.tagPlanned}>Planned</li>
           </ul>
-          <h3 id="event-radar-title" className={styles.title}>
+          <h3 id="event-radar-title" className={`${styles.title} ${styles.titleSub}`}>
             Know about every event near you, not just Diwali.
           </h3>
           <p className={site.lede}>

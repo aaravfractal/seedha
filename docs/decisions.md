@@ -683,3 +683,26 @@ static land-only North India map (31.4 KB). Auto-rotate is a slow sway of
 about 9 degrees each way so the six towns stay in view; it stops on hover,
 touch or drag. The guest-origins map keeps its city list and "3D view
 coming soon" note, since it is a different map.
+
+**D-096 Website upgrade review fixes.** From the three reviews
+(docs/agent-reports/website-upgrade-*.md), every high and medium finding:
+- Privacy H1: a design PDF carried a real name in its Author metadata. The
+  field now reads "Seedha team", replaced in place at the same byte length
+  so the file's offsets stay valid. The personal-data test now scans every
+  file git tracks, including PDF metadata and Office document properties.
+- Privacy M1 to M3: the guest consent page links the privacy notice, data
+  deletion and the Grievance Officer. The privacy page lists business
+  details, invited staff and inbox messages, says exactly what the AI
+  service receives, and that some providers may process data outside India.
+- A11y A-1: a "Pause motion" button (aria-pressed) stops the sway and the
+  halo pulse, and motion also pauses while keyboard focus is in the globe
+  (WCAG 2.2.2). A-2: the drag hint uses --ink. A-4: phones get a 2048 land
+  texture.
+- Design D1: the static map frame is 66 to 92 E, 18 to 36 N, so the
+  Arabian Sea and Bay of Bengal coasts show, with a glow over the hill belt.
+  D2: the camera ends at 2.4 and arcs are thicker; the hint names the layer.
+  D3: the chosen layer button is pine. D4: light theme land is graphite
+  #48484a. D5: an unset contact address shows the pending sentence on its
+  own, never after "Email:". D6: the Event Radar heading sits a step below
+  the Pulse heading.
+Low findings are left in the reports.

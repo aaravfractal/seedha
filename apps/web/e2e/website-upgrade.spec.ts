@@ -81,6 +81,11 @@ test("the globe canvas, when drawn, carries the same markers as the list", async
     await expect(canvas).toHaveAttribute("aria-hidden", /.*/);
     const attr = (await canvas.getAttribute("data-markers")) ?? "";
     expect(attr.split(" ").filter(Boolean).sort()).toEqual(listIds);
+    // WCAG 2.2.2: the sway and pulse can be stopped.
+    const pause = pass.getByTestId("globe-pause");
+    await expect(pause).toHaveAttribute("aria-pressed", "false");
+    await pause.click();
+    await expect(pause).toHaveAttribute("aria-pressed", "true");
   } else {
     expect(await markerIds(fallback)).toEqual(listIds);
   }

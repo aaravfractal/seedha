@@ -57,7 +57,7 @@ export default function DataDeletionPage() {
       <p>
         To withdraw consent without erasing it, reply STOP to any message. For access, correction, a
         nomination or a complaint, see the <Link href="/privacy">privacy policy</Link> or write to the
-        Grievance Officer. Email: <ContactEmail kind="privacy" />
+        Grievance Officer. <ContactEmail kind="privacy" lead="Write to" />
       </p>
 
       <p className="calc">

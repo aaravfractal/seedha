@@ -18,14 +18,14 @@ export default function PrivacyPage() {
           "Guests get WhatsApp offers only if they tick yes at the hotel's Desk. The box starts unticked.",
           "Contacts that come from OTAs (MakeMyTrip, Booking.com, Agoda) are never used for messages.",
           "Reply STOP to any message and the messages stop.",
-          "No name, phone number or booking detail goes on a public blockchain. Only salted fingerprints.",
+          "No name, phone number or booking detail goes on a public blockchain. The prototype keeps its consent proof on Seedha's server.",
           "You can ask for your consent record to be erased on the Delete my data page.",
         ],
         hi: [
           "Guest ko WhatsApp offer tabhi milte hain jab woh Desk par khud tick karke haan kehte hain. Box pehle se khaali hota hai.",
           "OTA (MakeMyTrip, Booking.com, Agoda) se aaye contact kabhi message ke liye use nahi hote.",
           "Kisi bhi message par STOP likhiye, message band ho jayenge.",
-          "Public blockchain par naam, phone ya booking ki koi jaankari nahi jaati. Sirf salted fingerprint.",
+          "Public blockchain par naam, phone ya booking ki koi jaankari nahi jaati. Prototype mein consent proof Seedha ke server par hi rehta hai.",
           "Apna consent record mitaane ke liye Delete my data page par request bhejiye.",
         ],
       }}
@@ -63,6 +63,14 @@ export default function PrivacyPage() {
           Basis: our contract with the hotel.
         </li>
         <li>
+          <b>Business details.</b> If the owner adds them in Settings, an email, business name, GSTIN, PAN,
+          address and PIN code. Used for invoices and account notices. Basis: our contract with the hotel.
+        </li>
+        <li>
+          <b>Staff the owner invites.</b> Each person&apos;s name, role and mobile number. Used to let them
+          sign in to the hotel&apos;s account. Basis: our contract with the hotel.
+        </li>
+        <li>
           <b>Uploaded statements and registers.</b> Booking references, stay dates, guest names and cities,
           and amounts. Used to work out what each channel leaves the hotel and to show the owner guests who
           came back through an OTA. Basis: processing on the hotel&apos;s behalf, under its contract with us.
@@ -73,8 +81,9 @@ export default function PrivacyPage() {
           Basis: the guest&apos;s consent, given by ticking an unticked box.
         </li>
         <li>
-          <b>Messages.</b> Drafts the owner approves and replies the guest sends, such as STOP. Used to
-          deliver offers and honour opt-outs. Basis: the guest&apos;s consent.
+          <b>Messages.</b> Drafts the owner approves, and the text of messages the guest and the hotel send
+          each other in the guest inbox, including STOP. Used to deliver offers, keep the conversation and
+          honour opt-outs. Basis: the guest&apos;s consent.
         </li>
         <li>
           <b>Direct bookings through Seedha Link.</b> Dates, room, amount, perk code and a payment reference.
@@ -92,7 +101,8 @@ export default function PrivacyPage() {
         <li>We never send a message without the owner approving it, and never after a guest replies STOP.</li>
         <li>We never sell personal data or use it for advertising.</li>
         <li>
-          We never put personal data on a public blockchain. Only salted fingerprints that identify no one.
+          We never put personal data on a public blockchain. At most a single fingerprint of the night&apos;s
+          salted consent fingerprints would go there, and in the prototype it stays on Seedha&apos;s server.
         </li>
         <li>We never scrape OTA websites.</li>
       </ul>
@@ -145,10 +155,13 @@ export default function PrivacyPage() {
         </li>
       </ul>
 
-      <h2 className="section">8. Grievance Officer</h2>
+      <h2 className="section" id="grievance">
+        8. Grievance Officer
+      </h2>
       <p>
-        The Grievance Officer is a role on the Seedha team, not a named person. Email:{" "}
-        <ContactEmail kind="privacy" /> We will answer within the time the DPDP Rules set.
+        The Grievance Officer is a role on the Seedha team, not a named person.{" "}
+        <ContactEmail kind="privacy" lead="Write to the Grievance Officer at" /> We will answer within the
+        time the DPDP Rules set.
       </p>
 
       <h2 className="section">9. Who processes data for us</h2>
@@ -158,10 +171,17 @@ export default function PrivacyPage() {
         <li>WhatsApp Business messaging, to deliver messages the owner approved.</li>
         <li>A payment gateway, for direct-booking payments. Payments are in simulated test mode today.</li>
         <li>
-          An AI service for reading statements in layouts Seedha does not recognise and for wording messages.
-          Every amount is checked by Seedha&apos;s own code.
+          An AI service, sent only what each task needs. Statements in layouts Seedha does not recognise, to
+          read their rows. Two guest names and their cities, when Seedha cannot tell on its own whether they
+          are the same person. A guest&apos;s first name and latest inbox message, to suggest a reply the
+          owner edits before sending. A guest&apos;s first name with the hotel, perk and booking link, to word
+          win-back drafts. Every amount is checked by Seedha&apos;s own code.
         </li>
       </ul>
+      <p>
+        Some of these providers may process data outside India. Before launch we will name each provider, say
+        where it processes data, and follow any transfer limits the DPDP Rules set.
+      </p>
 
       <h2 className="section">10. How we protect it</h2>
       <ul>

@@ -13,11 +13,13 @@ type Props = {
   layer: GlobeLayerKey;
   theme: GlobeTheme;
   active: string | null;
+  /** Stop the sway and pulse: the pause button, or keyboard focus in the region. */
+  paused: boolean;
   /** Called when WebGL cannot start; the parent shows the static map. */
   onFail: () => void;
 };
 
-export default function GlobeCanvas({ layer, theme, active, onFail }: Props) {
+export default function GlobeCanvas({ layer, theme, active, paused, onFail }: Props) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const handle = useRef<GlobeHandle | null>(null);
@@ -80,6 +82,7 @@ export default function GlobeCanvas({ layer, theme, active, onFail }: Props) {
   }, [layer]);
   useEffect(() => handle.current?.setTheme(theme), [theme]);
   useEffect(() => handle.current?.setActive(active), [active]);
+  useEffect(() => handle.current?.setPaused(paused), [paused]);
 
   // The canvas is created in the effect above; this box sizes it.
   return <div ref={hostRef} className={styles.canvasHost} aria-hidden="true" />;

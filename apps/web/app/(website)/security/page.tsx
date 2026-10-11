@@ -17,7 +17,8 @@ export default function SecurityPage() {
       <h2 className="section">How to report</h2>
       <p>
         Write to the Seedha team with what you found, how to reproduce it, and what an attacker could do.
-        Include your name or handle if you would like to be thanked. Email: <ContactEmail kind="security" />
+        Include your name or handle if you would like to be thanked.{" "}
+        <ContactEmail kind="security" lead="Send reports to" />
       </p>
 
       <h2 className="section">What we ask</h2>
@@ -44,7 +45,8 @@ export default function SecurityPage() {
       <p>We only claim what this prototype does today.</p>
       <ul>
         <li>
-          Built: guest consent logged. Each yes is stored with the wording the guest saw and sealed nightly.
+          Built: guest consent logged. Each yes is stored with the wording the guest saw and sealed into a
+          proof the owner writes from the Proof screen.
         </li>
         <li>Built: no OTA scraping. Seedha reads only the statements the owner uploads.</li>
         <li>Built: owner sign-in with a one-time code, limits on tries, and rate limits on public pages.</li>

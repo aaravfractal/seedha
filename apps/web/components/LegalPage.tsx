@@ -9,13 +9,20 @@ export const LAST_UPDATED = "11 October 2026";
  * A public role address from server config (lib/contact.ts), or the pending
  * line when it is not set. Server component: the value never reaches client code.
  */
-export function ContactEmail({ kind }: { kind: ContactKind }) {
+export function ContactEmail({ kind, lead }: { kind: ContactKind; lead?: string }) {
   const email = publicEmail(kind);
+  // Unset: the pending sentence stands alone, never after "Email:" or a lead-in.
   if (!email) return <span>{CONTACT_PENDING}</span>;
-  return (
+  const link = (
     <a className="link" href={`mailto:${email}`}>
       {email}
     </a>
+  );
+  if (!lead) return link;
+  return (
+    <span>
+      {lead} {link}.
+    </span>
   );
 }
 

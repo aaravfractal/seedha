@@ -98,6 +98,8 @@ export function WorldGlobe({ initialLayer, label }: WorldGlobeProps) {
   const [layer, setLayer] = useState<GlobeLayer>(initialLayer);
   const [mode, setMode] = useState<Mode>("idle");
   const [active, setActive] = useState<string | null>(null);
+  const [userPaused, setUserPaused] = useState(false);
+  const [focusInside, setFocusInside] = useState(false);
   const theme = useSiteTheme();
   const hostRef = useRef<HTMLDivElement>(null);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
@@ -176,31 +178,54 @@ export function WorldGlobe({ initialLayer, label }: WorldGlobeProps) {
       data-globe-layer={layer}
       data-globe-mode={mode}
       data-globe-theme={theme}
+      onFocus={() => setFocusInside(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocusInside(false);
+      }}
     >
-      <div className={styles.toggle} role="group" aria-label="Map layer" data-testid="globe-toggle">
-        {LAYERS.map((l, i) => (
+      <div className={styles.controls}>
+        <div className={styles.toggle} role="group" aria-label="Map layer" data-testid="globe-toggle">
+          {LAYERS.map((l, i) => (
+            <button
+              key={l.key}
+              ref={(el) => {
+                buttons.current[i] = el;
+              }}
+              type="button"
+              className={styles.toggleBtn}
+              aria-pressed={layer === l.key}
+              aria-controls={listId}
+              data-layer={l.key}
+              onClick={() => pick(l.key)}
+              onKeyDown={(e) => onToggleKey(e, i)}
+            >
+              {l.name}
+            </button>
+          ))}
+        </div>
+        {mode === "globe" ? (
           <button
-            key={l.key}
-            ref={(el) => {
-              buttons.current[i] = el;
-            }}
             type="button"
-            className={styles.toggleBtn}
-            aria-pressed={layer === l.key}
-            aria-controls={listId}
-            data-layer={l.key}
-            onClick={() => pick(l.key)}
-            onKeyDown={(e) => onToggleKey(e, i)}
+            className={styles.pauseBtn}
+            aria-pressed={userPaused}
+            data-testid="globe-pause"
+            onClick={() => setUserPaused((p) => !p)}
           >
-            {l.name}
+            Pause motion
           </button>
-        ))}
+        ) : null}
       </div>
 
       <div className={styles.body}>
         <div ref={hostRef} className={styles.viewport}>
           {mode === "globe" ? (
-            <GlobeCanvas layer={layer} theme={theme} active={active} onFail={onFail} />
+            <GlobeCanvas
+              layer={layer}
+              theme={theme}
+              active={active}
+              paused={userPaused || focusInside}
+              onFail={onFail}
+            />
           ) : mode === "static" ? (
             <StaticMap layer={layer} active={active} />
           ) : (
@@ -208,7 +233,7 @@ export function WorldGlobe({ initialLayer, label }: WorldGlobeProps) {
           )}
           {mode === "globe" ? (
             <p className={styles.hint} aria-hidden="true">
-              Drag to turn the globe
+              {layer === "pass" ? "Planned towns" : "Sample events"}. Drag to turn the globe.
             </p>
           ) : null}
         </div>

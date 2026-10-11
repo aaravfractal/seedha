@@ -45,6 +45,8 @@ export type GlobeHandle = {
   setLayer(layer: GlobeLayerKey): void;
   setTheme(theme: GlobeTheme): void;
   setActive(id: string | null): void;
+  /** True stops the sway and the halo pulse (WCAG 2.2.2); dragging still works. */
+  setPaused(paused: boolean): void;
   /** False while the section is off screen: the render loop stops. */
   setVisible(visible: boolean): void;
   dispose(): void;
@@ -54,7 +56,7 @@ export type GlobeHandle = {
 const FOV = 34;
 const FOCUS = { lat: 30.6, lon: 78.4 };
 const CAM_START = 4.6;
-const CAM_END = 2.0;
+const CAM_END = 2.4;
 const CAM_Y = 0.2;
 /** North India sits this far above the point facing the camera (radians). */
 const FOCUS_ELEV = 0.35;
@@ -190,7 +192,9 @@ export function createGlobe(
   const palette = () => GLOBE_PALETTE[theme];
   let theme = opts.theme;
 
-  const texture = landTexture(renderer.capabilities.maxTextureSize);
+  // Phones and small windows get a 2048 texture (8 MB on the GPU, not 32 MB).
+  const wantTexture = window.innerWidth * dpr >= 1600 ? 4096 : 2048;
+  const texture = landTexture(Math.min(wantTexture, renderer.capabilities.maxTextureSize));
   texture.colorSpace = SRGBColorSpace;
   const globeGeo = new SphereGeometry(1, 128, 96);
   const globeMat = new ShaderMaterial({
@@ -280,7 +284,7 @@ export function createGlobe(
       const pts = arcPoints(a, b, 40, 0, 1.002);
       const span = new Vector3(...pts[0]!).angleTo(new Vector3(...pts[pts.length - 1]!));
       const lifted = arcPoints(a, b, 40, Math.max(0.004, span * 0.35), 1.002).map((p) => new Vector3(...p));
-      const tube = new Mesh(new TubeGeometry(new CatmullRomCurve3(lifted), 48, 0.0016, 6, false), arcMat);
+      const tube = new Mesh(new TubeGeometry(new CatmullRomCurve3(lifted), 48, 0.0045, 6, false), arcMat);
       tube.renderOrder = 1;
       overlay.add(tube);
     }
@@ -302,12 +306,13 @@ export function createGlobe(
   let introStart = -1;
   let hovering = false;
   let dragging = false;
+  let paused = false;
   let resumeAt = 0;
   let lastX = 0;
   let lastY = 0;
 
   function autoRotating(now: number): boolean {
-    return !hovering && !dragging && now >= resumeAt && introK >= 1;
+    return !paused && !hovering && !dragging && now >= resumeAt && introK >= 1;
   }
 
   function freezeSway() {
@@ -330,6 +335,7 @@ export function createGlobe(
   const onPointerDown = (e: PointerEvent) => {
     freezeSway();
     dragging = true;
+    start();
     lastX = e.clientX;
     lastY = e.clientY;
     canvas.setPointerCapture(e.pointerId);
@@ -395,9 +401,11 @@ export function createGlobe(
     tilt.rotation.x = Math.max(-TILT_LIMIT, Math.min(TILT_LIMIT, baseX + INTRO_OFF_X * (1 - k)));
     camera.position.set(0, CAM_Y * k, dist);
     camera.lookAt(0, lookY, 0);
-    pointMat.uniforms.uTime!.value = now / 1000;
+    if (!paused) pointMat.uniforms.uTime!.value = now / 1000;
     renderer.render(scene, camera);
-    if (visible && !document.hidden) frame = requestAnimationFrame(render);
+    // Paused and settled: draw nothing more until a drag or resume.
+    const still = paused && introK >= 1 && !dragging;
+    if (visible && !document.hidden && !still) frame = requestAnimationFrame(render);
   }
 
   function start() {
@@ -427,8 +435,22 @@ export function createGlobe(
     },
     setActive(id) {
       active = id;
-      points?.geometry.setAttribute("aSize", new BufferAttribute(sizes(), 1));
+      // Rewrite the existing sizes in place; a new attribute per hover leaked GPU buffers.
+      const attr = points?.geometry.getAttribute("aSize");
+      if (attr instanceof BufferAttribute && attr.array.length === sizes().length) {
+        (attr.array as Float32Array).set(sizes());
+        attr.needsUpdate = true;
+      } else points?.geometry.setAttribute("aSize", new BufferAttribute(sizes(), 1));
       if (!frame) renderer.render(scene, camera);
+    },
+    setPaused(p) {
+      if (p === paused) return;
+      paused = p;
+      if (p) freezeSway();
+      else {
+        resumeAt = 0;
+        start();
+      }
     },
     setVisible(v) {
       visible = v;

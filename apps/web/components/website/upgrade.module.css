@@ -32,6 +32,12 @@
   text-wrap: balance;
 }
 
+/* Event Radar sits inside Pulse: a step below the Pulse h2. */
+.titleSub {
+  font-size: clamp(26px, 2.8vw, 40px);
+  max-width: 24ch;
+}
+
 .nowrap {
   white-space: nowrap;
 }

@@ -7,12 +7,17 @@
  * Each file is split into lower-cased word tokens and email-shaped tokens;
  * every token, and every pair of adjacent word tokens, is hashed and checked.
  * File paths are checked the same way, so a renamed file cannot keep a name.
+ * Every file git tracks is scanned: text in full, PDFs by their metadata
+ * fields, and Office files by their document properties. Other binaries
+ * (images, fonts) are skipped.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { inflateRawSync } from "node:zlib";
 
 const REPO = resolve(import.meta.dirname, "..", "..", "..");
 
@@ -28,57 +33,59 @@ const BLOCKED = new Set([
   "e39b10ed75a9f909c2b06643a800137f04ccbad3c7545a04f91b201bcd5bfebd", // pragma: allowlist secret
 ]);
 
-/** Folders scanned recursively, relative to the repo root. */
-const TREES = [
-  "apps/web/app",
-  "apps/web/components",
-  "apps/web/lib",
-  "apps/web/public",
-  "firmware/seedha-desk/src",
-  "firmware/seedha-desk/include",
-  "firmware/seedha-desk/lib",
-  "firmware/seedha-desk/test",
-  "firmware/seedha-desk/tools",
-  "docs",
-];
-
-/** Single files scanned, relative to the repo root. */
-const FILES = [
-  ".env.example",
-  "CLAUDE.md",
-  "README-dev.md",
-  "apps/web/README.md",
-  "apps/web/package.json",
-  "apps/api/pyproject.toml",
-  "firmware/seedha-desk/README.md",
-  "firmware/seedha-desk/platformio.ini",
-];
-
-const TEXT = /\.(tsx?|mjs|js|css|md|txt|json|svg|html|ini|toml|cpp|c|h|hpp|py|example)$/i;
-const SKIP_DIRS = new Set(["node_modules", ".next", ".pio", ".pio-core", ".venv", "__pycache__"]);
+/** Office files whose document properties (author, last editor) are checked. */
+const OFFICE = /\.(xlsx|docx|pptx)$/i;
 
 function sha(text: string): string {
   return createHash("sha256").update(text).digest("hex");
 }
 
-function walk(dir: string, out: string[]): void {
-  if (!existsSync(dir)) return;
-  for (const name of readdirSync(dir)) {
-    if (SKIP_DIRS.has(name)) continue;
-    const full = join(dir, name);
-    if (statSync(full).isDirectory()) walk(full, out);
-    else if (TEXT.test(name)) out.push(full);
-  }
+/** Every file git tracks, relative to the repo root. */
+function trackedFiles(): string[] {
+  return execFileSync("git", ["ls-files", "-z"], { cwd: REPO, encoding: "utf8", maxBuffer: 64 << 20 })
+    .split("\0")
+    .filter(Boolean);
 }
 
-function scannedFiles(): string[] {
-  const out: string[] = [];
-  for (const tree of TREES) walk(join(REPO, tree), out);
-  for (const file of FILES) if (existsSync(join(REPO, file))) out.push(join(REPO, file));
-  for (const file of readdirSync(join(REPO, "design", "handoff-text"))) {
-    if (file.endsWith(".md")) out.push(join(REPO, "design", "handoff-text", file));
+/** The Info dictionary strings and XMP packets of a PDF, where author names live. */
+function pdfMetadata(bytes: Buffer): string {
+  const raw = bytes.toString("latin1");
+  const info = raw.match(/\/(Author|Creator|Producer|Title|Subject|Keywords)\s*\((?:\\.|[^\\)])*\)/g) ?? [];
+  const xmp = raw.match(/<x:xmpmeta[\s\S]*?<\/x:xmpmeta>/g) ?? [];
+  return [...info, ...xmp].join("\n");
+}
+
+/** The docProps/*.xml parts of a zipped Office file (core.xml holds the author). */
+function officeMetadata(bytes: Buffer): string {
+  const parts: string[] = [];
+  // Walk the central directory: signature 0x02014b50, one record per entry.
+  const end = bytes.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
+  if (end < 0) return "";
+  let at = bytes.readUInt32LE(end + 16);
+  for (let n = bytes.readUInt16LE(end + 10); n > 0; n -= 1) {
+    const method = bytes.readUInt16LE(at + 10);
+    const size = bytes.readUInt32LE(at + 20);
+    const nameLen = bytes.readUInt16LE(at + 28);
+    const extraLen = bytes.readUInt16LE(at + 30);
+    const commentLen = bytes.readUInt16LE(at + 32);
+    const local = bytes.readUInt32LE(at + 42);
+    const name = bytes.toString("utf8", at + 46, at + 46 + nameLen);
+    if (name.startsWith("docProps/")) {
+      const dataAt = local + 30 + bytes.readUInt16LE(local + 26) + bytes.readUInt16LE(local + 28);
+      const data = bytes.subarray(dataAt, dataAt + size);
+      parts.push((method === 8 ? inflateRawSync(data) : data).toString("utf8"));
+    }
+    at += 46 + nameLen + extraLen + commentLen;
   }
-  return out;
+  return parts.join("\n");
+}
+
+/** The text of a tracked file that may carry a name, or null for other binaries. */
+function scannableText(rel: string): string | null {
+  const bytes = readFileSync(join(REPO, rel));
+  if (/\.pdf$/i.test(rel)) return pdfMetadata(bytes);
+  if (OFFICE.test(rel)) return officeMetadata(bytes);
+  return bytes.subarray(0, 8192).includes(0) ? null : bytes.toString("utf8");
 }
 
 /** Hashes of the tokens in a text that are blocked, with the line they are on. */
@@ -107,16 +114,21 @@ test("the hash list and scanner work on a harmless sample", () => {
   assert.deepEqual(blockedHits("Namaste Rahul ji. Rahul Sharma, Neha Gupta, Pooja and Rajesh ji."), []);
 });
 
-test("no public-facing file or doc carries a blocked personal word", () => {
-  const files = scannedFiles();
-  assert.ok(files.length > 100, `scanned only ${files.length} files`);
+test("no tracked file, path or file metadata carries a blocked personal word", () => {
+  const files = trackedFiles();
+  assert.ok(files.length > 300, `scanned only ${files.length} files`);
   const problems: string[] = [];
-  for (const file of files) {
-    const rel = relative(REPO, file);
+  for (const rel of files) {
     for (const hit of blockedHits(rel.replaceAll("/", " "))) problems.push(`${rel} (path) #${hit.hash}`);
-    for (const hit of blockedHits(readFileSync(file, "utf8"))) {
-      problems.push(`${rel}:${hit.line} #${hit.hash}`);
-    }
+    const text = scannableText(rel);
+    if (text === null) continue;
+    for (const hit of blockedHits(text)) problems.push(`${rel}:${hit.line} #${hit.hash}`);
   }
   assert.deepEqual(problems, [], `personal data found:\n${problems.join("\n")}`);
+});
+
+test("PDF and Office metadata readers find an author field", () => {
+  const pdf = Buffer.from("%PDF-1.4\n1 0 obj << /Author (Sample Author) /Title (Deck) >> endobj", "latin1");
+  assert.match(pdfMetadata(pdf), /Sample Author/);
+  assert.equal(officeMetadata(Buffer.from("not a zip")), "");
 });

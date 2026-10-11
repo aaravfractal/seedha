@@ -115,7 +115,7 @@ export default function TermsPage() {
       <h2 className="section">12. Changes and contact</h2>
       <p>
         When these terms change, the date at the top changes too, and material changes will be announced in
-        the app before they apply. Questions about these terms: <ContactEmail kind="contact" />
+        the app before they apply. <ContactEmail kind="contact" lead="Send questions about these terms to" />
       </p>
     </LegalPage>
   );

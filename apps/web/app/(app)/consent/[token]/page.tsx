@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
@@ -135,6 +136,11 @@ export default function ConsentScreen({ params }: { params: Promise<{ token: str
         {busy ? "Saving" : "Yes, send me offers"}
       </button>
       <p className={styles.stop}>No tick, no messages. Reply STOP to any message to opt out.</p>
+      <p className={styles.stop}>
+        The <Link href="/privacy">privacy notice</Link> explains how your number is used. You can{" "}
+        <Link href="/data-deletion">ask for it to be deleted</Link> or write to the{" "}
+        <Link href="/privacy#grievance">Grievance Officer</Link>.
+      </p>
     </form>
   );
 }

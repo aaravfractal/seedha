@@ -242,15 +242,15 @@ export function cappedDpr(dpr: number | undefined): number {
 /* ---------- Static map frame and palette ---------- */
 
 /** North India frame for the static map: [west, south, east, north] degrees. */
-export const NORTH_INDIA_BOUNDS = [72, 25, 85, 35.5] as const;
+export const NORTH_INDIA_BOUNDS = [66, 18, 92, 36] as const;
 
 /** Where each town label sits on the static map: side of the dot, and a nudge down. */
 export const LABEL_POS: Record<TownKey, { side: "left" | "right"; dy: number }> = {
   manali: { side: "left", dy: 0 },
-  kullu: { side: "left", dy: 0 },
-  shimla: { side: "left", dy: 0 },
+  kullu: { side: "right", dy: 0 },
+  shimla: { side: "left", dy: -6 },
   mussoorie: { side: "left", dy: -4 },
-  rishikesh: { side: "left", dy: 14 },
+  rishikesh: { side: "left", dy: 12 },
   auli: { side: "right", dy: 0 },
   nainital: { side: "right", dy: 4 },
 };
@@ -272,8 +272,8 @@ export const GLOBE_PALETTE = {
     arc: "#4cc38a",
   },
   light: {
-    ocean: "#eceef1",
-    land: "#7c7c81",
+    ocean: "#e6e9ee",
+    land: "#48484a",
     rim: "#1e6b4e",
     pass: "#1e6b4e",
     radar: "#e8a33d",
