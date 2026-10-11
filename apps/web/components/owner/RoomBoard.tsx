@@ -101,7 +101,7 @@ export function RoomBoard({ fallback }: { fallback: Overview["last_night"] }) {
             {nightSummary(night)}
           </span>
         </p>
-        <button type="button" className="btn ghost small" onClick={printClose} disabled={busy}>
+        <button type="button" className="btn ghost" onClick={printClose} disabled={busy}>
           {busy ? "Sending" : "Print close slip on Desk"}
         </button>
       </div>

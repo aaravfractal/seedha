@@ -131,3 +131,13 @@
     flex: 1 1 100%;
   }
 }
+/* Phone: stack the header so the hotel name and GSTIN get the full width
+   (review F14). After the base rules so it wins. */
+@media (max-width: 479px) {
+  .head {
+    flex-direction: column;
+  }
+  .meta {
+    text-align: left;
+  }
+}

@@ -108,7 +108,15 @@ function MoreMenu({ busy, onSimulate }: { busy: boolean; onSimulate: () => void 
     };
   }, [open]);
   return (
-    <div className={styles.moreWrap} ref={wrap}>
+    <div
+      className={styles.moreWrap}
+      ref={wrap}
+      onBlur={(e) => {
+        // Tab out of the menu closes it (review F15); a click is handled by mousedown.
+        const next = e.relatedTarget;
+        if (open && next instanceof Node && !e.currentTarget.contains(next)) setOpen(false);
+      }}
+    >
       <button
         ref={button}
         type="button"

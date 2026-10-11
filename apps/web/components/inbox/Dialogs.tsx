@@ -5,23 +5,33 @@ import type { ReactNode } from "react";
 import { useDialogFocus } from "@/components/useDialogFocus";
 import styles from "./Inbox.module.css";
 
-/** A modal dialog shell: aria-modal, focus kept inside, Escape closes. */
-function Dialog({
+/** A modal dialog shell: aria-modal, focus kept inside, Escape closes, focus returns. */
+export function Dialog({
   id,
   title,
   onClose,
   children,
+  className,
 }: {
   id: string;
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** Extra class on the dialog box (for example a wider sheet). */
+  className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useDialogFocus(ref, true, onClose);
   return (
     <div className="overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={ref} tabIndex={-1} className="dlg" role="dialog" aria-modal="true" aria-labelledby={id}>
+      <div
+        ref={ref}
+        tabIndex={-1}
+        className={className ? `dlg ${className}` : "dlg"}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={id}
+      >
         <h3 id={id} className="sub-title" style={{ fontSize: 24 }}>
           {title}
         </h3>

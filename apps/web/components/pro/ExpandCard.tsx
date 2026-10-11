@@ -11,7 +11,8 @@ const CURVE = [0.22, 1, 0.36, 1] as const;
 
 /**
  * A Pro card that expands in place into its live mini view (POLISH_BUILD C).
- * The whole summary is one disclosure button (aria-expanded, aria-controls).
+ * The whole summary is one disclosure button (aria-expanded, aria-controls),
+ * named by the card name with the summary as its description.
  * Escape or the Close button collapse it and focus returns to the button.
  * The open card spans its grid row with a shared-layout animation; under
  * reduced motion everything is instant.
@@ -80,11 +81,15 @@ export function ExpandCard({
           type="button"
           id={`pro-${id}-trigger`}
           className={o.trigger}
+          aria-label={name}
+          aria-describedby={`pro-${id}-summary`}
           aria-expanded={open}
           aria-controls={regionId}
           onClick={() => (open ? close() : onOpen(id))}
         >
-          {summary}
+          <span id={`pro-${id}-summary`} className={o.summary}>
+            {summary}
+          </span>
           <span className={o.more}>
             {open ? "Hide view" : "Show view"}
             <svg className={o.chev} aria-hidden="true" width="14" height="14" viewBox="0 0 14 14">
@@ -112,7 +117,7 @@ export function ExpandCard({
         >
           <View />
           <div className={o.panelFoot}>
-            <button type="button" className={`btn small ghost ${o.close}`} onClick={close}>
+            <button type="button" className={`btn ghost ${o.close}`} onClick={close}>
               Close <span className="sr-only-text">{name}</span>
             </button>
           </div>

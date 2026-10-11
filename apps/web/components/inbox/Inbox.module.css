@@ -210,7 +210,7 @@
 .filter {
   flex: none;
   white-space: nowrap;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 14px;
   border-radius: var(--r-pill);
   background: var(--fill);
@@ -259,6 +259,10 @@
 }
 .row[aria-current="true"] {
   background: var(--accentSoft);
+}
+/* --ink2 on accentSoft is 4.38:1 at 13px; --ink passes (review F2) */
+.row[aria-current="true"] .rowTime {
+  color: var(--ink);
 }
 .rowTop {
   display: flex;
@@ -418,13 +422,20 @@
 
 .stream {
   flex: 1;
-  min-height: 0;
+  /* never collapses under the compose area (review F1) */
+  min-height: 200px;
   overflow-y: auto;
   background: var(--bg2);
   padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+/* The log takes focus so the keyboard can scroll it; the ring sits inside
+   because the panel clips its edges (review F3). */
+.stream:focus-visible {
+  outline-offset: -3px;
+  border-radius: 0;
 }
 .divider {
   align-self: center;
@@ -574,6 +585,22 @@
   border-top: 1px solid var(--line);
   padding: 10px 16px 12px;
   background: var(--card);
+  /* Shrinks before the log does (the log keeps 200px); the composer and Send
+     never scroll away, only the top part scrolls when space is short (F1). */
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+/* Suggestions, the bot note and the invoice row scroll inside the cap. */
+.composeTop {
+  min-height: 0;
+  overflow-y: auto;
+  flex: 0 1 auto;
+}
+.composer,
+.composeFoot {
+  flex: none;
 }
 .suggest {
   display: flex;
@@ -595,7 +622,7 @@
 .suggestion {
   flex: none;
   max-width: 300px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 0 14px;
   border-radius: var(--r-pill);
   border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
@@ -624,7 +651,7 @@
   color: var(--ink);
 }
 .draftBtn {
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 12px;
   border-radius: var(--r-pill);
   color: var(--accent);
@@ -648,6 +675,65 @@
   font-size: 15px;
   font-weight: 600;
   color: var(--ink);
+}
+.invoiceSlot .kicker {
+  color: var(--ink);
+}
+.invoiceRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+.invoiceWhat {
+  min-width: 0;
+  flex: 1 1 180px;
+}
+.invoiceNo {
+  font-family: var(--mono);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.invoiceActions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+.slotBtn {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  font-weight: 600;
+  font-size: 15px;
+}
+.slotPrimary {
+  background: var(--accent);
+  color: var(--onAccent);
+  border-color: transparent;
+}
+.slotBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.invoiceSlot .invoiceStatus {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+/* The full preview sits in a wider dialog; the panel drops its own card. */
+.invoiceDlg {
+  max-width: 620px;
+}
+.invoiceDlg section {
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  max-width: none;
+  margin-top: 12px;
 }
 .composer {
   display: flex;
@@ -859,7 +945,8 @@
   color: var(--accent);
   font-weight: 600;
   font-size: 14px;
-  min-height: 36px;
+  min-height: 44px;
+  min-width: 44px;
 }
 .danger {
   width: 100%;

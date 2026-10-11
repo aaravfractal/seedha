@@ -64,6 +64,15 @@
   /* bg2, not fill: the grey day names keep 4.5:1 on it */
   background: var(--bg2);
 }
+/* On a phone the seven days get 44px columns: thinner gaps and a little of
+   the card's padding (review F6). */
+@media (max-width: 479px) {
+  .scrubber {
+    gap: 2px;
+    padding: 2px;
+    margin-inline: -8px;
+  }
+}
 .seg {
   min-height: 52px;
   border-radius: 14px;
