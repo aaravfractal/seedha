@@ -89,10 +89,11 @@ async function expectSheetMatches(page: Page, d: RoomDetail): Promise<void> {
 
   if (d.if_direct) {
     const box = s.getByTestId("room-if-direct");
-    await expect(box).toContainText(`+${inr(d.if_direct.extra_kept)} more kept`);
-    await expect(box).toContainText(`Commission ${inr(d.if_direct.commission_avoided)}`);
-    await expect(box).toContainText(`GST on it ${inr(d.if_direct.gst_avoided)}`);
-    await expect(box).toContainText(`UPI fee of ${inr(d.if_direct.upi_fee)}`);
+    await expect(box).toContainText(`${inr(d.if_direct.extra_kept)} more kept if direct`);
+    await expect(box).toContainText(
+      `Commission ${inr(d.if_direct.commission_avoided)} and GST on it ${inr(d.if_direct.gst_avoided)} ` +
+        `would have stayed with you, minus the UPI fee of ${inr(d.if_direct.upi_fee)}.`,
+    );
   }
 
   const consented = d.consent_status === "consented_at_desk" && d.consent_id !== null;
