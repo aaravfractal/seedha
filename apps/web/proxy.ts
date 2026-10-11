@@ -34,6 +34,7 @@ export const config = {
     "/pro",
     "/settings",
     "/desk",
+    "/desk/device",
     "/rate-card",
     "/agent-deck",
     "/onboard",
