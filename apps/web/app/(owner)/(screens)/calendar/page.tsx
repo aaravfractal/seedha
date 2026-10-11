@@ -1,13 +1,28 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ApiError, api, postJson, useApi } from "@/lib/api";
+import {
+  RATE_LINE,
+  actionText,
+  dateRange,
+  demandText,
+  eventLabels,
+  isOwnerEvent,
+  ownEventId,
+  sourceHost,
+} from "@/lib/events";
 import { inr } from "@/lib/format";
-import type { CalendarData, PulseEvent, PulseFacts } from "@/lib/types-settings";
+import type { CalendarData, OwnerEvent, PulseEvent, PulseFacts } from "@/lib/types-settings";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
-import { CalcNote, SampleChip, Screen, ui } from "@/components/owner/ui";
+import { CalcNote, Chip, Screen, ui } from "@/components/owner/ui";
+import { Modal } from "@/components/settings/Modal";
+import { AddEventsSheet } from "@/components/calendar/AddEventsSheet";
+import { MorningPreview } from "@/components/calendar/MorningPreview";
 import s from "@/components/settings/settings.module.css";
+import c from "@/components/calendar/calendar.module.css";
 
 const MONTHS = [
   "January",
@@ -23,7 +38,6 @@ const MONTHS = [
   "November",
   "December",
 ];
-const SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 /** The month the handoff opens on: the Winter Line Carnival. */
 const START_MONTH = "2026-12";
@@ -42,17 +56,6 @@ function fromKey(key: number): Ym {
 }
 function iso(y: number, m: number, d: number): string {
   return `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-}
-
-/** "2026-12-25".."2026-12-30" -> "25 to 30 Dec"; one day -> "31 Dec"; across months -> "31 Dec to 3 Jan". */
-function dateRange(start: string, end: string): string {
-  const [, sm, sd] = start.split("-").map(Number);
-  const [, em, ed] = end.split("-").map(Number);
-  const sMon = SHORT[(sm ?? 1) - 1];
-  const eMon = SHORT[(em ?? 1) - 1];
-  if (start === end) return `${sd} ${sMon}`;
-  if (sm === em) return `${sd} to ${ed} ${eMon}`;
-  return `${sd} ${sMon} to ${ed} ${eMon}`;
 }
 
 function eventsIn(events: PulseEvent[], { y, m }: Ym): PulseEvent[] {
@@ -101,12 +104,16 @@ function EventCard({
   facts,
   busy,
   onToggle,
+  onDelete,
 }: {
   event: PulseEvent;
   facts: PulseFacts | null;
   busy: boolean;
   onToggle: () => void;
+  onDelete: (() => void) | null;
 }) {
+  const owner = isOwnerEvent(event.origin);
+  const host = sourceHost(event.source_url);
   return (
     <article className={s.eventCard} aria-labelledby={`ev-${event.key}`}>
       <div className={s.eventTop}>
@@ -116,16 +123,42 @@ function EventCard({
         </span>
         <span className={ui.chips}>
           <span className={s.small}>{event.tag}</span>
-          <SampleChip />
+          {eventLabels(event.origin).map((label) => (
+            <Chip key={label} tone={label === "From your sources" ? "ok" : "sample"}>
+              {label}
+            </Chip>
+          ))}
         </span>
       </div>
       <h3 className={s.eventTitle} id={`ev-${event.key}`}>
         {event.title}
       </h3>
+      {owner && event.town ? <p className={s.small}>{event.town}</p> : null}
       <p className={s.decision}>
-        <b>Channel decision:</b> {event.decision}
+        <b>Channel decision:</b> {event.decision || `${actionText(event.action)} on these dates.`}
       </p>
-      {facts ? (
+      {owner && event.demand ? <p className={c.demand}>{demandText(event.demand)}</p> : null}
+      {owner ? (
+        <p className={c.sourceLine}>
+          <span>Source:</span>
+          {host && event.source_url ? (
+            <a
+              className={c.sourceLink}
+              href={event.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${host} (opens in a new tab)`}
+            >
+              {host}
+            </a>
+          ) : (
+            <span>Not given</span>
+          )}
+        </p>
+      ) : null}
+      {owner ? (
+        <p className={s.money}>{RATE_LINE}</p>
+      ) : facts ? (
         <p className={s.money}>
           Each room night sold direct instead of on {facts.channel_name} keeps{" "}
           <b className={ui.num}>{inr(facts.extra_per_room_night)}</b> more (
@@ -137,13 +170,24 @@ function EventCard({
         <button
           type="button"
           className={event.in_plan ? "btn ghost small" : "btn small"}
-          aria-pressed={event.in_plan}
           disabled={busy}
           onClick={onToggle}
+          aria-describedby={`ev-${event.key}`}
         >
-          {event.in_plan ? "In your plan" : "Add to plan"}
+          {event.in_plan ? "Remove from plan" : "Add to plan"}
         </button>
-        {event.in_plan ? <span className={s.small}>Tap again to take it off.</span> : null}
+        {event.in_plan ? <span className={s.on}>In your plan</span> : null}
+        {onDelete ? (
+          <button
+            type="button"
+            className={s.textBtn}
+            disabled={busy}
+            onClick={onDelete}
+            aria-describedby={`ev-${event.key}`}
+          >
+            Delete
+          </button>
+        ) : null}
       </div>
     </article>
   );
@@ -154,6 +198,19 @@ export default function CalendarPage() {
   const toast = useToast();
   const [busy, setBusy] = useState<string | null>(null);
   const [shown, setShown] = useState<number>(ymKey(parseYm(START_MONTH)));
+  const [adding, setAdding] = useState(false);
+  const [deleting, setDeleting] = useState<PulseEvent | null>(null);
+  const removedKey = useRef<string | null>(null);
+  const addButton = useRef<HTMLButtonElement>(null);
+
+  // Once a deleted card is gone, land on Add events rather than the page body.
+  useEffect(() => {
+    const key = removedKey.current;
+    if (key && cal.data && !cal.data.events.some((e) => e.key === key)) {
+      removedKey.current = null;
+      addButton.current?.focus();
+    }
+  }, [cal.data]);
 
   const bounds = useMemo(() => {
     if (!cal.data) return null;
@@ -177,9 +234,40 @@ export default function CalendarPage() {
     }
   }
 
+  function saved(events: OwnerEvent[]) {
+    setAdding(false);
+    cal.reload();
+    const first = events[0];
+    if (first) setShown(ymKey(parseYm(first.start_date)));
+    toast(
+      events.length === 1
+        ? `${first?.name ?? "Event"} is on your calendar.`
+        : `${events.length} events are on your calendar.`,
+    );
+  }
+
+  async function remove(event: PulseEvent) {
+    const id = ownEventId(event.key);
+    if (id === null) return;
+    setBusy(event.key);
+    try {
+      await api<unknown>(`events/${id}`, { method: "DELETE" });
+      setDeleting(null);
+      removedKey.current = event.key;
+      cal.reload();
+      toast(`${event.title} is deleted.`);
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : "That did not delete. Try again.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const data = cal.data;
   const monthEvents = data ? eventsIn(data.events, month) : [];
   const planned = data ? data.events.filter((e) => e.in_plan).length : 0;
+  const ownCount = data ? data.events.filter((e) => isOwnerEvent(e.origin)).length : 0;
+  const version = data ? data.events.map((e) => `${e.key}:${e.in_plan ? 1 : 0}`).join(",") : "";
 
   return (
     <Screen
@@ -192,11 +280,19 @@ export default function CalendarPage() {
         <Loading rows={3} label="Loading the calendar" />
       ) : (
         <>
+          <div className={c.toolbar}>
+            <button type="button" ref={addButton} className="btn small" onClick={() => setAdding(true)}>
+              Add events
+            </button>
+            <p className={c.rateLine}>{RATE_LINE}</p>
+          </div>
           <p className={s.note}>
-            <SampleChip />
+            <Chip tone="sample">Sample</Chip>
             <span>
               Sample events for the Mussoorie season. Dates other than the Winter Line Carnival are
-              illustrations. {planned ? `${planned} in your plan.` : "Nothing in your plan yet."}
+              illustrations.{" "}
+              {ownCount ? `${ownCount === 1 ? "1 event" : `${ownCount} events`} from your sources. ` : ""}
+              {planned ? `${planned} in your plan.` : "Nothing in your plan yet."}
             </span>
           </p>
           <div className={s.calWrap}>
@@ -228,7 +324,7 @@ export default function CalendarPage() {
               <div className={s.legend}>
                 <span>
                   <i className={s.swEvent} aria-hidden="true" />
-                  Sample event
+                  Event
                 </span>
                 <span>
                   <i className={s.swPlan} aria-hidden="true" />
@@ -250,6 +346,9 @@ export default function CalendarPage() {
                     facts={data.facts}
                     busy={busy === e.key}
                     onToggle={() => void toggle(e)}
+                    onDelete={
+                      isOwnerEvent(e.origin) && ownEventId(e.key) !== null ? () => setDeleting(e) : null
+                    }
                   />
                 ))
               )}
@@ -260,8 +359,36 @@ export default function CalendarPage() {
               )}
             </section>
           </div>
+          <MorningPreview version={version} />
         </>
       )}
+      {/* Portalled: the screen's enter transform would otherwise trap the fixed scrim. */}
+      {adding
+        ? createPortal(<AddEventsSheet onClose={() => setAdding(false)} onSaved={saved} />, document.body)
+        : null}
+      {deleting
+        ? createPortal(
+            <Modal title={`Delete ${deleting.title}?`} alert onClose={() => setDeleting(null)}>
+              <p className={s.sheetBody}>
+                It comes off your calendar and your plan. You can add it again from your source.
+              </p>
+              <div className={s.sheetActions}>
+                <button
+                  type="button"
+                  className={`btn ${s.dangerSolid}`}
+                  disabled={busy === deleting.key}
+                  onClick={() => void remove(deleting)}
+                >
+                  Delete event
+                </button>
+                <button type="button" className="btn ghost" onClick={() => setDeleting(null)}>
+                  Keep it
+                </button>
+              </div>
+            </Modal>,
+            document.body,
+          )
+        : null}
     </Screen>
   );
 }

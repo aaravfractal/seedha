@@ -22,6 +22,9 @@ test("owner routes", () => {
   assert.equal(accessFor("settings/account"), "owner");
   assert.equal(accessFor("calendar"), "owner");
   assert.equal(accessFor("calendar/plan/winter-line-carnival"), "owner");
+  assert.equal(accessFor("events"), "owner");
+  assert.equal(accessFor("events/extract"), "owner");
+  assert.equal(accessFor("events/morning-preview/send"), "owner");
 });
 
 test("device routes win over the owner desk prefix", () => {
@@ -43,6 +46,7 @@ test("unknown or unsafe paths are refused", () => {
   assert.equal(accessFor("assistants"), null);
   assert.equal(accessFor("settingsx"), null);
   assert.equal(accessFor("calendars"), null);
+  assert.equal(accessFor("eventsx"), null);
   assert.equal(accessFor("my-places"), null);
   assert.equal(accessFor("public/../pipeline"), null);
   assert.equal(accessFor("ledger/%2e%2e"), null);

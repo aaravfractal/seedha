@@ -1,0 +1,150 @@
+/* Calendar events: Add events sheet, owner event extras, morning preview. World A tokens. */
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 160px;
+  max-height: 40vh;
+  resize: vertical;
+  padding: 12px 14px;
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.45;
+}
+.textarea[aria-invalid="true"] {
+  border-color: var(--loss);
+}
+.counterRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.counter {
+  font-size: 13px;
+  color: var(--ink2);
+  font-variant-numeric: tabular-nums;
+  margin: 0;
+}
+.counter[data-over="true"] {
+  color: var(--loss);
+  font-weight: 600;
+}
+.results {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+.resultsHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.resultsTitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+}
+.draftList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.draft {
+  border: 1px solid var(--line);
+  border-radius: var(--r-row);
+  padding: 14px 16px;
+  background: var(--bg2);
+  display: grid;
+  gap: 4px;
+}
+.draftName {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.draftMeta {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 0;
+}
+.demand {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 2px 0 0;
+}
+.rejected {
+  border-left: 3px solid var(--loss);
+  background: var(--bg2);
+}
+.reason {
+  font-size: 14px;
+  color: var(--ink);
+  margin: 0;
+}
+.sourceLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 8px 0 0;
+}
+.sourceLink {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+}
+.rateLine {
+  font-size: 14px;
+  color: var(--ink2);
+  margin: 0;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+
+/* ---- morning preview ---- */
+.preview {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+}
+.previewHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.chat {
+  background: var(--bg2);
+  border-radius: var(--r-row);
+  padding: 16px;
+}
+.waBubble {
+  max-width: 520px;
+  white-space: pre-line;
+}
+.waMeta {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--ink2);
+}

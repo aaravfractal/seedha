@@ -35,6 +35,7 @@ const RULES: ReadonlyArray<readonly [string, Access]> = [
   ["demo", "owner"],
   ["settings", "owner"],
   ["calendar", "owner"],
+  ["events", "owner"],
   ["my-place", "owner"],
 ];
 
