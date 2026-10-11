@@ -9,6 +9,7 @@ import { Screen } from "@/components/owner/ui";
 import { NotificationsTab, PrivacyTab, SecurityTab } from "@/components/settings/AccountTabs";
 import { ContractsTab, HotelTab, PlanTab } from "@/components/settings/HotelTabs";
 import { PersonalTab } from "@/components/settings/PersonalTab";
+import { ProofWalletNotice } from "@/components/settings/ProofWalletNotice";
 import { StaffTab } from "@/components/settings/StaffTab";
 import s from "@/components/settings/settings.module.css";
 
@@ -47,6 +48,7 @@ export default function SettingsPage() {
   const data = settings.data;
   return (
     <Screen title="Settings." sub={data ? `${data.hotel.name}, ${data.hotel.town}` : undefined}>
+      <ProofWalletNotice />
       <div className={s.tabs} role="tablist" aria-label="Settings sections" onKeyDown={onKey}>
         {TABS.map((t) => (
           <button

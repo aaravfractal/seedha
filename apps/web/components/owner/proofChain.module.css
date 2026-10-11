@@ -1,0 +1,97 @@
+.card {
+  margin-top: 0;
+}
+.kicker {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
+  margin: 0;
+}
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 2px 0 6px;
+}
+.body {
+  font-size: 15px;
+  color: var(--ink2);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+.rows {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 16px;
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+.rows dt,
+.rows dd {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+  margin: 0;
+}
+.rows dt {
+  color: var(--ink2);
+}
+.rows dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
+}
+.mono {
+  font-family: var(--mono);
+  font-size: 14px;
+}
+.link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline-block;
+  padding: 10px 0;
+  font-size: 15px;
+}
+.host {
+  font-weight: 400;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+.low {
+  color: var(--loss);
+  font-weight: 600;
+}
+.status {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink2);
+  margin: 8px 0 0;
+}
+.status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+  margin-top: 6px;
+}
+.ok {
+  color: var(--accent);
+}
+.bad {
+  color: var(--loss);
+}
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+}

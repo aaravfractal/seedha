@@ -227,6 +227,11 @@ export type SavingItem = {
 
 export type Savings = { total_net_saving: number; total_avoided: number; count: number; items: SavingItem[] };
 
+/**
+ * One nightly bundle. chain_status is "stored" | "sent" | "verified" | "failed";
+ * old rows may still say "written" (read as "sent"). The chain fields are
+ * optional so an older API still type-checks; see lib/proofChain.ts.
+ */
 export type ProofBundle = {
   id: number;
   created_at: string;
@@ -235,6 +240,19 @@ export type ProofBundle = {
   chain_status: string;
   chain_tx: string | null;
   explorer_url: string | null;
+  chain_block?: number | null;
+  network_label?: string | null;
+};
+
+/** Where tonight's root goes: Polygon Amoy testnet, or kept on Seedha's server. */
+export type ProofChain = {
+  mode: "amoy" | "local";
+  network_label: string;
+  address: string | null;
+  balance_pol: string | null;
+  low_balance: boolean;
+  reason: "no_key" | "wrong_chain" | "rpc_down" | "low_balance" | null;
+  address_url: string | null;
 };
 
 export type ProofOverview = {
@@ -243,6 +261,8 @@ export type ProofOverview = {
   pending: number;
   chain_live: boolean;
   bundles: ProofBundle[];
+  /** Missing on an older API: read as local only. */
+  chain?: ProofChain | null;
 };
 
 export type ConsentProof = {
