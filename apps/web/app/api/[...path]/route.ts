@@ -8,6 +8,7 @@ import { accessFor } from "@/lib/bff";
 import { sameOrigin } from "@/lib/authServer";
 import { API_BODY_BYTES, readCapped } from "@/lib/body";
 import { clientAddress } from "@/lib/ratelimit";
+import { refuseRemoteReset } from "@/lib/requestOrigin";
 import { SESSION_COOKIE, nowSeconds, readSession } from "@/lib/session";
 
 const FORWARD_REQUEST_HEADERS = ["content-type", "accept"];
@@ -21,6 +22,10 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
   const joined = path.join("/");
   const access = accessFor(joined);
   if (access === null) return errorResponse(404, "not_found", "No such API route");
+  // make demo-live: only the laptop running the demo may reset it, never a tunnel visitor.
+  if (refuseRemoteReset(path, request.headers, process.env.SEEDHA_PUBLIC === "1")) {
+    return errorResponse(403, "reset_local_only", "Reset works only on the computer running the demo");
+  }
 
   const headers = new Headers();
   for (const name of FORWARD_REQUEST_HEADERS) {

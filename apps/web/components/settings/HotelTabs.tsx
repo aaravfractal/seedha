@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { inr } from "@/lib/format";
 import { PLANS } from "@/lib/plans";
+import { hostName, isLoopbackHost } from "@/lib/requestOrigin";
 import { bpsPct } from "@/lib/settingsRules";
 import type { Health } from "@/lib/types";
 import type { ContractsData, SettingsData } from "@/lib/types-settings";
@@ -21,6 +22,16 @@ const CONNECTIONS: [keyof Health, string][] = [
   ["proof_chain", "Public proof chain"],
 ];
 
+const noSubscribe = () => () => {};
+/** True when this page is open on the machine running Seedha (not a phone or a tunnel visitor). */
+function useOnThisMachine(): boolean {
+  return useSyncExternalStore(
+    noSubscribe,
+    () => isLoopbackHost(hostName(window.location.host)),
+    () => false,
+  );
+}
+
 /** Hotel: property facts (read-only for the sample hotel), connections, demo reset. */
 export function HotelTab({ data }: { data: SettingsData }) {
   const health = useApi<Health>("health");
@@ -28,6 +39,8 @@ export function HotelTab({ data }: { data: SettingsData }) {
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const h = data.hotel;
+  // Reset is local only (make demo-live refuses it through the tunnel too).
+  const canReset = useOnThisMachine();
 
   async function reset() {
     setBusy(true);
@@ -99,7 +112,7 @@ export function HotelTab({ data }: { data: SettingsData }) {
         Add keys in .env to switch a connection from simulated to live.
       </p>
 
-      {h.is_sample ? (
+      {h.is_sample && canReset ? (
         <>
           <div className={s.sectionHead}>
             <h2 className={s.sectionTitle}>Reset the sample hotel</h2>
