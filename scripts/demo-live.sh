@@ -40,14 +40,7 @@ main() {
   need_setup
   load_env
 
-  # Fresh secrets for this run only, never printed. The published demo values
-  # would let anyone forge a session on a public link.
-  OWNER_API_TOKEN="$(openssl rand -hex 24)"
-  SESSION_SECRET="$(openssl rand -hex 32)"
-  DESK_DEVICE_KEY="$(openssl rand -hex 24)"
-  export OWNER_API_TOKEN SESSION_SECRET DESK_DEVICE_KEY
-  export SEEDHA_PUBLIC=1
-  export SEEDHA_DEMO=
+  public_mode_env
 
   if [[ -f "$HOME/.cloudflared/config.yml" ]]; then
     say "Warning: ~/.cloudflared/config.yml exists. Quick tunnels may refuse to start; move it aside if so."

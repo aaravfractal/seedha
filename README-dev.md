@@ -166,6 +166,11 @@ Desk device (`/desk/device`) and guest URLs on `http://<wifi-ip>:3000`.
 - The session cookie is `Secure` only on https, so sign in works over plain
   http on a private address (`apps/web/lib/requestOrigin.ts`).
 - Reset demo data shows only on the laptop itself (`http://localhost:3000`).
+- Same safety as the public link: fresh secrets for every run (never
+  printed), the OTP demo banner off, and `SEEDHA_PUBLIC=1`. Sign in with
+  Direct beta login. For phones and tablets, Claude stays off (labelled
+  samples run) and tonight's proof stays local, so nobody on the Wi-Fi can
+  spend your Claude credits or testnet POL; the laptop keeps every feature.
 - Ctrl+C stops the web app and the API.
 
 ## Public link (make demo-live)
@@ -191,6 +196,9 @@ Safety in public mode (`SEEDHA_PUBLIC=1`):
 - Rate limits stay on. CORS allows only the tunnel origin (`WEB_ORIGIN` and
   `PUBLIC_BASE_URL` are set to it), never a wildcard.
 - Only the web app is exposed; the API never leaves 127.0.0.1.
+- Visitors through the tunnel never spend your money or test tokens: Claude
+  stays off for them (labelled samples run) and their proof writes stay
+  local. On the laptop (`http://localhost:3000`) everything works.
 
 Caveats: quick tunnels have no uptime guarantee (no SLA), a new URL each run
 (old Desk QR codes and drafted links stop working), and about 200 requests in

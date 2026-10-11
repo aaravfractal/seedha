@@ -16,6 +16,7 @@ main() {
   [[ -n "$ip" ]] || die "No Wi-Fi address found on en0 or en1. Join a Wi-Fi network and try again."
   need_setup
   load_env
+  public_mode_env
   export PUBLIC_BASE_URL="http://$ip:3000"
   export WEB_ORIGIN="$PUBLIC_BASE_URL"
 
@@ -29,6 +30,7 @@ main() {
   say "Seedha is on your Wi-Fi. Phones must be on the same network."
   print_urls "$PUBLIC_BASE_URL"
   say "On this laptop use http://localhost:3000 (Reset demo data shows only there)."
+  say "Sign in with Direct beta login. Claude and testnet proof writes run only on this laptop."
   say "macOS may ask whether node may accept incoming connections: choose Allow."
   say "Press Ctrl+C to stop everything."
   wait

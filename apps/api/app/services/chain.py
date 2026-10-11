@@ -48,7 +48,7 @@ STATUS_CACHE_S = 30.0
 _ROOT = re.compile(r"[0-9a-f]{64}")
 
 Mode = Literal["amoy", "local"]
-Reason = Literal["no_key", "wrong_chain", "rpc_down", "low_balance"]
+Reason = Literal["no_key", "wrong_chain", "rpc_down", "low_balance", "public_mode"]
 
 
 class ChainRefusedError(Exception):

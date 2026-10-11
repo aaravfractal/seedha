@@ -122,3 +122,7 @@ test("dialog chain note is true in both modes and never says mainnet", () => {
     assert.doesNotMatch(t, /not yet/);
   }
 });
+
+test("public demo visitors are told testnet writes run on the laptop", () => {
+  assert.match(localReason("public_mode"), /only on the laptop running Seedha/);
+});

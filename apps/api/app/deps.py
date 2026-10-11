@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hmac
 from collections.abc import Iterator
+from dataclasses import replace
 from typing import Annotated
 
 from fastapi import Depends, Header, Request
@@ -13,13 +14,17 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.config import Settings
 from app.errors import ApiError
 from app.models import DeskDevice, OwnerAccount, Property
+from app.public_mode import is_remote_public
 from app.services.desk import device_for_key
 from app.services.drafter import ClaudeWording, Wording
 
 
 def get_settings(request: Request) -> Settings:
-    """Settings the app was built with."""
+    """Settings the app was built with. For a public-demo visitor Claude is off,
+    so the labelled fallbacks run and nobody else spends the owner's credits."""
     settings: Settings = request.app.state.settings
+    if settings.anthropic_api_key and is_remote_public(request):
+        return replace(settings, anthropic_api_key="")
     return settings
 
 

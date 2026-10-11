@@ -67,6 +67,8 @@ export function localReason(reason: ProofChain["reason"]): string {
       return `The network did not answer as ${NETWORK}, so Seedha refused to send.`;
     case "low_balance":
       return "The wallet balance is too low to send.";
+    case "public_mode":
+      return `During a public demo, ${NETWORK} writes run only on the laptop running Seedha.`;
     default:
       return `Writing to ${NETWORK} is off.`;
   }

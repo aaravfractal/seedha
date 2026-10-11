@@ -251,7 +251,7 @@ export type ProofChain = {
   address: string | null;
   balance_pol: string | null;
   low_balance: boolean;
-  reason: "no_key" | "wrong_chain" | "rpc_down" | "low_balance" | null;
+  reason: "no_key" | "wrong_chain" | "rpc_down" | "low_balance" | "public_mode" | null;
   address_url: string | null;
 };
 

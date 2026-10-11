@@ -29,6 +29,19 @@ load_env() {
   set +a
 }
 
+# Fresh secrets for this run only, never printed, and public-demo mode: the
+# published .env.example values would let anyone on the link or the Wi-Fi
+# forge a session. SEEDHA_PUBLIC=1 keeps reset, Claude and testnet writes on
+# this laptop; SEEDHA_DEMO empty turns the OTP demo banner off.
+public_mode_env() {
+  OWNER_API_TOKEN="$(openssl rand -hex 24)"
+  SESSION_SECRET="$(openssl rand -hex 32)"
+  DESK_DEVICE_KEY="$(openssl rand -hex 24)"
+  export OWNER_API_TOKEN SESSION_SECRET DESK_DEVICE_KEY
+  export SEEDHA_PUBLIC=1
+  export SEEDHA_DEMO=
+}
+
 # Fresh database with the sample hotel (the same steps as make seed).
 seed_sample() {
   (cd "$API" && "$VENV/bin/alembic" downgrade base && "$VENV/bin/alembic" upgrade head \

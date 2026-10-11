@@ -12,6 +12,7 @@ from app.config import Settings
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
 from app.models import Booking, Consent, ProofBundle
+from app.public_mode import is_remote_public
 from app.services.chain import (
     EXPLORER_TX,
     NETWORK_LABEL,
@@ -142,6 +143,10 @@ def chain_out(status: ChainStatus) -> ChainOut:
     )  # fmt: skip
 
 
+# What a public-demo visitor sees: testnet writes run only on the laptop.
+PUBLIC_LOCAL = ChainStatus("local", None, None, False, False, "public_mode")
+
+
 def chain_writer(request: Request, settings: Settings) -> AmoyWriter | None:
     """One writer per app (it holds the nonce lock and the status cache)."""
     state = request.app.state
@@ -195,6 +200,8 @@ def get_proof(
 ) -> ProofOut:
     """Proof overview. Bundles still waiting on the testnet get one quick
     receipt check, skipped while the RPC is known to be down."""
+    if is_remote_public(request):
+        return overview(session, prop.id, PUBLIC_LOCAL)
     writer = chain_writer(request, settings)
     status = chain_status(writer, settings)
     if writer and status.reachable and status.reason != "wrong_chain":
@@ -212,7 +219,14 @@ def write_tonight(
 ) -> ProofOut:
     """Write tonight's proof now (the nightly job does the same). With a
     configured wallet the root also goes to Polygon Amoy; any refusal keeps
-    it local and is reported in `chain.reason`."""
+    it local and is reported in `chain.reason`. A public-demo visitor's write
+    stays local, so nobody else can spend the testnet wallet."""
+    if is_remote_public(request):
+        try:
+            publish_bundle(session, prop.id, LocalOnly("public_mode"), utc_now())
+        except ProofError as exc:
+            raise ApiError(exc.status, exc.code, exc.message) from exc
+        return overview(session, prop.id, PUBLIC_LOCAL)
     writer = chain_writer(request, settings)
     chain = writer or LocalOnly(local_status(settings).reason or "no_key")
     try:
