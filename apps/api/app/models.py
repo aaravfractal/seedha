@@ -20,6 +20,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    false,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -259,6 +260,9 @@ class Consent(Base):
     withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     erased_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     proof_status: Mapped[str] = mapped_column(String(10), default="pending")
+    # Sample inbox threads seeded for the demo (POLISH_BUILD B1). A seeded
+    # consent never counts as the Desk step of the 8-step pipeline.
+    seeded: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
     guest: Mapped[Guest] = relationship()
     booking: Mapped[Booking] = relationship()
@@ -651,6 +655,8 @@ class OwnerSettings(Base):
     notify_morning: Mapped[bool] = mapped_column(Boolean, default=True)
     notify_close: Mapped[bool] = mapped_column(Boolean, default=True)
     notify_approvals: Mapped[bool] = mapped_column(Boolean, default=True)
+    # GST on room tariff for stay invoices, in basis points; empty means 5%.
+    room_gst_bps: Mapped[int | None] = mapped_column(Integer, nullable=True)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
 
@@ -709,4 +715,37 @@ class OwnerEvent(Base):
     demand: Mapped[str] = mapped_column(String(8))
     source_url: Mapped[str] = mapped_column(String(500))
     origin: Mapped[str] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class StayInvoice(Base):
+    """A guest's stay invoice, numbered per financial year (e.g. DEODAR/2627/0001).
+    Every amount on it comes from the booking row by code; nothing is stored here
+    but the number, so the PDF is always rebuilt from the ledger."""
+
+    __tablename__ = "stay_invoice"
+    __table_args__ = (
+        UniqueConstraint("property_id", "fy", "seq", name="uq_stay_invoice_property_id_fy_seq"),
+        UniqueConstraint("booking_id", name="uq_stay_invoice_booking_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"))
+    booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"))
+    fy: Mapped[str] = mapped_column(String(4))
+    seq: Mapped[int] = mapped_column(Integer)
+    number: Mapped[str] = mapped_column(String(32), unique=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class GuestMemory(Base):
+    """What Seedha remembers about a consented guest: preferences and notes only
+    (no money, no documents). Deleted when the guest's consent is erased."""
+
+    __tablename__ = "guest_memory"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    guest_id: Mapped[int] = mapped_column(ForeignKey("guest.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(12))
+    text: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
