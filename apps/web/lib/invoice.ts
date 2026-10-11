@@ -24,9 +24,19 @@ export function invoiceDate(iso: string): string {
   return `${d ?? ""} ${months[(m ?? 1) - 1] ?? ""} ${y ?? ""}`;
 }
 
-/** The money rows of the preview, in the PDF's order, formatted at the edge. */
+/**
+ * The money rows of the preview, in the PDF's order, formatted at the edge.
+ * Without a GSTIN the tax split is not printed, only the total paid.
+ */
 export function amountRows(inv: StayInvoice): InvoiceRow[] {
   const half = halfRateLabel(inv.gst_bps);
+  const tax: InvoiceRow[] = inv.gstin
+    ? [
+        { key: "taxable", label: "Taxable value", value: inr(inv.taxable) },
+        { key: "cgst", label: `CGST at ${half}`, value: inr(inv.cgst) },
+        { key: "sgst", label: `SGST at ${half}`, value: inr(inv.sgst) },
+      ]
+    : [];
   return [
     {
       key: "rate",
@@ -39,9 +49,7 @@ export function amountRows(inv: StayInvoice): InvoiceRow[] {
       value: inr(inv.room_charges),
     },
     { key: "discount", label: "Discount", value: inv.discount ? inr(-inv.discount) : inr(0) },
-    { key: "taxable", label: "Taxable value", value: inr(inv.taxable) },
-    { key: "cgst", label: `CGST at ${half}`, value: inr(inv.cgst) },
-    { key: "sgst", label: `SGST at ${half}`, value: inr(inv.sgst) },
+    ...tax,
     { key: "total", label: "Total paid", value: inr(inv.total_paid), strong: true },
   ];
 }

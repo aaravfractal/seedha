@@ -40,7 +40,7 @@ test("each card expands and collapses with Escape and Close, focus returns", asy
     await expect(t).toHaveAttribute("aria-controls", `pro-${card.id}-view`);
     await t.click();
     await expect(t).toHaveAttribute("aria-expanded", "true");
-    const region = page.getByRole("region", { name: `${card.name}, live view` });
+    const region = page.getByRole("region", { name: `${card.name}, view` });
     await expect(region).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(region).toHaveCount(0);
@@ -87,7 +87,7 @@ test("B5 views show their live content", async ({ page }) => {
 
   await trigger(page, "rate-watch").click();
   const rate = view(page, "rate-watch");
-  await expect(rate).toContainText("From your screenshot. No scraping.");
+  await expect(rate).toContainText("From a sample screenshot. No scraping.");
   await expect(rate).toContainText("₹3,950");
   await expect(rate).toContainText("₹4,300");
   await expect(rate).toContainText("₹350");
@@ -95,7 +95,7 @@ test("B5 views show their live content", async ({ page }) => {
 
   await trigger(page, "tonight").click();
   const tonight = view(page, "tonight");
-  await expect(tonight.getByText("Rooms left", { exact: true })).toBeVisible();
+  await expect(tonight.getByText("Rooms free at the last close", { exact: true })).toBeVisible();
   await expect(tonight.getByText("Best channel", { exact: true })).toBeVisible();
 
   await trigger(page, "proof").click();

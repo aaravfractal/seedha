@@ -275,11 +275,12 @@ export function AppHeader() {
             <span className={styles.wordmark}>Seedha</span>
           </Link>
           {data ? (
-            <span className={styles.chip} title={hotel}>
-              <span>
-                {hotel}
-                {data.hotel.is_sample ? <span className="sr-only-text"> (sample data)</span> : null}
-              </span>
+            <span
+              className={data.hotel.is_sample ? `${styles.chip} ${styles.chipSample}` : styles.chip}
+              title={hotel}
+            >
+              <span className={styles.chipName}>{hotel}</span>
+              {data.hotel.is_sample ? <span className={styles.sampleBadge}>Sample hotel</span> : null}
             </span>
           ) : null}
           <span className={styles.spacer} />

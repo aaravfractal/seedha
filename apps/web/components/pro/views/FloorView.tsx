@@ -58,7 +58,7 @@ export function FloorView() {
         <div className={`${s.tableWrap} ${stale ? s.busy : ""}`} aria-busy={stale}>
           <table className={s.table}>
             <caption>
-              At {inr(data.rate)} a night. Floors at a minimum of {inr(data.target)} kept.
+              At {inr(data.rate)} a night. Each floor keeps you at least {inr(data.target)} a night.
             </caption>
             <thead>
               <tr>

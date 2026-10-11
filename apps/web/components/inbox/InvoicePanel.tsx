@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useApi } from "@/lib/api";
 import { amountRows, invoiceDate, invoicePdfPath } from "@/lib/invoice";
 import type { StayInvoice } from "@/lib/types-invoice";
@@ -96,6 +97,13 @@ export function InvoicePanel({ consentId, onAttach, attached = false }: InvoiceP
 
       <div className={styles.notes}>
         <p className={styles.footer}>{inv.gst_note}</p>
+        {inv.gstin ? null : (
+          <p className={styles.footer}>
+            <Link className="link" href="/settings">
+              Open Settings
+            </Link>
+          </p>
+        )}
         <p className={styles.thanks}>{inv.thank_you}</p>
         <p className={styles.footer}>{inv.footer}</p>
       </div>

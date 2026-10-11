@@ -86,7 +86,7 @@ export function ExpandCard({
         >
           {summary}
           <span className={o.more}>
-            {open ? "Hide live view" : "Show live view"}
+            {open ? "Hide view" : "Show view"}
             <svg className={o.chev} aria-hidden="true" width="14" height="14" viewBox="0 0 14 14">
               <path
                 d="M3 5l4 4 4-4"
@@ -103,7 +103,7 @@ export function ExpandCard({
         <motion.div
           id={regionId}
           role="region"
-          aria-label={`${name}, live view`}
+          aria-label={`${name}, view`}
           className={o.panel}
           data-testid={`pro-view-${id}`}
           initial={reduced ? false : { opacity: 0, y: 8 }}

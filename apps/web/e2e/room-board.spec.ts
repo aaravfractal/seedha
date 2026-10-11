@@ -48,7 +48,7 @@ test("a room opens a sheet with its money lines and initials only", async ({ pag
   await expect(s.getByText(/Sample|Demo/)).toHaveCount(0);
   await expect(s.getByRole("link", { name: "Open in Desk" })).toHaveAttribute("href", /\/desk\?room=\d+$/);
   await s.getByRole("button", { name: "Print slip" }).click();
-  await expect(page.getByText("Slip sent to the Desk")).toBeVisible();
+  await expect(page.getByText("Slip sent to the Desk.")).toBeVisible();
 });
 
 test("arrow keys move between rooms, Enter opens, Escape closes and returns focus", async ({ page }) => {

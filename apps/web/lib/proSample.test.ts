@@ -32,17 +32,23 @@ const channels: TonightChannel[] = [
   { key: "none", name: "Nothing yet", kind: "ota", net_adr: null },
 ];
 
-test("tonight picks rooms left and the highest net ADR channel", () => {
+test("tonight picks rooms free at the last close and the highest net ADR channel", () => {
   const t = tonightCard({ rooms_total: 22, rooms_sold: 12 }, channels);
   assert.equal(t.roomsLeft, 10);
   assert.equal(t.best?.key, "walkin");
   assert.equal(t.bestOta?.key, "bcom");
-  assert.match(t.line, /^Offer the 10 rooms left to Walk-in guests first: they keep ₹4,500/);
+  assert.match(
+    t.line,
+    /^10 rooms were free at the last close\. Offer free rooms to Walk-in guests first\. Walk-in keeps you ₹4,500/,
+  );
   assert.match(t.line, /Booking\.com keeps the most at ₹3,119/);
 });
 
 test("tonight handles a full house and missing statements", () => {
-  assert.match(tonightCard({ rooms_total: 22, rooms_sold: 22 }, channels).line, /Every room is sold/);
+  assert.match(
+    tonightCard({ rooms_total: 22, rooms_sold: 22 }, channels).line,
+    /Every room was sold at the last close/,
+  );
   const empty = tonightCard({ rooms_total: 22, rooms_sold: 21 }, [{ ...channels[0]!, net_adr: null }]);
   assert.equal(empty.best, null);
   assert.equal(empty.roomsLeft, 1);

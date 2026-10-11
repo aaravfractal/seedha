@@ -180,6 +180,36 @@
     display: inline-flex;
   }
 }
+/* Sample hotel: one quiet badge inside the chip (labelling rule). Below
+   620px the chip keeps only the badge so the label still shows on a phone. */
+.chip .sampleBadge {
+  flex: none;
+  overflow: visible;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink2);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.chipSample {
+  display: inline-flex;
+  flex: 0 1 auto;
+  max-width: 420px;
+  padding: 5px 6px 5px 12px;
+}
+@media (max-width: 619px) {
+  .chipSample {
+    padding: 0;
+    background: none;
+  }
+  .chipSample::before,
+  .chipSample .chipName {
+    display: none;
+  }
+}
 
 .spacer {
   flex: 1;

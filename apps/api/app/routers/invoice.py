@@ -21,11 +21,11 @@ from app.routers.inbox import thread_or_404
 from app.routers.settings import SAMPLE_GSTIN
 from app.services.invoice import (
     FOOTER,
-    GST_NOTE,
     THANK_YOU,
     Invoice,
     InvoiceError,
     detail_lines,
+    gst_note,
     invoice_for_consent,
     issuer_for,
     render_pdf,
@@ -84,7 +84,7 @@ def invoice_out(inv: Invoice) -> InvoiceOut:
         discount=inv.discount, taxable=inv.taxable, gst_bps=inv.gst_bps, cgst=inv.cgst,
         sgst=inv.sgst, total_paid=inv.total_paid, payment_method=inv.payment_method,
         lines=[InvoiceLineOut(label=label, value=value) for label, value in detail_lines(inv)],
-        gst_note=GST_NOTE, thank_you=THANK_YOU, footer=FOOTER,
+        gst_note=gst_note(inv), thank_you=THANK_YOU, footer=FOOTER,
     )  # fmt: skip
 
 

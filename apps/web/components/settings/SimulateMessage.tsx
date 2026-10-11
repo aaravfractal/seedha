@@ -48,7 +48,7 @@ export function SimulateMessage() {
                   </Link>
                 </>
               ) : (
-                "A sample guest writes to you on WhatsApp, so the inbox is never empty in a demo."
+                "A sample guest message lands in your inbox as if sent on WhatsApp. Nothing is sent."
               )}
             </span>
           </span>
