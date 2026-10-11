@@ -53,7 +53,7 @@ export default function SecurityPage() {
         <li>Built: consent links and Desk device keys stored only as hashes. Guest numbers never logged.</li>
         <li>
           Built: consent fingerprints are salted SHA-256 hashes. The nightly Merkle root is stored by Seedha
-          and is not yet on a public chain.
+          and, when the testnet option is on, also written to the Polygon Amoy testnet.
         </li>
         <li>Planned: two-step sign-in.</li>
         <li>Planned: encryption at rest for the database.</li>

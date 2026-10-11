@@ -18,14 +18,14 @@ export default function PrivacyPage() {
           "Guests get WhatsApp offers only if they tick yes at the hotel's Desk. The box starts unticked.",
           "Contacts that come from OTAs (MakeMyTrip, Booking.com, Agoda) are never used for messages.",
           "Reply STOP to any message and the messages stop.",
-          "No name, phone number or booking detail goes on a public blockchain. The prototype keeps its consent proof on Seedha's server.",
+          "No name, phone number or booking detail goes on a public blockchain. Only the night's Merkle root can, and only on the Polygon Amoy testnet when that option is on.",
           "You can ask for your consent record to be erased on the Delete my data page.",
         ],
         hi: [
           "Guest ko WhatsApp offer tabhi milte hain jab woh Desk par khud tick karke haan kehte hain. Box pehle se khaali hota hai.",
           "OTA (MakeMyTrip, Booking.com, Agoda) se aaye contact kabhi message ke liye use nahi hote.",
           "Kisi bhi message par STOP likhiye, message band ho jayenge.",
-          "Public blockchain par naam, phone ya booking ki koi jaankari nahi jaati. Prototype mein consent proof Seedha ke server par hi rehta hai.",
+          "Public blockchain par naam, phone ya booking ki koi jaankari nahi jaati. Sirf raat ka Merkle root jaa sakta hai, aur woh bhi tabhi jab Polygon Amoy testnet option chalu ho.",
           "Apna consent record mitaane ke liye Delete my data page par request bhejiye.",
         ],
       }}
@@ -101,8 +101,9 @@ export default function PrivacyPage() {
         <li>We never send a message without the owner approving it, and never after a guest replies STOP.</li>
         <li>We never sell personal data or use it for advertising.</li>
         <li>
-          We never put personal data on a public blockchain. At most a single fingerprint of the night&apos;s
-          salted consent fingerprints would go there, and in the prototype it stays on Seedha&apos;s server.
+          We never put personal data on a public blockchain. Only the night&apos;s Merkle root, one hash of
+          the salted consent fingerprints, can go there, and only on the Polygon Amoy testnet when that option
+          is on.
         </li>
         <li>We never scrape OTA websites.</li>
       </ul>
@@ -110,10 +111,11 @@ export default function PrivacyPage() {
       <h2 className="section">5. Consent proof</h2>
       <p>
         Each consent becomes a fingerprint: a SHA-256 hash of a random salt and the consent facts. Each night
-        the fingerprints are combined into one Merkle root. Today the root is stored by Seedha and is not yet
-        on a public chain. Writing it to a public test network is planned. A fingerprint cannot be turned back
-        into a person, and after erasure the salt is deleted so nobody, including Seedha, can link it to
-        anyone.
+        the fingerprints are combined into one Merkle root. The root is always stored by Seedha. When the
+        hotel turns on the testnet option, the root is also written to the Polygon Amoy testnet, a public test
+        network whose tokens have no value. Until then it stays on Seedha&apos;s server only. A fingerprint
+        cannot be turned back into a person, and after erasure the salt is deleted so nobody, including
+        Seedha, can link it to anyone.
       </p>
 
       <h2 className="section">6. How long we keep it</h2>
