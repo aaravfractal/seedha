@@ -3,6 +3,34 @@
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
+## Website upgrade and privacy clean-up (11 October 2026)
+
+Brief: docs/WEBSITE_UPGRADE.md. Decisions D-091 to D-096. Reports:
+docs/agent-reports/website-{globe,sections,privacy}.md and
+website-upgrade-{design-qa,a11y-perf,privacy-legal}.md.
+
+- **Built.** Seedha Pass section (Planned, Phase 3) and Event Radar inside
+  Pulse (Pro, Planned, Sample). They share one land-only 3D globe with a
+  Pass / Radar toggle, a text list, a Pause motion button and a static
+  North India map for reduced motion, no WebGL or low-end phones.
+- **Globe numbers.** About 150 KB gzipped extra JS when scrolled to
+  (budget 300), lazy, 60 fps on a laptop GPU, zero draw calls off screen,
+  DPR capped at 2, no requests to other origins, no border lines.
+- **Privacy.** Real names removed from repo files (git history untouched),
+  team named by roles, needs file renamed to docs/needs-from-owner.md, PDF
+  author metadata replaced. lib/personal-data.test.ts scans every tracked
+  file and file metadata against SHA-256 hashes only.
+- **Legal and contact.** Privacy, terms, cookies, security and data
+  deletion are marked drafts with a last-updated date; contact addresses
+  come from PUBLIC_*_EMAIL and show "Contact details will be published
+  before launch." while unset. New Open Graph image and icon.
+- **Reviews.** Every high and medium finding from the design QA, a11y and
+  performance, and privacy and legal reviews is fixed (D-096).
+- **Gates.** make check passes (pylint 9.97/9.98, coverage 98%, web 86/86
+  tests, secret scan 0 in 77 commits, firmware 5/5 and build SUCCESS).
+  Playwright 24/24 three runs in a row. The 8-step loop passed on make
+  demo-prod, and the demo data was reseeded.
+
 ## Frontend build: final summary (11 October 2026)
 
 **Phases done.** P1 app shell and Overview, P2 owner screens, P3 Front desk
