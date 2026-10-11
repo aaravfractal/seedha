@@ -82,7 +82,7 @@ async function openPro(page: Page): Promise<void> {
 /** The floor table against one GET /pro/floor answer. */
 async function expectFloorTable(region: Locator, floor: Floor): Promise<void> {
   await expect(region.getByRole("table").locator("caption")).toHaveText(
-    `At ${inr(floor.rate)} a night. Floors at a minimum of ${inr(floor.target)} kept.`,
+    `At ${inr(floor.rate)} a night. Each floor keeps you at least ${inr(floor.target)} a night.`,
   );
   for (const row of floor.rows) {
     const cells = region.getByRole("row", { name: new RegExp(`^${row.channel_name}`) }).getByRole("cell");

@@ -1,4 +1,3 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import { axeViolations, signIn } from "./helpers";
@@ -10,12 +9,10 @@ import { ensureBillRequest, setTheme, threadId } from "./polish-helpers";
  * stay invoice panel on /inbox, and a calculator card on /pro. Motion is
  * reduced so axe reads final colours, not a fade in flight.
  *
- * Left out until fixed (reported in docs/agent-reports/polish/t2-e2e.md):
- * the whole /inbox page with a thread and invoice open (color-contrast on the
- * invoice slot kicker and the selected row's time in light; the message
- * stream is a scrollable region with no focusable content, all four states),
- * and the floor card at 390 (its table wrapper scrolls but cannot be
- * focused). The invoice panel itself is checked on its own below.
+ * The whole /inbox page is checked with a thread open (message log, invoice
+ * row) and again with the stay invoice preview dialog open; the Floor and
+ * Khata cards with their scrolling tables are checked at both widths
+ * (review fixes F1 to F4 closed the gaps T2 reported).
  */
 
 const SIZES = [1440, 390] as const;
@@ -67,15 +64,19 @@ test("the stay invoice panel in a thread: no axe violations", async ({ page, con
     page,
     async (label) => {
       await page.goto(`/inbox?thread=${farhan}`);
-      const panel = page.getByTestId("invoice-slot").getByRole("region", { name: /^Stay invoice / });
+      const convo = page.getByRole("region", { name: "Conversation with Farhan Thapar" });
+      await expect(convo.getByRole("log", { name: "Messages with Farhan Thapar" })).toBeVisible();
+      const slot = convo.getByTestId("invoice-slot");
+      await expect(slot).toContainText(/Stay invoice ready to attach · [A-Z]+\/\d{4}\/\d{4}/);
+      for (const v of await axeViolations(page)) found.push(`${label} /inbox thread: ${v}`);
+
+      await slot.getByRole("button", { name: "Preview" }).click();
+      const dialog = page.getByRole("dialog", { name: "Stay invoice preview" });
+      const panel = dialog.getByRole("region", { name: /^Stay invoice / });
       await expect(panel.getByRole("link", { name: "Download PDF" })).toBeVisible();
-      const result = await new AxeBuilder({ page })
-        .include('[data-testid="invoice-slot"] section[aria-label^="Stay invoice "]')
-        .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-        .analyze();
-      for (const v of result.violations) {
-        found.push(`${label} invoice panel: ${v.id} (${v.nodes.map((n) => n.target.join(" ")).join(", ")})`);
-      }
+      for (const v of await axeViolations(page)) found.push(`${label} /inbox invoice preview: ${v}`);
+      await page.keyboard.press("Escape");
+      await expect(dialog).toHaveCount(0);
     },
     context,
     baseURL,
@@ -90,11 +91,10 @@ test("calculator cards open on /pro: no axe violations", async ({ page, context,
     page,
     async (label) => {
       await page.goto("/pro");
-      const wide = (page.viewportSize()?.width ?? 0) >= 1440;
-      for (const id of wide ? ["floor", "displacement"] : ["displacement"]) {
+      for (const id of ["floor", "displacement", "khata"]) {
         await page.locator(`#pro-${id}-trigger`).click();
         const region = page.getByTestId(`pro-view-${id}`);
-        await expect(region.locator(id === "floor" ? "table" : "dl")).toBeVisible();
+        await expect(region.locator(id === "displacement" ? "dl" : "table")).toBeVisible();
         for (const v of await axeViolations(page)) found.push(`${label} /pro ${id}: ${v}`);
       }
     },

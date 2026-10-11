@@ -174,7 +174,14 @@ test("invoice draft: panel numbers from the API, the PDF downloads, Attach sends
 
   const convo = page.getByRole("region", { name: "Conversation with Farhan Thapar" });
   await expect(convo.getByRole("textbox", { name: /Message to/ })).toHaveValue(draft.text);
-  const panel = convo.getByTestId("invoice-slot").getByRole("region", { name: `Stay invoice ${inv.number}` });
+  // The slot is one compact row; the full panel opens in a preview dialog.
+  const slot = convo.getByTestId("invoice-slot");
+  await expect(slot).toContainText(`Stay invoice ready to attach · ${inv.number}`);
+  const preview = slot.getByRole("button", { name: "Preview" });
+  await preview.click();
+  const dialog = page.getByRole("dialog", { name: "Stay invoice preview" });
+  await expect(dialog).toBeVisible();
+  const panel = dialog.getByRole("region", { name: `Stay invoice ${inv.number}` });
   await expect(panel).toBeVisible();
   await expect(panel).toContainText(inv.guest_name);
   await expect(panel).toContainText(inv.payment_method);
@@ -201,6 +208,13 @@ test("invoice draft: panel numbers from the API, the PDF downloads, Attach sends
   const attached = panel.getByRole("button", { name: "Attached" });
   await expect(attached).toBeDisabled();
   await expect(attached).toHaveAttribute("aria-pressed", "true");
+  // The row shares the same state; Escape closes the dialog and focus returns to Preview.
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(preview).toBeFocused();
+  await expect(slot.getByRole("button", { name: "Attached" })).toBeDisabled();
+  await expect(slot.getByRole("button", { name: "Attached" })).toHaveAttribute("aria-pressed", "true");
+  await expect(slot.getByRole("status")).toContainText("Attached.");
   await page.waitForTimeout(500);
   expect(await bubbles(page, farhan)).toHaveLength(before.length);
 });
