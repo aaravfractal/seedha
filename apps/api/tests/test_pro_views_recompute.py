@@ -18,10 +18,11 @@ from sqlalchemy.orm import Session
 
 from app.models import Booking, Channel, ChannelContract
 from app.money import line_items_for_booking, rupees
+from app.services.pro_views import SAMPLE_AGENTS
 
 START, END = date(2026, 4, 1), date(2026, 9, 30)
 SAMPLE_OTA_BPS = {"mmt": 400, "bcom": 300, "agoda": 500}
-AGENTS = ("Doon Valley Tours", "Himalayan Trails", "Kumaon Holidays", "Mall Road Travels")
+AGENTS = SAMPLE_AGENTS  # the service's fictional names; rows are checked against them in order
 TARGETS = (rupees(1_000), rupees(2_500), rupees(3_001), rupees(4_283), rupees(7_777))
 
 

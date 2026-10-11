@@ -28,6 +28,7 @@ from app.models import (
     Saving,
     StayInvoice,
 )
+from app.ratelimit import Limit
 from app.services.consent import active_consent
 from app.services.desk import in_house
 from app.services.overview import owner_initials
@@ -181,8 +182,10 @@ def side_effect_counts(session: Session) -> tuple[int, ...]:
 
 
 def test_slip_on_every_room_has_no_side_effects(
-    client: TestClient, owner: dict[str, str], inbox: Session
+    client: TestClient, owner: dict[str, str], inbox: Session, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    # This sweep prints every room once; the 6-a-minute print limit has its own test.
+    monkeypatch.setattr("app.public_mode.PRINT_LIMIT", Limit(10_000, 60))
     before = side_effect_counts(inbox)
     commands = int(inbox.scalar(select(func.count()).select_from(DeskCommand)) or 0)
     rooms = list(sold_rooms(client, owner))
