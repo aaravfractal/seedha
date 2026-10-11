@@ -1,4 +1,4 @@
-# Live features brief (saved word for word, 11 October 2026)
+# Live features brief (saved word for word, 11 October 2026; line 107 uses role wording for the personal-data test)
 
 FINAL BRIEF: LIVE FEATURES + AGENT TEAM + EMAIL REWRITE
 This answers your questions and is the complete plan. Save it to
@@ -104,7 +104,7 @@ WAVE 5: FINISH (lead)
 4. Reset demo data. Update docs/progress.md. Commit locally.
 5. Email rewrite: backup branch and gitignored .archive copy; git
    filter-repo with a mailmap installed in the API venv; map my old name
-   and Gmail to "Aarav Sharma" and the no-reply address for author and
+   and Gmail to "the owner's GitHub name" and the no-reply address for author and
    committer; keep messages, dates, order and files unchanged; verify
    commit count, the name/email/date list line by line, no Gmail left,
    no file diff; make check. Then delete the backup branch locally so it
