@@ -198,6 +198,42 @@ flight. A `~/.cloudflared/config.yml` stops quick tunnels from starting; the
 script warns when one exists. Ctrl+C stops the tunnel, the API and the web
 app together.
 
+## Manual checklist for the owner (live features)
+
+These steps need your browser, your phone or test tokens, so they are not
+automated. Everything else falls back to the simulated mode when skipped.
+
+1. **Fund the proof wallet.** The address is printed by `make proof-wallet`
+   (already run once; the key is in `.env`, never shown). Open
+   https://faucet.polygon.technology, choose Polygon Amoy and POL, paste the
+   address and request test POL. Testnet tokens have no value.
+2. **Write a real proof.** `make demo-prod`, sign in with Direct beta login,
+   check in a guest at the Desk and consent on the phone view, then on
+   Proof press "Write tonight's proof". The chain card should say
+   "Polygon Amoy testnet" with your balance. The bundle shows "Sent", then
+   "Verified on Polygon Amoy testnet, block N" within about 20 seconds (press
+   Refresh if it stays on Sent). If it says "Local only", the reason line
+   tells you why (no key, network not reachable, wrong network, low balance).
+3. **Open the explorer link.** "View on Amoy explorer" opens
+   https://amoy.polygonscan.com/tx/<hash>. The input data is the Merkle root;
+   the transaction goes from the wallet to itself with value 0.
+4. **Run the public link.** `make demo-live` (needs `cloudflared`). Note the
+   printed `https://<words>.trycloudflare.com` URLs and the QR.
+5. **Scan from a phone on mobile data** (Wi-Fi off, so it really goes over
+   the internet). The site should open over https.
+6. **Consent end to end.** On a tablet or a second phone open the printed
+   Desk device URL (`/desk/device`), sign in with Direct beta login, tap
+   Sound on. In the Staff panel check in a room so the QR shows; scan it
+   with the first phone, tick the box and agree. The Desk ring turns green
+   and chimes, and the slip shows on screen.
+7. **Paste one real event.** Calendar, Add events: paste the text of an
+   official event notice and its https link. With `ANTHROPIC_API_KEY` and
+   `CLAUDE_MODEL` set, Claude reads it; without them you see a labelled
+   sample extraction. Save it and check it shows "From your sources" with
+   the source link. Seedha never suggests a price; you set any rate.
+8. **Stop and reset.** Ctrl+C stops the tunnel and servers. `make seed`
+   resets the demo data.
+
 ## Security notes
 
 - Owner routes need the owner token (added by the BFF after login); Desk
