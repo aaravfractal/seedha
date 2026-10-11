@@ -22,6 +22,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from app.models import Booking, Consent, InboxMessage, Message, ProofBundle, ProofBundleItem
+from app.services.chain import CONFIRM_WAIT_S, RPC_TIMEOUT_S, Confirmation, WriteResult
 from app.services.consent import as_utc, fingerprint
 
 
@@ -83,19 +84,38 @@ def verify_path(fingerprint: str, path: list[tuple[str, str]], root: str) -> boo
 
 
 class ChainWriter(Protocol):
-    """Publishes a root to a public chain; returns a transaction id or None."""
+    """Publishes a root to a public chain and checks its receipt."""
 
-    def write(self, root: str) -> str | None:
-        """Publish the root."""
+    def write(self, root: str) -> WriteResult:
+        """Publish the root: a transaction hash, or the reason it stayed local."""
+
+    def confirm(self, tx_hash: str, wait_s: float = CONFIRM_WAIT_S) -> Confirmation:
+        """Wait up to `wait_s` seconds for the receipt."""
+
+    def receipt(self, tx_hash: str, timeout: float = RPC_TIMEOUT_S) -> Confirmation:
+        """One quick receipt lookup."""
 
 
 class LocalOnly:
-    """No chain configured (or the web3 library is unavailable, B-001)."""
+    """No chain configured: the root stays in Seedha's database."""
 
-    def write(self, root: str) -> str | None:
+    def __init__(self, reason: str = "no_key") -> None:
+        self.reason = reason
+
+    def write(self, root: str) -> WriteResult:
         """Keep the root in Seedha's database only."""
         _ = root  # stored by write_bundle; nothing is published
-        return None
+        return WriteResult(None, self.reason)
+
+    def confirm(self, tx_hash: str, wait_s: float = CONFIRM_WAIT_S) -> Confirmation:
+        """Nothing was sent, so nothing can confirm."""
+        _ = (tx_hash, wait_s)
+        return Confirmation("sent")
+
+    def receipt(self, tx_hash: str, timeout: float = RPC_TIMEOUT_S) -> Confirmation:
+        """Nothing was sent, so nothing can confirm."""
+        _ = (tx_hash, timeout)
+        return Confirmation("sent")
 
 
 def pending_consents(session: Session, property_id: int) -> list[Consent]:
@@ -116,9 +136,9 @@ def write_bundle(
     """Bundle every pending fingerprint under one root and mark them verified."""
     consents = pending_consents(session, property_id)
     root = merkle_root([c.fingerprint for c in consents])
-    tx = chain.write(root)
+    tx = chain.write(root).tx_hash
     bundle = ProofBundle(property_id=property_id, created_at=now, merkle_root=root,
-                         item_count=len(consents), chain_status="written" if tx else "stored",
+                         item_count=len(consents), chain_status="sent" if tx else "stored",
                          chain_tx=tx)  # fmt: skip
     session.add(bundle)
     session.flush()
@@ -128,6 +148,51 @@ def write_bundle(
         consent.proof_status = "verified"
     session.flush()
     return bundle
+
+
+def apply_confirmation(bundle: ProofBundle, found: Confirmation) -> None:
+    """Record a receipt: 'verified' or 'failed' with the block; 'sent' stays."""
+    if found.status == "sent":
+        return
+    bundle.chain_status = found.status
+    bundle.chain_block = found.block
+
+
+def publish_bundle(
+    session: Session,
+    property_id: int,
+    chain: ChainWriter,
+    now: datetime,
+    wait_s: float = CONFIRM_WAIT_S,
+) -> ProofBundle:
+    """Write tonight's bundle, then wait briefly for the testnet receipt.
+
+    The bundle row (with its transaction hash) is flushed before waiting, so a
+    timeout leaves it 'sent' and the next GET /proof checks it again.
+    """
+    bundle = write_bundle(session, property_id, chain, now)
+    if bundle.chain_tx:
+        # The transaction is already public: keep its hash even if the wait
+        # below is interrupted, and free the database while we wait.
+        session.commit()
+        apply_confirmation(bundle, chain.confirm(bundle.chain_tx, wait_s))
+        session.flush()
+    return bundle
+
+
+def recheck_sent(session: Session, property_id: int, chain: ChainWriter, timeout: float) -> None:
+    """One quick receipt lookup for every bundle still waiting on the chain."""
+    waiting = session.scalars(
+        select(ProofBundle).where(
+            ProofBundle.property_id == property_id,
+            ProofBundle.chain_status == "sent",
+            ProofBundle.chain_tx.is_not(None),
+        )
+    )
+    for bundle in waiting:
+        if bundle.chain_tx:
+            apply_confirmation(bundle, chain.receipt(bundle.chain_tx, timeout))
+    session.flush()
 
 
 def record_intact(consent: Consent) -> bool:
