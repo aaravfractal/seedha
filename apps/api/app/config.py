@@ -74,7 +74,9 @@ def load_settings() -> Settings:
     return Settings(
         database_url=_env("DATABASE_URL", f"sqlite:///{DEFAULT_DB_PATH}"),
         owner_api_token=_env("OWNER_API_TOKEN"),
-        web_origin=_env("WEB_ORIGIN", "http://localhost:3000"),
+        # PUBLIC_BASE_URL (demo-lan, demo-live) wins, so every QR and guest link
+        # uses the address a phone can reach. Read at start-up, not at build time.
+        web_origin=_env("PUBLIC_BASE_URL") or _env("WEB_ORIGIN", "http://localhost:3000"),
         anthropic_api_key=_env("ANTHROPIC_API_KEY"),
         claude_model=_env("CLAUDE_MODEL"),
         whatsapp_token=_env("WHATSAPP_TOKEN"),
