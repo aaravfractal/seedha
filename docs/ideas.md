@@ -114,3 +114,42 @@ the parts first, the total second.
 ## Not proposed
 Auto-flip on login (flip already reachable in under a minute with the sample
 button); any lower-rate or OTA-guest messaging idea (rules 4 and 6).
+
+## After the hackathon
+
+These are shown on the public website as planned features with sample
+content only (docs/WEBSITE_UPGRADE.md). Nothing about them is live.
+
+### Seedha Pass (Phase 3)
+
+One network of owner-run hill hotels. Guests will get perks at every
+Seedha hotel, never lower prices (rule 6); check-in will be faster from a
+profile the guest controls; hotels will refer guests to each other with no
+commission between hotels.
+
+- Consent: joining the network is a separate consent from a hotel's own
+  Desk consent. A guest's profile is shared between hotels only with that
+  separate yes, and it can be withdrawn on its own (reply STOP or the
+  profile settings).
+- The guest controls the profile: what it holds, which hotels can see it,
+  and its deletion (DPDP rights as in the privacy page).
+- No commission or referral fee flows between hotels; a referral is a
+  courtesy, and the receiving hotel's saving is counted the same way as any
+  coded direct booking (ruling 5).
+- Planned towns shown on the website globe: Mussoorie, Nainital,
+  Rishikesh, Auli, Shimla, Manali.
+
+### Pulse Event Radar (Pro)
+
+Know about every event near the hotel ahead of time.
+
+- Official event sources only (tourism boards, district administrations,
+  festival organisers); no scraping of OTA or third-party listing sites
+  (rule 8).
+- One WhatsApp line each morning tells the owner what is coming. The owner
+  decides rates, room holds and packages; Seedha never sets a price.
+- It is a channel decision (which rooms to keep for direct and walk-in
+  guests), never a demand prediction (README rule 7).
+- The website shows one dated sample event (Winter Line Carnival,
+  Mussoorie, 25 to 30 Dec, from the sample Pulse data) and a few regional
+  events by name with "Dates to confirm".
