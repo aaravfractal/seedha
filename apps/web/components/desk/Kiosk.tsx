@@ -31,6 +31,15 @@ const LINK_TEXT: Record<LinkState, string> = {
   login: "Signed out. Log in again to run the Desk.",
 };
 
+/** Short link words for the one-row top bar on a landscape phone. */
+const LINK_SHORT: Record<LinkState, string> = {
+  connecting: "Connecting",
+  online: "Online",
+  offline: "Offline",
+  paused: "Paused",
+  login: "Signed out",
+};
+
 const RING_WORD = { white: "Ready", green: "Consent saved", red: "Needs paper" } as const;
 
 /**
@@ -218,7 +227,7 @@ export function Kiosk() {
   const svg = qrSvg && qrUrl === qrSvg.url ? qrSvg.svg : null;
 
   return (
-    <div className={styles.kiosk}>
+    <div className={styles.kiosk} data-screen={screen.kind}>
       <h1 className={styles.srOnly}>Seedha Desk</h1>
       <div className={styles.top}>
         <p className={styles.brand}>
@@ -227,7 +236,10 @@ export function Kiosk() {
         </p>
         <p className={styles.link} role="status">
           <span className={`${styles.dot} ${styles[`dot_${link}`]}`} aria-hidden="true" />
-          {LINK_TEXT[link]}
+          <span className={styles.linkLong}>{LINK_TEXT[link]}</span>
+          <span className={styles.linkShort} aria-hidden="true">
+            {LINK_SHORT[link]}
+          </span>
           {link === "login" ? (
             <>
               {" "}
@@ -349,9 +361,7 @@ export function Kiosk() {
                     ? "Printer needs paper, so the slip is shown here."
                     : "This screen has no printer, so the slip is shown here."}
                 </p>
-                <figure className={styles.receipt} aria-label="Slip on screen" key={kiosk.slip.seq}>
-                  <pre>{kiosk.slip.text}</pre>
-                </figure>
+                <Receipt key={kiosk.slip.seq} text={kiosk.slip.text} />
                 <button
                   type="button"
                   className="btn ghost small"
@@ -374,6 +384,36 @@ export function Kiosk() {
       </div>
       {awake ? <p className={styles.awake}>Screen stays on while the Desk is open</p> : null}
     </div>
+  );
+}
+
+/**
+ * The slip as a paper receipt. The font follows the card width so all 32
+ * columns fit; if a very narrow screen still needs a sideways scroll, the
+ * receipt joins the Tab order so a keyboard can scroll it.
+ */
+function Receipt({ text }: { text: string }) {
+  const ref = useRef<HTMLElement>(null);
+  const [scrolls, setScrolls] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setScrolls(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const watch = new ResizeObserver(check);
+    watch.observe(el);
+    return () => watch.disconnect();
+  }, [text]);
+  return (
+    <figure
+      ref={ref}
+      className={styles.receipt}
+      aria-label="Slip on screen"
+      tabIndex={scrolls ? 0 : undefined}
+      data-scrolls={scrolls}
+    >
+      <pre>{text}</pre>
+    </figure>
   );
 }
 

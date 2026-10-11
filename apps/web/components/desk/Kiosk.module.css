@@ -1,7 +1,10 @@
 /* Desk kiosk (/desk/device): full screen, landscape first, large type. */
 
 .kiosk {
-  --ring-white: #8e8e93;
+  --ring-white: var(--hint);
+  --ring-glow: color-mix(in srgb, var(--gainFill) 45%, transparent);
+  --ring-glow-still: color-mix(in srgb, var(--gainFill) 35%, transparent);
+  --ring-glow-end: color-mix(in srgb, var(--gainFill) 0%, transparent);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -59,6 +62,10 @@
   flex: 1 1 220px;
 }
 
+.linkShort {
+  display: none;
+}
+
 .inlineLink {
   color: var(--accent);
   font-weight: 600;
@@ -88,7 +95,8 @@
   gap: 8px;
 }
 
-.tools :global(.btn) {
+/* Touch kiosk: every button is at least 44px tall. */
+.kiosk :global(.btn.small) {
   min-height: 44px;
 }
 
@@ -140,17 +148,17 @@
 
 @keyframes kioskPulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(31, 138, 85, 0.45);
+    box-shadow: 0 0 0 0 var(--ring-glow);
   }
   100% {
-    box-shadow: 0 0 0 18px rgba(31, 138, 85, 0);
+    box-shadow: 0 0 0 18px var(--ring-glow-end);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ring_green {
     animation: none;
-    box-shadow: 0 0 0 6px rgba(31, 138, 85, 0.35);
+    box-shadow: 0 0 0 6px var(--ring-glow-still);
   }
 }
 
@@ -278,6 +286,7 @@
 }
 
 .slipCard {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -319,12 +328,17 @@
     conic-gradient(from -45deg at bottom, #000 90deg, transparent 0) bottom / 12px 8px repeat-x;
 }
 
+/*
+ * The 32 monospace columns (about 19em) fit the card: the font follows its
+ * width. Longer lines, like the footer sentence, wrap instead of clipping.
+ */
 .receipt pre {
   margin: 0;
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: clamp(9px, calc((100cqi - 32px) / 19.8), 14px);
   line-height: 1.45;
-  white-space: pre;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .staff {
@@ -401,13 +415,69 @@
   }
 }
 
-/* Short landscape phones: tighter frame so the QR stays large. */
+/*
+ * Short landscape phones: the top bar stays on one row, the frame is tighter,
+ * and while a QR shows the side panel steps aside so the whole code fits the
+ * screen height without scrolling (about 140px of bar, gaps and frame).
+ */
 @media (orientation: landscape) and (max-height: 500px) {
+  .kiosk {
+    gap: 8px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .top {
+    flex-wrap: nowrap;
+    gap: 12px;
+  }
+  .hotel {
+    display: none;
+  }
+  .link {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .linkLong {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  .linkShort {
+    display: inline;
+  }
+  .tools {
+    flex-wrap: nowrap;
+    flex: none;
+  }
+  .tools :global(.btn) {
+    padding: 0 12px;
+  }
   .stage {
-    min-height: calc(100dvh - 90px);
-    padding-top: 52px;
+    min-height: 0;
+    gap: 10px;
+    padding: 46px 20px 10px;
+  }
+  .ringChip {
+    top: 8px;
+    padding: 4px 12px;
+  }
+  .qrState {
+    flex-direction: row;
+    text-align: left;
   }
   .qr {
-    width: min(64dvh, 34vw);
+    width: min(calc(100dvh - 140px), 40vw);
+    padding: 8px;
+  }
+  .kiosk[data-screen="qr"] .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kiosk[data-screen="qr"] .side,
+  .kiosk[data-screen="qr"] .awake {
+    display: none;
   }
 }

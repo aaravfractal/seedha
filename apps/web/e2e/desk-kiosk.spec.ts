@@ -103,6 +103,17 @@ test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page
   await expect(slip).toContainText("Hotel kept");
   await expect(slip).toContainText("DEODAR-");
   await expect(page.getByText("This screen has no printer, so the slip is shown here.")).toBeVisible();
+  // The whole receipt fits its card at kiosk widths: nothing clipped, or (if it
+  // ever scrolls sideways) it can take keyboard focus (review K2).
+  for (const width of [320, 390, 844, 1180]) {
+    await page.setViewportSize({ width, height: width < 600 ? 844 : 800 });
+    await expect
+      .poll(async () =>
+        slip.evaluate((el) => el.scrollWidth <= el.clientWidth + 1 || el.getAttribute("tabindex") === "0"),
+      )
+      .toBe(true);
+  }
+  await page.setViewportSize({ width: 1280, height: 800 });
 
   // Simulated paper out: red ring, clearly labelled, slip still on screen.
   await page.getByRole("button", { name: "Simulated: no paper" }).click();
@@ -137,4 +148,21 @@ test("kiosk: a phone held upright gets a hint and still works", async ({ page })
   await expect(page.getByText("Connected, checking every 2 seconds")).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
+});
+
+test("kiosk: a landscape phone shows the whole QR without scrolling", async ({ page }) => {
+  await signIn(page);
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto("/desk/device");
+  await expect(page.getByText("Connected, checking every 2 seconds")).toBeAttached();
+  const qr = page.getByRole("img", { name: "Consent QR code" });
+  await showQr(page, "103");
+  // Review K1: the code's bottom edge sits inside the screen, top too.
+  await expect
+    .poll(async () => {
+      const box = await qr.boundingBox();
+      const height = await page.evaluate(() => window.innerHeight);
+      return box !== null && box.y >= 0 && box.y + box.height <= height;
+    })
+    .toBe(true);
 });
