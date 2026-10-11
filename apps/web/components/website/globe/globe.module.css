@@ -37,7 +37,8 @@
   border: 0;
   border-radius: 980px;
   background: transparent;
-  color: var(--ink2);
+  /* --ink2 on --fill is under 4.5:1 in light; mixing toward --ink clears it. */
+  color: color-mix(in srgb, var(--ink) 60%, var(--ink2));
   font: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -262,7 +263,7 @@
   padding: 3px 10px;
   border-radius: 980px;
   background: var(--fill);
-  color: var(--ink2);
+  color: color-mix(in srgb, var(--ink) 60%, var(--ink2));
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;

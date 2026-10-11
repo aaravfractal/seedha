@@ -674,3 +674,12 @@ data deletion carry "Draft for the hackathon prototype. Not legal advice.
 To be reviewed by a lawyer before launch." and a last-updated date. India
 data residency is written as "Planned: stored in India before launch."
 Courts are at Dehradun.
+
+**D-095 Globe ships as 3D, static map as fallback.** Measured on a
+production build: scrolling to the globe adds 147.7 KB gzipped (budget
+300 KB), 60 fps in headless Chromium, zero draw calls off screen, pixel
+ratio capped at 2. Reduced motion, no WebGL or a low-end phone get the
+static land-only North India map (31.4 KB). Auto-rotate is a slow sway of
+about 9 degrees each way so the six towns stay in view; it stops on hover,
+touch or drag. The guest-origins map keeps its city list and "3D view
+coming soon" note, since it is a different map.
