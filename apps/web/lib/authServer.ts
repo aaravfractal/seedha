@@ -5,6 +5,7 @@
  */
 import { AUTH_BODY_BYTES, readCapped } from "./body.ts";
 import { type Limit, RateLimiter, clientAddress } from "./ratelimit.ts";
+import { cookieSecure } from "./requestOrigin.ts";
 
 /** Per client address on the web server, in front of the API's own limits. */
 export const AUTH_LIMITS = {
@@ -131,14 +132,18 @@ export function unreachable(): Response {
 }
 
 /**
- * Whether the session cookie gets `Secure`: on https, behind a TLS proxy, and
- * always in production except on localhost (security review S12).
+ * Whether the session cookie gets `Secure`: on https and behind a TLS proxy,
+ * and in production except on localhost or a private Wi-Fi address served
+ * over plain http (security review S12; make demo-lan).
  */
 export function isSecure(request: Request): boolean {
   const url = new URL(request.url);
-  if (url.protocol === "https:" || request.headers.get("x-forwarded-proto") === "https") return true;
-  const local = url.hostname === "localhost" || url.hostname === "127.0.0.1";
-  return process.env.NODE_ENV === "production" && !local;
+  const proto = request.headers.get("x-forwarded-proto") ?? url.protocol;
+  return cookieSecure({
+    proto: url.protocol === "https:" ? "https" : proto,
+    host: request.headers.get("x-forwarded-host") ?? request.headers.get("host") ?? url.host,
+    production: process.env.NODE_ENV === "production",
+  });
 }
 
 /** The values published in .env.example; nobody may run a real site with them. */

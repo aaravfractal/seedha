@@ -153,6 +153,51 @@ allowlisted routes (`apps/web/lib/bff.ts`).
 - Secrets: every commit in history
 - Firmware: native unit tests and the ESP32 build
 
+## Phone demo on Wi-Fi (make demo-lan)
+
+After `make setup` once, `make demo-lan` finds the Mac's Wi-Fi address
+(`en0`, else `en1`; it stops with a message when there is none), seeds the
+sample hotel, makes a production build and starts the web app on every
+interface at port 3000. The API stays on 127.0.0.1:8000. It prints the owner,
+Desk device (`/desk/device`) and guest URLs on `http://<wifi-ip>:3000`.
+
+- Phones and tablets must be on the same Wi-Fi. macOS may ask whether node
+  may accept incoming connections: choose Allow.
+- The session cookie is `Secure` only on https, so sign in works over plain
+  http on a private address (`apps/web/lib/requestOrigin.ts`).
+- Reset demo data shows only on the laptop itself (`http://localhost:3000`).
+- Ctrl+C stops the web app and the API.
+
+## Public link (make demo-live)
+
+Needs `cloudflared` (`brew install cloudflared`; the script prints this and
+exits when it is missing). `make demo-live` starts a Cloudflare quick tunnel
+to `http://localhost:3000`, reads its `https://<words>.trycloudflare.com`
+URL from the log (`.cache/demo-live/cloudflared.log`, gitignored, removed on
+exit), seeds, builds and starts the API (127.0.0.1 only) and the web app,
+then prints the public owner, Desk device and guest URLs and a QR of the link.
+
+Safety in public mode (`SEEDHA_PUBLIC=1`):
+
+- Fresh `OWNER_API_TOKEN`, `SESSION_SECRET` and `DESK_DEVICE_KEY` for every
+  run, never printed. The published demo values in `.env.example` are never
+  used on a public link.
+- Only the freshly seeded sample hotel exists. Owner pages need a login.
+- The OTP demo banner is off (`SEEDHA_DEMO` empty). Sign in with Direct
+  beta login on `/login`.
+- Reset demo data works only from `http://localhost:3000` on the laptop:
+  the web server refuses it when the request came through the tunnel, and
+  the API refuses it when the client is not loopback.
+- Rate limits stay on. CORS allows only the tunnel origin (`WEB_ORIGIN` and
+  `PUBLIC_BASE_URL` are set to it), never a wildcard.
+- Only the web app is exposed; the API never leaves 127.0.0.1.
+
+Caveats: quick tunnels have no uptime guarantee (no SLA), a new URL each run
+(old Desk QR codes and drafted links stop working), and about 200 requests in
+flight. A `~/.cloudflared/config.yml` stops quick tunnels from starting; the
+script warns when one exists. Ctrl+C stops the tunnel, the API and the web
+app together.
+
 ## Security notes
 
 - Owner routes need the owner token (added by the BFF after login); Desk

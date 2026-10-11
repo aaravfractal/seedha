@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import ipaddress
+import os
 from datetime import datetime
 from typing import Any, Literal
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
@@ -315,10 +317,38 @@ class ResetOut(BaseModel):
     demo_date: str
 
 
+def is_loopback(host: str) -> bool:
+    """True for 127.0.0.0/8, ::1 and IPv4-mapped loopback; False for names and junk."""
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    mapped = getattr(ip, "ipv4_mapped", None)
+    return bool(ip.is_loopback or (mapped is not None and mapped.is_loopback))
+
+
+def local_reset_only(request: Request) -> None:
+    """With SEEDHA_PUBLIC=1 (make demo-live) only the machine running Seedha may reset.
+
+    The web app's BFF forwards the real client address in X-Forwarded-For and
+    uvicorn resolves it into request.client, so a visitor through the tunnel
+    shows up with their own address, never loopback.
+    """
+    if os.environ.get("SEEDHA_PUBLIC", "") != "1":
+        return
+    host = request.client.host if request.client else ""
+    if not is_loopback(host):
+        raise ApiError(403, "reset_local_only", "Reset works only on the computer running the demo")
+
+
 @demo_router.post(
     "/reset",
     response_model=ResetOut,
-    dependencies=[Depends(require_owner_session), Depends(rate_limited("demo_reset"))],
+    dependencies=[
+        Depends(local_reset_only),
+        Depends(require_owner_session),
+        Depends(rate_limited("demo_reset")),
+    ],
 )
 def reset_demo(
     _owner: OwnerDep, session: SessionDep, prop: PropertyDep, settings: SettingsDep
