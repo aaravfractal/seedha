@@ -92,7 +92,7 @@ test("notice counter counts characters and flags the limit", () => {
 
 test("origin labels: missing origin is sample", () => {
   assert.deepEqual(eventLabels("owner_source"), ["From your sources"]);
-  assert.deepEqual(eventLabels("sample_extraction"), ["From your sources", "Sample extraction"]);
+  assert.deepEqual(eventLabels("sample_extraction"), ["Sample extraction"]);
   assert.deepEqual(eventLabels("sample"), ["Sample"]);
   assert.deepEqual(eventLabels(undefined), ["Sample"]);
   assert.equal(isOwnerEvent("owner_source"), true);
@@ -108,7 +108,8 @@ test("own event ids come only from own-<digits> keys", () => {
 });
 
 test("labels and dates", () => {
-  assert.equal(demandText("high"), "Likely overnight demand: High");
+  assert.equal(demandText("high"), "Likely overnight demand, as Claude read your source: High");
+  assert.equal(demandText("low", true), "Likely overnight demand (sample): Low");
   assert.equal(categoryText("festival"), "Festival");
   assert.equal(categoryText("nope"), "Other");
   assert.equal(dateRange("2026-12-25", "2026-12-30"), "25 to 30 Dec");

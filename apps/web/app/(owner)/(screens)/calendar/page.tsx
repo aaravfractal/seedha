@@ -137,10 +137,12 @@ function EventCard({
       <p className={s.decision}>
         <b>Channel decision:</b> {event.decision || `${actionText(event.action)} on these dates.`}
       </p>
-      {owner && event.demand ? <p className={c.demand}>{demandText(event.demand)}</p> : null}
+      {owner && event.demand ? (
+        <p className={c.demand}>{demandText(event.demand, event.origin === "sample_extraction")}</p>
+      ) : null}
       {owner ? (
         <p className={c.sourceLine}>
-          <span>Source:</span>
+          <span>{event.origin === "sample_extraction" ? "Sample event. Not read from" : "Source:"}</span>
           {host && event.source_url ? (
             <a
               className={c.sourceLink}
@@ -272,7 +274,7 @@ export default function CalendarPage() {
   return (
     <Screen
       title="Season calendar."
-      sub="Each date becomes one channel decision. Seedha Pulse does not predict demand."
+      sub="Each date becomes one channel decision. Seedha does not forecast demand. On events from your sources, the demand line is Claude's reading of your notice."
     >
       {cal.error && !data ? (
         <ErrorState message={cal.error.message} code={cal.error.code} onRetry={cal.reload} />

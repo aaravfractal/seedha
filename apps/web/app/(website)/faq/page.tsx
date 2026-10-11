@@ -46,7 +46,7 @@ const FAQ: [string, string][] = [
   ],
   [
     "What goes on the blockchain?",
-    "Only fingerprints of consents: salted hashes that identify no one, combined each night into one Merkle root. No name, phone or booking detail ever goes there. The root is stored by Seedha and, when the hotel turns on the testnet option, also written to the Polygon Amoy testnet, a public test network whose tokens have no value.",
+    "Only fingerprints of consents: salted hashes that identify no one, combined each night into one Merkle root. No name, phone or booking detail ever goes there. The root is stored by Seedha and, when the testnet option is on, also written to the Polygon Amoy testnet, a public test network whose tokens have no value.",
   ],
 ];
 

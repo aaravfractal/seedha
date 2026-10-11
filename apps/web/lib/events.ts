@@ -81,7 +81,8 @@ export function noticeCounter(
  */
 export function eventLabels(origin: EventOrigin | null | undefined): string[] {
   if (origin === "owner_source") return ["From your sources"];
-  if (origin === "sample_extraction") return ["From your sources", "Sample extraction"];
+  // The no-key sample ignores the pasted text, so it never claims to come from the owner's source.
+  if (origin === "sample_extraction") return ["Sample extraction"];
   return ["Sample"];
 }
 
@@ -98,8 +99,12 @@ export function ownEventId(key: string): number | null {
 
 const DEMAND: Record<EventDemand, string> = { low: "Low", medium: "Medium", high: "High" };
 
-export function demandText(demand: EventDemand): string {
-  return `Likely overnight demand: ${DEMAND[demand] ?? "Low"}`;
+/** Demand as read from the notice (D-097): Claude's reading, or the sample's fixed value. */
+export function demandText(demand: EventDemand, sample = false): string {
+  const level = DEMAND[demand] ?? "Low";
+  return sample
+    ? `Likely overnight demand (sample): ${level}`
+    : `Likely overnight demand, as Claude read your source: ${level}`;
 }
 
 const CATEGORY: Record<EventCategory, string> = {

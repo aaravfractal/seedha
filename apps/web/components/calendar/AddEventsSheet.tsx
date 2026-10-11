@@ -230,7 +230,7 @@ export function AddEventsSheet({
                     <p className={c.draftMeta}>
                       {dateRange(ev.start_date, ev.end_date)} · {ev.town} · {categoryText(ev.category)}
                     </p>
-                    <p className={c.demand}>{demandText(ev.demand)}</p>
+                    <p className={c.demand}>{demandText(ev.demand, result.mode === "sample")}</p>
                     <p className={st.help}>{result.mode === "claude" ? CLAUDE_NOTE : "Sample extraction."}</p>
                   </li>
                 ))}

@@ -104,16 +104,19 @@ test("paste, read as sample extraction, save, plan, preview and delete", async (
 
   await expect(sheet.getByText("Sample extraction").first()).toBeVisible();
   await expect(sheet.getByText("No Claude key is set")).toBeVisible();
-  await expect(sheet.getByText(/Likely overnight demand: (Low|Medium|High)/).first()).toBeVisible();
+  await expect(
+    sheet.getByText(/Likely overnight demand \(sample\): (Low|Medium|High)/).first(),
+  ).toBeVisible();
   await expect(sheet).not.toContainText("₹");
   await sheet.getByRole("button", { name: "Save events" }).click();
   await expect(sheet).toHaveCount(0);
 
   // Saved on the API: still there after a reload, labelled as the owner's own sample read.
   await page.reload();
-  const card = page.locator("article").filter({ hasText: "From your sources" }).first();
+  const card = page.locator("article").filter({ hasText: "Sample extraction" }).first();
   await expect(card).toBeVisible();
-  await expect(card).toContainText("Sample extraction");
+  await expect(card).not.toContainText("From your sources");
+  await expect(card).toContainText("Sample event. Not read from");
   await expect(card).toContainText(/Likely overnight demand/);
   const link = card.getByRole("link", { name: /e2e-events\.example\.org/ });
   await expect(link).toHaveText("e2e-events.example.org");
@@ -140,5 +143,5 @@ test("paste, read as sample extraction, save, plan, preview and delete", async (
   const confirm = page.getByRole("alertdialog");
   await expect(confirm).toBeVisible();
   await confirm.getByRole("button", { name: "Delete event" }).click();
-  await expect(page.locator("article").filter({ hasText: "From your sources" })).toHaveCount(0);
+  await expect(page.locator("article").filter({ hasText: "Sample extraction" })).toHaveCount(0);
 });

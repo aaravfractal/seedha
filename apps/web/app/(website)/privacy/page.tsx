@@ -112,10 +112,10 @@ export default function PrivacyPage() {
       <p>
         Each consent becomes a fingerprint: a SHA-256 hash of a random salt and the consent facts. Each night
         the fingerprints are combined into one Merkle root. The root is always stored by Seedha. When the
-        hotel turns on the testnet option, the root is also written to the Polygon Amoy testnet, a public test
-        network whose tokens have no value. Until then it stays on Seedha&apos;s server only. A fingerprint
-        cannot be turned back into a person, and after erasure the salt is deleted so nobody, including
-        Seedha, can link it to anyone.
+        testnet option is on, the root is also written to the Polygon Amoy testnet, a public test network
+        whose tokens have no value. Until then it stays on Seedha&apos;s server only. A fingerprint cannot be
+        turned back into a person, and after erasure the salt is deleted so nobody, including Seedha, can link
+        it to anyone.
       </p>
 
       <h2 className="section">6. How long we keep it</h2>
@@ -177,7 +177,8 @@ export default function PrivacyPage() {
           read their rows. Two guest names and their cities, when Seedha cannot tell on its own whether they
           are the same person. A guest&apos;s first name and latest inbox message, to suggest a reply the
           owner edits before sending. A guest&apos;s first name with the hotel, perk and booking link, to word
-          win-back drafts. Every amount is checked by Seedha&apos;s own code.
+          win-back drafts. The text of event notices the owner pastes, to read event names, dates and towns.
+          Every amount is checked by Seedha&apos;s own code.
         </li>
       </ul>
       <p>
