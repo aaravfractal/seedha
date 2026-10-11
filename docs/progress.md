@@ -21,7 +21,12 @@ docs/agent-reports/live/.
   morning preview). PUBLIC_BASE_URL now drives every guest link.
 - **Testnet wallet created** (key in .env only); funding and the first live
   write are the owner's manual steps (README-dev.md checklist).
-- **Next:** Wave 3 tests, Wave 4 reviews, finish gates, email rewrite.
+- **Wave 3 tests merged:** T1 added 100 safety tests (chain guard, key never
+  leaked, decoded signed tx, events injection and URL refusal, public-mode
+  reset and PUBLIC_BASE_URL); T2 hardened the e2e specs (kiosk QR origin,
+  proof states, events persistence, smoke and axe on new screens). No real
+  bugs found; 35/35 e2e twice on spare ports.
+- **Next:** Wave 4 reviews, finish gates, email rewrite.
 
 ## Website upgrade and privacy clean-up (11 October 2026)
 
