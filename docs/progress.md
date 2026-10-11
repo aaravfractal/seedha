@@ -3,6 +3,25 @@
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
+## Pulse section redesign (12 October 2026)
+
+Brief: docs/PULSE_SECTION.md. Reports: docs/agent-reports/pulse-r1.md,
+pulse-b1.md, pulse-b2.md, pulse-section.md (review).
+
+- Scroll story on desktop (pins from 1040x720): season timeline Oct 2026 to
+  Jan 2027 with a pine progress line, a decision card per sample event with
+  a channel rail (flip motion, Held back with a lock, favoured on top) and a
+  22-room illustration; click, arrow keys, Home and End, Play season.
+- Under 1040px or short screens: month strip with snap chips and swipe.
+  Reduced motion: a plain list of six cards.
+- Event Radar now sits once, after Pulse, with a "See Event Radar (Beta)"
+  link. Shared data and copy in apps/web/lib/pulse.ts (Agoda is the
+  lowest-net channel on the sample data).
+- Measured: about 6 KB gzipped extra JS (budget 40), 60 fps while pinned,
+  layout shift effectively 0, axe clean in both themes. Review found 0 high,
+  2 medium (fixed: card cut off at 980 to 1040 wide and short windows;
+  hover contrast in light theme).
+
 ## Live features (11 October 2026, in progress)
 
 Brief: docs/LIVE_FEATURES.md. Decisions D-097 to D-099. Status files:
