@@ -1,0 +1,541 @@
+/* Pulse decision card, channel rail, room grid and the reduced-motion
+   list (B2). Website tokens come from .site (site.module.css); channel
+   colours are redefined here so they follow the site theme, not the app
+   theme (docs/agent-reports/pulse-r1.md section 3). */
+
+.card,
+.list {
+  --pc-mmt: #f5f5f7;
+  --pc-bcom: #c7c7cc;
+  --pc-agoda: #8e8e93;
+  --pc-ta: #7c7c80;
+  --pc-walkin: #5e5e62;
+  --pc-direct: #4cc38a;
+  --pc-flip: var(--dur-flip, 700ms) var(--spring, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+:global([data-site-theme="light"]) .card,
+:global([data-site-theme="light"]) .list {
+  --pc-mmt: #1d1d1f;
+  --pc-bcom: #48484a;
+  --pc-agoda: #8e8e93;
+  --pc-ta: #aeaeb2;
+  --pc-walkin: #c7c7cc;
+  --pc-direct: #1e6b4e;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Card */
+
+.card {
+  position: relative;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: clamp(20px, 3vw, 32px);
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+
+.compact {
+  gap: 16px;
+  padding: 18px 16px;
+}
+
+/* Reserved for the longest decision line so nothing shifts between events. */
+.swap {
+  min-height: 7.4em;
+}
+
+.compact .swap {
+  min-height: 9.6em;
+}
+
+@container (max-width: 519px) {
+  .swap,
+  .compact .swap {
+    min-height: 9.6em;
+  }
+  .caption {
+    min-height: 4.2em;
+  }
+}
+
+.cardHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.eventName {
+  margin: 0 4px 0 0;
+  font-size: clamp(20px, 2.2vw, 24px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.dateChip,
+.samplePill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 2px 12px;
+  border-radius: 980px;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dateChip {
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.samplePill {
+  background: var(--fill);
+  color: var(--ink);
+}
+
+.decision {
+  margin: 14px 0 0;
+  font-size: clamp(20px, 2vw, 24px);
+  font-weight: 600;
+  line-height: 1.32;
+  letter-spacing: -0.01em;
+  max-width: 34ch;
+}
+
+.compact .decision {
+  font-size: 19px;
+}
+
+.body {
+  display: grid;
+  gap: 20px;
+}
+
+@container (min-width: 520px) {
+  .body {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+  }
+  .body .grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    max-width: 264px;
+  }
+}
+
+/* Channel rail: rows absolutely positioned, moved by translateY. */
+
+.rail {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.railRow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 12px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  transition:
+    transform var(--pc-flip),
+    box-shadow var(--pc-flip);
+  will-change: transform;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  transition: opacity var(--pc-flip);
+}
+
+.swMmt {
+  background: var(--pc-mmt);
+}
+.swBcom {
+  background: var(--pc-bcom);
+}
+.swAgoda {
+  background: var(--pc-agoda);
+}
+.swTa {
+  background: var(--pc-ta);
+}
+.swWalkin {
+  background: var(--pc-walkin);
+}
+.swDirect {
+  background: var(--pc-direct);
+}
+
+.railName {
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.railState {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+
+.stateIcon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.row_favoured {
+  box-shadow:
+    0 0 0 2px var(--accent),
+    0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.row_favoured .railState {
+  color: var(--accent);
+}
+
+/* Held: dimmed surface and swatch, text kept at full contrast. */
+.row_held {
+  background: transparent;
+  border-style: dashed;
+}
+
+.row_held .swatch {
+  opacity: 0.35;
+}
+
+.row_held .railName {
+  color: var(--ink2);
+}
+
+.row_held .railState {
+  color: var(--ink);
+}
+
+.compact .railName {
+  font-size: 15px;
+}
+
+.compact .railState {
+  font-size: 13px;
+}
+
+/* Room grid (Illustration). */
+
+.rooms {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roomsHead {
+  display: flex;
+  align-items: center;
+}
+
+.illustration {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 980px;
+  border: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
+}
+
+.gridWrap {
+  position: relative;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tile {
+  aspect-ratio: 1;
+  max-width: 40px;
+  width: 100%;
+  border-radius: 6px;
+  border: 1.5px solid var(--line);
+  background: var(--fill);
+  color: transparent;
+  display: grid;
+  place-items: center;
+  transition:
+    background-color 360ms var(--spring, ease),
+    border-color 360ms var(--spring, ease),
+    color 360ms var(--spring, ease);
+}
+
+.tileDirect {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--onAccent);
+}
+
+.tileWeekdays {
+  background: transparent;
+  border: 1.5px dashed var(--ink2);
+  color: var(--ink2);
+}
+
+.legendKey.tileDirect {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--onAccent);
+}
+
+.legendKey.tileWeekdays {
+  background: transparent;
+  border: 1.5px dashed var(--ink2);
+  color: var(--ink2);
+}
+
+.tileIcon {
+  width: 70%;
+  height: 70%;
+}
+
+.packageTag {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 980px;
+  background: var(--card);
+  border: 1.5px solid var(--accent);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+.tagIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 13px;
+  color: var(--ink2);
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend {
+  min-height: 20px;
+}
+
+.legendKey {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--line);
+  background: var(--fill);
+  display: grid;
+  place-items: center;
+}
+
+.caption {
+  margin: 0;
+  min-height: 2.8em;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ink2);
+}
+
+.captionPerk {
+  color: var(--ink);
+}
+
+.perkTag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 8px;
+  border-radius: 980px;
+  background: var(--gold);
+  color: var(--onGold);
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+
+/* Progress dots. */
+
+.progress {
+  display: flex;
+  justify-content: center;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 980px;
+  background: var(--ink2);
+  opacity: 0.45;
+  transition:
+    width 300ms var(--spring, ease),
+    opacity 300ms var(--spring, ease);
+}
+
+.dotOn {
+  width: 20px;
+  background: var(--accent);
+  opacity: 1;
+}
+
+/* Reduced motion: everything instant (the .site rule also covers CSS). */
+
+.still .railRow,
+.still .swatch,
+.still .tile {
+  transition: none !important;
+}
+
+/* Reduced-motion list of six plain cards. */
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 760px) {
+  .list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1180px) {
+  .list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.listCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+}
+
+.listDecision {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.listChannels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.listChannels li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.listChannels .row_favoured {
+  box-shadow: none;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.listChannels .row_held {
+  background: none;
+}
+
+.listMark {
+  display: inline-flex;
+  color: currentColor;
+}
+
+.listCaption {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink2);
+}
+
+@container (max-width: 299px) {
+  .swap,
+  .compact .swap {
+    min-height: 11.4em;
+  }
+}
