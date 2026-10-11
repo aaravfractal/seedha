@@ -39,6 +39,7 @@ __all__ = [
     "OptOutEvent",
     "OtpChallenge",
     "OwnerAccount",
+    "OwnerEvent",
     "OwnerSettings",
     "PlanEntry",
     "Guest",
@@ -684,3 +685,28 @@ class PlanEntry(Base):
     property_id: Mapped[int] = mapped_column(ForeignKey("property.id"))
     event_key: Mapped[str] = mapped_column(String(40))
     added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class OwnerEvent(Base):
+    """A town event the owner pasted from an official source (Event Radar
+    Lite). Demand is Claude's reading of the owner's own source text, never
+    a Seedha forecast (D-097); no rupee figure is stored with it."""
+
+    __tablename__ = "owner_event"
+    __table_args__ = (
+        UniqueConstraint(
+            "property_id", "name", "start_date", name="uq_owner_event_property_id_name_start_date"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"))
+    name: Mapped[str] = mapped_column(String(80))
+    start_date: Mapped[date] = mapped_column(Date)
+    end_date: Mapped[date] = mapped_column(Date)
+    town: Mapped[str] = mapped_column(String(60))
+    category: Mapped[str] = mapped_column(String(16))
+    demand: Mapped[str] = mapped_column(String(8))
+    source_url: Mapped[str] = mapped_column(String(500))
+    origin: Mapped[str] = mapped_column(String(20))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
