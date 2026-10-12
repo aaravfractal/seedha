@@ -88,3 +88,12 @@ def test_mark_seen_rejects_unknown_step(client: TestClient, owner: dict[str, str
     res = client.post("/pipeline/book/seen", headers=owner)
     assert res.status_code == 422
     assert res.json()["error"]["code"] == "invalid_input"
+
+
+def test_payments_stay_simulated_even_with_razorpay_keys(
+    settings: Settings, factory: sessionmaker[Session]
+) -> None:
+    """No checkout is built, so /health never calls UPI live (final audit F4)."""
+    keyed = replace(settings, razorpay_key_id="rzp_test_x", razorpay_key_secret="y" * 20)
+    with TestClient(create_app(keyed, factory)) as client:
+        assert client.get("/health").json()["payments"] == "simulated"

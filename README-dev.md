@@ -10,7 +10,7 @@ All data in this repo is fictional sample data for "Hotel Deodar View", Mussoori
 
 ## Run the demo
 
-Needs Python 3.11+ (3.12 tested), Node 20+ and GNU Make.
+Needs Python 3.11+ (3.12 tested), Node 24 to 26 and GNU Make.
 
 ```bash
 cp .env.example .env    # optional: make demo does this if .env is missing
@@ -61,7 +61,7 @@ Stop with Ctrl+C. For development with reload use `make dev` instead.
 
 ## Demo script (about 5 minutes)
 
-Run `make seed` first so the loop starts empty. Home shows "0 of 8 steps
+Run `make seed` first so the loop starts empty. Home shows "0 of 8
 done". Each step is also a screen in the sidebar.
 
 1. **Upload.** Upload, then "Use sample statements". Six files are read:
@@ -90,7 +90,7 @@ done". Each step is also a screen in the sidebar.
    DEODAR-NG26 and DEODAR-RS26 are kept as they are.
 8. **Savings.** Savings shows **₹2,233** commission and GST avoided (the
    original MakeMyTrip contract rate of 22% plus 18% GST) and **+₹2,199**
-   net after the UPI fee. Home now says "All 8 steps done".
+   net after the UPI fee. Home now says "8 of 8 done".
 
 Also worth showing: Ask ("How much did I pay MakeMyTrip last month?" gives
 the September figure, ₹1,09,542), Scenario (Saturday), Proof (each consent's fingerprint and the
@@ -108,7 +108,7 @@ code, never by a model, whatever is configured.
 | Claude | `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` | Known statement layouts are parsed by code; a new layout is refused with a request for CSV; match tie-breaks use the score alone; messages use fixed wording |
 | WhatsApp Cloud API | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_API_VERSION` | Sends are simulated and labelled; inbound webhooks are refused (503) |
 | Razorpay | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Simulated UPI, labelled "test mode, no money moves". Razorpay checkout is not built yet |
-| Polygon Amoy | `PROOF_RPC_URL`, `PROOF_PRIVATE_KEY` | Merkle roots are stored locally and labelled "not yet on a public chain". The chain write itself is not built (docs/blockers.md B-001) |
+| Polygon Amoy | `PROOF_RPC_URL`, `PROOF_PRIVATE_KEY` | Without a funded testnet wallet the Merkle roots stay on Seedha's server, labelled "Local only" with the reason. With `PROOF_RPC_URL`, `PROOF_PRIVATE_KEY` and `PROOF_CHAIN_ID=80002` the root is written to the Polygon Amoy testnet (`make proof-wallet` creates a testnet key) |
 
 To add a key, put it in `.env` and restart. Never commit `.env`; the
 pre-commit hook and `make check` scan for secrets.
@@ -241,6 +241,27 @@ automated. Everything else falls back to the simulated mode when skipped.
    the source link. Seedha never suggests a price; you set any rate.
 8. **Stop and reset.** Ctrl+C stops the tunnel and servers. `make seed`
    resets the demo data.
+
+## Hosted (Railway and Vercel)
+
+The step-by-step guide, both variable tables and the post-deploy checklist
+are in [docs/HOSTING.md](docs/HOSTING.md). In short:
+
+- **Database:** `DATABASE_URL` picks the database. SQLite locally; on
+  Railway it is Postgres (`${{Postgres.DATABASE_URL}}`). The API suite runs on
+  both in CI (`.github/workflows/api-postgres.yml`); locally set
+  `TEST_DATABASE_URL` to run it against a Postgres.
+- **API (Railway):** `SEEDHA_ENV=production` turns on the hosted safety
+  checks: the API refuses to start with demo or short secrets, non-https
+  origins or SQLite; sign-in codes and sign-up are off unless
+  `ALLOW_OWNER_ACCOUNTS=1`; visitors never use Claude or write to the testnet
+  unless `ALLOW_CLAUDE_FOR_DEMO=1` / `ALLOW_DEMO_PROOF_WRITES=1`; only the
+  operator token resets the demo. `PROOF_CHAIN_ID=80002` is required for
+  testnet writes; `DEMO_DATE` optionally fixes the sample business date.
+- **Web (Vercel):** `API_BASE_URL` is the API's address (falls back to
+  `API_URL`); `SEEDHA_HOSTED=1` marks the hosted site. The web server signs
+  every request it forwards, and the API trusts a forwarded visitor address
+  only on signed requests.
 
 ## Security notes
 

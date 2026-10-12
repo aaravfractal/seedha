@@ -75,6 +75,11 @@ secrets live only in the Railway and Vercel variable screens.
   openssl rand -hex 32   # DESK_DEVICE_KEY
   ```
 
+- Choose the Vercel project name now (for example `seedha-demo`). Its
+  address will be `https://<project>.vercel.app`, and the API needs it
+  before its first start: with `SEEDHA_ENV=production` the API refuses to
+  start without an https `WEB_ORIGIN`.
+
 ## 1. Railway: project and Postgres
 
 1. railway.com, New Project, Deploy PostgreSQL. This adds a service named
@@ -106,8 +111,8 @@ API service, Variables. Mark the secret ones as sealed.
 | `SESSION_SECRET` | generated: `openssl rand -hex 32` (same as Vercel) | yes |
 | `OWNER_API_TOKEN` | generated: `openssl rand -hex 32` (same as Vercel) | yes |
 | `DESK_DEVICE_KEY` | generated: `openssl rand -hex 32` (same as Vercel) | yes |
-| `WEB_ORIGIN` | `https://<project>.vercel.app` (after step 4) | no |
-| `PUBLIC_BASE_URL` | `https://<project>.vercel.app` (after step 4) | no |
+| `WEB_ORIGIN` | `https://<project>.vercel.app` (the name chosen in step 0) | no |
+| `PUBLIC_BASE_URL` | `https://<project>.vercel.app` (the name chosen in step 0) | no |
 | `PROOF_RPC_URL` | `https://rpc-amoy.polygon.technology` (optional) | no |
 | `PROOF_CHAIN_ID` | `80002` (optional; any other value keeps proofs local) | no |
 | `PROOF_PRIVATE_KEY` | the testnet-only key from your local `.env` (optional) | yes |
@@ -127,6 +132,9 @@ than 32 characters or one of the published demo values, if an origin is
 not https, or if the database is SQLite.
 
 ## 3. Railway: seed the sample hotel once
+
+Wait until the API's deployment shows healthy (the deploy log says
+production mode and `/health` answers), then seed:
 
 The seed refuses a database that already has data, so it never wipes
 anything. Install the Railway CLI, then:
@@ -168,9 +176,10 @@ Never prefix `API_BASE_URL` or any secret with `NEXT_PUBLIC_`. Do not set
 `SEEDHA_DEMO` or `SEEDHA_PUBLIC` on Vercel. Browsers only ever call the
 Vercel origin; the web server calls Railway through its proxy.
 
-8. Deploy. Note the production URL `https://<project>.vercel.app`, set it
-   as `WEB_ORIGIN` and `PUBLIC_BASE_URL` on Railway (step 2) and redeploy
-   the API, then optionally set `WEB_ORIGIN` on Vercel and redeploy.
+8. Deploy. Check that the production URL `https://<project>.vercel.app`
+   is the one set on Railway in step 2. If Vercel gave a different address,
+   update `WEB_ORIGIN` and `PUBLIC_BASE_URL` on Railway and redeploy the
+   API; optionally set `WEB_ORIGIN` on Vercel too and redeploy.
 
 ## 5. Verify
 
@@ -189,7 +198,7 @@ curl -X POST -H "Authorization: Bearer $OWNER_API_TOKEN" https://<api>.up.railwa
 ```
 
 (2 a minute.) Run it before each judging session so the 8-step demo
-starts at "0 of 8 steps done".
+starts at "0 of 8 done".
 
 ## 7. Roll back
 
@@ -212,14 +221,14 @@ starts at "0 of 8 steps done".
    channels, MakeMyTrip 1st to 5th); repeat guests (12, ₹41,800); Desk
    consent on room 207; checkout slip with DEODAR-RS26; approve the
    win-back; `/link/DEODAR-RS26` with simulated UPI; Savings ₹2,233 avoided,
-   ₹2,199 net. Home says "All 8 steps done".
+   ₹2,199 net. Home says "8 of 8 done".
 4. Desk on a phone: open `https://<project>.vercel.app/desk/device` on a
    phone or tablet over mobile data, sign in, tap Sound on; check in a room
    on the laptop; scan the QR with a second phone and agree; the Desk turns
    green and the slip shows. The QR link starts with the Vercel URL.
-5. Proof on Amoy (only if the wallet is funded and `PROOF_*` are set): sign
-   in as a real owner, or set `ALLOW_DEMO_PROOF_WRITES=1` for the test and
-   remove it after; on Proof press "Write tonight's proof"; it shows Sent,
+5. Proof on Amoy (only if the wallet is funded and `PROOF_*` are set): set
+   `ALLOW_DEMO_PROOF_WRITES=1` on Railway for the test (the hosted demo has
+   no real owner sign-in) and remove it right after; on Proof press "Write tonight's proof"; it shows Sent,
    then Verified with a block number and an explorer link. Otherwise it
    says Local only with the reason.
 6. Rate limits per guest: from two phones on different networks, the

@@ -128,7 +128,8 @@ def create_app(
     for name, enabled in (
         ("LLM", settings.llm_enabled),
         ("WhatsApp", settings.whatsapp_enabled),
-        ("Payments", settings.razorpay_enabled),
+        # No payment gateway is connected yet: UPI is always simulated, keys or not.
+        ("Payments", False),
         ("Proof chain", settings.chain_enabled),
     ):
         if not enabled:
@@ -140,7 +141,7 @@ def create_app(
             status="ok",
             llm=_mode(settings.llm_enabled),
             whatsapp=_mode(settings.whatsapp_enabled),
-            payments=_mode(settings.razorpay_enabled),
+            payments=_mode(False),
             proof_chain=_mode(settings.chain_enabled),
         )
 
