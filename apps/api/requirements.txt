@@ -1,0 +1,17 @@
+# Runtime dependencies for the hosted API (Railway installs these).
+# Mirrors [project].dependencies in pyproject.toml; tests/test_hosting.py
+# fails if the two drift. The app runs from this directory's source.
+fastapi>=0.143
+uvicorn>=0.54
+sqlalchemy>=2.1
+alembic>=1.20
+pydantic>=2.14
+python-multipart>=0.0.32
+rapidfuzz>=3.14
+anthropic>=1.12
+openpyxl>=3.1
+pdfplumber>=0.11
+httpx>=0.28
+eth-account==0.14.0
+hexbytes==2.0.0
+reportlab==5.0.1

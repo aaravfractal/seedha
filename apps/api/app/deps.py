@@ -14,16 +14,20 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.config import Settings
 from app.errors import ApiError
 from app.models import DeskDevice, OwnerAccount, Property
-from app.public_mode import is_remote_public
+from app.public_mode import may_spend
 from app.services.desk import device_for_key
 from app.services.drafter import ClaudeWording, Wording
 
 
 def get_settings(request: Request) -> Settings:
     """Settings the app was built with. For a public-demo visitor Claude is off,
-    so the labelled fallbacks run and nobody else spends the owner's credits."""
+    so the labelled fallbacks run and nobody else spends the owner's credits.
+    Hosted (production): off for the demo subject and public routes unless
+    ALLOW_CLAUDE_FOR_DEMO=1; a real owner account keeps it."""
     settings: Settings = request.app.state.settings
-    if settings.anthropic_api_key and is_remote_public(request):
+    if settings.anthropic_api_key and not may_spend(
+        request, demo_allowed=settings.allow_claude_for_demo
+    ):
         return replace(settings, anthropic_api_key="")
     return settings
 
