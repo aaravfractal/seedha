@@ -761,3 +761,13 @@ licences (x265 GPLv2, libheif and libde265 LGPLv3). That is acceptable for
 Seedha as a hosted service, where the software is not distributed. Review
 it before any distributed or on-premise version (options: drop HEIC and
 ask for JPEG, decode on the phone, or a differently licensed decoder).
+
+**D-103 Step 6 of the demo loop belongs to the loop's own guest.** "Print a
+checkout slip" was recorded by any Desk checkout and could also be marked
+seen from the browser, so after Reset demo data it could tick before steps
+1 to 5 (checking out an in-house sample guest who never consented). It now
+ticks only when the checked-out booking has a consent given at the Desk in
+this demo session (not a seeded sample consent); POST /pipeline/slip/seen
+is gone (422). Reset already deletes every recorded step; the Settings
+reset button now also reloads the shared Overview so the header, sidebar
+and Overview show 0 of 8 at once.

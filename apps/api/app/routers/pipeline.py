@@ -17,7 +17,9 @@ from app.services.pipeline import STEP_KEYS, compute_steps, record_step
 
 router = APIRouter(prefix="/pipeline", tags=["pipeline"])
 
-RecordedStep = Literal["flip", "rep", "slip"]
+# "slip" is recorded only by a Desk checkout of the loop's own guest
+# (services/pipeline.record_slip), never marked seen from the browser.
+RecordedStep = Literal["flip", "rep"]
 
 
 class StepOut(BaseModel):
@@ -46,7 +48,7 @@ def get_pipeline(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> Pi
 def mark_seen(
     key: RecordedStep, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
 ) -> PipelineOut:
-    """Record that the owner saw the flip, the repeat guests or a slip."""
+    """Record that the owner saw the flip or the repeat guests."""
     record_step(session, key)
     session.flush()
     return get_pipeline(None, session, prop)

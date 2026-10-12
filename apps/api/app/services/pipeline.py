@@ -64,3 +64,13 @@ def record_step(session: Session, key: str) -> None:
     """Mark a seen-only step done (idempotent)."""
     if session.get(PipelineStep, key) is None:
         session.add(PipelineStep(key=key))
+
+
+def record_slip(session: Session, booking_id: int) -> None:
+    """Tick "Print a checkout slip" only for the demo loop's own guest: a
+    booking whose guest gave consent at the Desk in this session (not a
+    seeded sample consent). Checking out any other in-house sample guest
+    prints a slip but does not complete step 6 ahead of steps 1 to 5."""
+    if _has(session, select(Consent.id).where(Consent.booking_id == booking_id,
+                                              Consent.seeded.is_(False))):  # fmt: skip
+        record_step(session, "slip")

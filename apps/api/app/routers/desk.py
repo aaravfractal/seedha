@@ -30,7 +30,7 @@ from app.services.desk import (
     utc_now,
 )
 from app.services.messages import draft_for_booking
-from app.services.pipeline import record_step
+from app.services.pipeline import record_slip
 from app.services.slips import Slip
 
 router = APIRouter(prefix="/desk", tags=["desk"])
@@ -210,7 +210,7 @@ def desk_checkout(
     stay = stay_for_room(session, prop, body.room)
     slip, perk = check_out(session, prop, stay, utc_now())
     draft_for_booking(session, prop, stay.booking.id, settings.web_origin, wording)
-    record_step(session, "slip")
+    record_slip(session, stay.booking.id)
     return CheckoutOut(booking_id=stay.booking.id, perk_code=perk.code, slip=slip_out(slip))
 
 

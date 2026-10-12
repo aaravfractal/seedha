@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
@@ -11,6 +12,7 @@ import { bpsPct } from "@/lib/settingsRules";
 import type { Health } from "@/lib/types";
 import type { ContractsData, SettingsData } from "@/lib/types-settings";
 import { ErrorState, Loading } from "@/components/States";
+import { useShell } from "@/components/shell/ShellData";
 import { useToast } from "@/components/Toast";
 import { CalcNote, Chip, SampleChip } from "@/components/owner/ui";
 import { Modal } from "./Modal";
@@ -37,6 +39,9 @@ function useOnThisMachine(): boolean {
 export function HotelTab({ data, beforeReset }: { data: SettingsData; beforeReset?: ReactNode }) {
   const health = useApi<Health>("health");
   const toast = useToast();
+  // Reset changes the 8-step loop: reload the shared Overview so no step
+  // from before the reset stays ticked in the header, sidebar or Overview.
+  const shell = useShell(usePathname());
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const h = data.hotel;
@@ -55,6 +60,7 @@ export function HotelTab({ data, beforeReset }: { data: SettingsData; beforeRese
     try {
       const result = await postJson<{ ok: boolean; demo_date: string }>("demo/reset");
       toast(`Sample hotel reset. Desk date ${result.demo_date}.`);
+      shell.reload();
       setConfirming(false);
     } catch (err) {
       toast(err instanceof ApiError ? err.message : "Reset failed");
