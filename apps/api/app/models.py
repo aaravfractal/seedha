@@ -17,6 +17,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Integer,
+    LargeBinary,
     String,
     Text,
     UniqueConstraint,
@@ -518,6 +519,11 @@ class SiteConfig(Base):
     lang: Mapped[str] = mapped_column(String(2), default="en")
     approved_packages: Mapped[str] = mapped_column(String(200), default="")
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # Real mode (docs/SITE_REAL.md): the public address and branding.
+    slug: Mapped[str | None] = mapped_column(String(40), unique=True, nullable=True)
+    previous_slug: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    slug_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    hide_branding: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
 
 class ErasureRequest(Base):
@@ -749,3 +755,58 @@ class GuestMemory(Base):
     kind: Mapped[str] = mapped_column(String(12))
     text: Mapped[str] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SitePhoto(Base):
+    """An owner photo for the hotel site, stored resized (<=1024 px), re-encoded
+    as JPEG with every EXIF field removed. Kept in the database so it survives
+    redeploys on an ephemeral disk and is covered by database backups."""
+
+    __tablename__ = "site_photo"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    position: Mapped[int] = mapped_column(Integer, default=0)
+    content_type: Mapped[str] = mapped_column(String(20), default="image/jpeg")
+    width: Mapped[int] = mapped_column(Integer)
+    height: Mapped[int] = mapped_column(Integer)
+    size_bytes: Mapped[int] = mapped_column(Integer)
+    sha256: Mapped[str] = mapped_column(String(64))
+    data: Mapped[bytes] = mapped_column(LargeBinary)
+    caption_en: Mapped[str] = mapped_column(String(80), default="")
+    caption_hi: Mapped[str] = mapped_column(String(120), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SiteContent(Base):
+    """The owner's inputs and the generated or edited site text. Room prices are
+    only what the owner typed (paise); generated text never carries a price."""
+
+    __tablename__ = "site_content"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), unique=True)
+    owner_description: Mapped[str] = mapped_column(Text, default="")
+    # JSON: [{"name": str, "price_paise": int, "blurb_en": str, "blurb_hi": str}]
+    rooms_json: Mapped[str] = mapped_column(Text, default="[]")
+    # JSON with description_en/hi, why_book_direct_en/hi (3 each), google_description_en/hi
+    content_json: Mapped[str] = mapped_column(Text, default="{}")
+    source: Mapped[str] = mapped_column(String(12), default="none")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SiteGenRun(Base):
+    """One generation call: tokens and outcome, for limits and the Settings usage panel."""
+
+    __tablename__ = "site_gen_run"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    status: Mapped[str] = mapped_column(String(16))
+    model: Mapped[str] = mapped_column(String(60), default="")
+    input_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    output_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cache_creation_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    cache_read_tokens: Mapped[int] = mapped_column(Integer, default=0)
+    fields_fallback: Mapped[int] = mapped_column(Integer, default=0)
