@@ -10,10 +10,16 @@ docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 - **Answers applied:** pillow-heif kept (D-102); helper commits 1a7838e,
   41e91de, caafbbd, 796faed reviewed and kept (D-104): the full 8-step loop
   with DEODAR-RS26 passed 2 of 2 on make demo-prod with 41e91de in place.
-- **Stage 1 (site-real), wave 2 merged:** B1 photos and generation API
-  (fe46efc, HEIC 1697c2f), B2 setup and review UI (a066287), B3 addresses
-  and sharing (40e2b43). Wave 3 tests (T1, T2) and wave 4 reviews (V1
-  security, V2 cost and honesty; V3 design next) running.
+- **Stage 1 (site-real):** B1 photos and generation API (fe46efc, HEIC
+  1697c2f), B2 setup and review UI (a066287), B3 addresses and sharing
+  (40e2b43); tests T1 (129 API cases) and T2 (site e2e); reviews V1 (1 high,
+  2 medium), V2 (3 high, 4 medium), V3 (1 high, 7 medium) all fixed
+  (caf08ec, 70b32ff), plus T1's two real bugs. Gates on site-real at
+  70b32ff: make check passed (pylint 9.98/9.99, coverage 98% and money
+  100%, pip-audit clean, web 205/205, e2e 78/78, secrets 0 in 208 commits,
+  firmware SUCCESS); e2e three runs in a row 78/78 each; the 8-step loop on
+  make demo-prod 2/2. Public hotel page LCP on slow 4G about 3.0 s (from
+  about 5.2 s), CLS 0. API suite on Postgres running.
 - **Stage 2 facts so far:** storage: photos in the database, statement files
   are parsed in memory (only rows and a SHA-256 kept), invoice PDFs rebuilt
   from booking rows on request; nothing lives only on disk. Local .env:
