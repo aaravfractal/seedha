@@ -26,6 +26,8 @@ dependencies = [
   "reportlab==5.0.1",
   # Site photos: resize, re-encode as JPEG, strip EXIF (docs/SITE_REAL.md)
   "pillow==12.3.0",
+  # HEIC/HEIF (iPhone) photos; owner-approved, wheels are GPLv2-labelled
+  "pillow-heif==1.8.1",
   # Postgres when hosted (Railway); binary wheels, no libpq build. SQLite needs nothing.
   "psycopg[binary]==3.3.6",
 ]

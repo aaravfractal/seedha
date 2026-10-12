@@ -1,8 +1,8 @@
 """Owner photos for the hotel site: checked by content, resized, re-encoded.
 
 Every upload is opened by Pillow and accepted only if its real format (not the
-declared content type) is JPEG, PNG or WebP, or HEIC when the optional
-pillow_heif package is installed. The picture is turned upright, converted to
+declared content type) is JPEG, PNG, WebP or HEIC/HEIF (iPhone photos, read
+by the pinned pillow-heif package). The picture is turned upright, converted to
 RGB, shrunk to at most 1024 px on the long side and saved as a new JPEG of
 about 200 KB built from pixels only, so no EXIF (including GPS), XMP or other
 metadata can survive. Bytes live in the database (site_photo), so they
@@ -17,18 +17,14 @@ from dataclasses import dataclass
 from io import BytesIO
 
 from PIL import Image, ImageOps, UnidentifiedImageError
+from pillow_heif import register_heif_opener
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, defer
 
 from app.models import SitePhoto
 
-try:  # optional: its binary wheels are GPLv2-labelled, so the owner decides
-    from pillow_heif import register_heif_opener  # type: ignore[import-not-found]
-
-    register_heif_opener()
-    HEIC_SUPPORTED = True
-except ImportError:  # pragma: no cover - depends on the environment
-    HEIC_SUPPORTED = False
+# HEIC/HEIF decoding (owner-approved dependency; its wheels are GPLv2-labelled).
+register_heif_opener()
 
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 MAX_PHOTOS = 8
@@ -36,11 +32,8 @@ MAX_SIDE = 1024
 TARGET_BYTES = 200_000
 QUALITIES = (85, 80, 75, 70, 65, 60)
 MAX_PIXELS = 40_000_000
-ALLOWED_FORMATS = frozenset({"JPEG", "PNG", "WEBP"})
-HEIF_FORMATS = frozenset({"HEIF", "HEIC"})
-HEIC_BRANDS = frozenset({b"heic", b"heix", b"hevc", b"hevx", b"heim", b"heis", b"mif1", b"msf1"})
-HEIC_MESSAGE = "HEIC photos are not supported yet. Please upload JPEG, PNG or WebP."
-TYPE_MESSAGE = "Please upload a JPEG, PNG or WebP photo."
+ALLOWED_FORMATS = frozenset({"JPEG", "PNG", "WEBP", "HEIF"})
+TYPE_MESSAGE = "Please upload a JPEG, PNG, WebP or HEIC photo."
 
 Image.MAX_IMAGE_PIXELS = MAX_PIXELS
 
@@ -65,21 +58,14 @@ class CleanPhoto:
     sha256: str
 
 
-def is_heic(data: bytes) -> bool:
-    """True for an ISO base media file with a HEIC/HEIF brand (by content)."""
-    return data[4:8] == b"ftyp" and data[8:12] in HEIC_BRANDS
-
-
 def _open(data: bytes) -> Image.Image:
     """Open and fully decode, refusing decompression bombs and unknown formats."""
-    if is_heic(data) and not HEIC_SUPPORTED:
-        raise PhotoError(415, "heic_not_supported", HEIC_MESSAGE)
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
             img = Image.open(BytesIO(data))
             fmt = (img.format or "").upper()
-            if fmt not in ALLOWED_FORMATS and not (HEIC_SUPPORTED and fmt in HEIF_FORMATS):
+            if fmt not in ALLOWED_FORMATS:
                 raise PhotoError(415, "unsupported_type", TYPE_MESSAGE)
             if img.width * img.height > MAX_PIXELS:
                 raise PhotoError(413, "photo_too_large", "This photo has too many pixels")
