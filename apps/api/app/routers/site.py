@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep, require_owner_session
 from app.errors import ApiError
 from app.models import Base, Property, SiteConfig
+from app.public_mode import is_production, is_real_owner
 from app.ratelimit import rate_limited
 from app.services.desk import business_date, utc_now
 from app.services.link import room_rates
@@ -333,7 +334,17 @@ def local_reset_only(request: Request) -> None:
     The web app's BFF forwards the real client address in X-Forwarded-For and
     uvicorn resolves it into request.client, so a visitor through the tunnel
     shows up with their own address, never loopback.
+
+    Hosted (SEEDHA_ENV=production) every client is remote, so the address
+    decides nothing: a signed-in session may reset only when it is a real
+    owner account (OWNER_PHONES). The demo subject (Direct beta login, open to
+    anyone) is refused. A server-side call with the owner token and no session
+    (the operator) passes on to the owner check.
     """
+    if is_production(request):
+        if "x-seedha-subject" in request.headers and not is_real_owner(request):
+            raise ApiError(403, "reset_owner_only", "Only the owner can reset the hosted demo")
+        return
     if os.environ.get("SEEDHA_PUBLIC", "") != "1":
         return
     host = request.client.host if request.client else ""
