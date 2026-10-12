@@ -4,6 +4,24 @@ Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
 
+
+## Overnight run (docs/OVERNIGHT.md), live status
+
+- **Answers applied:** pillow-heif kept (D-102); helper commits 1a7838e,
+  41e91de, caafbbd, 796faed reviewed and kept (D-104): the full 8-step loop
+  with DEODAR-RS26 passed 2 of 2 on make demo-prod with 41e91de in place.
+- **Stage 1 (site-real), wave 2 merged:** B1 photos and generation API
+  (fe46efc, HEIC 1697c2f), B2 setup and review UI (a066287), B3 addresses
+  and sharing (40e2b43). Wave 3 tests (T1, T2) and wave 4 reviews (V1
+  security, V2 cost and honesty; V3 design next) running.
+- **Stage 2 facts so far:** storage: photos in the database, statement files
+  are parsed in memory (only rows and a SHA-256 kept), invoice PDFs rebuilt
+  from booking rows on request; nothing lives only on disk. Local .env:
+  ANTHROPIC_API_KEY set, CLAUDE_MODEL set, SITE_GEN_MODEL not set,
+  EVENT_SCAN_MODEL not set. Overview step 6 bug fixed by 41e91de (D-103).
+- **Event discovery:** not part of the overnight brief; stays on its own
+  branch with the event-scan API unfinished in .worktrees/ev-api.
+
 ## Open work: FINAL MASTER (docs/FINAL_MASTER.md), 12 October 2026
 
 **Seedha Site real mode** (docs/SITE_REAL.md, branch `site-real`)
