@@ -1,19 +1,26 @@
-"""Shared fixtures: an in-memory database, the sample hotel, an API client."""
+"""Shared fixtures: a database, the sample hotel, an API client.
+
+The database is a fresh in-memory SQLite per test by default. With
+TEST_DATABASE_URL set (e.g. postgresql://localhost:5432/seedha_test)
+the same tests run on that Postgres: the tables are created once per session
+and emptied (identities restarted) after every test.
+"""
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterator
 from dataclasses import replace
 from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, create_engine, event
+from sqlalchemy import Engine, create_engine, event, text
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.config import Settings, load_settings
-from app.db import make_session_factory
+from app.db import make_engine, make_session_factory
 from app.main import create_app
 from app.models import Base
 from seed.load import load_sample
@@ -21,11 +28,38 @@ from seed.load import load_sample
 OWNER_TOKEN = "test-owner-token"
 DEVICE_KEY = "test-desk-key"  # pragma: allowlist secret (test value)
 DEMO_DATE = date(2026, 10, 13)
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "").strip()
+
+
+@pytest.fixture(name="server_engine", scope="session")
+def fixture_server_engine() -> Iterator[Engine | None]:
+    """The TEST_DATABASE_URL engine with every table created, or None for SQLite."""
+    if not TEST_DATABASE_URL:
+        yield None
+        return
+    eng = make_engine(TEST_DATABASE_URL)
+    Base.metadata.drop_all(eng)
+    Base.metadata.create_all(eng)
+    yield eng
+    Base.metadata.drop_all(eng)
+    eng.dispose()
+
+
+def empty_tables(eng: Engine) -> None:
+    """Remove every row and restart every id sequence (Postgres)."""
+    names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
+    with eng.begin() as conn:
+        conn.execute(text("SET LOCAL lock_timeout = '10s'"))
+        conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))  # noqa: S608
 
 
 @pytest.fixture(name="engine")
-def fixture_engine() -> Iterator[Engine]:
-    """A fresh in-memory SQLite database with foreign keys on."""
+def fixture_engine(server_engine: Engine | None) -> Iterator[Engine]:
+    """A fresh in-memory SQLite database with foreign keys on (or the emptied server DB)."""
+    if server_engine is not None:
+        yield server_engine
+        empty_tables(server_engine)
+        return
     eng = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )

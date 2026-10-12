@@ -154,7 +154,7 @@ def answer_payouts(session: Session, prop: Property, day: date) -> Answer:
             Booking.check_in <= day,
             Booking.check_in > day - timedelta(days=7),
         )
-        .group_by(Channel.key, Channel.name)
+        .group_by(Channel.key, Channel.name, Channel.sort_order)
         .order_by(Channel.sort_order)
     ).all()
     if not rows:
