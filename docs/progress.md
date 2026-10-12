@@ -3,6 +3,57 @@
 Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
+
+## Open work: state on 12 October 2026 (after a network failure)
+
+All background agents stopped on a TLS error (self-signed certificate in
+chain). Their partial work is uncommitted on disk in the worktrees below;
+nothing was lost. Restart each builder from its brief plus its status file.
+
+**Seedha Site real mode** (docs/SITE_REAL.md, branch `site-real`)
+- Done: brief saved (73eed0e); `deploy` merged in (6513396) so the branch has
+  the hosting, Postgres and readiness work; Wave 1 research R1 and R2
+  (docs/agent-reports/site-real/r1.md, r2.md); groundwork commit 0dadc4b:
+  migration 0014 (site_config slug, previous_slug, slug_changed_at,
+  hide_branding; site_photo; site_content; site_gen_run), Pillow 12.3.0
+  pinned, microphone=(self), SITE_GEN_MODEL / SITE_GEN_MONTHLY_TOKEN_CAP /
+  SITE_ROOT_DOMAIN in .env.example.
+- Wave 2 in progress, stopped early (uncommitted):
+  - B1 photos and generation API, worktree `.worktrees/sb1` (branch
+    `site-sb1`): config.py SITE_GEN_* settings and the status file
+    docs/agent-reports/site-real/b1.md with the design; services, router,
+    tests and the one-off script not started.
+  - B2 setup and review UI, worktree `.worktrees/sb2` (branch `site-sb2`):
+    lib/siteBuild.ts, lib/siteBuild.test.ts, lib/types-site-build.ts.
+  - B3 addresses and sharing, worktree `.worktrees/sb3` (branch `site-sb3`):
+    apps/api/app/services/slug.py.
+- Next: finish Wave 2 (B1, B2, B3), Wave 3 tests (T1, T2), Wave 4 reviews
+  (V1 to V3), Wave 5 finish (gates, merges into master and deploy, docs).
+- Decisions pending with the owner: HEIC (pillow-heif wheels are
+  GPLv2-labelled; default: HEIC only if that package is installed, else a
+  clear 415 message); the hotel route moves from /hotel/<slug> to /h/<slug>.
+
+**Event discovery** (docs/EVENT_DISCOVERY.md, branch `event-discovery`)
+- Done: brief (03740b5); web UI merged (1390eb2): Scan now, cooldown and
+  forced-rescan confirm, Suggested events queue, Found by AI events, scan
+  settings and usage.
+- In progress, stopped early: EV-API in `.worktrees/ev-api` (branch
+  `ev-api`, uncommitted): config, models, jobs, calendar and events edits,
+  new services/event_scan.py, routers/event_scan.py, tests/test_event_scan.py
+  and migration 0014_event_scan.py. Its migration number collides with
+  site-real's 0014: renumber or add an Alembic merge revision when the two
+  branches meet.
+- Not merged into master or deploy until the owner says so.
+
+**Final readiness** (docs/FINAL_READINESS.md, branch `deploy`): steps 1 and 2
+done (merges, three audits, every high and medium finding fixed; latest
+4757dd3). Steps 3 to 5 (gates, branch alignment, READY report) are folded
+into the Seedha Site finish.
+
+**Open worktrees:** `.worktrees/evd` (event-discovery), `.worktrees/ev-api`,
+`.worktrees/site` (site-real), `.worktrees/sb1`, `.worktrees/sb2`,
+`.worktrees/sb3`. The main checkout is on `deploy`.
+
 ## Polish build (12 October 2026, in progress)
 
 Brief: docs/POLISH_BUILD.md. Decision D-100. Status files:
