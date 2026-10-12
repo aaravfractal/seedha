@@ -51,3 +51,173 @@ DELIVER
    proof write on Amoy if the wallet is funded.
 3. make check and the Postgres CI workflow passing on the branch.
 Commit locally on "deploy" and give me a 6-line summary.
+
+---
+
+# Hosting guide: Railway (API and Postgres) and Vercel (web)
+
+Plain steps, in order. You create the accounts and push; nothing here
+creates them for you. Never paste a real secret into a file in this repo:
+secrets live only in the Railway and Vercel variable screens.
+
+## 0. Before you start
+
+- Push the `deploy` branch to GitHub. The workflow
+  `.github/workflows/api-postgres.yml` runs the full API test suite on
+  Postgres 16 and on SQLite on every push to `deploy` and `master`; wait
+  for both jobs to pass (the Postgres job takes about 25 minutes).
+- Generate three secrets once, on your laptop, and keep them in a password
+  manager. Use the same three values on Railway and Vercel.
+
+  ```bash
+  openssl rand -hex 32   # SESSION_SECRET
+  openssl rand -hex 32   # OWNER_API_TOKEN
+  openssl rand -hex 32   # DESK_DEVICE_KEY
+  ```
+
+## 1. Railway: project and Postgres
+
+1. railway.com, New Project, Deploy PostgreSQL. This adds a service named
+   `Postgres`.
+2. In the same project: New, GitHub Repo, choose this repository.
+3. On the new service: Settings, Source: branch `deploy`, Root Directory
+   `apps/api`. Config-as-code file path: `/apps/api/railway.json` (Railway
+   does not look for it under the root directory on its own).
+   The config builds with Railpack (Python 3.12 from `.python-version`,
+   packages from `requirements.txt`), starts with
+   `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`,
+   and checks health on `/health`. The two proxy flags make the API see each
+   guest's own address behind Railway's proxy, so rate limits work per
+   guest.
+4. Settings, Networking, Generate Domain. Note the URL,
+   `https://<api>.up.railway.app`. This is `API_BASE_URL` for Vercel.
+
+## 2. Railway: API variables
+
+API service, Variables. Mark the secret ones as sealed.
+
+| Name | Value | Secret |
+|---|---|---|
+| `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (reference variable) | yes |
+| `SEEDHA_ENV` | `production` | no |
+| `SESSION_SECRET` | generated: `openssl rand -hex 32` (same as Vercel) | yes |
+| `OWNER_API_TOKEN` | generated: `openssl rand -hex 32` (same as Vercel) | yes |
+| `DESK_DEVICE_KEY` | generated: `openssl rand -hex 32` (same as Vercel) | yes |
+| `WEB_ORIGIN` | `https://<project>.vercel.app` (after step 4) | no |
+| `PUBLIC_BASE_URL` | `https://<project>.vercel.app` (after step 4) | no |
+| `PROOF_RPC_URL` | `https://rpc-amoy.polygon.technology` (optional) | no |
+| `PROOF_CHAIN_ID` | `80002` (optional; any other value keeps proofs local) | no |
+| `PROOF_PRIVATE_KEY` | the testnet-only key from your local `.env` (optional) | yes |
+| `ANTHROPIC_API_KEY` | your key (optional; empty means labelled samples) | yes |
+| `CLAUDE_MODEL` | the model id, only with `ANTHROPIC_API_KEY` | no |
+| `ALLOW_CLAUDE_FOR_DEMO` | leave empty: visitors never spend your Claude credits | no |
+| `ALLOW_DEMO_PROOF_WRITES` | leave empty: visitors never spend testnet POL | no |
+| `ALLOW_OWNER_ACCOUNTS` | leave empty: sample hotel only, Direct beta login | no |
+
+Do not set `PORT` (Railway sets it). Leave the WhatsApp and Razorpay
+variables unset so messages and UPI stay simulated. If the build log shows
+a Python other than 3.12, add `RAILPACK_PYTHON_VERSION=3.12`.
+
+With `SEEDHA_ENV=production` the API refuses to start, and names the
+variable in the log (never its value), if a secret is missing, shorter
+than 32 characters or one of the published demo values, if an origin is
+not https, or if the database is SQLite.
+
+## 3. Railway: seed the sample hotel once
+
+The seed refuses a database that already has data, so it never wipes
+anything. Install the Railway CLI, then:
+
+```bash
+railway login
+railway link                       # pick the project and the API service
+railway ssh --service <api-service>
+python -m seed.load                # inside the container
+```
+
+Alternative from your laptop, in `apps/api`: copy the Postgres service's
+`DATABASE_PUBLIC_URL` from Railway and run
+`railway run --service <api-service> sh -c 'DATABASE_URL="<DATABASE_PUBLIC_URL>" .venv/bin/python -m seed.load'`.
+A plain `railway run` injects the internal database address, which your
+laptop cannot reach.
+
+## 4. Vercel: web project
+
+1. vercel.com, Add New, Project, import this repository.
+2. Production branch `deploy` (Settings, Git, if not asked on import).
+3. Root Directory `apps/web`, Framework Preset Next.js.
+4. Install Command `npm ci`, Build Command `npm run build`.
+5. Node.js Version 24.x (Settings, Build and Deployment).
+6. Function Region near the Railway region (Settings, Functions).
+7. Variables (Production):
+
+| Name | Value | Secret |
+|---|---|---|
+| `API_BASE_URL` | `https://<api>.up.railway.app` (from step 1.4) | no |
+| `SESSION_SECRET` | the same value as on Railway | yes |
+| `OWNER_API_TOKEN` | the same value as on Railway | yes |
+| `DESK_DEVICE_KEY` | the same value as on Railway | yes |
+| `SEEDHA_HOSTED` | `1` | no |
+| `WEB_ORIGIN` | `https://<project>.vercel.app` (optional, after the first deploy) | no |
+| `PUBLIC_CONTACT_EMAIL`, `PUBLIC_PRIVACY_EMAIL`, `PUBLIC_SECURITY_EMAIL` | role addresses (optional) | no |
+
+Never prefix `API_BASE_URL` or any secret with `NEXT_PUBLIC_`. Do not set
+`SEEDHA_DEMO` or `SEEDHA_PUBLIC` on Vercel. Browsers only ever call the
+Vercel origin; the web server calls Railway through its proxy.
+
+8. Deploy. Note the production URL `https://<project>.vercel.app`, set it
+   as `WEB_ORIGIN` and `PUBLIC_BASE_URL` on Railway (step 2) and redeploy
+   the API, then optionally set `WEB_ORIGIN` on Vercel and redeploy.
+
+## 5. Verify
+
+- `curl -s https://<api>.up.railway.app/health` returns `{"status":"ok", ...}`.
+  The deploy log says production mode and never shows a secret.
+- `https://<project>.vercel.app/api/health` returns the same JSON (the proxy works).
+- In the browser's Network panel every call goes to the Vercel origin, never to `railway.app`.
+
+## 6. Fresh demo data later
+
+Signed-in visitors on the hosted demo cannot reset it. You can, with the
+token:
+
+```bash
+curl -X POST -H "Authorization: Bearer $OWNER_API_TOKEN" https://<api>.up.railway.app/demo/reset
+```
+
+(2 a minute.) Run it before each judging session so the 8-step demo
+starts at "0 of 8 steps done".
+
+## 7. Roll back
+
+- API: Railway, API service, Deployments, pick the last good deployment,
+  Redeploy. Migrations only go forward: if the bad deploy added one,
+  restore the database too (Postgres service Backups if your plan has
+  them, or `pg_dump` and `pg_restore` with `DATABASE_PUBLIC_URL`; take a
+  dump before each deploy).
+- Web: Vercel, Deployments, the last good production deployment, Instant
+  Rollback (or Promote to Production). Variable changes need a redeploy.
+
+## Post-deploy checklist
+
+1. Health: the Railway `/health` and the Vercel `/api/health` both return ok.
+2. Sign in: `https://<project>.vercel.app/login` shows no sign-in code
+   banner; Direct beta login opens Hotel Deodar View with the Sample hotel
+   badge.
+3. The 8-step demo on the live URL (reset first, section 6): Upload sample
+   statements (1,500 rows, 3 flagged); the flip (₹10,39,108 paid to
+   channels, MakeMyTrip 1st to 5th); repeat guests (12, ₹41,800); Desk
+   consent on room 207; checkout slip with DEODAR-RS26; approve the
+   win-back; `/link/DEODAR-RS26` with simulated UPI; Savings ₹2,233 avoided,
+   ₹2,199 net. Home says "All 8 steps done".
+4. Desk on a phone: open `https://<project>.vercel.app/desk/device` on a
+   phone or tablet over mobile data, sign in, tap Sound on; check in a room
+   on the laptop; scan the QR with a second phone and agree; the Desk turns
+   green and the slip shows. The QR link starts with the Vercel URL.
+5. Proof on Amoy (only if the wallet is funded and `PROOF_*` are set): sign
+   in as a real owner, or set `ALLOW_DEMO_PROOF_WRITES=1` for the test and
+   remove it after; on Proof press "Write tonight's proof"; it shows Sent,
+   then Verified with a block number and an explorer link. Otherwise it
+   says Local only with the reason.
+6. Safety: as a signed-in visitor, the Calendar's Add events shows a
+   labelled sample extraction (no Claude spend) and proof writes stay local.

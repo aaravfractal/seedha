@@ -1,7 +1,9 @@
 /**
  * Which deploy this web server is, for the signed-in owner's screens. Only
  * booleans, never an address or a secret. Settings uses `hosted` to show
- * "Reset demo data" on the hosted site (the API still decides).
+ * "Reset demo data" on the hosted site to a real owner account only: the API
+ * refuses the Direct beta login (subject "demo") there, so the button is
+ * hidden for it rather than shown and refused.
  */
 import type { NextRequest } from "next/server";
 import { jsonError } from "@/lib/authServer";
@@ -17,6 +19,6 @@ export async function GET(request: NextRequest): Promise<Response> {
     nowSeconds(),
   );
   if (!session) return jsonError(401, "login_required", "Your session has ended. Sign in again.");
-  const body: WebMode = { hosted: isHosted() };
+  const body: WebMode = { hosted: isHosted() && session.subject !== "demo" };
   return Response.json(body, { headers: { "cache-control": "no-store" } });
 }
