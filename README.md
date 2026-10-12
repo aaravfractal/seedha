@@ -606,3 +606,5 @@ Next technical milestones:
 | Owner survey and real hotel statements | In progress |
 
 Users today: zero, deliberately. Every claim in this README is either working in the prototype or labelled as planned.
+
+Prototype branch for the live demo link.
