@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { inr } from "@/lib/format";
 import { MAX_ROOMS, MIN_ROOMS, paiseToRupeeText, roomRowError, rupeesToPaise } from "@/lib/siteBuild";
 import type { BuildRoom } from "@/lib/types-site-build";
@@ -31,6 +31,16 @@ export function RoomsEditor({
   showErrors: boolean;
 }) {
   const base = useId();
+  const addButton = useRef<HTMLButtonElement>(null);
+  // After Remove, focus the next row's name (or Add a room type) instead of the page.
+  const focusAfter = useRef<number | "add" | null>(null);
+  useEffect(() => {
+    const want = focusAfter.current;
+    if (want === null) return;
+    focusAfter.current = null;
+    if (want === "add") addButton.current?.focus();
+    else document.getElementById(`${base}-name-${want}`)?.focus();
+  }, [rows, base]);
   const change = (key: number, patch: Partial<RoomRow>) =>
     onRows(rows.map((r) => (r.key === key ? { ...r, ...patch } : r)));
 
@@ -88,7 +98,10 @@ export function RoomsEditor({
                 className="btn ghost small"
                 disabled={rows.length <= MIN_ROOMS}
                 aria-label={`Remove room ${i + 1}${row.name ? `, ${row.name}` : ""}`}
-                onClick={() => onRows(rows.filter((r) => r.key !== row.key))}
+                onClick={() => {
+                  focusAfter.current = rows[i + 1]?.key ?? "add";
+                  onRows(rows.filter((r) => r.key !== row.key));
+                }}
               >
                 Remove
               </button>
@@ -103,6 +116,7 @@ export function RoomsEditor({
       </ol>
       <div>
         <button
+          ref={addButton}
           type="button"
           className="btn ghost"
           disabled={rows.length >= MAX_ROOMS}

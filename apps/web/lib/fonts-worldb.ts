@@ -22,6 +22,9 @@ const dmSerif = localFont({
   weight: "400",
   variable: "--font-wb-stone",
   display: "swap",
+  // Stone and Sky load when a page uses that mood; Pine (the default) and
+  // Mukta Latin are preloaded so the hero text does not swap late.
+  preload: false,
 });
 
 const outfit = localFont({
@@ -29,6 +32,7 @@ const outfit = localFont({
   weight: "600",
   variable: "--font-wb-sky",
   display: "swap",
+  preload: false,
 });
 
 // Mukta's Latin subset: World B body text is Mukta in English too (design QA

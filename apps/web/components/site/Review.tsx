@@ -96,6 +96,18 @@ function BuildEditor({
   const [generating, setGenerating] = useState(false);
   const [result, setResult] = useState<GenerateResult | null>(null);
   const current = build ?? loaded.data;
+  const note = useRef<HTMLDivElement>(null);
+  const regenButton = useRef<HTMLButtonElement>(null);
+  const focusNote = useRef(false);
+
+  // The confirm closes onto a button that is disabled while it writes: keep
+  // focus on the status note instead, then on the result (or the button).
+  useEffect(() => {
+    if (!focusNote.current) return;
+    if (generating || result) note.current?.focus();
+    else regenButton.current?.focus();
+    if (!generating) focusNote.current = false;
+  }, [generating, result]);
 
   if (loaded.error && !current) {
     return <ErrorState message={loaded.error.message} code={loaded.error.code} onRetry={loaded.reload} />;
@@ -115,6 +127,7 @@ function BuildEditor({
   }
 
   async function regenerate() {
+    focusNote.current = true;
     setConfirm(false);
     setGenerating(true);
     setResult(null);
@@ -163,6 +176,7 @@ function BuildEditor({
       </div>
       <div className={b.regen}>
         <button
+          ref={regenButton}
           type="button"
           className="btn ghost"
           disabled={generating || limitHit}
@@ -172,7 +186,7 @@ function BuildEditor({
         </button>
         <span className={b.hint}>{allowanceText(current)}</span>
       </div>
-      <div aria-live="polite">
+      <div aria-live="polite" ref={note} tabIndex={-1} className={b.liveNote}>
         {generating ? (
           <div className={b.field}>
             <p className={b.label}>Writing your site again. This can take up to a minute.</p>
@@ -223,15 +237,23 @@ export function Review({
   onChange,
   onSiteChanged,
   onPackages,
+  claimFocus,
 }: {
   site: OwnerSite;
   busy: boolean;
+  /** True once when Review was just opened from the build steps: focus its heading. */
+  claimFocus?: () => boolean;
   onLook: (patch: { mood?: Mood; lang?: Lang }) => void;
   onChange: () => void;
   onSiteChanged: () => void;
   onPackages: () => void;
 }) {
   const approved = site.packages.filter((p) => p.approved);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const [picked, setPicked] = useState("");
+  useEffect(() => {
+    if (claimFocus?.()) heading.current?.focus();
+  }, [claimFocus]);
   const today = new Date().toISOString().slice(0, 10);
   const page = (
     <div className={worldBFonts}>
@@ -243,7 +265,9 @@ export function Review({
     <div className={o.stack}>
       <div className={o.reviewHead}>
         <div>
-          <h2 className={o.h2}>Your hotel, online.</h2>
+          <h2 ref={heading} tabIndex={-1} className={o.h2}>
+            Your hotel, online.
+          </h2>
           <p className={o.sub}>
             {site.live ? "Live now. Saved changes show on your site." : "Check every line, then publish."}
           </p>
@@ -307,7 +331,7 @@ export function Review({
               <i style={{ background: "#FF5F57" }} />
               <i style={{ background: "#FEBC2E" }} />
               <i style={{ background: "#28C840" }} />
-              <span className={o.url}>{site.address}</span>
+              <span className={o.url}>{picked || site.address}</span>
             </div>
             <PreviewFrame width={1280} height={560} label="Desktop preview of your site. Scroll to see more.">
               {page}
@@ -324,7 +348,7 @@ export function Review({
         <ul className={o.checklist}>
           <li data-optional={approved.length === 0}>
             <span>Packages</span>
-            <button type="button" className="link" onClick={onPackages}>
+            <button type="button" className={`link ${o.linkBtn}`} onClick={onPackages}>
               {approved.length} of {site.packages.length} approved
             </button>
           </li>
@@ -356,7 +380,7 @@ export function Review({
         </div>
       </div>
 
-      <PublishPanel hotelName={site.hotel} onPublished={onSiteChanged} />
+      <PublishPanel hotelName={site.hotel} onPublished={onSiteChanged} onAddress={setPicked} />
     </div>
   );
 }

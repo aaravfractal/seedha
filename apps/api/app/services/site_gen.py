@@ -26,6 +26,7 @@ from typing import Any, Literal, Protocol
 import anthropic
 from anthropic.types import ContentBlockParam, ImageBlockParam, OutputConfigParam
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import Property, SiteContent, SiteGenRun, SitePhoto
@@ -202,13 +203,25 @@ class Room:
 
 
 def get_content(session: Session, property_id: int) -> SiteContent:
-    """The property's site content row, created empty on first use."""
-    row = session.scalar(select(SiteContent).where(SiteContent.property_id == property_id))
-    if row is None:
-        row = SiteContent(property_id=property_id, owner_description="", rooms_json="[]",
-                          content_json="{}", source="none")  # fmt: skip
-        session.add(row)
-        session.flush()
+    """The property's site content row, created empty on first use.
+
+    Two first requests can race (the owner screen loads it twice at once);
+    the loser's insert is rolled back to a savepoint and it reads the row
+    the winner created, so neither request fails.
+    """
+    query = select(SiteContent).where(SiteContent.property_id == property_id)
+    row = session.scalar(query)
+    if row is not None:
+        return row
+    try:
+        with session.begin_nested():
+            row = SiteContent(property_id=property_id, owner_description="", rooms_json="[]",
+                              content_json="{}", source="none")  # fmt: skip
+            session.add(row)
+    except IntegrityError:
+        row = session.scalar(query)
+        if row is None:  # pragma: no cover - the conflicting row must exist
+            raise
     return row
 
 

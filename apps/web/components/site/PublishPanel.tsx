@@ -30,10 +30,13 @@ function errorText(err: unknown, fallback: string): string {
 export function PublishPanel({
   hotelName,
   onPublished,
+  onAddress,
 }: {
   hotelName: string;
   /** Optional: lets the screen reload its own copy of the site after a publish. */
   onPublished?: () => void;
+  /** Optional: the address as it will look (the live one, or the one being picked). */
+  onAddress?: (address: string) => void;
 }) {
   const inputId = useId();
   const noteId = useId();
@@ -48,6 +51,20 @@ export function PublishPanel({
   const [editing, setEditing] = useState(false);
   const [appHost, setAppHost] = useState("");
   const asked = useRef(0);
+  // After Publish, Change address and Cancel the section is replaced: put focus
+  // on the new heading or control instead of letting it fall to the page.
+  const focusTo = useRef<"live" | "input" | "change" | null>(null);
+  const liveHeading = useRef<HTMLHeadingElement>(null);
+  const changeButton = useRef<HTMLButtonElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const want = focusTo.current;
+    if (!want) return;
+    focusTo.current = null;
+    if (want === "live") liveHeading.current?.focus();
+    else if (want === "change") changeButton.current?.focus();
+    else input.current?.focus();
+  });
 
   async function load() {
     setLoadError(null);
@@ -86,6 +103,19 @@ export function PublishPanel({
     return () => clearTimeout(timer);
   }, [slug, local, info]);
 
+  // The address as it will look, for the preview's browser bar on Review.
+  const checked = check.state === "done" && check.result.slug === slug ? check.result : null;
+  const showsLive = Boolean(info?.published && info.url && info.slug && !editing);
+  let looksLike = "";
+  if (info && showsLive) looksLike = (info.url ?? "").replace(/^https?:\/\//, "");
+  else if (info && slug && !local)
+    looksLike = checked?.ok
+      ? checked.url.replace(/^https?:\/\//, "")
+      : siteAddress(slug, info.root_domain, appHost);
+  useEffect(() => {
+    onAddress?.(looksLike);
+  }, [looksLike, onAddress]);
+
   async function publish() {
     setBusy(true);
     setError(null);
@@ -95,6 +125,7 @@ export function PublishPanel({
         old ? { ...old, slug: done.slug, url: done.url, address: done.address, published: true } : old,
       );
       setEditing(false);
+      focusTo.current = "live";
       toast("Your site is live");
       onPublished?.();
     } catch (err) {
@@ -157,16 +188,18 @@ export function PublishPanel({
   if (live && info.url && info.slug && !editing) {
     return (
       <section className={p.panel} aria-labelledby={`${inputId}-title`}>
-        <h2 id={`${inputId}-title`} className={p.title}>
+        <h2 id={`${inputId}-title`} ref={liveHeading} tabIndex={-1} className={p.title}>
           Your site is live
         </h2>
         <SiteAddress url={info.url} slug={info.slug} hotelName={hotelName} />
         {branding}
         <button
+          ref={changeButton}
           type="button"
           className="btn ghost small"
           onClick={() => {
             setSlug(info.slug ?? slug);
+            focusTo.current = "input";
             setEditing(true);
           }}
         >
@@ -204,6 +237,7 @@ export function PublishPanel({
       </label>
       <div className={p.field}>
         <input
+          ref={input}
           id={inputId}
           className={p.input}
           value={slug}
@@ -240,7 +274,14 @@ export function PublishPanel({
           {busy ? "Publishing" : live ? "Save new address" : "Publish site"}
         </button>
         {live ? (
-          <button type="button" className="btn ghost" onClick={() => setEditing(false)}>
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() => {
+              focusTo.current = "change";
+              setEditing(false);
+            }}
+          >
             Cancel
           </button>
         ) : null}

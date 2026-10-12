@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ApiError, api, postJson, useApi } from "@/lib/api";
 import type { Lang, Mood, OwnerSite } from "@/lib/types-site";
 import { ErrorState, Loading } from "@/components/States";
@@ -57,14 +57,27 @@ export default function SitePage() {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<Tab>("site");
+  // After a stage change by button, the new screen takes focus once (its heading).
+  const focusNext = useRef(false);
+  const claimFocus = useCallback(() => {
+    const take = focusNext.current;
+    focusNext.current = false;
+    return take;
+  }, []);
+  async function goStage(stage: "chat" | "review") {
+    focusNext.current = true;
+    if (!(await run(() => patch("site", { stage })))) focusNext.current = false;
+  }
 
-  async function run(work: () => Promise<OwnerSite>, note?: string) {
+  async function run(work: () => Promise<OwnerSite>, note?: string): Promise<boolean> {
     setBusy(true);
     try {
       site.setData(await work());
       if (note) toast(note);
+      return true;
     } catch (err) {
       toast(err instanceof ApiError ? err.message : "That did not work. Try again.");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -151,12 +164,7 @@ export default function SitePage() {
         <p className={o.sub} style={{ margin: 0 }}>
           No website? Add a few photos and a few lines, and we build one with direct booking.
         </p>
-        <button
-          type="button"
-          className="btn"
-          disabled={busy}
-          onClick={() => run(() => patch("site", { stage: "chat" }))}
-        >
+        <button type="button" className="btn" disabled={busy} onClick={() => void goStage("chat")}>
           Build my site
         </button>
         <p className={o.muted} style={{ margin: 0, fontSize: 15 }}>
@@ -170,16 +178,17 @@ export default function SitePage() {
       </section>
     );
   } else if (s.stage === "chat") {
-    body = <BuildFlow busy={busy} onReview={() => run(() => patch("site", { stage: "review" }))} />;
+    body = <BuildFlow busy={busy} claimFocus={claimFocus} onReview={() => void goStage("review")} />;
   } else {
     body = (
       <Review
         site={s}
         busy={busy}
         onLook={(look: { mood?: Mood; lang?: Lang }) => run(() => patch("site", look))}
-        onChange={() => run(() => patch("site", { stage: "chat" }))}
+        onChange={() => void goStage("chat")}
         onSiteChanged={site.reload}
         onPackages={() => setTab("packages")}
+        claimFocus={claimFocus}
       />
     );
   }

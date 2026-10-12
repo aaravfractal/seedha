@@ -1,6 +1,7 @@
 /* Publish and share (end of Review). World A tokens from app/globals.css. */
 .panel {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   justify-items: start;
   padding: 20px;
@@ -62,11 +63,13 @@
 }
 .address {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   width: 100%;
 }
 .addressText {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2px;
   min-width: 0;
 }

@@ -40,22 +40,24 @@ export function AiUsage() {
               </span>
             </span>
           </div>
-          <div className={s.row}>
+          <div className={`${s.row} ${s.stackPhone}`}>
             <span className={s.rowText}>
               <span className={s.rowLabel}>Tokens this month</span>
               <span className={s.rowHint}>Input includes cached photo tokens</span>
             </span>
             <span className={s.rowValue}>
-              {count(u.month_input_tokens)} in · {count(u.month_output_tokens)} out
+              <span className={s.nowrap}>{count(u.month_input_tokens)} in</span> ·{" "}
+              <span className={s.nowrap}>{count(u.month_output_tokens)} out</span>
             </span>
           </div>
-          <div className={s.row}>
+          <div className={`${s.row} ${s.stackPhone}`}>
             <span className={s.rowText}>
               <span className={s.rowLabel}>Monthly cap</span>
               <span className={s.rowHint}>Generation stops for the month at the cap</span>
             </span>
             <span className={s.rowValue}>
-              {count(u.month_input_tokens + u.month_output_tokens)} of {count(u.monthly_token_cap)}
+              <span className={s.nowrap}>{count(u.month_input_tokens + u.month_output_tokens)}</span> of{" "}
+              <span className={s.nowrap}>{count(u.monthly_token_cap)}</span>
             </span>
           </div>
           <div className={s.row}>

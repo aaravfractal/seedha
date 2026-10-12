@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { fallbackLabels } from "@/lib/siteBuild";
 import type { BuildState, GenerateResult } from "@/lib/types-site-build";
 import { Modal } from "@/components/settings/Modal";
@@ -64,13 +65,15 @@ export function ConfirmGenerate({
   onClose: () => void;
 }) {
   const left = Math.max(0, build.daily_limit - build.generations_today);
+  const bodyId = useId();
   return (
     <Modal
       alert
+      describedBy={bodyId}
       title={build.key_configured ? "This uses AI credit" : "Write Sample text again?"}
       onClose={onClose}
     >
-      <p className={ms.sheetBody}>
+      <p id={bodyId} className={ms.sheetBody}>
         {build.key_configured
           ? `Claude writes all the site text again from your photos, words and rooms. It counts as 1 of ${build.daily_limit} runs today (${left} left).`
           : "No AI key is set up, so this writes Sample text again. It uses no AI credit."}

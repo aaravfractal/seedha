@@ -594,3 +594,8 @@ ul.list {
     justify-content: flex-start;
   }
 }
+
+/* A number and its unit never break across lines. */
+.nowrap {
+  white-space: nowrap;
+}
