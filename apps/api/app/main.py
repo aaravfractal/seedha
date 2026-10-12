@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.types import Message, Receive, Scope, Send
 
+from app.body_limit import BodyLimitMiddleware
 from app.config import ProductionConfigError, Settings, load_settings, production_problems
 from app.db import make_engine, make_session_factory
 from app.deps import OwnerDep, PropertyDep
@@ -125,6 +126,8 @@ def create_app(
     )
     if settings.production:
         api.add_middleware(ProxyTrustMiddleware, owner_token=settings.owner_api_token)
+    # Added last, so it runs first: oversized bodies never reach a route (V1-M1).
+    api.add_middleware(BodyLimitMiddleware)
     install_error_handlers(api)
     for name, enabled in (
         ("LLM", settings.llm_enabled),

@@ -139,7 +139,12 @@ export function HotelSite({
   }, []);
   const href = (type: string, day: string, n: number) =>
     bookingLink(site.booking_url ?? "/link", linkHref(type, day, n), here);
-  const firstRoom = site.rooms[0]?.room_type ?? "";
+  // Seedha Link books only rooms it charges at the shown price; the rest say "Ask the hotel".
+  const bookable = site.rooms.filter((r) => r.bookable);
+  const canBook = bookable.length > 0;
+  const phone = site.contact.phone;
+  const askHref = phone ? `https://wa.me/${waNumber(phone)}` : "";
+  const firstRoom = bookable[0]?.room_type ?? "";
   const [checkIn, setCheckIn] = useState(() => defaultCheckIn(today));
   const [nights, setNights] = useState(2);
   const [room, setRoom] = useState(firstRoom);
@@ -211,9 +216,15 @@ export function HotelSite({
             </button>
           ))}
         </div>
-        <a className={`${s.pill} ${s.headBook}`} href={`#${id("book")}`}>
-          {t.book}
-        </a>
+        {canBook ? (
+          <a className={`${s.pill} ${s.headBook}`} href={`#${id("book")}`}>
+            {t.book}
+          </a>
+        ) : askHref ? (
+          <a className={`${s.pill} ${s.headBook}`} href={askHref} rel="noopener noreferrer">
+            {t.askHotel}
+          </a>
+        ) : null}
       </header>
 
       <section className={s.hero} aria-labelledby={id("hotel-name")}>
@@ -236,73 +247,81 @@ export function HotelSite({
             {name}
           </h1>
           {site.tagline[lang] ? <p className={s.tagline}>{site.tagline[lang]}</p> : null}
-          <a className={`${s.pill} ${s.pillLight}`} href={`#${id("book")}`}>
-            {t.book}
-          </a>
+          {canBook ? (
+            <a className={`${s.pill} ${s.pillLight}`} href={`#${id("book")}`}>
+              {t.book}
+            </a>
+          ) : askHref ? (
+            <a className={`${s.pill} ${s.pillLight}`} href={askHref} rel="noopener noreferrer">
+              {t.askHotel}
+            </a>
+          ) : null}
         </div>
       </section>
 
-      <form id={id("book")} className={s.bar} onSubmit={submit} noValidate>
-        <label className={s.field}>
-          <span>{t.checkIn}</span>
-          <input
-            type="date"
-            value={checkIn}
-            min={addDays(today, 1)}
-            max={addDays(today, 365)}
-            required
-            onChange={(e) => {
-              setCheckIn(e.target.value);
-              void check(e.target.value, nights, room);
-            }}
-          />
-        </label>
-        <label className={s.field}>
-          <span>{t.nights}</span>
-          <select
-            value={nights}
-            onChange={(e) => {
-              const n = Number(e.target.value);
-              setNights(n);
-              void check(checkIn, n, room);
-            }}
-          >
-            {Array.from({ length: MAX_NIGHTS }, (_, i) => i + 1).map((n) => (
-              <option key={n} value={n}>
-                {nightsLabel(n, lang)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className={s.field}>
-          <span>{t.room}</span>
-          <select
-            value={room}
-            onChange={(e) => {
-              setRoom(e.target.value);
-              void check(checkIn, nights, e.target.value);
-            }}
-          >
-            {site.rooms.map((r) => (
-              <option key={r.room_type} value={r.room_type}>
-                {roomName(r)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button type="submit" className={s.barBook} aria-disabled={status.kind === "closed"}>
-          {site.hide_branding ? (
-            t.bookShort
-          ) : (
-            <>
-              {brand.book} <span className={s.powered}>· {brand.powered}</span>
-            </>
-          )}
-        </button>
-        <p className={`${s.barNote} ${closedReason ? s.closed : ""}`} role="status" aria-live="polite">
-          {message}
-        </p>
-      </form>
+      {canBook ? (
+        <form id={id("book")} className={s.bar} onSubmit={submit} noValidate>
+          <label className={s.field}>
+            <span>{t.checkIn}</span>
+            <input
+              type="date"
+              value={checkIn}
+              min={addDays(today, 1)}
+              max={addDays(today, 365)}
+              required
+              onChange={(e) => {
+                setCheckIn(e.target.value);
+                void check(e.target.value, nights, room);
+              }}
+            />
+          </label>
+          <label className={s.field}>
+            <span>{t.nights}</span>
+            <select
+              value={nights}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                setNights(n);
+                void check(checkIn, n, room);
+              }}
+            >
+              {Array.from({ length: MAX_NIGHTS }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {nightsLabel(n, lang)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className={s.field}>
+            <span>{t.room}</span>
+            <select
+              value={room}
+              onChange={(e) => {
+                setRoom(e.target.value);
+                void check(checkIn, nights, e.target.value);
+              }}
+            >
+              {bookable.map((r) => (
+                <option key={r.room_type} value={r.room_type}>
+                  {roomName(r)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button type="submit" className={s.barBook} aria-disabled={status.kind === "closed"}>
+            {site.hide_branding ? (
+              t.bookShort
+            ) : (
+              <>
+                {brand.book} <span className={s.powered}>· {brand.powered}</span>
+              </>
+            )}
+          </button>
+          <p className={`${s.barNote} ${closedReason ? s.closed : ""}`} role="status" aria-live="polite">
+            {message}
+          </p>
+        </form>
+      ) : null}
 
       {about ? (
         <section className={s.section} aria-labelledby={id("about")}>
@@ -358,13 +377,24 @@ export function HotelSite({
                     <p className={s.price}>
                       <b className={s.num}>{inr(r.nightly_rate)}</b> <span>{t.aNight}</span>
                     </p>
-                    <a
-                      className={s.pill}
-                      href={href(r.room_type, checkIn, nights)}
-                      aria-label={`${t.bookShort}: ${roomName(r)}`}
-                    >
-                      {t.bookShort}
-                    </a>
+                    {r.bookable ? (
+                      <a
+                        className={s.pill}
+                        href={href(r.room_type, checkIn, nights)}
+                        aria-label={`${t.bookShort}: ${roomName(r)}`}
+                      >
+                        {t.bookShort}
+                      </a>
+                    ) : askHref ? (
+                      <a
+                        className={s.pill}
+                        href={askHref}
+                        rel="noopener noreferrer"
+                        aria-label={`${t.askHotel}: ${roomName(r)}`}
+                      >
+                        {t.askHotel}
+                      </a>
+                    ) : null}
                   </div>
                 </div>
               </article>
@@ -434,28 +464,30 @@ export function HotelSite({
         </section>
       ) : null}
 
-      <section className={s.section} aria-labelledby={id("contact")}>
-        <h2 id={id("contact")} className={`${s.display} ${s.h2}`}>
-          {t.contact}
-        </h2>
-        <ul className={s.list}>
-          <li>
-            <span>{t.whatsapp}</span>
-            <a
-              className={s.link}
-              href={`https://wa.me/${waNumber(site.contact.phone)}`}
-              rel="noopener noreferrer"
-            >
-              {site.contact.phone}
-            </a>
-          </li>
-          <li>
-            <span>{t.upi}</span>
-            <span className={s.num}>{site.contact.upi}</span>
-          </li>
-        </ul>
-        {site.contact.placeholder ? <p className={s.note}>{t.placeholders}</p> : null}
-      </section>
+      {phone || site.contact.upi ? (
+        <section className={s.section} aria-labelledby={id("contact")}>
+          <h2 id={id("contact")} className={`${s.display} ${s.h2}`}>
+            {t.contact}
+          </h2>
+          <ul className={s.list}>
+            {phone ? (
+              <li>
+                <span>{t.whatsapp}</span>
+                <a className={s.link} href={askHref} rel="noopener noreferrer">
+                  {phone}
+                </a>
+              </li>
+            ) : null}
+            {site.contact.upi ? (
+              <li>
+                <span>{t.upi}</span>
+                <span className={s.num}>{site.contact.upi}</span>
+              </li>
+            ) : null}
+          </ul>
+          {site.contact.placeholder ? <p className={s.note}>{t.placeholders}</p> : null}
+        </section>
+      ) : null}
 
       <footer className={s.foot}>
         {site.sample ? <p>{t.sampleHotel}</p> : null}

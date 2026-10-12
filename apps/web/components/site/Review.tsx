@@ -79,7 +79,15 @@ function PreviewFrame({
  * first because it uses AI credit and replaces the text. `onSiteChanged`
  * reloads the preview after each save.
  */
-function BuildEditor({ onSiteChanged, onChange }: { onSiteChanged: () => void; onChange: () => void }) {
+function BuildEditor({
+  live,
+  onSiteChanged,
+  onChange,
+}: {
+  live: boolean;
+  onSiteChanged: () => void;
+  onChange: () => void;
+}) {
   const toast = useToast();
   const loaded = useApi<BuildState>("site/build");
   const [build, setBuild] = useState<BuildState | null>(null);
@@ -98,7 +106,7 @@ function BuildEditor({ onSiteChanged, onChange }: { onSiteChanged: () => void; o
     try {
       setBuild(await patchBuild(patch));
       onSiteChanged();
-      toast("Saved. Only you see it until you publish.");
+      toast(live ? "Saved. It is on your site now." : "Saved. Only you see it until you publish.");
       return true;
     } catch (err) {
       toast(errorText(err));
@@ -309,7 +317,7 @@ export function Review({
         </div>
       </div>
 
-      <BuildEditor onSiteChanged={onSiteChanged} onChange={onChange} />
+      <BuildEditor live={site.live} onSiteChanged={onSiteChanged} onChange={onChange} />
 
       <div className={o.card}>
         <h3 className={o.cardTitle}>Also on your site</h3>
@@ -322,7 +330,13 @@ export function Review({
           </li>
           <li>
             <span>Contact and UPI</span>
-            <span className={o.muted}>{site.contact.placeholder ? "Placeholders" : "Added"}</span>
+            <span className={o.muted}>
+              {site.contact.placeholder
+                ? "Placeholders"
+                : site.contact.phone || site.contact.upi
+                  ? "Added"
+                  : "Not added yet"}
+            </span>
           </li>
         </ul>
         <div className={o.actions}>

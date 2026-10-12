@@ -21,7 +21,13 @@ from app.errors import ApiError
 from app.models import Property
 from app.ratelimit import rate_limited
 from app.routers.auth import NowDep
-from app.routers.site import PublicPackageOut, SiteContentOut, public_package, site_content
+from app.routers.site import (
+    PublicPackageOut,
+    SiteContentOut,
+    public_package,
+    sample_locked,
+    site_content,
+)
 from app.services.desk import business_date, utc_now
 from app.services.link import free_room, room_rates
 from app.services.site import get_config, packages
@@ -100,18 +106,20 @@ def resolve_slug(slug: str, session: SessionDep, now: NowDep) -> ResolveOut:
 
 
 @router.get("/{slug}/photos/{photo_id}", dependencies=[PHOTO_LIMIT])
-def public_photo(
+def public_photo(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     slug: str,
     photo_id: int,
     session: SessionDep,
+    settings: SettingsDep,
     now: NowDep,
     if_none_match: Annotated[str | None, Header()] = None,
 ) -> Response:
     """A published site's photo. Cached a day by browsers and CDNs; the URL
-    carries ?v=<hash> so a replaced photo gets a new address."""
+    carries ?v=<hash> so a replaced photo gets a new address. Never a photo a
+    visitor uploaded to the shared demo's sample hotel (production)."""
     prop, _ = find_site(session, slug, now)
     row = None
-    if get_config(session, prop.id).published_at is not None:
+    if get_config(session, prop.id).published_at is not None and not sample_locked(prop, settings):
         row = find_photo(session, prop.id, photo_id)
     if row is None:
         raise ApiError(404, "no_such_photo", "No photo with that id")
