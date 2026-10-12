@@ -17,6 +17,8 @@ PUBLIC = {
     ("POST", "/public/data-deletion"),
     ("GET", "/public/site/{slug}"),
     ("GET", "/public/site/{slug}/availability"),
+    ("GET", "/public/site/{slug}/resolve"),
+    ("GET", "/public/site/{slug}/photos/{photo_id}"),
     ("GET", "/public/sample"),
     ("GET", "/webhooks/whatsapp"),
     ("POST", "/webhooks/whatsapp"),

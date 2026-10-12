@@ -49,7 +49,8 @@ def test_site_flow_and_package_prices(client: TestClient, owner: dict[str, str])
     assert [p["approved"] for p in body["packages"]] == [True, False, False]
     assert client.post("/site/packages/zz", headers=owner).status_code == 404
     live = client.post("/site/publish", headers=owner).json()
-    assert live["live"] is True and live["published_at"]
+    assert live["published"] is True and live["published_at"]
+    assert client.get("/site", headers=owner).json()["live"] is True
     assert client.patch("/site", headers=owner, json={"mood": "neon"}).status_code == 422
 
 

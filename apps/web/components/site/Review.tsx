@@ -342,7 +342,7 @@ export function Review({
         </div>
       </div>
 
-      <PublishPanel hotelName={site.hotel} />
+      <PublishPanel hotelName={site.hotel} onPublished={onSiteChanged} />
     </div>
   );
 }

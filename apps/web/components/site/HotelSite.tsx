@@ -1,11 +1,12 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { api } from "@/lib/api";
 import { inr } from "@/lib/format";
 import { addDays } from "@/lib/linkPrefill";
-import type { Availability, Lang, Mood, PublicPackage, SiteContent } from "@/lib/types-site";
+import { bookingLink } from "@/lib/siteHost";
+import type { Availability, Lang, Mood, PublicPackage, SiteContent, SitePhoto } from "@/lib/types-site";
 import { COPY, defaultCheckIn, linkHref, nightsLabel, waNumber } from "./copy";
 import s from "./worldb.module.css";
 
@@ -23,6 +24,16 @@ const GALLERY_PHOTOS = [
   "linear-gradient(160deg,#8A6E5E,#5D5A63)",
 ];
 const MAX_NIGHTS = 14;
+// Seedha branding on hotel pages; a Pro setting (hide_branding) removes it.
+const BRAND = {
+  en: { book: "Book direct", powered: "Powered by Seedha", built: "Built with Seedha", about: "About us" },
+  hi: {
+    book: "सीधे बुक करें",
+    powered: "Powered by Seedha",
+    built: "Built with Seedha",
+    about: "हमारे बारे में",
+  },
+} as const;
 
 type Status = { kind: "idle" } | { kind: "checking" } | { kind: "open" } | { kind: "closed"; reason: string };
 
@@ -42,6 +53,46 @@ export function Photo({
     <div className={`${s.photo} ${className ?? ""}`} style={{ background }}>
       {chip ? <span className={s.chip}>{chip}</span> : null}
       {label ? <span className={s.photoLabel}>{label}</span> : null}
+    </div>
+  );
+}
+
+/** A photo's caption in the page language (Hindi falls back to English). */
+function caption(photo: SitePhoto, lang: Lang): string {
+  return lang === "hi" ? photo.caption_hi || photo.caption_en : photo.caption_en;
+}
+
+/** One of the owner's own photos, sized up front so the page does not jump while it loads. */
+export function OwnerPhoto({
+  photo,
+  lang,
+  label,
+  className,
+  eager = false,
+}: {
+  photo: SitePhoto;
+  lang: Lang;
+  label?: string;
+  className?: string;
+  eager?: boolean;
+}) {
+  return (
+    <div className={`${s.photo} ${className ?? ""}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- same-origin API photos, already resized and cached; next/image would re-encode them per host */}
+      <img
+        className={s.photoImg}
+        src={photo.url}
+        alt={caption(photo, lang)}
+        width={photo.width}
+        height={photo.height}
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+      />
+      {label ? (
+        <span className={s.photoLabel} aria-hidden="true">
+          {label}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -74,6 +125,20 @@ export function HotelSite({
   preview?: boolean;
 }) {
   const t = COPY[lang];
+  const brand = BRAND[lang];
+  const photos = site.photos ?? [];
+  const points = site.text?.why_book_direct[lang].filter(Boolean) ?? [];
+  const about = site.text?.description[lang] ?? "";
+  const hero = photos[0];
+  // Same-origin path on the server and first render; the hotel-host fix-up runs after hydration.
+  const [here, setHere] = useState<{ protocol: string; hostname: string; port: string } | undefined>();
+  useEffect(() => {
+    const { protocol, hostname, port } = window.location;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one read of the host after hydration
+    setHere({ protocol, hostname, port });
+  }, []);
+  const href = (type: string, day: string, n: number) =>
+    bookingLink(site.booking_url ?? "/link", linkHref(type, day, n), here);
   const firstRoom = site.rooms[0]?.room_type ?? "";
   const [checkIn, setCheckIn] = useState(() => defaultCheckIn(today));
   const [nights, setNights] = useState(2);
@@ -107,7 +172,7 @@ export function HotelSite({
     event.preventDefault();
     if (preview) return;
     if (status.kind === "closed") return;
-    if (await check(checkIn, nights, room)) window.location.assign(linkHref(room, checkIn, nights));
+    if (await check(checkIn, nights, room)) window.location.assign(href(room, checkIn, nights));
   }
 
   const closedReason = status.kind === "closed" ? (status.reason as keyof typeof t.closed) : null;
@@ -152,13 +217,25 @@ export function HotelSite({
       </header>
 
       <section className={s.hero} aria-labelledby={id("hotel-name")}>
-        <span className={s.chip}>{t.samplePhoto}</span>
+        {hero ? (
+          // eslint-disable-next-line @next/next/no-img-element -- see OwnerPhoto
+          <img
+            className={s.photoImg}
+            src={hero.url}
+            alt={caption(hero, lang)}
+            width={hero.width}
+            height={hero.height}
+            fetchPriority="high"
+          />
+        ) : (
+          <span className={s.chip}>{t.samplePhoto}</span>
+        )}
         <div className={s.heroText}>
-          <p className={s.kicker}>{site.location[lang]}</p>
+          {site.location[lang] ? <p className={s.kicker}>{site.location[lang]}</p> : null}
           <h1 id={id("hotel-name")} className={`${s.display} ${s.h1}`}>
             {name}
           </h1>
-          <p className={s.tagline}>{site.tagline[lang]}</p>
+          {site.tagline[lang] ? <p className={s.tagline}>{site.tagline[lang]}</p> : null}
           <a className={`${s.pill} ${s.pillLight}`} href={`#${id("book")}`}>
             {t.book}
           </a>
@@ -214,24 +291,45 @@ export function HotelSite({
           </select>
         </label>
         <button type="submit" className={s.barBook} aria-disabled={status.kind === "closed"}>
-          {t.bookShort}
+          {site.hide_branding ? (
+            t.bookShort
+          ) : (
+            <>
+              {brand.book} <span className={s.powered}>· {brand.powered}</span>
+            </>
+          )}
         </button>
         <p className={`${s.barNote} ${closedReason ? s.closed : ""}`} role="status" aria-live="polite">
           {message}
         </p>
       </form>
 
+      {about ? (
+        <section className={s.section} aria-labelledby={id("about")}>
+          <h2 id={id("about")} className={`${s.display} ${s.h2}`}>
+            {brand.about}
+          </h2>
+          <p className={s.about}>{about}</p>
+        </section>
+      ) : null}
+
       <section className={s.section} aria-labelledby={id("why")}>
         <h2 id={id("why")} className={`${s.display} ${s.h2}`}>
           {t.why}
         </h2>
         <div className={s.why}>
-          {t.whyItems.map(([title, body]) => (
-            <div key={title}>
-              <h3>{title}</h3>
-              <p>{body}</p>
-            </div>
-          ))}
+          {points.length
+            ? points.map((point) => (
+                <div key={point}>
+                  <h3>{point}</h3>
+                </div>
+              ))
+            : t.whyItems.map(([title, body]) => (
+                <div key={title}>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </div>
+              ))}
         </div>
       </section>
 
@@ -240,31 +338,38 @@ export function HotelSite({
           {t.rooms}
         </h2>
         <div className={s.rooms}>
-          {site.rooms.map((r, i) => (
-            <article key={r.room_type} className={s.room}>
-              <Photo
-                background={ROOM_PHOTOS[i % ROOM_PHOTOS.length] ?? ""}
-                chip={t.samplePhoto}
-                className={s.roomPhoto}
-              />
-              <div className={s.roomBody}>
-                <h3 className={s.display}>{roomName(r)}</h3>
-                {r.detail[lang] ? <p className={s.muted}>{r.detail[lang]}</p> : null}
-                <div className={s.priceRow}>
-                  <p className={s.price}>
-                    <b className={s.num}>{inr(r.nightly_rate)}</b> <span>{t.aNight}</span>
-                  </p>
-                  <a
-                    className={s.pill}
-                    href={linkHref(r.room_type, checkIn, nights)}
-                    aria-label={`${t.bookShort}: ${roomName(r)}`}
-                  >
-                    {t.bookShort}
-                  </a>
+          {site.rooms.map((r, i) => {
+            const photo = photos.length ? photos[(i + 1) % photos.length] : undefined;
+            return (
+              <article key={r.room_type} className={s.room}>
+                {photo ? (
+                  <OwnerPhoto photo={photo} lang={lang} className={s.roomPhoto} />
+                ) : (
+                  <Photo
+                    background={ROOM_PHOTOS[i % ROOM_PHOTOS.length] ?? ""}
+                    chip={t.samplePhoto}
+                    className={s.roomPhoto}
+                  />
+                )}
+                <div className={s.roomBody}>
+                  <h3 className={s.display}>{roomName(r)}</h3>
+                  {r.detail[lang] ? <p className={s.muted}>{r.detail[lang]}</p> : null}
+                  <div className={s.priceRow}>
+                    <p className={s.price}>
+                      <b className={s.num}>{inr(r.nightly_rate)}</b> <span>{t.aNight}</span>
+                    </p>
+                    <a
+                      className={s.pill}
+                      href={href(r.room_type, checkIn, nights)}
+                      aria-label={`${t.bookShort}: ${roomName(r)}`}
+                    >
+                      {t.bookShort}
+                    </a>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       </section>
 
@@ -298,28 +403,36 @@ export function HotelSite({
           <h2 id={id("photos")} className={`${s.display} ${s.h2}`}>
             {t.photos}
           </h2>
-          <span className={s.chipQuiet}>{t.samplePhotos}</span>
+          {photos.length ? null : <span className={s.chipQuiet}>{t.samplePhotos}</span>}
         </div>
         <div className={s.gallery}>
-          {site.gallery.map((g, i) => (
-            <Photo key={g.en} background={GALLERY_PHOTOS[i % GALLERY_PHOTOS.length] ?? ""} label={g[lang]} />
-          ))}
+          {photos.length
+            ? photos.map((p) => <OwnerPhoto key={p.id} photo={p} lang={lang} label={caption(p, lang)} />)
+            : site.gallery.map((g, i) => (
+                <Photo
+                  key={g.en}
+                  background={GALLERY_PHOTOS[i % GALLERY_PHOTOS.length] ?? ""}
+                  label={g[lang]}
+                />
+              ))}
         </div>
       </section>
 
-      <section className={s.section} aria-labelledby={id("nearby")}>
-        <h2 id={id("nearby")} className={`${s.display} ${s.h2}`}>
-          {t.nearby}
-        </h2>
-        <ul className={s.list}>
-          {site.nearby.map((n) => (
-            <li key={n.place.en}>
-              <span>{n.place[lang]}</span>
-              <span className={s.muted}>{n.distance[lang]}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {site.nearby.length ? (
+        <section className={s.section} aria-labelledby={id("nearby")}>
+          <h2 id={id("nearby")} className={`${s.display} ${s.h2}`}>
+            {t.nearby}
+          </h2>
+          <ul className={s.list}>
+            {site.nearby.map((n) => (
+              <li key={n.place.en}>
+                <span>{n.place[lang]}</span>
+                <span className={s.muted}>{n.distance[lang]}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className={s.section} aria-labelledby={id("contact")}>
         <h2 id={id("contact")} className={`${s.display} ${s.h2}`}>
@@ -346,7 +459,7 @@ export function HotelSite({
 
       <footer className={s.foot}>
         {site.sample ? <p>{t.sampleHotel}</p> : null}
-        <p lang="en">{t.madeWith}</p>
+        {site.hide_branding ? null : <p lang="en">{brand.built}</p>}
       </footer>
     </div>
   );

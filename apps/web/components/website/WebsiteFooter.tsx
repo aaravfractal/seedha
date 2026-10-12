@@ -36,7 +36,7 @@ const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, s
   [
     "Seedha Site",
     [
-      ["/hotel/deodar-view", "Sample hotel site"],
+      ["/h/deodar-view", "Sample hotel site"],
       ["/rate-card", "Rate card"],
       ["/agent-deck", "Agent deck"],
     ],

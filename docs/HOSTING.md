@@ -210,6 +210,64 @@ starts at "0 of 8 done".
 - Web: Vercel, Deployments, the last good production deployment, Instant
   Rollback (or Promote to Production). Variable changes need a redeploy.
 
+## 8. Custom domain (hotel addresses)
+
+Without a custom domain every published hotel site lives at
+`https://<project>.vercel.app/h/<slug>`, which already works. With one,
+each hotel also gets `https://<slug>.<your-domain>` (for example
+`deodar-view.example.in`). The app itself stays on the apex or on
+`app.<your-domain>`; `www`, `app`, `api`, `admin`, `mail`, `docs`,
+`status` and the app's route names can never be hotel addresses.
+Items marked (unconfirmed) were not checked against the live Vercel
+dashboard; follow what the dashboard shows.
+
+1. Buy the domain from any registrar (for example `example.in`).
+2. Vercel, the web project, Settings, Domains: add `example.in`,
+   `www.example.in` (choose "redirect to example.in") and the wildcard
+   `*.example.in`. Optionally add `app.example.in` if the app should live
+   there instead of the apex.
+3. DNS. The wildcard needs Vercel's nameservers: at the registrar, set
+   the nameservers to the ones Vercel shows for the domain (usually
+   `ns1.vercel-dns.com` and `ns2.vercel-dns.com`). Vercel then creates the
+   apex, `www` and wildcard records itself. If you keep another DNS host
+   for the apex and `www` only, use the records the dashboard shows: an
+   `A` record for the apex (the IP shown; historically `76.76.21.21`,
+   unconfirmed whether it is now project specific) and a `CNAME` for
+   `www` to the value shown (historically `cname.vercel-dns.com`). A
+   wildcard on another DNS host is not supported by Vercel (unconfirmed
+   for every plan), so hotel subdomains need step 3's nameservers.
+4. Certificates: Vercel issues and renews HTTPS certificates itself,
+   including the wildcard one, once DNS points at Vercel. Wait until each
+   domain shows "Valid Configuration" (exact wording unconfirmed); this
+   can take from minutes to a few hours while DNS spreads.
+5. Variables. `SITE_ROOT_DOMAIN=example.in` (no scheme, no `*.`) on both:
+   - Vercel (Production): the proxy reads it on every request to tell a
+     hotel host from the app host. Never as `NEXT_PUBLIC_`.
+   - Railway (API): the owner's address, the QR code and the WhatsApp
+     share text use it, and Seedha Link buttons on hotel pages point back
+     to `WEB_ORIGIN`.
+   Set `WEB_ORIGIN` and `PUBLIC_BASE_URL` on Railway (and `WEB_ORIGIN` on
+   Vercel) to the app host, `https://example.in` or
+   `https://app.example.in`, never to a hotel subdomain.
+6. Redeploy both: Railway API (Deployments, Redeploy) and Vercel
+   (Deployments, Redeploy the latest production one). Variable changes do
+   nothing until then.
+7. Test:
+   - `https://example.in/login` signs in as before.
+   - Publish the site (Website, Review, Publish site); the address shown is
+     `deodar-view.example.in`; open it on a phone over mobile data.
+   - `https://deodar-view.example.in/` shows the hotel page; a booking
+     button opens Seedha Link on the app host.
+   - `https://no-such-hotel.example.in/` answers 404 with "This hotel
+     site isn't live yet" (`curl -sI` shows `HTTP/2 404`).
+   - Owner pages 404 on a hotel host: `curl -sI
+     https://deodar-view.example.in/login` and `/home` and `/api/site`
+     all show 404.
+   - Rename the address and check the old one answers 308 to the new one
+     (for 30 days).
+   - In the browser's cookie panel, the `seedha_owner` cookie belongs to
+     the app host only (no Domain attribute), so hotel hosts never get it.
+
 ## Post-deploy checklist
 
 1. Health: the Railway `/health` and the Vercel `/api/health` both return ok.

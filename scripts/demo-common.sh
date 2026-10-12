@@ -78,6 +78,6 @@ print_urls() {
   say ""
   say "Owner (sign in):   $base/login"
   say "Desk device:       $base/desk/device   (sign in on that phone or tablet first)"
-  say "Guest test:        $base/hotel/deodar-view   (the consent page opens from the Desk QR)"
+  say "Guest test:        $base/h/deodar-view   (the consent page opens from the Desk QR)"
   say ""
 }

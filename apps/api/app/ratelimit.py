@@ -44,6 +44,8 @@ LIMITS: dict[str, Limit] = {
     # Anyone signed in to the sample hotel can press reset (review S6).
     "demo_reset": Limit(2, 60),
     "site": Limit(60, 60),
+    # Up to 8 photos per hotel page view (browsers cache them a day).
+    "site_photo": Limit(240, 60),
     # The public website loads the sample figures once per page view.
     "public_sample": Limit(60, 60),
 }
