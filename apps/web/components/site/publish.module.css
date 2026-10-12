@@ -1,0 +1,178 @@
+/* Publish and share (end of Review). World A tokens from app/globals.css. */
+.panel {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+.sub,
+.note {
+  margin: 0;
+  color: var(--ink2);
+  font-size: 15px;
+}
+.note:empty {
+  display: none;
+}
+.bad {
+  margin: 0;
+  color: var(--loss);
+  font-size: 15px;
+}
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
+}
+.field {
+  width: 100%;
+  max-width: 420px;
+}
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 18px;
+}
+.input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.input[aria-invalid="true"] {
+  border-color: var(--loss);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.address {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+}
+.addressText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.url {
+  color: var(--accent);
+  font-size: 18px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.qr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+.qrImg {
+  width: 160px;
+  height: 160px;
+  border-radius: 12px;
+  background: #fff;
+}
+.qrNote {
+  margin: 0 0 10px;
+  max-width: 34ch;
+  color: var(--ink2);
+  font-size: 15px;
+}
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 15px;
+  color: var(--ink2);
+  cursor: pointer;
+}
+.check input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+  flex: none;
+}
+.pro {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+/* A small browser frame showing the address as guests will see it. */
+.preview {
+  width: 100%;
+  max-width: 420px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--bg2);
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+  color: var(--ink2);
+}
+.lock {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 2px solid currentColor;
+  flex: none;
+}
+.barText {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.previewBody {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  padding: 14px 12px;
+  font-size: 17px;
+}
+.previewBtn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--onAccent);
+  font-size: 14px;
+  font-weight: 600;
+}
+.copyField {
+  width: 100%;
+  max-width: 420px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}

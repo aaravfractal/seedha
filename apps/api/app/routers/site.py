@@ -5,18 +5,21 @@ from __future__ import annotations
 import ipaddress
 import os
 from datetime import datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, Field
-from sqlalchemy import delete
+from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.config import Settings
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep, require_owner_session
 from app.errors import ApiError
-from app.models import Base, Property, SiteConfig
+from app.models import Base, Property, SiteConfig, SiteContent, SitePhoto
 from app.public_mode import is_production, is_real_owner
 from app.ratelimit import rate_limited
+from app.routers.auth import NowDep
 from app.services.desk import business_date, utc_now
 from app.services.link import room_rates
 from app.services.pro import active_consents, audit
@@ -30,7 +33,6 @@ from app.services.site import (
     MIN_PACKAGE_NIGHTS,
     NAME_HI,
     NEARBY,
-    SAMPLE_ADDRESS,
     SETUP,
     TAGLINE,
     Package,
@@ -41,6 +43,17 @@ from app.services.site import (
     packages,
     rooms_copy,
     slugify,
+)
+from app.services.site_gen import read_content, read_rooms
+from app.services.site_photos import list_photos
+from app.services.slug import (
+    SlugProblem,
+    current_slug,
+    display_address,
+    problem,
+    set_slug,
+    site_url,
+    suggested_slug,
 )
 
 site_router = APIRouter(prefix="/site", tags=["site"])
@@ -100,8 +113,32 @@ class ContactOut(BaseModel):
     placeholder: bool
 
 
+class SitePhotoOut(BaseModel):
+    """One of the owner's photos. `url` is versioned (?v=) on public pages.
+    `caption_hi` falls back to the English caption."""
+
+    id: int
+    url: str
+    width: int
+    height: int
+    caption_en: str
+    caption_hi: str
+
+
+class SiteTextOut(BaseModel):
+    """The owner's generated or edited text (never a price: prices are rooms only)."""
+
+    description: dict[str, str]
+    why_book_direct: dict[str, list[str]]
+
+
 class SiteContentOut(BaseModel):
-    """What the hotel's own site shows (World B). No guest data, ever."""
+    """What the hotel's own site shows (World B). No guest data, ever.
+
+    `text` and `photos` are the owner's own build once there is one (else
+    null and empty: the labelled sample render). `url` is the full public
+    address; `booking_url` is Seedha Link on the app host: absolute when the
+    site is served on its own host (SITE_ROOT_DOMAIN), else "/link"."""
 
     slug: str
     address: str
@@ -117,6 +154,12 @@ class SiteContentOut(BaseModel):
     nearby: list[NearbyOut]
     gallery: list[dict[str, str]]
     contact: ContactOut
+    url: str = ""
+    source: str = "none"
+    text: SiteTextOut | None = None
+    photos: list[SitePhotoOut] = Field(default_factory=list)
+    hide_branding: bool = False
+    booking_url: str = "/link"
 
 
 class SetupOut(BaseModel):
@@ -158,6 +201,68 @@ class SitePatchIn(BaseModel):
     lang: Literal["en", "hi"] | None = None
 
 
+class BrandingIn(BaseModel):
+    """A Pro setting: hide "Built with Seedha" and "Powered by Seedha"."""
+
+    hide_branding: bool
+
+
+class BrandingOut(BaseModel):
+    """The branding setting as stored."""
+
+    hide_branding: bool
+
+
+class PublishIn(BaseModel):
+    """The address the owner picked (empty = the suggestion)."""
+
+    slug: str | None = Field(default=None, max_length=80)
+
+
+class PublishOut(BaseModel):
+    """The site is live at `url` (`address` is the same without the scheme)."""
+
+    slug: str
+    url: str
+    address: str
+    published: Literal[True] = True
+    published_at: datetime
+
+
+class AddressOut(BaseModel):
+    """The site's address for the Publish panel. `slug` is the address in use
+    (null until the first publish, except the sample hotel's default);
+    `suggested_slug` prefills the box; `root_domain` is SITE_ROOT_DOMAIN ("" =
+    sites live at <app>/h/<slug>). `hide_branding` is the Pro setting."""
+
+    slug: str | None
+    suggested_slug: str
+    url: str | None
+    address: str | None
+    published: bool
+    root_domain: str
+    hide_branding: bool
+
+
+class SlugCheckOut(BaseModel):
+    """Whether an address can be used; `reason` is a code, `message` its sentence."""
+
+    slug: str
+    ok: bool
+    reason: SlugProblem | None
+    message: str | None
+    suggestion: str
+    url: str
+
+
+SLUG_MESSAGES: dict[SlugProblem, str] = {
+    "slug_invalid": "Use 3 to 40 small letters, numbers and single hyphens, "
+    "starting and ending with a letter or number.",
+    "slug_reserved": "This address is reserved. Please pick another.",
+    "slug_taken": "Another hotel uses this address. Please pick another.",
+}
+
+
 class PackagePatchIn(BaseModel):
     """Approve, skip, bring back, or change the nights of a package."""
 
@@ -165,28 +270,106 @@ class PackagePatchIn(BaseModel):
     nights: int | None = Field(default=None, ge=MIN_PACKAGE_NIGHTS, le=MAX_PACKAGE_NIGHTS)
 
 
-def site_content(session: Session, prop: Property, config: SiteConfig) -> dict[str, Any]:
-    """The fields both the owner screen and the public site share."""
+def built_content(session: Session, property_id: int) -> SiteContent | None:
+    """The owner's build, if any (read only: a public page never creates rows)."""
+    row = session.scalar(select(SiteContent).where(SiteContent.property_id == property_id))
+    return row if row is not None and row.source != "none" else None
+
+
+def photo_url(slug: str, photo: SitePhoto, *, public: bool) -> str:
+    """Public pages: cacheable, versioned by the photo's hash. Owner: the private preview route."""
+    if public:
+        return f"/api/public/site/{slug}/photos/{photo.id}?v={photo.sha256[:8]}"
+    return f"/api/site/photos/{photo.id}"
+
+
+def site_photos(session: Session, prop: Property, slug: str, *, public: bool) -> list[SitePhotoOut]:
+    """The owner's photos in order, with captions (Hindi falls back to English)."""
+    return [
+        SitePhotoOut(
+            id=p.id,
+            url=photo_url(slug, p, public=public),
+            width=p.width,
+            height=p.height,
+            caption_en=p.caption_en,
+            caption_hi=p.caption_hi or p.caption_en,
+        )
+        for p in list_photos(session, prop.id)
+    ]
+
+
+def site_text(row: SiteContent) -> SiteTextOut:
+    """Description and why-book-direct points from the build."""
+    text = read_content(row)
+    return SiteTextOut(
+        description={"en": text["description_en"], "hi": text["description_hi"]},
+        why_book_direct={"en": text["why_book_direct_en"], "hi": text["why_book_direct_hi"]},
+    )
+
+
+def built_rooms(row: SiteContent) -> list[SiteRoomOut]:
+    """Room types with ONLY the prices the owner typed (paise); blurbs from the build."""
+    return [
+        SiteRoomOut(room_type=r.name, name_hi=r.name, nightly_rate=r.price_paise,
+                    detail={"en": r.blurb_en, "hi": r.blurb_hi or r.blurb_en})
+        for r in read_rooms(row)
+        if r.price_paise > 0
+    ]  # fmt: skip
+
+
+def sample_rooms(session: Session, prop: Property) -> list[SiteRoomOut]:
+    """Room types at the rooms table's public rates (the sample render)."""
     rooms = []
     for room_type, rate in room_rates(session, prop.id).items():
         name_hi, detail = rooms_copy(room_type)
         rooms.append(SiteRoomOut(room_type=room_type, name_hi=name_hi, detail=detail,
                                  nightly_rate=rate))  # fmt: skip
+    return rooms
+
+
+def booking_url(settings: Settings) -> str:
+    """Seedha Link lives on the app host. A hotel host serves only its own page, so
+    with a root domain the link is absolute; on /h/<slug> it is same-origin."""
+    if settings.site_root_domain:
+        return f"{settings.web_origin.rstrip('/')}/link"
+    return "/link"
+
+
+def site_content(
+    session: Session, prop: Property, config: SiteConfig, settings: Settings, *, public: bool
+) -> dict[str, Any]:
+    """The fields both the owner screen and the public site share.
+
+    The owner always previews their build. Guests see it only once the site
+    is published; until then the sample hotel keeps its labelled sample page.
+    """
+    slug = current_slug(prop, config) or slugify(prop.short_name)
+    url = site_url(slug, settings.web_origin, settings.site_root_domain)
+    row = built_content(session, prop.id)
+    if row is not None and public and config.published_at is None:
+        row = None
+    photos = site_photos(session, prop, slug, public=public) if row is not None else []
     return {
-        "slug": slugify(prop.short_name),
-        "address": SAMPLE_ADDRESS,
+        "slug": slug,
+        "address": display_address(url),
+        "url": url,
         "sample": prop.is_sample,
         "mood": config.mood,
         "lang": config.lang,
         "hotel": prop.short_name,
-        "hotel_hi": NAME_HI,
-        "location": LOCATION,
-        "tagline": TAGLINE,
+        "hotel_hi": NAME_HI if prop.is_sample else prop.short_name,
+        "location": LOCATION if prop.is_sample else {"en": prop.city, "hi": prop.city},
+        "tagline": TAGLINE if prop.is_sample else {"en": "", "hi": ""},
         "rooms_count": prop.rooms_count,
-        "rooms": rooms,
-        "nearby": [NearbyOut(place=p, distance=d) for p, d in NEARBY],
-        "gallery": list(GALLERY),
+        "rooms": built_rooms(row) if row is not None else sample_rooms(session, prop),
+        "nearby": [NearbyOut(place=p, distance=d) for p, d in NEARBY] if prop.is_sample else [],
+        "gallery": [] if photos else list(GALLERY),
         "contact": ContactOut(placeholder=prop.is_sample, **CONTACT),
+        "source": row.source if row is not None else "none",
+        "text": site_text(row) if row is not None else None,
+        "photos": photos,
+        "hide_branding": bool(config.hide_branding),
+        "booking_url": booking_url(settings),
     }
 
 
@@ -209,12 +392,12 @@ def owner_package(p: Package, rates: dict[str, int]) -> PackageOut:
     )
 
 
-def site_out(session: SessionDep, prop: Property) -> SiteOut:
+def site_out(session: Session, prop: Property, settings: Settings) -> SiteOut:
     """Shape the site for the screen."""
     config = get_config(session, prop.id)
     rates = room_rates(session, prop.id)
     return SiteOut(
-        **site_content(session, prop, config),
+        **site_content(session, prop, config, settings, public=False),
         stage=config.stage,
         live=config.published_at is not None,
         published_at=config.published_at,
@@ -230,14 +413,20 @@ def site_out(session: SessionDep, prop: Property) -> SiteOut:
 
 
 @site_router.get("", response_model=SiteOut)
-def get_site(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> SiteOut:
+def get_site(
+    _owner: OwnerDep, session: SessionDep, prop: PropertyDep, settings: SettingsDep
+) -> SiteOut:
     """The site as it stands."""
-    return site_out(session, prop)
+    return site_out(session, prop, settings)
 
 
 @site_router.patch("", response_model=SiteOut)
 def patch_site(
-    body: SitePatchIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
+    body: SitePatchIn,
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
 ) -> SiteOut:
     """Change setup stage, look or language."""
     config = get_config(session, prop.id)
@@ -247,39 +436,133 @@ def patch_site(
         config.mood = body.mood
     if body.lang is not None:
         config.lang = body.lang
-    return site_out(session, prop)
+    return site_out(session, prop, settings)
+
+
+@site_router.patch("/branding", response_model=BrandingOut)
+def patch_branding(
+    body: BrandingIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
+) -> BrandingOut:
+    """The Pro setting that hides Seedha's footer and button line on the hotel site."""
+    config = get_config(session, prop.id)
+    config.hide_branding = body.hide_branding
+    return BrandingOut(hide_branding=config.hide_branding)
 
 
 @site_router.post("/packages/{key}", response_model=SiteOut)
-def approve(key: str, _owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> SiteOut:
+def approve(
+    key: str, _owner: OwnerDep, session: SessionDep, prop: PropertyDep, settings: SettingsDep
+) -> SiteOut:
     """Owner approves a suggested package for the site."""
     try:
         approve_package(get_config(session, prop.id), key)
     except KeyError as exc:
         raise ApiError(404, "no_such_package", "No package with that key") from exc
-    return site_out(session, prop)
+    return site_out(session, prop, settings)
 
 
 @site_router.patch("/packages/{key}", response_model=SiteOut)
-def change_package(
-    key: str, body: PackagePatchIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
+def change_package(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    key: str,
+    body: PackagePatchIn,
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
 ) -> SiteOut:
     """Skip, bring back or change the nights. The price is worked out again by code."""
     try:
         decide_package(get_config(session, prop.id), key, state=body.state, nights=body.nights)
     except KeyError as exc:
         raise ApiError(404, "no_such_package", "No package with that key") from exc
-    return site_out(session, prop)
+    return site_out(session, prop, settings)
 
 
-@site_router.post("/publish", response_model=SiteOut)
-def publish(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> SiteOut:
-    """Nothing goes live before the owner taps Publish."""
+def slug_check(
+    session: Session, prop: Property, settings: Settings, now: datetime, raw: str | None
+) -> SlugCheckOut:
+    """Check an address (or the suggestion when none is given)."""
     config = get_config(session, prop.id)
-    if config.stage != "review":
-        raise ApiError(409, "not_ready", "Finish the setup chat before publishing")
-    config.published_at = config.published_at or utc_now()
-    return site_out(session, prop)
+    suggestion = suggested_slug(session, prop, config, now)
+    slug = (raw or "").strip().lower() or suggestion
+    why = problem(session, slug, prop.id, now)
+    return SlugCheckOut(
+        slug=slug,
+        ok=why is None,
+        reason=why,
+        message=SLUG_MESSAGES[why] if why else None,
+        suggestion=suggestion,
+        url=site_url(slug, settings.web_origin, settings.site_root_domain),
+    )
+
+
+@site_router.get("/slug/check", response_model=SlugCheckOut)
+def check_slug(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
+    now: NowDep,
+    slug: Annotated[str | None, Query(max_length=80)] = None,
+) -> SlugCheckOut:
+    """Live check for the Publish panel: {slug, ok, reason, message, suggestion, url}."""
+    return slug_check(session, prop, settings, now, slug)
+
+
+def publishable(session: Session, config: SiteConfig) -> bool:
+    """The build has content, or the older sample setup reached review."""
+    return built_content(session, config.property_id) is not None or config.stage == "review"
+
+
+@site_router.get("/address", response_model=AddressOut)
+def get_address(
+    _owner: OwnerDep, session: SessionDep, prop: PropertyDep, settings: SettingsDep, now: NowDep
+) -> AddressOut:
+    """The address in use (if any), the suggestion and whether the site is live."""
+    config = get_config(session, prop.id)
+    slug = current_slug(prop, config)
+    url = site_url(slug, settings.web_origin, settings.site_root_domain) if slug else None
+    return AddressOut(
+        slug=slug,
+        suggested_slug=suggested_slug(session, prop, config, now),
+        url=url,
+        address=display_address(url) if url else None,
+        published=config.published_at is not None,
+        root_domain=settings.site_root_domain,
+        hide_branding=bool(config.hide_branding),
+    )
+
+
+@site_router.post("/publish", response_model=PublishOut)
+def publish(  # pylint: disable=too-many-arguments,too-many-positional-arguments
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
+    now: NowDep,
+    body: PublishIn | None = None,
+) -> PublishOut:
+    """Nothing goes live before the owner taps Publish. Picks or changes the address;
+    a changed address keeps redirecting from the old one for 30 days. A slug that
+    cannot be used is a 422 with error.code slug_invalid, slug_reserved or slug_taken."""
+    config = get_config(session, prop.id)
+    if not publishable(session, config):
+        raise ApiError(409, "not_ready", "Build your site before publishing")
+    check = slug_check(session, prop, settings, now, body.slug if body else None)
+    if check.reason is not None:
+        raise ApiError(422, check.reason, SLUG_MESSAGES[check.reason])
+    try:
+        with session.begin_nested():
+            set_slug(prop, config, check.slug, now)
+            config.published_at = config.published_at or now
+    except IntegrityError as exc:  # another hotel took it a moment ago
+        raise ApiError(422, "slug_taken", SLUG_MESSAGES["slug_taken"]) from exc
+    return PublishOut(
+        slug=check.slug,
+        url=check.url,
+        address=display_address(check.url),
+        published_at=config.published_at or now,
+    )
 
 
 class ProOut(BaseModel):

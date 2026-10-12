@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import type { Lang, Mood, OwnerSite } from "@/lib/types-site";
 import { worldBFonts } from "@/lib/fonts-worldb";
 import { HotelSite } from "./HotelSite";
+import PublishPanel from "./PublishPanel";
 import o from "./owner.module.css";
 
 const MOODS: ReadonlyArray<[Mood, string, string]> = [
@@ -69,9 +70,7 @@ export function Review({
   site,
   busy,
   onLook,
-  onPublish,
   onChange,
-  onCopy,
   onPackages,
 }: {
   site: OwnerSite;
@@ -83,13 +82,7 @@ export function Review({
   onPackages: () => void;
 }) {
   const approved = site.packages.filter((p) => p.approved);
-  const [origin, setOrigin] = useState("");
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the page's own address, known only in the browser
-    setOrigin(window.location.origin);
-  }, []);
-  const publicPath = `/hotel/${site.slug}`;
-  const shareText = `Book ${site.hotel} directly: ${origin}${publicPath}`;
+  const publicPath = `/h/${site.slug}`;
   const today = new Date().toISOString().slice(0, 10);
   const page = (
     <div className={worldBFonts}>
@@ -144,35 +137,7 @@ export function Review({
         </div>
       </div>
 
-      {site.live ? (
-        <div className={`${o.card} ${o.live}`}>
-          <span className={o.liveCheck} aria-hidden="true">
-            ✓
-          </span>
-          <div className={o.liveText}>
-            <b>Your site is live</b>
-            <Link className="link" href={publicPath} target="_blank">
-              {site.address}
-            </Link>{" "}
-            <span className={o.muted} style={{ fontSize: 14 }}>
-              (sample address)
-            </span>
-          </div>
-          <div className={o.actions}>
-            <button type="button" className="btn ghost" onClick={() => onCopy(`${origin}${publicPath}`)}>
-              Copy link
-            </button>
-            <a
-              className="btn"
-              href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Share on WhatsApp
-            </a>
-          </div>
-        </div>
-      ) : (
+      {site.live ? null : (
         <p className={o.notice}>
           Not live yet. Only you can see this preview. Nothing goes online until you tap Publish site.
         </p>
@@ -242,16 +207,13 @@ export function Review({
                 Agent deck
               </Link>
             </>
-          ) : (
-            <button type="button" className="btn" disabled={busy} onClick={onPublish}>
-              Publish site
-            </button>
-          )}
+          ) : null}
           <button type="button" className="btn ghost" disabled={busy} onClick={onChange}>
             Change something
           </button>
         </div>
       </div>
+      <PublishPanel hotelName={site.hotel} />
     </div>
   );
 }

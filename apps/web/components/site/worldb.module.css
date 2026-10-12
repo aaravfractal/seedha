@@ -419,6 +419,26 @@
   inset: 50% 0 0;
   background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.5));
 }
+/* The owner's own photos fill their frame; width/height attributes reserve the space. */
+.photoImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.about {
+  margin: 0;
+  max-width: 70ch;
+  font-size: 19px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+.powered {
+  font-weight: 500;
+  font-size: 15px;
+  opacity: 0.85;
+}
 .photoLabel {
   position: absolute;
   left: 14px;

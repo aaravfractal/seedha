@@ -434,7 +434,7 @@ export function NoWebsiteBand() {
             card and an agent deck. Nothing goes live until you publish.
           </p>
           <div className={styles.ctaRow}>
-            <Link href="/hotel/deodar-view" className={`${styles.pillOutline} ${styles.pillLg}`}>
+            <Link href="/h/deodar-view" className={`${styles.pillOutline} ${styles.pillLg}`}>
               See a sample site
             </Link>
             <Link href="/signup" className={`${styles.pill} ${styles.pillLg}`}>

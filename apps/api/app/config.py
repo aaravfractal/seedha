@@ -99,6 +99,8 @@ class Settings:  # pylint: disable=too-many-instance-attributes
     site_gen_model: str = ""
     # Input + output + cache tokens per calendar month across the account.
     site_gen_monthly_token_cap: int = DEFAULT_SITE_GEN_TOKEN_CAP
+    # Hotel addresses: <slug>.<SITE_ROOT_DOMAIN> when set, else <web>/h/<slug>.
+    site_root_domain: str = ""
 
     @property
     def llm_enabled(self) -> bool:
@@ -152,6 +154,12 @@ def production_problems(settings: Settings) -> list[tuple[str, str]]:
     return problems
 
 
+def root_domain(raw: str) -> str:
+    """'https://Seedha.in/' -> 'seedha.in': lower case, no scheme, path or end dots."""
+    host = raw.strip().lower().removeprefix("https://").removeprefix("http://")
+    return host.split("/")[0].split(":")[0].strip(".")
+
+
 def load_settings() -> Settings:
     """Read settings from the process environment."""
     raw_demo_date = _env("DEMO_DATE")
@@ -192,4 +200,5 @@ def load_settings() -> Settings:
         allow_demo_proof_writes=_flag("ALLOW_DEMO_PROOF_WRITES"),
         site_gen_model=_env("SITE_GEN_MODEL"),
         site_gen_monthly_token_cap=_count("SITE_GEN_MONTHLY_TOKEN_CAP", DEFAULT_SITE_GEN_TOKEN_CAP),
+        site_root_domain=root_domain(_env("SITE_ROOT_DOMAIN")),
     )
