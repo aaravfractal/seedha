@@ -771,3 +771,12 @@ this demo session (not a seeded sample consent); POST /pipeline/slip/seen
 is gone (422). Reset already deletes every recorded step; the Settings
 reset button now also reloads the shared Overview so the header, sidebar
 and Overview show 0 of 8 at once.
+
+**D-104 Helper commits reviewed (lead, 13 October 2026).** The owner
+confirmed that 1a7838e (FINAL_MASTER brief and D-102), 41e91de (D-103 demo
+loop step 6), caafbbd and 796faed (progress notes) were made by helper
+agents at the owner's request. Reviewed and kept. 41e91de was kept because
+the full 8-step loop with DEODAR-RS26 passed on make demo-prod from
+site-real (2 of 2, 20.8 s; the loop asserts every locked number) and its
+own tests pass; the web app never called the removed slip/seen route.
+D-102 already records the pillow-heif licence note the owner asked for.
