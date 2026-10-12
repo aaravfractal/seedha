@@ -16,6 +16,7 @@ DEFAULT_DB_PATH = API_ROOT / "seedha.db"
 AMOY_CHAIN_ID = "80002"
 PRODUCTION = "production"
 MIN_SECRET_LENGTH = 32
+DEFAULT_SITE_GEN_TOKEN_CAP = 300_000
 # The values published in .env.example. Never accepted in production.
 PUBLISHED_DEMO_VALUES = frozenset(
     {
@@ -36,6 +37,12 @@ def _env(name: str, default: str = "") -> str:
 
 def _flag(name: str) -> bool:
     return _env(name) == "1"
+
+
+def _count(name: str, default: int) -> int:
+    """A non-negative whole number from the environment, else `default`."""
+    raw = _env(name)
+    return int(raw) if raw.isdigit() else default
 
 
 def _origins(*raw: str) -> tuple[str, ...]:
@@ -87,11 +94,21 @@ class Settings:  # pylint: disable=too-many-instance-attributes
     # Production: let demo and public visitors use Claude / write testnet proofs.
     allow_claude_for_demo: bool = False
     allow_demo_proof_writes: bool = False
+    # Seedha Site generation (docs/SITE_REAL.md section 2). Empty model = the
+    # labelled sample flow, no Claude call. Suggested: claude-haiku-5-5.
+    site_gen_model: str = ""
+    # Input + output + cache tokens per calendar month across the account.
+    site_gen_monthly_token_cap: int = DEFAULT_SITE_GEN_TOKEN_CAP
 
     @property
     def llm_enabled(self) -> bool:
         """Claude is called only when a key and model are both set."""
         return bool(self.anthropic_api_key and self.claude_model)
+
+    @property
+    def site_gen_enabled(self) -> bool:
+        """Site generation calls Claude only with a key and SITE_GEN_MODEL."""
+        return bool(self.anthropic_api_key and self.site_gen_model)
 
     @property
     def whatsapp_enabled(self) -> bool:
@@ -173,4 +190,6 @@ def load_settings() -> Settings:
         allow_owner_accounts=_flag("ALLOW_OWNER_ACCOUNTS"),
         allow_claude_for_demo=_flag("ALLOW_CLAUDE_FOR_DEMO"),
         allow_demo_proof_writes=_flag("ALLOW_DEMO_PROOF_WRITES"),
+        site_gen_model=_env("SITE_GEN_MODEL"),
+        site_gen_monthly_token_cap=_count("SITE_GEN_MONTHLY_TOKEN_CAP", DEFAULT_SITE_GEN_TOKEN_CAP),
     )
