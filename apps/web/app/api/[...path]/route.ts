@@ -10,6 +10,7 @@ import { API_BODY_BYTES, readCapped } from "@/lib/body";
 import { clientAddress } from "@/lib/ratelimit";
 import { refuseRemoteReset } from "@/lib/requestOrigin";
 import { SESSION_COOKIE, nowSeconds, readSession } from "@/lib/session";
+import { apiUrl, deviceKeyUsable, isHosted, isPublicMode } from "@/lib/webEnv";
 
 const FORWARD_REQUEST_HEADERS = ["content-type", "accept"];
 const FORWARD_RESPONSE_HEADERS = ["content-type", "content-disposition"];
@@ -23,7 +24,8 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
   const access = accessFor(joined);
   if (access === null) return errorResponse(404, "not_found", "No such API route");
   // make demo-live: only the laptop running the demo may reset it, never a tunnel visitor.
-  if (refuseRemoteReset(path, request.headers, process.env.SEEDHA_PUBLIC === "1")) {
+  // Hosted (SEEDHA_HOSTED=1): the owner session below and the API decide.
+  if (refuseRemoteReset(path, request.headers, isPublicMode(), isHosted())) {
     return errorResponse(403, "reset_local_only", "Reset works only on the computer running the demo");
   }
 
@@ -33,7 +35,9 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
     if (value) headers.set(name, value);
   }
   // The API rate-limits public routes per guest; uvicorn trusts this header
-  // from the loopback BFF and resolves it into the client address.
+  // from the loopback BFF and resolves it into the client address. On Vercel
+  // the edge overwrites X-Forwarded-For with the real client IP, so its last
+  // entry is the visitor, not a value the browser chose.
   headers.set("x-forwarded-for", clientAddress(request.headers));
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
   // Writes must come from this site (security review S4; cookies are SameSite=Lax too).
@@ -51,9 +55,15 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
     headers.set("x-seedha-subject", session.subject);
   }
   if (access === "owner") headers.set("authorization", `Bearer ${process.env.OWNER_API_TOKEN ?? ""}`);
-  if (access === "device") headers.set("x-device-key", process.env.DESK_DEVICE_KEY ?? "");
+  if (access === "device") {
+    // A production site must not act as the Desk with the published demo key.
+    if (!deviceKeyUsable()) {
+      return errorResponse(503, "desk_not_configured", "Set your own DESK_DEVICE_KEY for the Desk");
+    }
+    headers.set("x-device-key", process.env.DESK_DEVICE_KEY ?? "");
+  }
 
-  const target = new URL(`${process.env.API_URL ?? "http://localhost:8000"}/${joined}`);
+  const target = apiUrl(joined);
   target.search = request.nextUrl.search;
   const body = hasBody ? await readCapped(request, API_BODY_BYTES) : undefined;
   if (body === null) {
