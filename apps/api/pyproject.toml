@@ -24,7 +24,7 @@ dependencies = [
   "hexbytes==2.0.0",
   # Stay invoice PDFs (D-100)
   "reportlab==5.0.1",
-  # Postgres when hosted (Neon); binary wheels, no libpq build. SQLite needs nothing.
+  # Postgres when hosted (Railway); binary wheels, no libpq build. SQLite needs nothing.
   "psycopg[binary]==3.3.6",
 ]
 

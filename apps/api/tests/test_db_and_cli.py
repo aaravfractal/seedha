@@ -72,12 +72,12 @@ def test_seed_cli_loads_into_database_url(tmp_path: Path, monkeypatch: pytest.Mo
     ("given", "expected"),
     [
         (
-            "postgres://u:p@ep-x.neon.tech/seedha?sslmode=require",
-            "postgresql+psycopg://u:p@ep-x.neon.tech/seedha?sslmode=require",
+            "postgres://u:p@db.example.internal/seedha?sslmode=require",
+            "postgresql+psycopg://u:p@db.example.internal/seedha?sslmode=require",
         ),
         (
-            "postgresql://u:p@dpg-x.render.com:5432/seedha",
-            "postgresql+psycopg://u:p@dpg-x.render.com:5432/seedha",
+            "postgresql://u:p@postgres.railway.internal:5432/seedha",
+            "postgresql+psycopg://u:p@postgres.railway.internal:5432/seedha",
         ),
         ("postgresql+psycopg2://u@h/db", "postgresql+psycopg://u@h/db"),
         ("postgresql+psycopg://u@h/db", "postgresql+psycopg://u@h/db"),

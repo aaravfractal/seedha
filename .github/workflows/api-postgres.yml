@@ -1,4 +1,4 @@
-# The API test suite on Postgres 16 (as on Neon) and on SQLite (the local demo).
+# The API test suite on Postgres 16 (as on Railway) and on SQLite (the local demo).
 # No secrets: the Postgres credentials below are throwaway values for the
 # service container that exists only for the length of the job.
 name: api-postgres
@@ -58,7 +58,7 @@ jobs:
         run: psql -h localhost -U seedha -d seedha_test -c "CREATE DATABASE seedha_migrations"
       - name: Migrations upgrade to head, match the models, downgrade and upgrade again
         env:
-          # The URL form Render and Neon hand out; app.db rewrites it for psycopg 3.
+          # The URL form hosts such as Railway hand out; app.db rewrites it for psycopg 3.
           DATABASE_URL: postgres://seedha:seedha-ci-only@localhost:5432/seedha_migrations # pragma: allowlist secret
         run: |
           alembic upgrade head
