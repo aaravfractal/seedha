@@ -55,9 +55,39 @@ export function isLocalRequest(headers: Headers, allowed: readonly string[] = LO
   return forwarded === null || forwarded.toLowerCase() === host.toLowerCase();
 }
 
-/** In public mode (SEEDHA_PUBLIC=1), refuse demo/reset unless it comes from this machine. */
-export function refuseRemoteReset(path: readonly string[], headers: Headers, publicMode: boolean): boolean {
-  if (!publicMode) return false;
+/**
+ * Whether the BFF refuses demo/reset before the owner session check.
+ *
+ * | mode                                   | demo/reset                          |
+ * | -------------------------------------- | ----------------------------------- |
+ * | local (both flags empty)               | passed on (owner session needed)    |
+ * | make demo-live (SEEDHA_PUBLIC=1)       | only from this machine              |
+ * | hosted (SEEDHA_HOSTED=1)               | passed on; the API decides          |
+ *
+ * Hosted wins over public: a hosted site has no "this machine", so the
+ * signed-in owner is the only check the web can make. make demo-live never
+ * sets SEEDHA_HOSTED.
+ */
+export function refuseRemoteReset(
+  path: readonly string[],
+  headers: Headers,
+  publicMode: boolean,
+  hosted = false,
+): boolean {
+  if (!publicMode || hosted) return false;
   const isReset = path.filter(Boolean).join("/").toLowerCase().startsWith("demo/reset");
   return isReset && !isLocalRequest(headers);
+}
+
+/**
+ * Whether Settings shows "Reset demo data": only for the sample hotel, and
+ * then on the laptop running Seedha or on the hosted deploy (the page itself
+ * is behind the owner sign in).
+ */
+export function showResetButton(input: {
+  sample: boolean;
+  onThisMachine: boolean;
+  hosted: boolean;
+}): boolean {
+  return input.sample && (input.onThisMachine || input.hosted);
 }
