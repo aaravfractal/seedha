@@ -56,7 +56,11 @@ test("the full 8-step loop", async ({ page, context }) => {
   // 7. Owner approves the win-back message.
   await page.goto("/approvals");
   const draft = page.locator(".bub").first();
-  await expect(draft).toContainText("Namaste Rahul ji");
+  // Claude words the greeting when a key is set ("Namaste" or "Dear"); the
+  // fixed template says "Namaste Rahul ji". Either way: his name, his code,
+  // the STOP line (final audit A2-1).
+  await expect(draft).toContainText("Rahul ji");
+  await expect(draft).toContainText("DEODAR-RS26");
   await expect(draft).toContainText("Reply STOP to opt out.");
   await page.getByRole("button", { name: "Approve and send" }).click();
   await expect(page.locator(".bub.me").first()).toContainText("Sent");

@@ -80,8 +80,10 @@ done". Each step is also a screen in the sidebar.
    types a WhatsApp number, ticks, and says yes. The Desk ring turns green.
 5. **Checkout slip.** "Check out and print": the slip shows what the hotel
    kept on this booking and Rahul's perk code **DEODAR-RS26**.
-6. **Approve.** Approvals: the win-back draft ("Namaste Rahul ji", ending
-   "Reply STOP to opt out."). Nothing is sent until the owner approves.
+6. **Approve.** Approvals: the win-back draft greets Rahul ji by name
+   (Claude's wording when a key is set, otherwise the fixed "Namaste Rahul
+   ji" template), carries DEODAR-RS26 and ends "Reply STOP to opt out.".
+   Nothing is sent until the owner approves.
 7. **Direct booking.** Open `/link/DEODAR-RS26` (a guest page, no login).
    Free breakfast, same price as the hotel's public rate. Pay ₹8,600 with
    simulated UPI. The code works once. The page does not show the guest's
