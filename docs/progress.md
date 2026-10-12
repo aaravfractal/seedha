@@ -12,11 +12,29 @@ docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
   generation API merged (fe46efc); HEIC via pillow-heif 1.8.1 and
   SITE_GEN_MODEL=claude-haiku-5-5 suggestion merged (1697c2f); D-102 and
   the saved final master brief (1a7838e).
-- In progress: B2 setup and review UI + BFF photo caching headers
-  (`.worktrees/sb2`, branch `site-sb2`); B3 slugs, /h/<slug>, subdomains,
-  public photo route, PublishPanel (Copy, WhatsApp, QR), Custom domain docs
-  (`.worktrees/sb3`, branch `site-sb3`). B2 ships a PublishPanel stub; take
-  B3's file at merge.
+- B2 DONE, uncommitted in `.worktrees/sb2` (branch `site-sb2`, base 1a7838e),
+  state of 13 Oct 2026: tsc, eslint --max-warnings=0, prettier, node tests
+  (194/194) and audit-check all pass (the earlier Review.tsx type error is
+  fixed). Not yet viewed in a browser. Status file:
+  `.worktrees/sb2/docs/agent-reports/site-real/b2.md`. Files (apps/web):
+  modified app/(owner)/(screens)/site/page.tsx, settings/page.tsx,
+  app/api/[...path]/route.ts, components/site/Review.tsx; deleted (staged)
+  components/site/SetupFlow.tsx; new components/site/{BuildFlow,
+  PhotoPicker, MicButton, RoomsEditor, GenerateParts, ReviewEditors,
+  PublishPanel (STUB)}.tsx, buildApi.ts, build.module.css,
+  components/settings/AiUsage.tsx, lib/{siteBuild, proxyHeaders}.ts (+ tests),
+  lib/types-site-build.ts, docs/agent-reports/site-real/b2.md.
+- B3 IN PROGRESS, uncommitted in `.worktrees/sb3` (branch `site-sb3`, base
+  1a7838e, no status file yet): modified api config.py, ratelimit.py,
+  routers/public_site.py, routers/site.py, tests/test_route_auth.py, web
+  app/hotel/[slug]/page.tsx, app/hotel/layout.tsx, HotelSite.tsx,
+  worldb.module.css, lib/types-site.ts, proxy.ts; new api services/slug.py,
+  tests/test_site_publish.py, web app/h/, components/site/{PublishPanel,
+  SiteAddress}.tsx, publish.module.css, lib/siteHost.ts (+ test). Relaunch B3
+  from this list: finish, run its checks, write b3.md.
+- Merge order: commit B2 and B3 in their worktrees, merge both into
+  site-real; take B3's components/site/PublishPanel.tsx over B2's stub
+  (same signature: default export, props { hotelName }). Then make check.
 - Next: merge B2 and B3, T1/T2 tests, V1 to V3 reviews, merge into master.
 
 **Part 2 (open fixes):** a. done (41e91de, D-103): step 6 ticks only for
@@ -36,6 +54,17 @@ database; nothing on local disk. c. checked (answer in the READY report).
   site-real's 0014: renumber or add an Alembic merge revision when the two
   branches meet.
 - Not merged into master or deploy until the owner says so.
+
+**Worktrees (13 Oct 2026):** main checkout on `deploy` (4757dd3, clean);
+`.worktrees/site` site-real (this file); `.worktrees/sb2` site-sb2 (B2 done,
+uncommitted); `.worktrees/sb3` site-sb3 (B3 in progress, uncommitted);
+`.worktrees/ev-api` ev-api (uncommitted, migration 0014 collision);
+`.worktrees/evd` event-discovery (1390eb2, clean). Every worktree also shows
+an untracked apps/api/.venv symlink (ignore it).
+
+**Next steps:** 1) finish B3; 2) commit and merge B2 and B3 into site-real;
+3) T1 API and T2 Playwright tests; 4) V1 to V3 reviews and fixes; 5) gates,
+merge into master, then FINAL_MASTER Parts 3 to 5 and the READY report.
 
 **Final readiness** (docs/FINAL_READINESS.md, branch `deploy`): steps 1 and 2
 done (merges, three audits, every high and medium finding fixed; latest
