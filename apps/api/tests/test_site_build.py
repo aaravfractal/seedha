@@ -24,7 +24,7 @@ from app.config import Settings, load_settings
 from app.main import create_app
 from app.models import Property, SiteContent, SiteGenRun, SitePhoto
 from app.services import site_gen as gen
-from app.services.site_photos import HEIC_MESSAGE, HEIC_SUPPORTED, clean_photo, is_heic
+from app.services.site_photos import clean_photo
 from tests.test_hosting import RAILWAY_PROXY, headers, prod
 
 TEST_KEY = "test-key"  # pragma: allowlist secret (dummy value, never sent)
@@ -276,15 +276,68 @@ def test_other_types_rejected(
     assert res.json()["error"]["code"] == "unsupported_type"
 
 
-def test_heic_without_pillow_heif(ai: TestClient, owner: dict[str, str]) -> None:
-    heic = b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic" + b"\x00" * 64
-    assert is_heic(heic)
-    res = upload(ai, owner, heic, "IMG_0001.HEIC", "image/heic")
-    if HEIC_SUPPORTED:  # the owner chose to install pillow_heif: this stub is not a real photo
-        assert res.status_code in (415, 422)
-    else:
-        assert res.status_code == 415
-        assert res.json()["error"]["message"] == HEIC_MESSAGE
+def heic_photo(orientation: int = 1, size: tuple[int, int] = (1600, 1000)) -> bytes:
+    """A real HEIC (as an iPhone sends) with camera EXIF and GPS."""
+    exif = Image.Exif()
+    exif[ExifTags.Base.Make] = "PhoneMaker"
+    exif[ExifTags.Base.Orientation] = orientation
+    exif[ExifTags.IFD.GPSInfo] = {1: "N", 2: (30.0, 27.0, 18.0), 3: "E", 4: (78.0, 4.0, 30.0)}
+    buffer = BytesIO()
+    Image.open(BytesIO(picture(size))).save(buffer, format="HEIF", exif=exif.tobytes())
+    return buffer.getvalue()
+
+
+def test_heic_upload_converted_and_stripped(
+    ai: TestClient, owner: dict[str, str], session: Session
+) -> None:
+    source = heic_photo()
+    assert source[4:12] == b"ftypheic"
+    assert Image.open(BytesIO(source)).getexif().get_ifd(ExifTags.IFD.GPSInfo)
+    res = upload(ai, owner, source, "IMG_0001.HEIC", "image/heic")
+    assert res.status_code == 201
+    body = res.json()
+    assert (body["width"], body["height"]) == (1024, 640)
+    stored = session.get(SitePhoto, body["id"])
+    assert stored is not None
+    out = Image.open(BytesIO(stored.data))
+    assert out.format == "JPEG"
+    assert not out.getexif()
+    assert b"Exif" not in stored.data and b"PhoneMaker" not in stored.data
+    assert b"GPS" not in stored.data
+    img = ai.get(f"/site/photos/{body['id']}", headers=owner)
+    assert img.headers["content-type"] == "image/jpeg"
+
+
+def test_heic_turned_upright() -> None:
+    clean = clean_photo(heic_photo(orientation=6))
+    assert (clean.width, clean.height) == (640, 1024)
+
+
+def test_heic_declared_as_jpeg_still_read(ai: TestClient, owner: dict[str, str]) -> None:
+    res = upload(ai, owner, heic_photo(size=(800, 600)), "photo.jpg", "image/jpeg")
+    assert res.status_code == 201
+    assert (res.json()["width"], res.json()["height"]) == (800, 600)
+
+
+@pytest.mark.parametrize(
+    ("data", "status"),
+    [
+        (b"\x00\x00\x00\x18ftypheic\x00\x00\x00\x00mif1heic" + b"\x00" * 64, 415),
+        (heic_photo(size=(400, 300))[:300], None),
+    ],
+)
+def test_broken_heic_rejected(
+    ai: TestClient, owner: dict[str, str], data: bytes, status: int | None
+) -> None:
+    res = upload(ai, owner, data, "IMG_0002.HEIC", "image/heic")
+    assert res.status_code in ((status,) if status else (415, 422))
+    assert res.json()["error"]["code"] in ("unsupported_type", "unreadable_photo")
+
+
+def test_avif_not_accepted(ai: TestClient, owner: dict[str, str]) -> None:
+    buffer = BytesIO()
+    Image.new("RGB", (64, 48)).save(buffer, format="AVIF")
+    assert upload(ai, owner, buffer.getvalue(), "a.avif", "image/avif").status_code == 415
 
 
 def test_empty_and_huge_pixel_counts(ai: TestClient, owner: dict[str, str]) -> None:
