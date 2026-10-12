@@ -540,7 +540,7 @@ def test_generate_request_shape(ai: TestClient, owner: dict[str, str], fake: Fak
     generate(ai, owner)
     (kwargs,) = fake.calls
     assert kwargs["model"] == MODEL
-    assert kwargs["max_tokens"] == 3_000
+    assert kwargs["max_tokens"] == 4_000
     assert kwargs["output_config"]["effort"] == "low"
     assert kwargs["output_config"]["format"]["type"] == "json_schema"
     assert len(kwargs["system"].split()) < 150

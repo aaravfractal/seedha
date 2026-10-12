@@ -62,12 +62,18 @@ demo_router = APIRouter(prefix="/demo", tags=["demo"])
 
 
 class SiteRoomOut(BaseModel):
-    """A room type at its public rate (paise), with its Hindi name and a short line."""
+    """A room type at its public rate (paise), with its Hindi name and a short line.
+
+    `bookable`: Seedha Link can book it at exactly this price (the name is a
+    room type in the rooms table and the shown price is that room's rate).
+    Otherwise the page says "Ask the hotel", so a guest never sees one price
+    and is asked for another (cost and honesty review V2-H3)."""
 
     room_type: str
     name_hi: str
     detail: dict[str, str]
     nightly_rate: int
+    bookable: bool = True
 
 
 class PublicPackageOut(BaseModel):
@@ -106,7 +112,9 @@ class NearbyOut(BaseModel):
 
 
 class ContactOut(BaseModel):
-    """The hotel's contact. The sample hotel's are placeholders."""
+    """The hotel's contact. The sample hotel's are placeholders; any other
+    hotel's are empty until the owner sets their own (V1-M2): never the
+    sample number or UPI ID."""
 
     phone: str
     upi: str
@@ -174,11 +182,16 @@ class SetupOut(BaseModel):
 
 
 class GoogleKitOut(BaseModel):
-    """Ready to paste into a Google Business Profile."""
+    """Ready to paste into a Google Business Profile. `description` is the
+    owner's generated or edited text (empty until there is one), or the
+    sample hotel's sample text (`sample`). `photos` are the owner's captions
+    in site order, or sample labels (`photos_sample`)."""
 
     description: dict[str, str]
     categories: list[str]
     photos: list[str]
+    sample: bool = False
+    photos_sample: bool = False
 
 
 class SiteOut(SiteContentOut):
@@ -307,11 +320,13 @@ def site_text(row: SiteContent) -> SiteTextOut:
     )
 
 
-def built_rooms(row: SiteContent) -> list[SiteRoomOut]:
-    """Room types with ONLY the prices the owner typed (paise); blurbs from the build."""
+def built_rooms(row: SiteContent, rates: dict[str, int]) -> list[SiteRoomOut]:
+    """Room types with ONLY the prices the owner typed (paise); blurbs from the build.
+    Bookable through Seedha Link only when Link would charge that same price."""
     return [
         SiteRoomOut(room_type=r.name, name_hi=r.name, nightly_rate=r.price_paise,
-                    detail={"en": r.blurb_en, "hi": r.blurb_hi or r.blurb_en})
+                    detail={"en": r.blurb_en, "hi": r.blurb_hi or r.blurb_en},
+                    bookable=rates.get(r.name) == r.price_paise)
         for r in read_rooms(row)
         if r.price_paise > 0
     ]  # fmt: skip
@@ -335,6 +350,20 @@ def booking_url(settings: Settings) -> str:
     return "/link"
 
 
+def sample_locked(prop: Property, settings: Settings) -> bool:
+    """Hosted (production): anyone can sign in to the sample hotel with Direct
+    beta login, so its public page shows only the fixed sample content, never
+    a visitor's photos, text or branding choice (security review V1-H1)."""
+    return settings.production and prop.is_sample
+
+
+def contact_out(prop: Property) -> ContactOut:
+    """Sample placeholders for the sample hotel; empty for any other (V1-M2)."""
+    if prop.is_sample:
+        return ContactOut(placeholder=True, **CONTACT)
+    return ContactOut(phone="", upi="", placeholder=False)
+
+
 def site_content(
     session: Session, prop: Property, config: SiteConfig, settings: Settings, *, public: bool
 ) -> dict[str, Any]:
@@ -342,11 +371,13 @@ def site_content(
 
     The owner always previews their build. Guests see it only once the site
     is published; until then the sample hotel keeps its labelled sample page.
+    In production guests always get the sample hotel's fixed sample page.
     """
     slug = current_slug(prop, config) or slugify(prop.short_name)
     url = site_url(slug, settings.web_origin, settings.site_root_domain)
     row = built_content(session, prop.id)
-    if row is not None and public and config.published_at is None:
+    locked = public and sample_locked(prop, settings)
+    if row is not None and public and (config.published_at is None or locked):
         row = None
     photos = site_photos(session, prop, slug, public=public) if row is not None else []
     return {
@@ -361,14 +392,18 @@ def site_content(
         "location": LOCATION if prop.is_sample else {"en": prop.city, "hi": prop.city},
         "tagline": TAGLINE if prop.is_sample else {"en": "", "hi": ""},
         "rooms_count": prop.rooms_count,
-        "rooms": built_rooms(row) if row is not None else sample_rooms(session, prop),
+        "rooms": (
+            built_rooms(row, room_rates(session, prop.id))
+            if row is not None
+            else sample_rooms(session, prop)
+        ),
         "nearby": [NearbyOut(place=p, distance=d) for p, d in NEARBY] if prop.is_sample else [],
         "gallery": [] if photos else list(GALLERY),
-        "contact": ContactOut(placeholder=prop.is_sample, **CONTACT),
+        "contact": contact_out(prop),
         "source": row.source if row is not None else "none",
         "text": site_text(row) if row is not None else None,
         "photos": photos,
-        "hide_branding": bool(config.hide_branding),
+        "hide_branding": bool(config.hide_branding) and not locked,
         "booking_url": booking_url(settings),
     }
 
@@ -404,11 +439,31 @@ def site_out(session: Session, prop: Property, settings: Settings) -> SiteOut:
         owner_name=prop.owner_name,
         packages=[owner_package(p, rates) for p in packages(session, prop, config)],
         setup=SetupOut.model_validate(SETUP),
-        google=GoogleKitOut(
-            description=google_description(prop),
-            categories=list(GOOGLE_CATEGORIES),
-            photos=list(GOOGLE_PHOTOS),
-        ),  # fmt: skip
+        google=google_kit(session, prop),
+    )
+
+
+def google_kit(session: Session, prop: Property) -> GoogleKitOut:
+    """The owner's own Google text once built (V2-H2). The fixed Mussoorie
+    text is the sample hotel's only, labelled Sample; another hotel with no
+    text yet gets empty descriptions (the screen asks to generate first)."""
+    row = built_content(session, prop.id)
+    text = read_content(row) if row is not None else {}
+    own = {"en": text.get("google_description_en", ""), "hi": text.get("google_description_hi", "")}
+    if own["en"] or own["hi"]:
+        description, sample = own, prop.is_sample and row is not None and row.source == "sample"
+    elif prop.is_sample:
+        description, sample = google_description(prop), True
+    else:
+        description, sample = {"en": "", "hi": ""}, False
+    captions = [p.caption_en for p in list_photos(session, prop.id) if p.caption_en]
+    own_photos = row is not None and bool(captions)
+    return GoogleKitOut(
+        description=description,
+        categories=list(GOOGLE_CATEGORIES),
+        photos=captions[:5] if own_photos else list(GOOGLE_PHOTOS),
+        sample=sample,
+        photos_sample=not own_photos,
     )
 
 
@@ -439,7 +494,24 @@ def patch_site(
     return site_out(session, prop, settings)
 
 
-@site_router.patch("/branding", response_model=BrandingOut)
+def publish_owner_only(request: Request) -> None:
+    """Hosted (production): the shared demo cannot go public (security review
+    V1-H1). Direct beta login gives anyone the demo subject, so publishing,
+    choosing an address and branding need a real owner account (OWNER_PHONES),
+    or the operator's server-side call (owner token, no session). Local demos
+    are unchanged."""
+    if (
+        is_production(request)
+        and "x-seedha-subject" in request.headers
+        and not is_real_owner(request)
+    ):
+        raise ApiError(403, "publish_owner_only", "Publishing is off on the shared demo")
+
+
+PUBLISH_GUARD = [Depends(require_owner_session), Depends(publish_owner_only)]
+
+
+@site_router.patch("/branding", response_model=BrandingOut, dependencies=PUBLISH_GUARD)
 def patch_branding(
     body: BrandingIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
 ) -> BrandingOut:
@@ -533,7 +605,7 @@ def get_address(
     )
 
 
-@site_router.post("/publish", response_model=PublishOut)
+@site_router.post("/publish", response_model=PublishOut, dependencies=PUBLISH_GUARD)
 def publish(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     _owner: OwnerDep,
     session: SessionDep,

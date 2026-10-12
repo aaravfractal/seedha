@@ -380,6 +380,7 @@ def test_public_site_shows_the_build_only_after_publish(
             "name_hi": "Deluxe Valley View",
             "detail": {"en": "Big windows.", "hi": "Big windows."},
             "nightly_rate": 450_000,
+            "bookable": False,  # 450,000 is not the rooms table's rate (V2-H3)
         }
     ]
     assert body["text"]["description"] == {"en": "A quiet family hotel.", "hi": "एक शांत होटल।"}

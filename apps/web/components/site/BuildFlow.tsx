@@ -254,8 +254,9 @@ function Steps({ initial, onReview, busy }: { initial: BuildState; onReview: () 
         ) : (
           <>
             <p className={b.lede}>
-              Claude reads your photos, your words and your room names (never the prices) and writes your site
-              in English and Hindi. You check and edit every line next.
+              {build.key_configured
+                ? "Claude reads your photos, your words and your room names (never the prices) and writes your site in English and Hindi. You check and edit every line next."
+                : "Without an AI key, this makes Sample text from your own words. Prices are never written by AI. You check and edit every line next."}
             </p>
             <ul className={b.summary} aria-label="What goes in">
               <li>

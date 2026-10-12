@@ -31,8 +31,10 @@ MAX_PHOTOS = 8
 MAX_SIDE = 1024
 TARGET_BYTES = 200_000
 QUALITIES = (85, 80, 75, 70, 65, 60)
-MAX_PIXELS = 40_000_000
-ALLOWED_FORMATS = frozenset({"JPEG", "PNG", "WEBP", "HEIF"})
+# 30 MP: above any phone's default photo (24 MP at most), and a decoded RGBA
+# copy stays near 120 MB (security review V1-L4).
+MAX_PIXELS = 30_000_000
+ALLOWED_FORMATS = ("JPEG", "PNG", "WEBP", "HEIF")
 TYPE_MESSAGE = "Please upload a JPEG, PNG, WebP or HEIC photo."
 
 Image.MAX_IMAGE_PIXELS = MAX_PIXELS
@@ -63,7 +65,8 @@ def _open(data: bytes) -> Image.Image:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
-            img = Image.open(BytesIO(data))
+            # Only these decoders are tried, never EPS, PSD and the rest (V1-L3).
+            img = Image.open(BytesIO(data), formats=ALLOWED_FORMATS)
             fmt = (img.format or "").upper()
             if fmt not in ALLOWED_FORMATS:
                 raise PhotoError(415, "unsupported_type", TYPE_MESSAGE)

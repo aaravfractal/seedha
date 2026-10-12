@@ -4,7 +4,14 @@ export type Lang = "en" | "hi";
 export type Mood = "pine" | "stone" | "sky";
 export type Bi = { en: string; hi: string };
 
-export type SiteRoom = { room_type: string; name_hi: string; detail: Bi; nightly_rate: number };
+/** `bookable`: Seedha Link books this room at exactly this price; otherwise "Ask the hotel". */
+export type SiteRoom = {
+  room_type: string;
+  name_hi: string;
+  detail: Bi;
+  nightly_rate: number;
+  bookable: boolean;
+};
 
 export type PublicPackage = { key: string; name: Bi; includes: Bi; nights: number; price: number };
 
@@ -107,7 +114,14 @@ export type OwnerSite = SiteContent & {
     voice_length: string;
     voice_summary: string;
   };
-  google: { description: Bi; categories: string[]; photos: string[] };
+  /** The owner's own Google text (empty until generated), or the sample hotel's labelled sample. */
+  google: {
+    description: Bi;
+    categories: string[];
+    photos: string[];
+    sample: boolean;
+    photos_sample: boolean;
+  };
 };
 
 export type PublicSite = SiteContent & {

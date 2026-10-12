@@ -251,12 +251,21 @@ def write_states(config: SiteConfig, states: dict[str, tuple[str, int | None]]) 
 
 
 def packages(session: Session, prop: Property, config: SiteConfig) -> list[Package]:
-    """All suggested packages with computed prices and the owner's decisions."""
+    """All suggested packages with computed prices and the owner's decisions.
+
+    The fixed suggestions (bonfire, yatra stop, monsoon offer) are the sample
+    hotel's: another hotel gets none, so it never shows an offer it did not
+    write, and a package whose room type is missing from the rooms table is
+    left out instead of failing the page."""
+    if not prop.is_sample:
+        return []
     rates = room_rates(session, prop.id)
     why = reasons(session, prop.id)
     states = read_states(config.approved_packages)
     out = []
     for spec in PACKAGES:
+        if spec.room_type not in rates:
+            continue
         state, nights = states.get(spec.key, ("pending", None))
         n = nights or spec.nights
         lines = package_lines(spec, n, rates)

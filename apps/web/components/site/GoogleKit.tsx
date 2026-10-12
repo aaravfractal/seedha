@@ -24,6 +24,8 @@ export function GoogleKit({
   onCopy: (text: string, note: string) => void;
 }) {
   const { google } = site;
+  const hasText = Boolean(google.description.en || google.description.hi);
+  const sampleTag = google.sample ? <span className={o.muted}> (Sample)</span> : null;
   return (
     <div className={o.stack}>
       <div>
@@ -35,39 +37,54 @@ export function GoogleKit({
       </div>
       <div className={o.grid2}>
         <div className={o.stack} style={{ gap: 20 }}>
-          <section className={o.card} aria-labelledby="kit-en">
-            <div className={o.kitTop}>
-              <h3 id="kit-en" className={o.cardTitle}>
-                English description
+          {hasText ? null : (
+            <section className={o.card} aria-labelledby="kit-empty">
+              <h3 id="kit-empty" className={o.cardTitle}>
+                Generate your site text first
               </h3>
-              <button
-                type="button"
-                className="btn ghost small"
-                onClick={() => onCopy(google.description.en, "English description copied")}
-              >
-                Copy description
-              </button>
-            </div>
-            <p style={{ margin: 0 }}>{google.description.en}</p>
-          </section>
-          <section className={o.card} aria-labelledby="kit-hi">
-            <div className={o.kitTop}>
-              <h3 id="kit-hi" className={`${o.cardTitle} ${o.deva}`} lang="hi">
-                हिंदी विवरण
-              </h3>
-              <button
-                type="button"
-                className="btn ghost small"
-                aria-label="Copy Hindi description"
-                onClick={() => onCopy(google.description.hi, "Hindi description copied")}
-              >
-                Copy description
-              </button>
-            </div>
-            <p className={o.deva} lang="hi" style={{ margin: 0 }}>
-              {google.description.hi}
-            </p>
-          </section>
+              <p style={{ margin: 0 }}>
+                Your Google description is written with your site text, from your own photos and words. Build
+                your site on the Website tab, then come back here to copy it.
+              </p>
+            </section>
+          )}
+          {hasText ? (
+            <>
+              <section className={o.card} aria-labelledby="kit-en">
+                <div className={o.kitTop}>
+                  <h3 id="kit-en" className={o.cardTitle}>
+                    English description{sampleTag}
+                  </h3>
+                  <button
+                    type="button"
+                    className="btn ghost small"
+                    onClick={() => onCopy(google.description.en, "English description copied")}
+                  >
+                    Copy description
+                  </button>
+                </div>
+                <p style={{ margin: 0 }}>{google.description.en}</p>
+              </section>
+              <section className={o.card} aria-labelledby="kit-hi">
+                <div className={o.kitTop}>
+                  <h3 id="kit-hi" className={`${o.cardTitle} ${o.deva}`} lang="hi">
+                    हिंदी विवरण{sampleTag}
+                  </h3>
+                  <button
+                    type="button"
+                    className="btn ghost small"
+                    aria-label="Copy Hindi description"
+                    onClick={() => onCopy(google.description.hi, "Hindi description copied")}
+                  >
+                    Copy description
+                  </button>
+                </div>
+                <p className={o.deva} lang="hi" style={{ margin: 0 }}>
+                  {google.description.hi}
+                </p>
+              </section>
+            </>
+          ) : null}
           <section className={o.card} aria-labelledby="kit-cat">
             <h3 id="kit-cat" className={o.cardTitle}>
               Suggested categories
@@ -79,7 +96,7 @@ export function GoogleKit({
             </ul>
             <p style={{ margin: 0 }}>
               Website link: <b style={{ color: "var(--accent)" }}>{site.address}</b>{" "}
-              <span className={o.muted}>(sample address)</span>
+              {site.sample || !site.live ? <span className={o.muted}>(sample address)</span> : null}
             </p>
           </section>
         </div>
@@ -95,7 +112,7 @@ export function GoogleKit({
             </div>
             <ol className={o.photos}>
               {google.photos.map((label, i) => (
-                <li key={label}>
+                <li key={`${i}-${label}`}>
                   <i style={{ background: PHOTOS[i % PHOTOS.length] }} aria-hidden="true" />
                   <span>
                     {i + 1}. {label}
@@ -104,7 +121,9 @@ export function GoogleKit({
               ))}
             </ol>
             <p id="kit-photos-note" className={o.muted} style={{ margin: "14px 0 0", fontSize: 14 }}>
-              Sample photos. Your own photos from the WhatsApp setup download here.
+              {google.photos_sample
+                ? "Sample photos. Downloading your own photos is coming soon."
+                : "Your own photos, in your site's order. Downloading them is coming soon."}
             </p>
           </section>
           <section className={o.card} aria-labelledby="kit-steps">
