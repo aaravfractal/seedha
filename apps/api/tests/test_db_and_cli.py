@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import func, select, text
 
-from app.db import make_engine, make_session_factory, session_scope
+from app.db import make_engine, make_session_factory, normalise_database_url, session_scope
 from app.models import Base, Booking, Consent
 from app.services.ledger import LedgerError, load_ledger
 from seed import load as seed_load
@@ -65,4 +65,32 @@ def test_seed_cli_loads_into_database_url(tmp_path: Path, monkeypatch: pytest.Mo
     with make_session_factory(engine)() as session:
         count = session.scalar(select(func.count()).select_from(Booking))
     assert count == 1_500 + 152 + 14 + len(CODED_STAYS) + len(CLOSE_STAYS)  # D-080, closes
+    engine.dispose()
+
+
+@pytest.mark.parametrize(
+    ("given", "expected"),
+    [
+        (
+            "postgres://u:p@ep-x.neon.tech/seedha?sslmode=require",
+            "postgresql+psycopg://u:p@ep-x.neon.tech/seedha?sslmode=require",
+        ),
+        (
+            "postgresql://u:p@dpg-x.render.com:5432/seedha",
+            "postgresql+psycopg://u:p@dpg-x.render.com:5432/seedha",
+        ),
+        ("postgresql+psycopg2://u@h/db", "postgresql+psycopg://u@h/db"),
+        ("postgresql+psycopg://u@h/db", "postgresql+psycopg://u@h/db"),
+        ("  sqlite:///seedha.db ", "sqlite:///seedha.db"),
+        ("sqlite://", "sqlite://"),
+    ],
+)
+def test_database_url_is_normalised_for_psycopg3(given: str, expected: str) -> None:
+    assert normalise_database_url(given) == expected
+
+
+def test_postgres_engine_uses_psycopg3_without_connecting() -> None:
+    engine = make_engine("postgres://u:p@localhost:5432/seedha?sslmode=require")
+    assert engine.dialect.driver == "psycopg"
+    assert engine.url.query == {"sslmode": "require"}
     engine.dispose()

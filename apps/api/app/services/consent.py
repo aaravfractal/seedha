@@ -45,8 +45,9 @@ def hash_token(token: str) -> str:
 
 
 def as_utc(moment: datetime) -> datetime:
-    """SQLite returns naive datetimes; treat stored times as UTC."""
-    return moment if moment.tzinfo else moment.replace(tzinfo=UTC)
+    """Stored times are UTC. SQLite returns them naive; Postgres returns them
+    aware in the session time zone, so convert (the fingerprint uses isoformat)."""
+    return moment.astimezone(UTC) if moment.tzinfo else moment.replace(tzinfo=UTC)
 
 
 def issue_token(session: Session, booking: Booking, now: datetime) -> tuple[str, ConsentToken]:
