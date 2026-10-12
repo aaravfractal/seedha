@@ -2,6 +2,15 @@
 
 The step-by-step hosting guide follows this brief once the build is done.
 
+**Change of plan (owner, same day):** Railway instead of Render and Neon.
+The API and its Postgres both run in one Railway project (DATABASE_URL from
+Railway's reference variable); the web stays a new Vercel project with
+API_BASE_URL set to the Railway service URL. Railway config (railway.json
+or Procfile) for apps/api with Python 3.12, start command "alembic upgrade
+head && uvicorn app.main:app --host 0.0.0.0 --port $PORT" and the existing
+health check; the one-off seed runs with Railway's run feature. No Render
+files remain. Everything else in the brief below stands.
+
 HOSTING BUILD: VERCEL (WEB) + RENDER (API) + NEON (POSTGRES)
 Work on a new branch "deploy". Do not change master's demo behaviour,
 money code or locked numbers. Do not create cloud accounts or push; I do
