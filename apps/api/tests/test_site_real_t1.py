@@ -238,7 +238,12 @@ def test_one_bad_field_keeps_every_other_claude_field(
     ready(ai, owner, rooms=TWO_ROOMS)
     body = generate(ai, owner)
     assert body["fallback_fields"] == ["description_hi"]
-    assert body["content"]["description_hi"] == DESCRIPTION
+    # The Hindi fallback is a fixed Hindi line, never the owner's English
+    # (honesty review V2-L7); it carries no money.
+    fallback_hi = body["content"]["description_hi"]
+    assert fallback_hi != DESCRIPTION
+    assert any("\u0900" <= ch <= "\u097f" for ch in fallback_hi)
+    assert "₹" not in fallback_hi and "रुपये" not in fallback_hi
     good = good_payload([])
     assert body["content"]["description_en"] == good["description_en"]
     assert body["content"]["google_description_hi"] == good["google_description_hi"]
