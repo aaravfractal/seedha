@@ -7,13 +7,16 @@ import type { NextRequest } from "next/server";
 import { accessFor } from "@/lib/bff";
 import { sameOrigin } from "@/lib/authServer";
 import { API_BODY_BYTES, readCapped } from "@/lib/body";
+import {
+  FORWARD_REQUEST_HEADERS,
+  FORWARD_RESPONSE_HEADERS,
+  hasNoBody,
+  pickHeaders,
+} from "@/lib/proxyHeaders";
 import { clientAddress } from "@/lib/ratelimit";
 import { refuseRemoteReset } from "@/lib/requestOrigin";
 import { SESSION_COOKIE, nowSeconds, readSession } from "@/lib/session";
 import { apiUrl, deviceKeyUsable, isHosted, isPublicMode, proxyProof } from "@/lib/webEnv";
-
-const FORWARD_REQUEST_HEADERS = ["content-type", "accept"];
-const FORWARD_RESPONSE_HEADERS = ["content-type", "content-disposition"];
 
 function errorResponse(status: number, code: string, message: string): Response {
   return Response.json({ error: { code, message } }, { status });
@@ -29,11 +32,7 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
     return errorResponse(403, "reset_local_only", "Reset works only on the computer running the demo");
   }
 
-  const headers = new Headers();
-  for (const name of FORWARD_REQUEST_HEADERS) {
-    const value = request.headers.get(name);
-    if (value) headers.set(name, value);
-  }
+  const headers = pickHeaders(request.headers, FORWARD_REQUEST_HEADERS);
   // The API rate-limits public routes per guest; uvicorn trusts this header
   // from the loopback BFF and resolves it into the client address. On Vercel
   // the edge overwrites X-Forwarded-For with the real client IP, so its last
@@ -77,12 +76,10 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
       body: body ? Buffer.from(body) : undefined,
       cache: "no-store",
     });
-    const responseHeaders = new Headers();
-    for (const name of FORWARD_RESPONSE_HEADERS) {
-      const value = upstream.headers.get(name);
-      if (value) responseHeaders.set(name, value);
-    }
-    return new Response(upstream.body, { status: upstream.status, headers: responseHeaders });
+    const responseHeaders = pickHeaders(upstream.headers, FORWARD_RESPONSE_HEADERS);
+    // A 304 (the browser's cached photo is current) has no body.
+    const out = hasNoBody(upstream.status) ? null : upstream.body;
+    return new Response(out, { status: upstream.status, headers: responseHeaders });
   } catch {
     return errorResponse(502, "api_unreachable", "Seedha API is not reachable. Is it running?");
   }
