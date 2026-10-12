@@ -68,8 +68,9 @@ NowDep = Annotated[datetime, Depends(get_now)]
 
 
 def demo_codes(settings: Settings, session: Session) -> bool:
-    """Show sign-in codes on screen only for the sample hotel (SEEDHA_DEMO=1)."""
-    if not settings.seedha_demo:
+    """Show sign-in codes on screen only for the sample hotel (SEEDHA_DEMO=1),
+    never in production."""
+    if not settings.seedha_demo or settings.production:
         return False
     prop = session.scalar(select(Property).order_by(Property.id).limit(1))
     return prop is None or prop.is_sample
@@ -89,6 +90,18 @@ def number_cap(request: Request, raw_phone: str) -> None:
             "too_many_codes",
             "Too many codes for this number. Try again later.",
             headers={"Retry-After": str(math.ceil(wait))},
+        )
+
+
+def accounts_open(request: Request) -> None:
+    """Production (the hosted demo) offers the sample hotel only: OTP sign in
+    and sign up are off unless ALLOW_OWNER_ACCOUNTS=1. Direct beta login works."""
+    settings: Settings = request.app.state.settings
+    if settings.production and not settings.allow_owner_accounts:
+        raise ApiError(
+            403,
+            "accounts_off",
+            "This hosted demo uses the sample hotel only. Use Direct beta login.",
         )
 
 
@@ -291,7 +304,7 @@ def _sent(sent: SentCode, demo: bool) -> OtpSentOut:
 @router.post(
     "/auth/otp/request",
     response_model=OtpSentOut,
-    dependencies=[Depends(limited("otp_send"))],
+    dependencies=[Depends(accounts_open), Depends(limited("otp_send"))],
 )
 def request_code(
     request: Request,
@@ -314,7 +327,7 @@ def request_code(
 @router.post(
     "/auth/otp/verify",
     response_model=OtpVerifyOut,
-    dependencies=[Depends(limited("otp_verify"))],
+    dependencies=[Depends(accounts_open), Depends(limited("otp_verify"))],
 )
 def verify_code(
     body: OtpVerifyIn, _owner: OwnerDep, session: SessionDep, now: NowDep
@@ -344,7 +357,7 @@ def verify_code(
 @router.post(
     "/auth/signup",
     response_model=OtpSentOut,
-    dependencies=[Depends(limited("otp_send"))],
+    dependencies=[Depends(accounts_open), Depends(limited("otp_send"))],
 )
 def signup(
     request: Request,

@@ -6,14 +6,17 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.config import load_settings
+from app.db import normalise_database_url
 from app.models import Base  # importing models registers every table
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name, disable_existing_loggers=False)
 
-if not config.get_main_option("sqlalchemy.url"):
-    config.set_main_option("sqlalchemy.url", load_settings().database_url)
+_url = config.get_main_option("sqlalchemy.url") or load_settings().database_url
+# Hosted (Railway) style postgres:// URLs run on psycopg 3 (see app.db). "%" is
+# doubled because alembic's config interpolates it (URL-encoded passwords).
+config.set_main_option("sqlalchemy.url", normalise_database_url(_url).replace("%", "%%"))
 
 target_metadata = Base.metadata
 

@@ -34,3 +34,14 @@ test("client address is the last forwarded hop", () => {
   assert.equal(clientAddress(new Headers({ "x-real-ip": "10.0.0.8" })), "10.0.0.8");
   assert.equal(clientAddress(new Headers()), "unknown");
 });
+
+test("behind Vercel the client address is the visitor Vercel saw", () => {
+  // Vercel overwrites X-Forwarded-For (and sets X-Real-IP, X-Vercel-Forwarded-For)
+  // with the client IP, dropping whatever the browser sent.
+  const vercel = new Headers({
+    "x-forwarded-for": "203.0.113.7",
+    "x-real-ip": "203.0.113.7",
+    "x-vercel-forwarded-for": "203.0.113.7",
+  });
+  assert.equal(clientAddress(vercel), "203.0.113.7");
+});

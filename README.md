@@ -52,7 +52,7 @@ flowchart LR
   Guest[Guest phone] --> Web
   Desk[Seedha Desk<br/>ESP32 or phone kiosk] -->|polls every 2 s| Web
   Web -->|server-side proxy| API[FastAPI API]
-  API --> DB[(SQLite now<br/>Postgres later)]
+  API --> DB[(SQLite locally<br/>Postgres when hosted)]
   API -.->|optional| Claude[Claude API]
   API -.->|optional| WA[WhatsApp Cloud API]
   API -.->|optional| Amoy[Polygon Amoy testnet]
@@ -60,7 +60,7 @@ flowchart LR
 
 - **Web:** Next.js (App Router, TypeScript, Tailwind) for the owner app, the guest pages and the public website. The browser talks only to the web app, which proxies to the API.
 - **API:** Python, FastAPI, SQLAlchemy 2 and Alembic. Money is integer paise internally and formatted with Indian grouping only at the edge.
-- **Database:** SQLite for the hackathon, with the schema written so Postgres works later.
+- **Database:** SQLite for the local demo; Postgres when hosted (Railway), chosen by `DATABASE_URL`. The full API suite runs on both in CI.
 - **Desk:** ESP32 firmware (PlatformIO) with a TFT screen, QR, LED ring and thermal printer; a phone or tablet can stand in at `/desk/device`.
 - **AI:** Claude reads unfamiliar statement layouts, breaks name-match ties and drafts message wording. It never produces a money figure; code checks every amount.
 
@@ -74,7 +74,7 @@ flowchart LR
 | Consent capture, salted fingerprints, Merkle roots             | Real                                                                                                                        |
 | Proof write to a public chain                                  | Polygon Amoy testnet only, when a funded testnet wallet and RPC are set; otherwise stored locally and labelled "Local only" |
 | WhatsApp messages                                              | Simulated send log unless WhatsApp Cloud API keys are set                                                                   |
-| UPI payment on Seedha Link                                     | Simulated unless Razorpay test keys are set                                                                                 |
+| UPI payment on Seedha Link                                     | Simulated (labelled); no payment gateway is connected                                                                                 |
 | Message drafts and event reading                               | Claude when a key is set; fixed templates and a labelled sample extraction otherwise                                        |
 | Stay invoice PDF                                               | Real, built from the booking row; marked Sample for the sample hotel                                                        |
 | Hotel, guests, bookings, events, second property               | Fictional sample data, labelled                                                                                             |
@@ -95,7 +95,7 @@ Open http://localhost:3000/login and tap **Direct beta login**. That opens
 the fictional sample hotel with no code. The demo listens on localhost
 only.
 
-The 8-step demo path (Home shows "0 of 8 steps done"):
+The 8-step demo path (Home shows "0 of 8 done"):
 
 1. **Upload:** "Use sample statements". 1,500 rows matched, 3 flagged for review.
 2. **The flip:** paid to channels ₹10,39,108; switch to "By money kept" and MakeMyTrip falls from 1st to 5th (₹2,737 kept per room night).
@@ -104,7 +104,7 @@ The 8-step demo path (Home shows "0 of 8 steps done"):
 5. **Checkout slip:** "Check out and print" shows what the hotel kept and the perk code **DEODAR-RS26**.
 6. **Approve:** approve the win-back draft on Approvals.
 7. **Direct booking:** open `/link/DEODAR-RS26`, book with simulated UPI. The code works once.
-8. **Savings:** ₹2,233 commission and GST avoided, ₹2,199 net after the UPI fee. Home shows "All 8 steps done".
+8. **Savings:** ₹2,233 commission and GST avoided, ₹2,199 net after the UPI fee. Home shows "8 of 8 done".
 
 For phones on the same Wi-Fi use `make demo-lan`, and for a public link
 `make demo-live` (needs `cloudflared`). Both use fresh secrets for every
@@ -114,8 +114,8 @@ run and keep reset, Claude and testnet writes on the laptop.
 
 `make check` runs every gate:
 
-- **API:** 950 pytest tests, about 98% coverage overall and 100% on money code, mypy strict, pylint 9.97, bandit and pip-audit clean.
-- **Web:** TypeScript strict, ESLint with zero warnings, Prettier, 171 unit tests, npm audit gate.
+- **API:** 1,004 pytest tests, about 98% coverage overall and 100% on money code, mypy strict, pylint 9.97, bandit and pip-audit clean.
+- **Web:** TypeScript strict, ESLint with zero warnings, Prettier, 181 unit tests, npm audit gate.
 - **End to end:** 75 Playwright tests, including the full 8-step loop, accessibility (axe) in light and dark at phone and laptop widths, and a speed check on the flip.
 - **Secrets:** a scan of the whole git history.
 - **Firmware:** native tests and a device build.

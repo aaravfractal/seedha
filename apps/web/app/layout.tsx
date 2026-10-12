@@ -4,20 +4,13 @@ import { ToastProvider } from "@/components/Toast";
 import { ShellProvider } from "@/components/shell/ShellData";
 import { THEME_BOOT_SCRIPT } from "@/components/ThemeToggle";
 import { mukta } from "@/lib/fonts";
+import { siteOrigin } from "@/lib/webEnv";
 
 const DESCRIPTION =
   "Seedha reads your OTA statements, shows what each channel actually leaves you, and stops you paying commission twice for guests you already won.";
 
-/** Absolute base for Open Graph URLs: the public web origin, read when the app is built. */
-function siteOrigin(): URL {
-  try {
-    return new URL(process.env.WEB_ORIGIN || "http://localhost:3000");
-  } catch {
-    return new URL("http://localhost:3000");
-  }
-}
-
 export const metadata: Metadata = {
+  // Absolute base for Open Graph URLs, read when the app is built (lib/webEnv.ts).
   metadataBase: siteOrigin(),
   title: "Seedha · Know what you really keep",
   description: DESCRIPTION,

@@ -7,6 +7,7 @@ import {
   isLocalRequest,
   isLoopbackHost,
   refuseRemoteReset,
+  showResetButton,
 } from "./requestOrigin.ts";
 
 test("host names lose the port and IPv6 brackets", () => {
@@ -83,4 +84,53 @@ test("public mode refuses a remote reset and nothing else", () => {
   assert.equal(refuseRemoteReset(["demo", "reset"], local, true), false);
   assert.equal(refuseRemoteReset(["ledger", "channels"], remote, true), false);
   assert.equal(refuseRemoteReset(["demo", "reset"], remote, false), false, "unchanged outside public mode");
+});
+
+test("reset decision table: local, demo-live, hosted", () => {
+  const reset = ["demo", "reset"];
+  const laptop = h({ host: "localhost:3000" });
+  const tunnel = h({ host: "abc-def.trycloudflare.com", "cf-ray": "1", "cf-connecting-ip": "203.0.113.7" });
+  const vercel = h({
+    host: "seedha.vercel.app",
+    "x-forwarded-host": "seedha.vercel.app",
+    "x-forwarded-for": "203.0.113.7",
+    "x-vercel-forwarded-for": "203.0.113.7",
+  });
+  const rows: [Headers, boolean, boolean, boolean][] = [
+    // headers, publicMode, hosted, refused
+    [laptop, false, false, false],
+    [tunnel, false, false, false],
+    [laptop, true, false, false],
+    [tunnel, true, false, true],
+    [vercel, true, false, true],
+    [vercel, false, true, false],
+    [vercel, true, true, false],
+  ];
+  for (const [headers, publicMode, hosted, refused] of rows) {
+    assert.equal(
+      refuseRemoteReset(reset, headers, publicMode, hosted),
+      refused,
+      JSON.stringify([publicMode, hosted]),
+    );
+  }
+  assert.equal(refuseRemoteReset(["ledger", "channels"], tunnel, true, false), false);
+});
+
+test("reset button: sample hotel only, on this machine or hosted", () => {
+  const rows: [boolean, boolean, boolean, boolean][] = [
+    // sample, onThisMachine, hosted, shown
+    [true, true, false, true],
+    [true, false, false, false],
+    [true, false, true, true],
+    [true, true, true, true],
+    [false, true, false, false],
+    [false, false, true, false],
+  ];
+  for (const [sample, onThisMachine, hosted, shown] of rows) {
+    assert.equal(
+      showResetButton({ sample, onThisMachine, hosted }),
+      shown,
+      JSON.stringify([sample, onThisMachine, hosted]),
+    );
+  }
 });

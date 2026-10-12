@@ -12,7 +12,7 @@ from app.config import Settings
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
 from app.models import Booking, Consent, ProofBundle
-from app.public_mode import is_remote_public
+from app.public_mode import app_settings, may_spend
 from app.services.chain import (
     EXPLORER_TX,
     NETWORK_LABEL,
@@ -143,8 +143,14 @@ def chain_out(status: ChainStatus) -> ChainOut:
     )  # fmt: skip
 
 
-# What a public-demo visitor sees: testnet writes run only on the laptop.
+# What a public-demo visitor sees: testnet writes run only on the laptop
+# (hosted: only for a real owner, or for everyone with ALLOW_DEMO_PROOF_WRITES=1).
 PUBLIC_LOCAL = ChainStatus("local", None, None, False, False, "public_mode")
+
+
+def chain_allowed(request: Request) -> bool:
+    """Whether this request may use the testnet wallet at all."""
+    return may_spend(request, demo_allowed=app_settings(request).allow_demo_proof_writes)
 
 
 def chain_writer(request: Request, settings: Settings) -> AmoyWriter | None:
@@ -200,7 +206,7 @@ def get_proof(
 ) -> ProofOut:
     """Proof overview. Bundles still waiting on the testnet get one quick
     receipt check, skipped while the RPC is known to be down."""
-    if is_remote_public(request):
+    if not chain_allowed(request):
         return overview(session, prop.id, PUBLIC_LOCAL)
     writer = chain_writer(request, settings)
     status = chain_status(writer, settings)
@@ -221,7 +227,7 @@ def write_tonight(
     configured wallet the root also goes to Polygon Amoy; any refusal keeps
     it local and is reported in `chain.reason`. A public-demo visitor's write
     stays local, so nobody else can spend the testnet wallet."""
-    if is_remote_public(request):
+    if not chain_allowed(request):
         try:
             publish_bundle(session, prop.id, LocalOnly("public_mode"), utc_now())
         except ProofError as exc:

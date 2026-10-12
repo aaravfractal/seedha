@@ -6,6 +6,7 @@
 import { AUTH_BODY_BYTES, readCapped } from "./body.ts";
 import { type Limit, RateLimiter, clientAddress } from "./ratelimit.ts";
 import { cookieSecure } from "./requestOrigin.ts";
+import { apiUrl, loginSecretsProblem, proxyProof } from "./webEnv.ts";
 
 /** Per client address on the web server, in front of the API's own limits. */
 export const AUTH_LIMITS = {
@@ -90,10 +91,11 @@ export async function callApi(
     authorization: `Bearer ${process.env.OWNER_API_TOKEN ?? ""}`,
     accept: "application/json",
     "x-forwarded-for": init.client,
+    "x-seedha-proxy": await proxyProof(),
   });
   if (init.subject) headers.set("x-seedha-subject", init.subject);
   if (init.body !== undefined) headers.set("content-type", "application/json");
-  const target = `${process.env.API_URL ?? "http://localhost:8000"}/${path}`;
+  const target = apiUrl(path);
   const res = await fetch(target, {
     method: init.method,
     headers,
@@ -146,22 +148,13 @@ export function isSecure(request: Request): boolean {
   });
 }
 
-/** The values published in .env.example; nobody may run a real site with them. */
-const DEMO_SECRETS = new Set(["demo-session-secret-change-me-32chars", "demo-owner-token-change-me"]);
-
-/** 503 when the web server lacks the secrets it needs to sign anyone in. */
+/**
+ * 503 when the web server lacks the secrets it needs to sign anyone in.
+ * Published demo secrets would let anyone forge a session (security review S14).
+ */
 export function notConfigured(): Response | null {
-  const token = process.env.OWNER_API_TOKEN ?? "";
-  const secret = process.env.SESSION_SECRET ?? "";
-  if (!token || !secret) {
-    return jsonError(503, "login_not_configured", "OWNER_API_TOKEN or SESSION_SECRET is not set");
-  }
-  // Published demo secrets would let anyone forge a session (security review S14).
-  const demoSecrets = DEMO_SECRETS.has(token) || DEMO_SECRETS.has(secret) || secret.length < 32;
-  if (demoSecrets && process.env.NODE_ENV === "production" && process.env.SEEDHA_DEMO !== "1") {
-    return jsonError(503, "login_not_configured", "Set your own OWNER_API_TOKEN and SESSION_SECRET");
-  }
-  return null;
+  const problem = loginSecretsProblem();
+  return problem ? jsonError(503, "login_not_configured", problem) : null;
 }
 
 /** Shared guard for auth POSTs: configuration, same origin, rate limit. */

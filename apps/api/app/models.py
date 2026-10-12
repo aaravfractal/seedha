@@ -160,7 +160,7 @@ class StatementFile(Base):
     filename: Mapped[str] = mapped_column(String(200))
     file_type: Mapped[str] = mapped_column(String(10))
     sha256: Mapped[str] = mapped_column(String(64))
-    parse_method: Mapped[str] = mapped_column(String(20))
+    parse_method: Mapped[str] = mapped_column(String(60))  # "layout:travel-agent-register"
     row_count: Mapped[int] = mapped_column(Integer, default=0)
     flagged_count: Mapped[int] = mapped_column(Integer, default=0)
     is_sample: Mapped[bool] = mapped_column(Boolean, default=False)

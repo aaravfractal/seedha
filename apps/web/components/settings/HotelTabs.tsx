@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { inr } from "@/lib/format";
 import { PLANS } from "@/lib/plans";
-import { hostName, isLoopbackHost } from "@/lib/requestOrigin";
+import { hostName, isLoopbackHost, showResetButton } from "@/lib/requestOrigin";
 import { bpsPct } from "@/lib/settingsRules";
 import type { Health } from "@/lib/types";
 import type { ContractsData, SettingsData } from "@/lib/types-settings";
@@ -40,8 +40,15 @@ export function HotelTab({ data, beforeReset }: { data: SettingsData; beforeRese
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const h = data.hotel;
-  // Reset is local only (make demo-live refuses it through the tunnel too).
-  const canReset = useOnThisMachine();
+  // Reset shows on the laptop running Seedha (make demo-live refuses it through
+  // the tunnel too) and, with SEEDHA_HOSTED=1, on the hosted site.
+  const onThisMachine = useOnThisMachine();
+  const mode = useApi<{ hosted: boolean }>("auth/mode");
+  const canReset = showResetButton({
+    sample: h.is_sample,
+    onThisMachine,
+    hosted: mode.data?.hosted === true,
+  });
 
   async function reset() {
     setBusy(true);
@@ -114,7 +121,7 @@ export function HotelTab({ data, beforeReset }: { data: SettingsData; beforeRese
       </p>
 
       {beforeReset}
-      {h.is_sample && canReset ? (
+      {canReset ? (
         <>
           <div className={s.sectionHead}>
             <h2 className={s.sectionTitle}>Reset the sample hotel</h2>
