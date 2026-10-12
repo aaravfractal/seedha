@@ -749,3 +749,15 @@ review found demo-prod reachable on the venue Wi-Fi with the published
 demo secrets and the OTP banner on). Phones and tablets use `make
 demo-lan` or `make demo-live`, which generate fresh secrets per run and
 turn on public-demo mode.
+
+## Seedha Site real mode (docs/SITE_REAL.md)
+
+**D-102 HEIC uploads through pillow-heif.** Owners photograph their hotel
+on iPhones, which save HEIC, so the API decodes HEIC/HEIF with
+pillow-heif 1.8.1 (pinned in pyproject.toml and requirements.txt) and
+re-encodes every photo as a metadata-free JPEG. The package itself is
+BSD-3-Clause, but its binary wheels bundle codecs under GPL and LGPL
+licences (x265 GPLv2, libheif and libde265 LGPLv3). That is acceptable for
+Seedha as a hosted service, where the software is not distributed. Review
+it before any distributed or on-premise version (options: drop HEIC and
+ask for JPEG, decode on the phone, or a differently licensed decoder).
