@@ -114,16 +114,6 @@
 .preview .head {
   position: relative;
 }
-.backBtn {
-  display: inline-grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 26px;
-  line-height: 1;
-  color: var(--wb-ink);
-}
 .brand {
   font-size: 24px;
   margin-right: auto;
@@ -140,7 +130,7 @@
 }
 .langSwitch button {
   min-width: 44px;
-  height: 40px;
+  height: 44px;
   padding: 0 10px;
   border-radius: 980px;
   font-weight: 700;

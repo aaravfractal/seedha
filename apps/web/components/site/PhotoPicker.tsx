@@ -41,7 +41,9 @@ export function PhotoGrid({
   const refocus = useRef<{ id: number; dir: "up" | "down" } | null>(null);
 
   useEffect(() => {
-    // Moving a photo moves its DOM node, which drops focus: put it back on the same button.
+    // Moving a photo moves its DOM node, which drops focus: put it back on the
+    // same button. The buttons stay enabled while the order saves (busy only
+    // sets aria-disabled), so the button is there to take focus.
     const want = refocus.current;
     if (!want || !list.current) return;
     refocus.current = null;
@@ -52,6 +54,7 @@ export function PhotoGrid({
   }, [photos]);
 
   async function move(from: number, to: number) {
+    if (busy) return;
     const before = photos;
     const moved = before[from];
     if (!moved || to < 0 || to >= before.length) return;
@@ -72,6 +75,7 @@ export function PhotoGrid({
   }
 
   async function remove(photo: SitePhoto, index: number) {
+    if (busy) return;
     setBusy(true);
     try {
       const left = (await deletePhoto(photo.id)).photos;
@@ -111,7 +115,8 @@ export function PhotoGrid({
                 type="button"
                 className={b.tool}
                 data-dir="up"
-                disabled={busy || i === 0}
+                disabled={i === 0}
+                aria-disabled={busy || undefined}
                 aria-label={`Move photo ${i + 1} earlier`}
                 onClick={() => void move(i, i - 1)}
               >
@@ -121,7 +126,8 @@ export function PhotoGrid({
                 type="button"
                 className={b.tool}
                 data-dir="down"
-                disabled={busy || i === photos.length - 1}
+                disabled={i === photos.length - 1}
+                aria-disabled={busy || undefined}
                 aria-label={`Move photo ${i + 1} later`}
                 onClick={() => void move(i, i + 1)}
               >
@@ -131,7 +137,7 @@ export function PhotoGrid({
                 <button
                   type="button"
                   className={`${b.tool} ${b.toolEnd}`}
-                  disabled={busy}
+                  aria-disabled={busy || undefined}
                   aria-label={`Remove photo ${i + 1}`}
                   onClick={() => void remove(photo, i)}
                 >

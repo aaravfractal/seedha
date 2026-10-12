@@ -193,15 +193,6 @@ export function HotelSite({
   return (
     <div className={`${s.wb} ${preview ? s.preview : ""}`} {...moodProps(mood, lang)}>
       <header className={s.head}>
-        {preview ? (
-          <span className={s.backBtn} aria-hidden="true">
-            ‹
-          </span>
-        ) : (
-          <button type="button" className={s.backBtn} aria-label={t.back} onClick={() => history.back()}>
-            ‹
-          </button>
-        )}
         <span className={`${s.brand} ${s.display}`}>{name}</span>
         <div className={s.langSwitch} role="group" aria-label={t.language}>
           {(["en", "hi"] as const).map((code) => (
@@ -236,6 +227,7 @@ export function HotelSite({
             alt={caption(hero, lang)}
             width={hero.width}
             height={hero.height}
+            loading="eager"
             fetchPriority="high"
           />
         ) : (

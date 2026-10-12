@@ -34,16 +34,35 @@ function firstStep(build: BuildState): Step {
  * prices, then one generation. Nothing is public here; Review and Publish
  * come next (docs/SITE_REAL.md section 4).
  */
-export function BuildFlow({ onReview, busy }: { onReview: () => void; busy: boolean }) {
+export function BuildFlow({
+  onReview,
+  busy,
+  claimFocus,
+}: {
+  onReview: () => void;
+  busy: boolean;
+  /** True once when the steps were just opened from Review or the empty screen: focus the step heading. */
+  claimFocus?: () => boolean;
+}) {
   const build = useApi<BuildState>("site/build");
   if (build.error && !build.data) {
     return <ErrorState message={build.error.message} code={build.error.code} onRetry={build.reload} />;
   }
   if (!build.data) return <Loading rows={3} label="Loading your site setup" />;
-  return <Steps initial={build.data} onReview={onReview} busy={busy} />;
+  return <Steps initial={build.data} onReview={onReview} busy={busy} claimFocus={claimFocus} />;
 }
 
-function Steps({ initial, onReview, busy }: { initial: BuildState; onReview: () => void; busy: boolean }) {
+function Steps({
+  initial,
+  onReview,
+  busy,
+  claimFocus,
+}: {
+  initial: BuildState;
+  onReview: () => void;
+  busy: boolean;
+  claimFocus?: () => boolean;
+}) {
   const toast = useToast();
   const descId = useId();
   const [build, setBuild] = useState(initial);
@@ -58,12 +77,29 @@ function Steps({ initial, onReview, busy }: { initial: BuildState; onReview: () 
   const [result, setResult] = useState<GenerateResult | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const moved = useRef(false);
+  const note = useRef<HTMLDivElement>(null);
+  const writeButton = useRef<HTMLButtonElement>(null);
+  const focusNote = useRef(false);
 
   useEffect(() => {
     // Move focus to the new step's heading (not on first load).
     if (moved.current) heading.current?.focus();
     moved.current = true;
   }, [step]);
+
+  useEffect(() => {
+    // Opened with a button (Build my site, Change photos): start at the heading.
+    if (claimFocus?.()) heading.current?.focus();
+  }, [claimFocus]);
+
+  // While writing and after it, focus the status note (the button that started
+  // it is disabled meanwhile); after an error, the button again.
+  useEffect(() => {
+    if (!focusNote.current) return;
+    if (generating || result) note.current?.focus();
+    else writeButton.current?.focus();
+    if (!generating) focusNote.current = false;
+  }, [generating, result]);
 
   const index = STEPS.findIndex(([key]) => key === step);
   const descDirty = desc.trim() !== build.owner_description;
@@ -139,6 +175,7 @@ function Steps({ initial, onReview, busy }: { initial: BuildState; onReview: () 
   }
 
   async function generate() {
+    focusNote.current = true;
     setConfirm(false);
     setGenerating(true);
     setError("");
@@ -273,7 +310,7 @@ function Steps({ initial, onReview, busy }: { initial: BuildState; onReview: () 
               </li>
             </ul>
             <p className={b.hint}>{allowanceText(build)}</p>
-            <div aria-live="polite">
+            <div aria-live="polite" ref={note} tabIndex={-1} className={b.liveNote}>
               {generating ? (
                 <div className={b.field}>
                   <p className={b.label}>Writing your site. This can take up to a minute.</p>
@@ -287,6 +324,7 @@ function Steps({ initial, onReview, busy }: { initial: BuildState; onReview: () 
             </div>
             <div className={b.regen}>
               <button
+                ref={writeButton}
                 type="button"
                 className={canReview ? "btn ghost" : "btn"}
                 disabled={working || limitHit || !ready.photos || !ready.describe || !ready.rooms}

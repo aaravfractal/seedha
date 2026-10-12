@@ -98,7 +98,12 @@ function Section({
       {hint ? <p className={b.hint}>{hint}</p> : null}
       {children}
       <div>
-        <button type="submit" className="btn small" disabled={!dirty || invalid || saving}>
+        <button
+          type="submit"
+          className="btn small"
+          disabled={!dirty || invalid || saving}
+          aria-label={saving ? undefined : `Save ${title}`}
+        >
           {saving ? "Saving…" : "Save"}
         </button>
       </div>

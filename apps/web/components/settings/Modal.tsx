@@ -15,11 +15,14 @@ export function Modal({
   onClose,
   children,
   alert = false,
+  describedBy,
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
   alert?: boolean;
+  /** Id of the body text, read out with the title when the dialog opens. */
+  describedBy?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -33,6 +36,7 @@ export function Modal({
         role={alert ? "alertdialog" : "dialog"}
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-describedby={describedBy}
       >
         <h2 id={titleId} className={s.sheetTitle}>
           {title}

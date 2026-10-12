@@ -23,6 +23,9 @@ const EDITED = "Edited by the owner in the T2 test: a quiet family hotel among t
 const ROOMS = [
   { name: "Valley Suite", price: "5250", shown: "₹5,250" },
   { name: "Forest Cottage", price: "3875", shown: "₹3,875" },
+  // Same name and price as the sample hotel's rate, so Seedha Link can book it
+  // and the booking bar shows (the other two say "Ask the hotel").
+  { name: "Deluxe Valley View", price: "4300", shown: "₹4,300" },
 ];
 const BUILD_URL = /\/api\/site\/build(\?.*)?$/;
 const GENERATE_URL = /\/api\/site\/build\/generate(\?.*)?$/;
@@ -162,8 +165,8 @@ test("build, generate, edit, regenerate and publish the site", async ({
 
   // 3. Rooms with the owner's own prices.
   await expect(page.getByRole("heading", { name: "Rooms and prices" })).toBeFocused();
-  await page.getByRole("button", { name: "Add a room type" }).click();
   for (const [i, room] of ROOMS.entries()) {
+    if (i > 0) await page.getByRole("button", { name: "Add a room type" }).click();
     await page.getByLabel(`Room ${i + 1} name`).fill(room.name);
     await page.getByLabel("Price for one night (₹)").nth(i).fill(room.price);
     await expect(page.getByText(`Shown as ${room.shown} a night`)).toBeVisible();
@@ -181,6 +184,7 @@ test("build, generate, edit, regenerate and publish the site", async ({
   expect(saved.rooms.map((r) => [r.name, r.price_paise])).toEqual([
     ["Valley Suite", 525_000],
     ["Forest Cottage", 387_500],
+    ["Deluxe Valley View", 430_000],
   ]);
   await expect(page.getByText("No AI key is set up here, so this writes Sample text.")).toBeVisible();
 
@@ -203,7 +207,7 @@ test("build, generate, edit, regenerate and publish the site", async ({
 
   await page.getByRole("button", { name: "Write my site" }).click();
   const note = page.getByRole("status").filter({ hasText: "Sample text." });
-  await expect(note).toContainText("Add ANTHROPIC_API_KEY and SITE_GEN_MODEL to write your own.");
+  await expect(note).toContainText("AI writing is not switched on here.");
   await axeSweep(page, context, baseURL, "generate step");
   await page.getByRole("button", { name: "Review my site" }).click();
 

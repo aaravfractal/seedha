@@ -18,4 +18,8 @@ export const mukta = localFont({
   ],
   variable: "--font-mukta",
   display: "swap",
+  // Not preloaded: the three Devanagari files (about 200 KB) would compete with
+  // every page's first paint, and the browser fetches them as soon as Hindi
+  // text is on screen anyway (design review V3-M7).
+  preload: false,
 });

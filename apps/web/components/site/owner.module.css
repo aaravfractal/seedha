@@ -2,6 +2,7 @@
 
 .stack {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   min-width: 0;
 }
@@ -135,6 +136,7 @@
 /* setup */
 .setup {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
   align-items: start;
 }
@@ -385,6 +387,7 @@
 }
 .previews {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
@@ -477,6 +480,7 @@
 /* packages */
 .grid2 {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   align-items: start;
 }
@@ -657,4 +661,12 @@
 /* The preview frame is dark; the pine ring falls below 3:1 on it (review A28). */
 .viewport:focus-visible {
   outline-color: #4cc38a;
+}
+
+/* A text-style button that still meets the 44 px target size. */
+.linkBtn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
 }

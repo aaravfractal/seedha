@@ -8,7 +8,6 @@ import type { Lang } from "@/lib/types-site";
 
 export const COPY = {
   en: {
-    back: "Back",
     language: "Language",
     book: "Book directly",
     bookShort: "Book",
@@ -47,7 +46,6 @@ export const COPY = {
     madeWith: "Made with Seedha",
   },
   hi: {
-    back: "वापस",
     language: "भाषा",
     book: "सीधे बुक करें",
     bookShort: "बुक करें",

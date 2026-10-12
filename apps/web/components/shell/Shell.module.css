@@ -31,7 +31,9 @@
 
 .content {
   min-width: 0;
-  animation: enter var(--dur-enter) var(--spring) both;
+  /* backwards, not both: a transform left on after the entrance would make
+     this column the containing block of every position: fixed sheet inside it. */
+  animation: enter var(--dur-enter) var(--spring) backwards;
 }
 @keyframes enter {
   from {
