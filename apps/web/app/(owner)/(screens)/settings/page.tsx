@@ -8,6 +8,7 @@ import { ErrorState, Loading } from "@/components/States";
 import { Screen } from "@/components/owner/ui";
 import { NotificationsTab, PrivacyTab, SecurityTab } from "@/components/settings/AccountTabs";
 import { ContractsTab, HotelTab, PlanTab } from "@/components/settings/HotelTabs";
+import { AiUsage } from "@/components/settings/AiUsage";
 import { InvoiceGstSetting } from "@/components/settings/InvoiceGstSetting";
 import { PersonalTab } from "@/components/settings/PersonalTab";
 import { SimulateMessage } from "@/components/settings/SimulateMessage";
@@ -81,7 +82,10 @@ export default function SettingsPage() {
         ) : tab === "hotel" ? (
           <HotelTab data={data} beforeReset={<InvoiceGstSetting />} />
         ) : tab === "plan" ? (
-          <PlanTab />
+          <>
+            <PlanTab />
+            <AiUsage />
+          </>
         ) : tab === "contracts" ? (
           <ContractsTab />
         ) : tab === "staff" ? (
