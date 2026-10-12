@@ -45,3 +45,7 @@ firmware/seedha-desk/.pio-core/
 .pre-commit-home/
 .cache/
 .worktrees/
+
+# Build output of the API package and the local repo archive (never committed)
+*.egg-info/
+.archive/
