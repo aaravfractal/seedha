@@ -34,6 +34,7 @@ from app.config import (
 from app.deps import get_settings
 from app.main import LazyApp, create_app
 from app.models import OwnerAccount
+from app.proxy_trust import proxy_proof
 from app.public_mode import print_guarded
 from app.routers.proof import chain_allowed
 
@@ -355,12 +356,19 @@ def test_forged_loopback_grants_nothing_behind_the_proxy(
 
     proxied = ProxyHeadersMiddleware(inner, trusted_hosts="*")  # type: ignore[arg-type]
     forged = {"X-Forwarded-For": "127.0.0.1, 198.51.100.4"}
+    via_web = {"X-Seedha-Proxy": proxy_proof(PROD_TOKEN)}
     with TestClient(proxied, client=RAILWAY_PROXY) as client:  # type: ignore[arg-type]
-        assert client.get("/whoami", headers=headers("demo") | forged).json() == {"claude": False}
-        reset = client.post("/demo/reset", headers=headers("demo") | forged)
+        # Even through the web server, a forged 127.0.0.1 grants nothing.
+        assert client.get("/whoami", headers=headers("demo") | forged | via_web).json() == {
+            "claude": False
+        }
+        reset = client.post("/demo/reset", headers=headers("demo") | forged | via_web)
         assert reset.status_code == 403
-        client.get("/whoami", headers={"X-Forwarded-For": "203.0.113.7, 10.250.0.9"})
-    assert seen == ["127.0.0.1", "203.0.113.7"]
+        # Through the web server the forwarded visitor is trusted ...
+        client.get("/whoami", headers={"X-Forwarded-For": "203.0.113.7, 10.250.0.9"} | via_web)
+        # ... a direct caller without the proof gets the proxy-recorded hop (S-H1).
+        client.get("/whoami", headers=forged)
+    assert seen == ["127.0.0.1", "203.0.113.7", "198.51.100.4"]
 
 
 def test_each_guest_gets_their_own_rate_limit_bucket(
@@ -371,12 +379,42 @@ def test_each_guest_gets_their_own_rate_limit_bucket(
         create_app(prod_settings, factory),  # type: ignore[arg-type]
         trusted_hosts="*",
     )
+    via_web = {"X-Seedha-Proxy": proxy_proof(PROD_TOKEN)}
     with TestClient(proxied, client=RAILWAY_PROXY) as client:  # type: ignore[arg-type]
-        first = {"X-Forwarded-For": "203.0.113.7, 10.250.0.9"}
+        first = {"X-Forwarded-For": "203.0.113.7, 10.250.0.9"} | via_web
         codes = [client.get("/public/consent/nope", headers=first).status_code for _ in range(21)]
         assert codes[-1] == 429 and 429 not in codes[:-1]
-        second = {"X-Forwarded-For": "203.0.113.8, 10.250.0.9"}
+        second = {"X-Forwarded-For": "203.0.113.8, 10.250.0.9"} | via_web
         assert client.get("/public/consent/nope", headers=second).status_code != 429
+
+
+def test_direct_callers_cannot_pick_a_fresh_bucket(
+    prod_settings: Settings, factory: sessionmaker[Session]
+) -> None:
+    """S-H1: without the web server's proof, a forged left-most entry is ignored:
+    every direct call from the same proxy hop shares one bucket."""
+    proxied = ProxyHeadersMiddleware(
+        create_app(prod_settings, factory),  # type: ignore[arg-type]
+        trusted_hosts="*",
+    )
+    wrong = {"X-Seedha-Proxy": "0" * 64}
+    with TestClient(proxied, client=RAILWAY_PROXY) as client:  # type: ignore[arg-type]
+        codes = [
+            client.get(
+                "/public/consent/nope",
+                headers={"X-Forwarded-For": f"203.0.113.{i}, 10.250.0.9"}
+                | (wrong if i % 2 else {}),
+            ).status_code
+            for i in range(21)
+        ]
+    assert codes[-1] == 429 and 429 not in codes[:-1]
+
+
+def test_docs_are_off_in_production(hosted: TestClient, client: TestClient) -> None:
+    """S-H2: no public API docs on the hosted API; local development keeps them."""
+    for path in ("/docs", "/redoc", "/openapi.json"):
+        assert hosted.get(path).status_code == 404
+    assert client.get("/openapi.json").status_code == 200
 
 
 # --- app.main:app and the Railway files -------------------------------------------

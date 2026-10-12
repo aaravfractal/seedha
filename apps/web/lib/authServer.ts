@@ -6,7 +6,7 @@
 import { AUTH_BODY_BYTES, readCapped } from "./body.ts";
 import { type Limit, RateLimiter, clientAddress } from "./ratelimit.ts";
 import { cookieSecure } from "./requestOrigin.ts";
-import { apiUrl, loginSecretsProblem } from "./webEnv.ts";
+import { apiUrl, loginSecretsProblem, proxyProof } from "./webEnv.ts";
 
 /** Per client address on the web server, in front of the API's own limits. */
 export const AUTH_LIMITS = {
@@ -91,6 +91,7 @@ export async function callApi(
     authorization: `Bearer ${process.env.OWNER_API_TOKEN ?? ""}`,
     accept: "application/json",
     "x-forwarded-for": init.client,
+    "x-seedha-proxy": await proxyProof(),
   });
   if (init.subject) headers.set("x-seedha-subject", init.subject);
   if (init.body !== undefined) headers.set("content-type", "application/json");

@@ -88,7 +88,10 @@ secrets live only in the Railway and Vercel variable screens.
    `alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips='*'`,
    and checks health on `/health`. The two proxy flags make the API see each
    guest's own address behind Railway's proxy, so rate limits work per
-   guest.
+   guest. The API trusts that forwarded address only on requests that
+   carry the web server's proof header (derived from `OWNER_API_TOKEN`); a
+   direct caller of the Railway URL is limited by the address Railway's
+   proxy recorded, and the API docs pages are off in production.
 4. Settings, Networking, Generate Domain. Note the URL,
    `https://<api>.up.railway.app`. This is `API_BASE_URL` for Vercel.
 
@@ -135,11 +138,9 @@ railway ssh --service <api-service>
 python -m seed.load                # inside the container
 ```
 
-Alternative from your laptop, in `apps/api`: copy the Postgres service's
-`DATABASE_PUBLIC_URL` from Railway and run
-`railway run --service <api-service> sh -c 'DATABASE_URL="<DATABASE_PUBLIC_URL>" .venv/bin/python -m seed.load'`.
-A plain `railway run` injects the internal database address, which your
-laptop cannot reach.
+Use `railway ssh` only: it runs inside the API container with its own
+variables, so the database password never appears on your command line and
+the Desk device key is registered from the sealed variable.
 
 ## 4. Vercel: web project
 
@@ -161,6 +162,8 @@ laptop cannot reach.
 | `WEB_ORIGIN` | `https://<project>.vercel.app` (optional, after the first deploy) | no |
 | `PUBLIC_CONTACT_EMAIL`, `PUBLIC_PRIVACY_EMAIL`, `PUBLIC_SECURITY_EMAIL` | role addresses (optional) | no |
 
+Mark `SESSION_SECRET`, `OWNER_API_TOKEN` and `DESK_DEVICE_KEY` as
+Sensitive and scope them to Production only (not Preview or Development).
 Never prefix `API_BASE_URL` or any secret with `NEXT_PUBLIC_`. Do not set
 `SEEDHA_DEMO` or `SEEDHA_PUBLIC` on Vercel. Browsers only ever call the
 Vercel origin; the web server calls Railway through its proxy.
@@ -219,5 +222,8 @@ starts at "0 of 8 steps done".
    remove it after; on Proof press "Write tonight's proof"; it shows Sent,
    then Verified with a block number and an explorer link. Otherwise it
    says Local only with the reason.
-6. Safety: as a signed-in visitor, the Calendar's Add events shows a
+6. Rate limits per guest: from two phones on different networks, the
+   consent page works on both; from one, repeated fast reloads of a public
+   page eventually get "Too many tries" on that phone only.
+7. Safety: as a signed-in visitor, the Calendar's Add events shows a
    labelled sample extraction (no Claude spend) and proof writes stay local.

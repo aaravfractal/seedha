@@ -7,6 +7,7 @@ import {
   isHosted,
   isPublicMode,
   loginSecretsProblem,
+  proxyProof,
   siteOrigin,
 } from "./webEnv.ts";
 
@@ -89,4 +90,12 @@ test("desk key: needed, and never the demo key in strict production", () => {
   assert.equal(deviceKeyUsable({ ...DEMO, NODE_ENV: "production", SEEDHA_DEMO: "1" }), true);
   assert.equal(deviceKeyUsable({ ...DEMO, NODE_ENV: "production" }), false);
   assert.equal(deviceKeyUsable({ ...FRESH, NODE_ENV: "production" }), true);
+});
+
+test("proxy proof: HMAC-SHA256 of the label keyed by the owner token, empty without a token", async () => {
+  const { createHmac } = await import("node:crypto");
+  const token = "a".repeat(64);
+  const expected = createHmac("sha256", token).update("seedha-proxy").digest("hex");
+  assert.equal(await proxyProof(token), expected);
+  assert.equal(await proxyProof(""), "");
 });

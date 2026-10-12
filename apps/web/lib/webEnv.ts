@@ -91,3 +91,23 @@ export function deviceKeyUsable(env: Env = process.env): boolean {
   if (!key) return false;
   return !(strictProduction(env) && DEMO_SECRETS.has(key));
 }
+
+/**
+ * Proof that a request to the API came through this web server (hosting
+ * security review S-H1). The API trusts the client address in
+ * X-Forwarded-For only when this header matches; a direct caller of the
+ * API's public URL is limited by the address its proxy saw instead.
+ * HMAC-SHA256 of a fixed label keyed by OWNER_API_TOKEN, so no new secret.
+ */
+export async function proxyProof(token: string | undefined = process.env.OWNER_API_TOKEN): Promise<string> {
+  if (!token) return "";
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(token),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode("seedha-proxy"));
+  return Array.from(new Uint8Array(mac), (b) => b.toString(16).padStart(2, "0")).join("");
+}

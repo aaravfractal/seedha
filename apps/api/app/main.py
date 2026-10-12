@@ -15,6 +15,7 @@ from app.config import ProductionConfigError, Settings, load_settings, productio
 from app.db import make_engine, make_session_factory
 from app.deps import OwnerDep, PropertyDep
 from app.errors import install_error_handlers
+from app.proxy_trust import ProxyTrustMiddleware
 from app.ratelimit import RateLimiter
 from app.routers import (
     ask,
@@ -103,7 +104,15 @@ def create_app(
     origins = allowed_origins(settings)
     if session_factory is None:
         session_factory = make_session_factory(make_engine(settings.database_url))
-    api = FastAPI(title="Seedha API", version="0.1.0")
+    # Production: no public API docs (hosting security review S-H2).
+    hide_docs = settings.production
+    api = FastAPI(
+        title="Seedha API",
+        version="0.1.0",
+        docs_url=None if hide_docs else "/docs",
+        redoc_url=None if hide_docs else "/redoc",
+        openapi_url=None if hide_docs else "/openapi.json",
+    )
     api.state.settings = settings
     api.state.session_factory = session_factory
     api.state.rate_limiter = RateLimiter()
@@ -113,6 +122,8 @@ def create_app(
         allow_methods=["GET", "POST", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type", "X-Device-Key"],
     )
+    if settings.production:
+        api.add_middleware(ProxyTrustMiddleware, owner_token=settings.owner_api_token)
     install_error_handlers(api)
     for name, enabled in (
         ("LLM", settings.llm_enabled),

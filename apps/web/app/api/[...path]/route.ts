@@ -10,7 +10,7 @@ import { API_BODY_BYTES, readCapped } from "@/lib/body";
 import { clientAddress } from "@/lib/ratelimit";
 import { refuseRemoteReset } from "@/lib/requestOrigin";
 import { SESSION_COOKIE, nowSeconds, readSession } from "@/lib/session";
-import { apiUrl, deviceKeyUsable, isHosted, isPublicMode } from "@/lib/webEnv";
+import { apiUrl, deviceKeyUsable, isHosted, isPublicMode, proxyProof } from "@/lib/webEnv";
 
 const FORWARD_REQUEST_HEADERS = ["content-type", "accept"];
 const FORWARD_RESPONSE_HEADERS = ["content-type", "content-disposition"];
@@ -39,6 +39,7 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
   // the edge overwrites X-Forwarded-For with the real client IP, so its last
   // entry is the visitor, not a value the browser chose.
   headers.set("x-forwarded-for", clientAddress(request.headers));
+  headers.set("x-seedha-proxy", await proxyProof());
   const hasBody = request.method !== "GET" && request.method !== "HEAD";
   // Writes must come from this site (security review S4; cookies are SameSite=Lax too).
   if (hasBody && !sameOrigin(request.headers, request.url)) {
