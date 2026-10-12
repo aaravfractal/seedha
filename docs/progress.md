@@ -4,34 +4,26 @@ Autonomous build, M1 to M11. Instructions: docs/AUTONOMOUS.md. Rulings:
 docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
 
-## Open work: state on 12 October 2026 (after a network failure)
-
-All background agents stopped on a TLS error (self-signed certificate in
-chain). Their partial work is uncommitted on disk in the worktrees below;
-nothing was lost. Restart each builder from its brief plus its status file.
+## Open work: FINAL MASTER (docs/FINAL_MASTER.md), 12 October 2026
 
 **Seedha Site real mode** (docs/SITE_REAL.md, branch `site-real`)
-- Done: brief saved (73eed0e); `deploy` merged in (6513396) so the branch has
-  the hosting, Postgres and readiness work; Wave 1 research R1 and R2
-  (docs/agent-reports/site-real/r1.md, r2.md); groundwork commit 0dadc4b:
-  migration 0014 (site_config slug, previous_slug, slug_changed_at,
-  hide_branding; site_photo; site_content; site_gen_run), Pillow 12.3.0
-  pinned, microphone=(self), SITE_GEN_MODEL / SITE_GEN_MONTHLY_TOKEN_CAP /
-  SITE_ROOT_DOMAIN in .env.example.
-- Wave 2 in progress, stopped early (uncommitted):
-  - B1 photos and generation API, worktree `.worktrees/sb1` (branch
-    `site-sb1`): config.py SITE_GEN_* settings and the status file
-    docs/agent-reports/site-real/b1.md with the design; services, router,
-    tests and the one-off script not started.
-  - B2 setup and review UI, worktree `.worktrees/sb2` (branch `site-sb2`):
-    lib/siteBuild.ts, lib/siteBuild.test.ts, lib/types-site-build.ts.
-  - B3 addresses and sharing, worktree `.worktrees/sb3` (branch `site-sb3`):
-    apps/api/app/services/slug.py.
-- Next: finish Wave 2 (B1, B2, B3), Wave 3 tests (T1, T2), Wave 4 reviews
-  (V1 to V3), Wave 5 finish (gates, merges into master and deploy, docs).
-- Decisions pending with the owner: HEIC (pillow-heif wheels are
-  GPLv2-labelled; default: HEIC only if that package is installed, else a
-  clear 415 message); the hotel route moves from /hotel/<slug> to /h/<slug>.
+- Done: brief, deploy merged in, R1/R2 research, groundwork 0dadc4b
+  (migration 0014, Pillow, mic permission, env vars); B1 photos and
+  generation API merged (fe46efc); HEIC via pillow-heif 1.8.1 and
+  SITE_GEN_MODEL=claude-haiku-5-5 suggestion merged (1697c2f); D-102 and
+  the saved final master brief (1a7838e).
+- In progress: B2 setup and review UI + BFF photo caching headers
+  (`.worktrees/sb2`, branch `site-sb2`); B3 slugs, /h/<slug>, subdomains,
+  public photo route, PublishPanel (Copy, WhatsApp, QR), Custom domain docs
+  (`.worktrees/sb3`, branch `site-sb3`). B2 ships a PublishPanel stub; take
+  B3's file at merge.
+- Next: merge B2 and B3, T1/T2 tests, V1 to V3 reviews, merge into master.
+
+**Part 2 (open fixes):** a. done (41e91de, D-103): step 6 ticks only for
+the loop's own Desk-consented guest, no direct slip/seen, reset reloads the
+Overview. b. checked: statement rows (original file not kept, sha256 only),
+photos (site_photo bytes) and invoices (rebuilt from rows) all live in the
+database; nothing on local disk. c. checked (answer in the READY report).
 
 **Event discovery** (docs/EVENT_DISCOVERY.md, branch `event-discovery`)
 - Done: brief (03740b5); web UI merged (1390eb2): Scan now, cooldown and
@@ -51,8 +43,8 @@ done (merges, three audits, every high and medium finding fixed; latest
 into the Seedha Site finish.
 
 **Open worktrees:** `.worktrees/evd` (event-discovery), `.worktrees/ev-api`,
-`.worktrees/site` (site-real), `.worktrees/sb1`, `.worktrees/sb2`,
-`.worktrees/sb3`. The main checkout is on `deploy`.
+`.worktrees/site` (site-real), `.worktrees/sb2`, `.worktrees/sb3`. The
+main checkout is on `deploy`.
 
 ## Polish build (12 October 2026, in progress)
 
