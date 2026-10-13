@@ -32,7 +32,7 @@ type CardCopy = V2Copy["card"];
  */
 const GATE = `try{var c=new URLSearchParams(location.search).get("src");if(c==="card-wallet"||c==="card-room"||c==="card-desk")document.documentElement.setAttribute("data-hs-card","")}catch(e){}`;
 
-type Sent = { verified: boolean; reward: FeedbackOut["reward"]; consent: boolean };
+type Sent = { verified: boolean; reward: FeedbackOut["reward"]; asked: RewardId | "none"; consent: boolean };
 
 const STARS = [1, 2, 3, 4, 5] as const;
 
@@ -240,7 +240,7 @@ export function CardWelcome({
       )
         return;
       const res = await postJson<FeedbackOut>(`${base}/feedback`, out.body);
-      setSent({ verified: res?.verified === true, reward: res?.reward ?? reward, consent });
+      setSent({ verified: res?.verified === true, reward: res?.reward ?? reward, asked: reward, consent });
     } catch (err) {
       if (err instanceof ApiError && err.status === 422 && /phone|last4/i.test(err.code) && !askLast4) {
         setAskLast4(true);
@@ -258,6 +258,7 @@ export function CardWelcome({
     <div className={s.done} role="status">
       <p>{t.thanksSent}</p>
       <p>{sent.verified ? t.verifiedYes : t.verifiedNo}</p>
+      {sent.reward !== sent.asked ? <p>{t.rewardChanged(sent.reward)}</p> : null}
       {sent.reward !== "none" ? <p>{sent.consent ? t.codeLater : t.codeNoConsent}</p> : null}
     </div>
   ) : (

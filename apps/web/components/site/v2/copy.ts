@@ -97,6 +97,10 @@ export const V2_COPY = {
       thanksSent: "Thank you. Your feedback reached the hotel.",
       verifiedYes: "Your booking is verified, so your rating counts on this page.",
       verifiedNo: "We could not verify a stay, so your rating stays private to the hotel.",
+      rewardChanged: (reward: string) =>
+        reward === "none"
+          ? "Discounts are only for verified stays, so no reward was added."
+          : "Discounts are only for verified stays, so your reward is free breakfast instead.",
       codeLater: "The hotel reviews your feedback first. If they approve, they send your code on WhatsApp.",
       codeNoConsent:
         "You did not ask for WhatsApp, so no code will be sent. You can ask at the desk on your next stay.",
@@ -199,6 +203,10 @@ export const V2_COPY = {
       thanksSent: "धन्यवाद। आपका फ़ीडबैक होटल तक पहुंच गया।",
       verifiedYes: "आपकी बुकिंग सत्यापित है, इसलिए आपकी रेटिंग इस पेज पर गिनी जाएगी।",
       verifiedNo: "हम ठहराव सत्यापित नहीं कर सके, इसलिए आपकी रेटिंग केवल होटल के पास रहेगी।",
+      rewardChanged: (reward: string) =>
+        reward === "none"
+          ? "छूट केवल सत्यापित ठहराव के लिए है, इसलिए कोई इनाम नहीं जोड़ा गया।"
+          : "छूट केवल सत्यापित ठहराव के लिए है, इसलिए आपका इनाम मुफ़्त नाश्ता है।",
       codeLater: "होटल पहले आपका फ़ीडबैक देखता है। मंज़ूरी के बाद वह आपका कोड WhatsApp पर भेजता है।",
       codeNoConsent:
         "आपने WhatsApp नहीं चुना, इसलिए कोई कोड नहीं भेजा जाएगा। अगली बार डेस्क पर पूछ सकते हैं।",
