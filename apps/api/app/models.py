@@ -22,6 +22,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     false,
+    true,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,6 +46,7 @@ __all__ = [
     "OwnerSettings",
     "PlanEntry",
     "Guest",
+    "GuestFeedback",
     "InboxAway",
     "InboxMessage",
     "Message",
@@ -312,14 +314,16 @@ class PerkCode(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str] = mapped_column(String(30), unique=True)
-    guest_id: Mapped[int] = mapped_column(ForeignKey("guest.id"))
-    origin_booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"))
+    # Both empty only for a card-page feedback reward to an unverified visitor
+    # (Free breakfast; never a discount, D-106).
+    guest_id: Mapped[int | None] = mapped_column(ForeignKey("guest.id"), nullable=True)
+    origin_booking_id: Mapped[int | None] = mapped_column(ForeignKey("booking.id"), nullable=True)
     perk: Mapped[str] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     redeemed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    guest: Mapped[Guest] = relationship()
-    origin_booking: Mapped[Booking] = relationship()
+    guest: Mapped[Guest | None] = relationship()
+    origin_booking: Mapped[Booking | None] = relationship()
 
 
 MESSAGE_STATUSES = ("draft", "approved", "sent", "rejected", "failed", "blocked")
@@ -379,7 +383,8 @@ class Saving(Base):
     __tablename__ = "saving"
     __table_args__ = (
         CheckConstraint(
-            "net_saving = commission_avoided + gst_avoided - upi_fee", name="saving_formula"
+            "net_saving = commission_avoided + gst_avoided - upi_fee - hotel_discount",
+            name="saving_formula",
         ),
     )
 
@@ -390,6 +395,8 @@ class Saving(Base):
     commission_avoided: Mapped[int] = mapped_column(Money)
     gst_avoided: Mapped[int] = mapped_column(Money)
     upi_fee: Mapped[int] = mapped_column(Money)
+    # A feedback reward code's hotel-funded discount (5% or Rs 100), else 0.
+    hotel_discount: Mapped[int] = mapped_column(Money, default=0, server_default="0")
     net_saving: Mapped[int] = mapped_column(Money)
 
     direct_booking: Mapped[DirectBooking] = relationship()
@@ -524,6 +531,10 @@ class SiteConfig(Base):
     previous_slug: Mapped[str | None] = mapped_column(String(40), nullable=True)
     slug_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     hide_branding: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    # Card-page feedback rewards the owner offers (discounts are off by default).
+    reward_breakfast: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
+    reward_pct5: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    reward_flat100: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
 
 class ErasureRequest(Base):
@@ -904,3 +915,49 @@ class SiteFeedback(Base):
     message: Mapped[str] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+FEEDBACK_REWARDS = ("breakfast", "pct5", "flat100", "none")
+FEEDBACK_STATUSES = ("new", "reward_sent", "hidden")
+
+
+class GuestFeedback(Base):
+    """Feedback a guest left with the card-page form (D-106). Private to the
+    owner; a verified stay's stars also become its one public 'card' rating.
+    `phone` (normalised, +91...) is kept only with consent, until STOP or
+    erasure. Nothing else about the visitor is stored."""
+
+    __tablename__ = "guest_feedback"
+    __table_args__ = (
+        UniqueConstraint("booking_id", name="uq_guest_feedback_booking_id"),
+        CheckConstraint(f"reward IN {FEEDBACK_REWARDS}", name="guest_feedback_reward"),
+        CheckConstraint(f"status IN {FEEDBACK_STATUSES}", name="guest_feedback_status"),
+        CheckConstraint("overall BETWEEN 1 AND 5", name="guest_feedback_overall"),
+        CheckConstraint("food IS NULL OR food BETWEEN 1 AND 5", name="guest_feedback_food"),
+        CheckConstraint(
+            "phone IS NULL OR consent_at IS NOT NULL", name="guest_feedback_phone_consent"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    booking_id: Mapped[int | None] = mapped_column(ForeignKey("booking.id"), nullable=True)
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    name: Mapped[str] = mapped_column(String(60))
+    phone: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    consent_wording_version: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    overall: Mapped[int] = mapped_column(Integer)
+    food: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    review: Mapped[str] = mapped_column(String(500), default="")
+    reward: Mapped[str] = mapped_column(String(10))
+    perk_code_id: Mapped[int | None] = mapped_column(
+        ForeignKey("perk_code.id"), nullable=True, unique=True
+    )
+    status: Mapped[str] = mapped_column(String(12), default="new")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    booking: Mapped[Booking | None] = relationship()
+    perk_code: Mapped[PerkCode | None] = relationship()

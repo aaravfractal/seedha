@@ -11,10 +11,18 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
-from app.models import Booking, Consent, PerkCode, Property, SiteFeedback, SiteRating
+from app.models import (
+    Booking,
+    Consent,
+    GuestFeedback,
+    PerkCode,
+    Property,
+    SiteFeedback,
+    SiteRating,
+)
 from app.ratelimit import RateLimiter
 from app.services.card_page import last4
 from app.services.proof import erase_consent
@@ -38,6 +46,10 @@ def fixture_hotel(session: Session) -> Session:
     """The sample hotel as the demo and a reset load it (inbox threads too)."""
     load_sample(session, DEMO_DATE, with_statements=False, device_key=DEVICE_KEY,
                 with_inbox=True, now=T0)  # fmt: skip
+    # The two sample feedbacks (D-106) rate CL2101 and CL3108; these tests
+    # need those stays unrated, so the sample feedback and ratings go.
+    session.execute(delete(GuestFeedback))
+    session.execute(delete(SiteRating))
     session.commit()
     return session
 
@@ -374,11 +386,14 @@ def test_reset_clears_notes_and_card_ratings(
     client.post(FEEDBACK, json={"message": "Hello"})
     assert rate(client, verify(client, NO_PHONE)["stay_token"]).status_code == 204
     assert client.post("/demo/reset", headers=owner).status_code == 200
-    for model in (SiteFeedback, SiteRating):
-        assert session.scalar(select(func.count()).select_from(model)) == 0
-    # The sample references still work after a reset.
-    assert verify(client, NO_PHONE)["state"] == "verified"
-    assert verify(client, WITH_PHONE) == {"state": "needs_phone"}
+    assert session.scalar(select(func.count()).select_from(SiteFeedback)) == 0
+    # Reset restores the two sample feedbacks (D-106) and only their ratings.
+    assert session.scalar(select(func.count()).select_from(GuestFeedback)) == 2
+    assert session.scalar(select(func.count()).select_from(SiteRating)) == 2
+    assert verify(client, NO_PHONE) == {"state": "already_rated"}
+    # Unrated references still work after a reset.
+    assert verify(client, "CL2102")["state"] == "verified"
+    assert verify(client, "CL3101") == {"state": "needs_phone"}
 
 
 @pytest.mark.usefixtures("hotel")

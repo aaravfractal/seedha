@@ -10,6 +10,12 @@ booking whose original channel took no commission claims no saving.
 
 Rahul (originally MakeMyTrip, 22%), Rs 8,600: commission Rs 1,892 + GST Rs 341
 = Rs 2,233 avoided; UPI fee Rs 34; net Rs 2,199.
+
+A card-page feedback reward code (D-106) may carry a hotel-funded discount on
+the public rate: 5% (rounded to the rupee) or Rs 100. Commission avoided is
+still taken on the public rate (what the OTA would have charged on it), the
+UPI fee on what the guest paid, and the discount is its own line:
+net = commission + GST - UPI fee - discount (it can be negative).
 """
 
 from __future__ import annotations
@@ -24,6 +30,19 @@ from app.money import bps_of, gst_on_commission, rupees, upi_fee
 # Seedha Site extra). Owner-entered in a real setup; labelled "Sample cost".
 SAMPLE_PERK_COST_PER_NIGHT = rupees(400)
 MAX_PERK_COST_PER_NIGHT = rupees(5000)
+REWARD_PCT5_BPS = 500
+REWARD_FLAT100 = rupees(100)
+
+
+def reward_discount(amount: int, reward: str | None) -> int:
+    """The hotel-funded discount a feedback reward code gives on a direct
+    booking of `amount` paise at the public rate: 5% or Rs 100 (never more
+    than the amount); 0 for Free breakfast or any other perk."""
+    if reward == "pct5":
+        return bps_of(amount, REWARD_PCT5_BPS)
+    if reward == "flat100":
+        return min(REWARD_FLAT100, amount)
+    return 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +53,7 @@ class SavingLines:
     commission_avoided: int
     gst_avoided: int
     upi_fee: int
+    hotel_discount: int = 0
 
     @property
     def avoided(self) -> int:
@@ -42,21 +62,25 @@ class SavingLines:
 
     @property
     def net_saving(self) -> int:
-        """Avoided minus the UPI fee paid instead."""
-        return self.avoided - self.upi_fee
+        """Avoided minus the UPI fee paid instead and any hotel-funded discount."""
+        return self.avoided - self.upi_fee - self.hotel_discount
 
 
-def compute_saving(amount: int, commission_bps: int, gst_applies: bool) -> SavingLines | None:
-    """The saving on a direct booking of `amount` paise, or None if nothing
-    was avoided (the guest first came through a commission-free channel)."""
+def compute_saving(
+    amount: int, commission_bps: int, gst_applies: bool, discount: int = 0
+) -> SavingLines | None:
+    """The saving on a direct booking of `amount` paise at the public rate
+    (the guest paid `amount - discount`), or None when nothing was avoided and
+    nothing discounted (the guest first came through a commission-free channel)."""
     commission = bps_of(amount, commission_bps)
-    if commission == 0:
+    if commission == 0 and discount == 0:
         return None
     return SavingLines(
         commission_rate_used=commission_bps,
         commission_avoided=commission,
         gst_avoided=gst_on_commission(commission) if gst_applies else 0,
-        upi_fee=upi_fee(amount),
+        upi_fee=upi_fee(amount - discount),
+        hotel_discount=discount,
     )
 
 
@@ -91,7 +115,10 @@ class PerkSplit:
     kept_after_perk: int
 
 
-def perk_split(avoided: int, fee: int, nights: int, cost_per_night: int) -> PerkSplit:
-    """Split the avoided commission into UPI fee, perk cost and what the hotel keeps."""
-    perk_cost = cost_per_night * nights
+def perk_split(
+    avoided: int, fee: int, nights: int, cost_per_night: int, discount: int = 0
+) -> PerkSplit:
+    """Split the avoided commission into UPI fee, perk cost and what the hotel
+    keeps. A reward code's hotel-funded discount is that perk's whole cost."""
+    perk_cost = discount or cost_per_night * nights
     return PerkSplit(avoided, fee, perk_cost, avoided - fee - perk_cost)

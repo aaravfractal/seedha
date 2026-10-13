@@ -14,7 +14,7 @@ A token rates once: 1 to 5 stars and an optional plain-text comment of up to
 comment but never change the stars, and hidden comments are never public.
 The public summary shows an average only from 3 ratings up; below that the
 site says the hotel has no ratings yet. Nothing here is invented: the sample
-hotel starts with zero ratings and a demo reset restores zero.
+hotel starts with 2 sample ratings (seed/guest_feedback.py), below 3.
 
 The card page (app.services.card_page) adds a third source, 'card': a guest
 who verifies a stay with its booking reference gets a 30-minute token in a
