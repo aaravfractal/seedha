@@ -96,7 +96,7 @@ test("card visit at 390: panel first, in the server HTML, no layout shift, axe c
 
   const text = (await panel.textContent()) ?? "";
   expect(text).not.toMatch(/Sample perk:|₹|—|!/);
-  await expect(panel.getByText("From your checkout slip")).toBeVisible();
+  await expect(panel.getByText("The booking ID on your booking confirmation")).toBeVisible();
   await expect(panel.getByLabel("Last 4 digits of your phone")).toHaveCount(0);
   const book = panel.locator("[data-book-again]");
   if (text.includes("Book direct next time:")) await expect(book).toContainText("Sample");
@@ -227,7 +227,7 @@ test("Book again opens Seedha Link with the room prefilled; Hindi; 1440 clean", 
   await page.goto(`${PAGE}?src=card-desk&lang=hi`);
   const panel = page.locator("[data-card-welcome]");
   await expect(panel.getByRole("heading", { level: 2 })).toContainText("ठहरने के लिए धन्यवाद");
-  await expect(panel.getByText("आपकी चेक-आउट पर्ची से")).toBeVisible();
+  await expect(panel.getByText("आपकी बुकिंग पुष्टि पर दी गई बुकिंग आईडी")).toBeVisible();
   expect(await scrollsSideways(page)).toBe(false);
   expect(await axeViolations(page)).toEqual([]);
   const href = (await panel.getByRole("link", { name: "बुकिंग खोलें" }).getAttribute("href")) ?? "";
