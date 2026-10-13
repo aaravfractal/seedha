@@ -18,12 +18,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from app.models import (
     Booking,
     Consent,
+    GuestFeedback,
     GuestMemory,
     InboxMessage,
     Message,
@@ -291,6 +292,17 @@ def erase_consent(session: Session, consent: Consent, now: datetime) -> None:
     session.execute(delete(GuestMemory).where(GuestMemory.guest_id == consent.guest_id))
     # A mini-site rating comment may hold the guest's words: blanked, stars stay.
     erase_guest_comments(session, consent.guest_id)
+    # Card-page feedback for this stay or with this number (D-106) is blanked too.
+    owned = GuestFeedback.booking_id == consent.booking_id
+    if consent.whatsapp_number:
+        owned = owned | (GuestFeedback.phone == consent.whatsapp_number)
+    session.execute(
+        update(GuestFeedback)
+        .where(owned)
+        .values(name="", phone=None, review="",
+                withdrawn_at=func.coalesce(GuestFeedback.withdrawn_at, now))
+        .execution_options(synchronize_session=False)
+    )  # fmt: skip
     for message in session.scalars(select(Message).where(Message.consent_id == consent.id)):
         message.body = "[erased at the guest's request]"
         if message.status == "draft":

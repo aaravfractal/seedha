@@ -19,7 +19,15 @@ from app.ratelimit import rate_limited
 from app.services.consent import as_utc
 from app.services.desk import business_date, utc_now
 from app.services.ledger import DEFAULT_END, DEFAULT_START
-from app.services.link import BookingRequest, LinkError, book, code_status, date_options, room_rates
+from app.services.link import (
+    BookingRequest,
+    LinkError,
+    book,
+    code_status,
+    date_options,
+    feedback_reward,
+    room_rates,
+)
 from app.services.savings import (
     MAX_PERK_COST_PER_NIGHT,
     SAMPLE_PERK_COST_PER_NIGHT,
@@ -82,6 +90,8 @@ class BookOut(BaseModel):
     nights: int
     room_type: str
     perk_applied: bool
+    # A feedback reward code's hotel-funded discount (paise); `amount` is after it.
+    discount: int = 0
     payment: str
     # Only once the code has been accepted with a booking (D-076).
     guest_short_name: str | None
@@ -113,7 +123,11 @@ def link_page(
         address=prop.address,
         code=status.perk.code if status.perk else None,
         code_status=status.status,
-        perk=prop.perk_text,
+        perk=(
+            status.perk.perk
+            if status.perk and feedback_reward(session, status.perk)
+            else prop.perk_text
+        ),
         rooms=[
             RoomOut(room_type=t, nightly_rate=r) for t, r in room_rates(session, prop.id).items()
         ],
@@ -142,6 +156,7 @@ def link_book(
         nights=done.booking.nights,
         room_type=body.room_type,
         perk_applied=done.perk_applied,
+        discount=done.booking.discount,
         payment="Simulated UPI (test mode)",
         guest_short_name=(
             done.booking.guest.short_name if done.perk_applied and done.booking.guest else None
@@ -173,6 +188,7 @@ class SavingOut(BaseModel):
     commission_avoided: int
     gst_avoided: int
     upi_fee: int
+    hotel_discount: int = 0
     net_saving: int
     booked_at: datetime
     nights: int
@@ -205,8 +221,9 @@ class SavingsOut(BaseModel):
 def split_fields(saving: Saving, nights: int, cost_per_night: int) -> dict[str, int]:
     """The perk split of one saving row (ruling 5 lines untouched)."""
     split = perk_split(
-        saving.commission_avoided + saving.gst_avoided, saving.upi_fee, nights, cost_per_night
-    )
+        saving.commission_avoided + saving.gst_avoided, saving.upi_fee, nights, cost_per_night,
+        saving.hotel_discount,
+    )  # fmt: skip
     return {"perk_cost": split.perk_cost, "kept_after_perk": split.kept_after_perk}
 
 
@@ -247,6 +264,7 @@ def get_savings(
             commission_avoided=s.commission_avoided,
             gst_avoided=s.gst_avoided,
             upi_fee=s.upi_fee,
+            hotel_discount=s.hotel_discount,
             net_saving=s.net_saving,
             booked_at=d.created_at,
             nights=d.booking.nights,

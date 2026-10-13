@@ -6,6 +6,10 @@
   two payments racing with the same code cannot both claim it.
 * A saving is recorded only for a redeemed code, using the original channel's
   contract (ruling 5). No code, no saving.
+* A card-page feedback reward code (D-106) for 5% or Rs 100 off is the one
+  exception to "never lower": a private, one-time, hotel-funded discount on
+  the public rate, recorded as the booking's discount line and on its saving
+  row. It is valid for 12 months; one code per booking, so never stacked.
 """
 
 from __future__ import annotations
@@ -22,18 +26,22 @@ from app.models import (
     Channel,
     ChannelContract,
     DirectBooking,
+    GuestFeedback,
     PerkCode,
     Property,
     Room,
     Saving,
 )
 from app.money import LineItems, upi_fee
-from app.services.savings import SavingLines, compute_saving
+from app.services.consent import as_utc
+from app.services.savings import SavingLines, compute_saving, reward_discount
 
 MAX_NIGHTS = 14
 BOOKING_HORIZON_DAYS = 365
 DATE_OPTIONS = 2
 FIRST_OPTION_AFTER_DAYS = 30
+REWARD_VALID_DAYS = 365
+DISCOUNT_REWARDS = frozenset({"pct5", "flat100"})
 
 
 class LinkError(ValueError):
@@ -141,8 +149,26 @@ def redeem(session: Session, perk: PerkCode, now: datetime) -> bool:
     return bool(getattr(result, "rowcount", 0))
 
 
-def original_terms(session: Session, perk: PerkCode) -> tuple[int, int, bool]:
-    """(channel id, commission bps, GST applies) of the stay that earned the perk."""
+def feedback_reward(session: Session, perk: PerkCode | None) -> str | None:
+    """The feedback reward ('breakfast', 'pct5', 'flat100') a code was issued
+    for, or None for any other perk code."""
+    if perk is None:
+        return None
+    return session.scalar(select(GuestFeedback.reward).where(GuestFeedback.perk_code_id == perk.id))
+
+
+def reward_expired(session: Session, perk: PerkCode, now: datetime) -> bool:
+    """A discount reward code lasts 12 months from when the owner sent it."""
+    return feedback_reward(session, perk) in DISCOUNT_REWARDS and (
+        as_utc(perk.created_at) + timedelta(days=REWARD_VALID_DAYS) < now
+    )
+
+
+def original_terms(session: Session, perk: PerkCode) -> tuple[int, int, bool] | None:
+    """(channel id, commission bps, GST applies) of the stay that earned the
+    perk; None for a reward code given without a verified stay."""
+    if perk.origin_booking is None:
+        return None
     channel_id = perk.origin_booking.channel_id
     contract = session.scalar(
         select(ChannelContract)
@@ -159,6 +185,8 @@ def claim_perk(session: Session, req: BookingRequest, now: datetime) -> PerkCode
     status = code_status(session, req.code)
     if status.status == "unknown":
         raise LinkError(422, "unknown_code", "That code is not right. Check your slip or WhatsApp.")
+    if status.status == "valid" and status.perk and reward_expired(session, status.perk, now):
+        raise LinkError(422, "code_expired", "This code has expired.")
     if status.status == "used" or (
         status.perk is not None and not redeem(session, status.perk, now)
     ):
@@ -168,22 +196,24 @@ def claim_perk(session: Session, req: BookingRequest, now: datetime) -> PerkCode
 
 def direct_stay(
     session: Session, prop: Property, req: BookingRequest, room: Room, amount: int,
-    perk: PerkCode | None,
+    perk: PerkCode | None, discount: int = 0,
 ) -> Booking:  # fmt: skip
-    """The ledger row for a Seedha Link booking: direct channel, UPI fee only."""
+    """The ledger row for a Seedha Link booking: direct channel, UPI fee on
+    what the guest paid, and a reward code's hotel-funded discount line."""
     channel = session.scalar(
         select(Channel).where(Channel.property_id == prop.id, Channel.kind == "direct")
     )
     if channel is None:
         raise LinkError(500, "no_direct_channel", "Direct booking is not set up")
-    lines = LineItems(list_amount=amount, fees=upi_fee(amount))
+    lines = LineItems(list_amount=amount, discount=discount, fees=upi_fee(amount - discount))
+    guest = perk.guest if perk else None
     booking = Booking(
         property_id=prop.id, channel_id=channel.id, room_id=room.id,
-        guest_id=perk.guest_id if perk else None,
+        guest_id=guest.id if guest else None,
         external_ref=f"SL{secrets.token_hex(4).upper()}", source="direct_link", status="stay",
         check_in=req.check_in, nights=req.nights,
-        guest_name=perk.guest.display_name if perk else "Direct guest",
-        guest_city=perk.guest.city if perk else None, list_amount=amount, discount=0,
+        guest_name=guest.display_name if guest else "Direct guest",
+        guest_city=guest.city if guest else None, list_amount=amount, discount=discount,
         commission=0, gst_on_commission=0, fees=lines.fees, net_kept=lines.net_kept,
         payout_reported=lines.net_kept, math_check_passed=True,
     )  # fmt: skip
@@ -193,11 +223,15 @@ def direct_stay(
 
 
 def record_saving(
-    session: Session, direct: DirectBooking, perk: PerkCode, amount: int
+    session: Session, direct: DirectBooking, perk: PerkCode, amount: int, discount: int = 0
 ) -> SavingLines | None:
-    """Store the saving at the original channel's contract rate (ruling 5)."""
-    channel_id, bps, gst = original_terms(session, perk)
-    saving = compute_saving(amount, bps, gst)
+    """Store the saving at the original channel's contract rate (ruling 5),
+    with a reward code's hotel-funded discount as its own line."""
+    terms = original_terms(session, perk)
+    if terms is None:
+        return None
+    channel_id, bps, gst = terms
+    saving = compute_saving(amount, bps, gst, discount)
     if saving is None:
         return None
     session.add(
@@ -208,6 +242,7 @@ def record_saving(
             commission_avoided=saving.commission_avoided,
             gst_avoided=saving.gst_avoided,
             upi_fee=saving.upi_fee,
+            hotel_discount=saving.hotel_discount,
             net_saving=saving.net_saving,
         )
     )
@@ -226,11 +261,13 @@ def book(
         raise LinkError(409, "sold_out", "That room is full on those dates. Try other dates.")
     perk = claim_perk(session, req, now)
     amount = nightly * req.nights
-    booking = direct_stay(session, prop, req, room, amount, perk)
+    discount = reward_discount(amount, feedback_reward(session, perk))
+    booking = direct_stay(session, prop, req, room, amount, perk, discount)
     direct = DirectBooking(property_id=prop.id, perk_code_id=perk.id if perk else None,
-                           booking_id=booking.id, amount=amount, payment_method="upi_simulated",
-                           payment_ref=payment_ref, created_at=now)  # fmt: skip
+                           booking_id=booking.id, amount=amount - discount,
+                           payment_method="upi_simulated", payment_ref=payment_ref,
+                           created_at=now)  # fmt: skip
     session.add(direct)
     session.flush()
-    saving = record_saving(session, direct, perk, amount) if perk else None
+    saving = record_saving(session, direct, perk, amount, discount) if perk else None
     return BookingDone(direct, booking, perk is not None, saving)

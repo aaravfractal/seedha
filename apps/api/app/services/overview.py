@@ -28,6 +28,7 @@ from app.money import per_unit_rounded, share_tenths_of_percent
 from app.services.card_page import recent_ratings, unread_notes
 from app.services.consent import as_utc
 from app.services.desk import business_date, in_house, utc_now
+from app.services.guest_feedback import unread_count as unread_guest_feedback
 from app.services.insight import build_insight
 from app.services.ledger import LedgerSummary, booking_lines, load_ledger
 from app.services.pipeline import STEP_KEYS, compute_steps
@@ -392,6 +393,13 @@ def website_items(session: Session, property_id: int) -> list[Item]:
             Item("site-notes", f"Read {_plural(unread, 'private note')} from guests",
                  "Left on your card page; only you see them", WEBSITE_HREF, "inbox",
                  as_utc(newest_note) if newest_note else None)
+        )  # fmt: skip
+    fresh, newest_feedback = unread_guest_feedback(session, property_id)
+    if fresh:
+        items.append(
+            Item("guest-feedback", f"{fresh} new guest feedback",
+                 "From your card page; approve a reward code if they chose one", WEBSITE_HREF,
+                 "inbox", as_utc(newest_feedback) if newest_feedback else None)
         )  # fmt: skip
     rated, newest_rating = recent_ratings(session, property_id, utc_now())
     if rated:

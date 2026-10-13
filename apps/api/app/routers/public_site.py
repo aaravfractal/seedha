@@ -29,6 +29,7 @@ from app.routers.site import (
     site_content,
 )
 from app.services.desk import business_date, utc_now
+from app.services.guest_feedback import RewardOption, reward_options
 from app.services.link import free_room, room_rates
 from app.services.site import get_config, packages
 from app.services.site_details import ScanCard, record_scan
@@ -70,6 +71,8 @@ class PublicSiteOut(SiteContentOut):
     redirect_to: str | None = None
     # Verified-guest ratings; the hosted sample hotel always shows none.
     ratings: RatingsSummary = Field(default_factory=RatingsSummary)
+    # Rewards the card-page feedback form offers (D-106), labelled EN and HI.
+    rewards: list[RewardOption] = Field(default_factory=list)
 
 
 class ResolveOut(BaseModel):
@@ -120,6 +123,7 @@ def public_site(
         packages=[public_package(p) for p in packages(session, prop, config) if p.approved],
         redirect_to=moved_to,
         ratings=RatingsSummary() if sample_locked(prop, settings) else summary(session, prop.id),
+        rewards=reward_options(config),
     )
 
 

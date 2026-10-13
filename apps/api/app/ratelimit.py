@@ -75,6 +75,9 @@ LIMITS: dict[str, Limit] = {
     "card_verify_hotel": Limit(6, 60),
     "card_rate": Limit(10, 60),
     "card_feedback": Limit(5, 60),
+    # Card-page feedback form (D-106): per client and per client per hotel.
+    "guest_feedback": Limit(5, 60),
+    "guest_feedback_hotel": Limit(5, 60),
     # The public website loads the sample figures once per page view.
     "public_sample": Limit(60, 60),
 }

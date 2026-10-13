@@ -347,13 +347,17 @@ def test_hosted_sample_hotel_shows_no_ratings(session: Session, settings: Settin
 
 
 @pytest.mark.usefixtures("sample")
-def test_reset_restores_zero_ratings(
+def test_reset_restores_no_public_ratings(
     client: TestClient, owner: dict[str, str], session: Session
 ) -> None:
     assert link_book(client).json()["rating_url"]
     assert client.post("/demo/reset", headers=owner).status_code == 200
-    assert session.scalar(select(func.count()).select_from(SiteRating)) == 0
-    assert client.get(SAMPLE).json()["ratings"]["count"] == 0
+    # Only the 2 sample feedback ratings (D-106): below 3, so none is shown.
+    given = select(func.count()).select_from(SiteRating).where(SiteRating.stars.is_not(None))
+    assert session.scalar(given) == 2
+    assert session.scalar(select(func.count()).select_from(SiteRating)) == 2
+    summary = client.get(SAMPLE).json()["ratings"]
+    assert summary["count"] == 2 and summary["average"] is None
 
 
 # --- card QR -------------------------------------------------------------------------

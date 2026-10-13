@@ -43,6 +43,7 @@ from app.services.parser import ParseResult
 from app.services.rows import ParsedRow
 from seed.closes import load_closes
 from seed.coded_history import load_coded_history
+from seed.guest_feedback import load_sample_feedback
 from seed.inbox_threads import load_inbox_threads
 from seed.spec import CHANNELS, HISTORY_FILE, PROPERTY, ROOM_TYPES, ROOMS
 
@@ -205,6 +206,7 @@ def load_sample(  # noqa: PLR0913  (each argument is a distinct switch)
         session.flush()
     if with_inbox:
         load_inbox_threads(session, prop, demo_date, now or datetime.now(UTC))
+        load_sample_feedback(session, prop, now or datetime.now(UTC))
         session.flush()
     return prop
 

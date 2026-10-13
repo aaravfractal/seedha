@@ -23,6 +23,7 @@ PUBLIC = {
     ("POST", "/public/site/{slug}/card/verify"),
     ("POST", "/public/site/{slug}/card/rate"),
     ("POST", "/public/site/{slug}/card/feedback"),
+    ("POST", "/public/site/{slug}/feedback"),
     ("GET", "/public/rate/{token}"),
     ("POST", "/public/rate/{token}"),
     ("GET", "/public/sample"),
