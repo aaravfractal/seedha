@@ -114,14 +114,20 @@ test("hotel hosts serve only the page and their own public API", () => {
   assert.equal(allowed("/api/public/site/deodar-view", "POST"), false);
 });
 
-test("hotel hosts allow exactly one write: POST to their own card scan count", () => {
+test("hotel hosts allow only their own card writes: scan count, verify, rate, feedback", () => {
   const allowed = (path: string, method = "GET") => hotelPathAllowed(path, method, "deodar-view");
-  assert.ok(allowed("/api/public/site/deodar-view/scan", "POST"));
+  for (const w of ["scan", "card/verify", "card/rate", "card/feedback"]) {
+    assert.ok(allowed(`/api/public/site/deodar-view/${w}`, "POST"), w);
+    assert.equal(allowed(`/api/public/site/other-hotel/${w}`, "POST"), false, `other hotel ${w}`);
+  }
   for (const path of [
     "/api/public/site/other-hotel/scan",
     "/api/public/site/deodar-view/scan/x",
     "/api/public/site/deodar-view/scans",
     "/api/public/site/deodar-viewer/scan",
+    "/api/public/site/deodar-view/card",
+    "/api/public/site/deodar-view/card/verify/x",
+    "/api/public/site/deodar-view/card/other",
     "/api/public/site/deodar-view",
     "/api/public/site/deodar-view/availability",
     "/api/site/scans",

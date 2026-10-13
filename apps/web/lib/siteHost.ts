@@ -76,13 +76,16 @@ export const HOTEL_SW_PATH = "/h-sw.js";
 /**
  * What a hotel host may serve: its page at "/", Next's own assets, its
  * offline service worker, GET requests to its own public site API (the page,
- * availability and photos) and exactly one write: POST to its own
- * `/scan` (a printed card's QR count; the BFF still checks the Origin).
+ * availability and photos) and only these writes, POSTs to its own card
+ * routes: `/scan` (a printed card's QR count) and `/card/verify`,
+ * `/card/rate`, `/card/feedback` (the card page). The BFF still checks the Origin.
  */
+const HOTEL_HOST_WRITES = ["scan", "card/verify", "card/rate", "card/feedback"];
+
 export function hotelPathAllowed(pathname: string, method: string, slug: string): boolean {
   if (pathname === "/" || pathname.startsWith("/_next/") || pathname.startsWith("/__nextjs")) return true;
   const api = `/api/public/site/${slug}`;
-  if (method === "POST") return pathname === `${api}/scan`;
+  if (method === "POST") return HOTEL_HOST_WRITES.some((w) => pathname === `${api}/${w}`);
   if (method !== "GET" && method !== "HEAD") return false;
   if (pathname === HOTEL_SW_PATH) return true;
   return pathname === api || pathname.startsWith(`${api}/`);
