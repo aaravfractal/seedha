@@ -43,6 +43,7 @@ from app.routers import (
     scenario,
     site,
     site_build,
+    site_details,
     statements,
     webhooks,
 )
@@ -175,6 +176,7 @@ def create_app(
     api.include_router(assistant.router)
     api.include_router(site.site_router)
     api.include_router(site_build.router)
+    api.include_router(site_details.router)
     api.include_router(site.pro_router)
     api.include_router(pro_views.router)
     api.include_router(site.demo_router)

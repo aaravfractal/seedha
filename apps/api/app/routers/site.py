@@ -44,6 +44,7 @@ from app.services.site import (
     rooms_copy,
     slugify,
 )
+from app.services.site_details import SiteDetailsOut, read_details
 from app.services.site_gen import read_content, read_rooms
 from app.services.site_photos import list_photos
 from app.services.slug import (
@@ -162,6 +163,7 @@ class SiteContentOut(BaseModel):
     nearby: list[NearbyOut]
     gallery: list[dict[str, str]]
     contact: ContactOut
+    details: SiteDetailsOut
     url: str = ""
     source: str = "none"
     text: SiteTextOut | None = None
@@ -400,6 +402,7 @@ def site_content(
         "nearby": [NearbyOut(place=p, distance=d) for p, d in NEARBY] if prop.is_sample else [],
         "gallery": [] if photos else list(GALLERY),
         "contact": contact_out(prop),
+        "details": read_details(session, prop.id, is_sample=prop.is_sample, locked=locked),
         "source": row.source if row is not None else "none",
         "text": site_text(row) if row is not None else None,
         "photos": photos,

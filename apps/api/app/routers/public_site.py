@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Header, Query, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from app.deps import SessionDep, SettingsDep
 from app.errors import ApiError
@@ -31,6 +31,7 @@ from app.routers.site import (
 from app.services.desk import business_date, utc_now
 from app.services.link import free_room, room_rates
 from app.services.site import get_config, packages
+from app.services.site_details import ScanCard, record_scan
 from app.services.site_photos import find_photo
 from app.services.slug import resolve
 
@@ -39,6 +40,7 @@ router = APIRouter(prefix="/public/site", tags=["public"])
 SITE_LIMIT = Depends(rate_limited("site"))
 # A page view loads up to 8 photos; they have their own, larger allowance.
 PHOTO_LIMIT = Depends(rate_limited("site_photo"))
+SCAN_LIMIT = Depends(rate_limited("site_scan"))
 BOOKING_HORIZON_DAYS = 365
 MAX_NIGHTS = 14
 PHOTO_CACHE = "public, max-age=86400, immutable"
@@ -61,6 +63,14 @@ class ResolveOut(BaseModel):
 
     state: Literal["live", "moved", "none"]
     slug: str
+
+
+class ScanIn(BaseModel):
+    """Which printed card's QR brought the guest here."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    card: ScanCard
 
 
 class AvailabilityOut(BaseModel):
@@ -153,3 +163,12 @@ def availability(  # pylint: disable=too-many-arguments,too-many-positional-argu
         reason = "full"
     return AvailabilityOut(open=reason is None, reason=reason, check_in=check_in, nights=nights,
                            room_type=room_type)  # fmt: skip
+
+
+@router.post("/{slug}/scan", status_code=204, dependencies=[SCAN_LIMIT])
+def card_scan(slug: str, body: ScanIn, session: SessionDep, now: NowDep) -> Response:
+    """Count one scan of a printed card's QR (Hotel Site V2). Stores only the
+    count per card type per hotel day: no IP, cookie or device data."""
+    prop, _ = find_site(session, slug, now)
+    record_scan(session, prop.id, body.card, business_date(session, prop.id, utc_now().date()))
+    return Response(status_code=204)

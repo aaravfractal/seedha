@@ -810,3 +810,30 @@ class SiteGenRun(Base):
     cache_creation_tokens: Mapped[int] = mapped_column(Integer, default=0)
     cache_read_tokens: Mapped[int] = mapped_column(Integer, default=0)
     fields_fallback: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class SiteDetails(Base):
+    """The owner's hotel facts for the site: amenities, nearby places, how to
+    reach, good to know, contact and map position (JSON, validated by
+    app.services.site_details). Never guest data and never a price."""
+
+    __tablename__ = "site_details"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), unique=True)
+    details_json: Mapped[str] = mapped_column(Text, default="{}")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SiteCardScan(Base):
+    """How many times a printed card's QR was scanned, per card type per hotel
+    day. Only a count: no IP, cookie, user agent or device data."""
+
+    __tablename__ = "site_card_scan"
+    __table_args__ = (UniqueConstraint("property_id", "card", "day"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    card: Mapped[str] = mapped_column(String(8))
+    day: Mapped[date] = mapped_column(Date)
+    count: Mapped[int] = mapped_column(Integer, default=0)

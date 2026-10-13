@@ -48,6 +48,8 @@ LIMITS: dict[str, Limit] = {
     "site": Limit(60, 60),
     # Up to 8 photos per hotel page view (browsers cache them a day).
     "site_photo": Limit(240, 60),
+    # A printed card's QR counts one scan per page load (Hotel Site V2).
+    "site_scan": Limit(30, 60),
     # The public website loads the sample figures once per page view.
     "public_sample": Limit(60, 60),
 }
