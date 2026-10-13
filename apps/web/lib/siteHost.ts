@@ -70,14 +70,21 @@ export function hotelHost(host: string, root: string): HotelHost | null {
   return null;
 }
 
+/** The hotel page's offline service worker (public/h-sw.js). */
+export const HOTEL_SW_PATH = "/h-sw.js";
+
 /**
- * What a hotel host may serve: its page at "/", Next's own assets, and GET
- * requests to its own public site API (the page, availability and photos).
+ * What a hotel host may serve: its page at "/", Next's own assets, its
+ * offline service worker, GET requests to its own public site API (the page,
+ * availability and photos) and exactly one write: POST to its own
+ * `/scan` (a printed card's QR count; the BFF still checks the Origin).
  */
 export function hotelPathAllowed(pathname: string, method: string, slug: string): boolean {
   if (pathname === "/" || pathname.startsWith("/_next/") || pathname.startsWith("/__nextjs")) return true;
-  if (method !== "GET" && method !== "HEAD") return false;
   const api = `/api/public/site/${slug}`;
+  if (method === "POST") return pathname === `${api}/scan`;
+  if (method !== "GET" && method !== "HEAD") return false;
+  if (pathname === HOTEL_SW_PATH) return true;
   return pathname === api || pathname.startsWith(`${api}/`);
 }
 

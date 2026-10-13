@@ -3,9 +3,11 @@
  *
  * 1. Hotel hosts (<slug>.<SITE_ROOT_DOMAIN>, and <slug>.localhost in
  *    development; lib/siteHost.ts): "/" shows the hotel's public page
- *    (rewritten to /h/<slug>), the page's own public API GETs pass, and every
- *    other path is a 404, so a hotel address never serves an owner screen,
- *    a sign-in route or an API write. A renamed hotel 308s to its new host.
+ *    (rewritten to /h/<slug>, with the strict hotel page headers), the page's
+ *    own public API GETs, its offline service worker and its one card-scan
+ *    POST pass, and every other path is a 404, so a hotel address never
+ *    serves an owner screen, a sign-in route or any other API write. A
+ *    renamed hotel 308s to its new host.
  * 2. App host /h/<slug>: a renamed slug 308s to /h/<new> (for 30 days), an
  *    unknown or unpublished one is a 404 "This hotel site isn't live yet".
  *    The old /hotel/<slug> address 308s to /h/<slug>.
@@ -18,6 +20,7 @@
  */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { hotelPageHeaders } from "@/lib/hotelSiteV2";
 import { clientAddress } from "@/lib/ratelimit";
 import { SESSION_COOKIE, nowSeconds, verifySession } from "@/lib/session";
 import {
@@ -111,7 +114,11 @@ async function hotelHostResponse(request: NextRequest, slug: string, root: strin
     const host = request.headers.get("host") ?? "";
     return NextResponse.redirect(movedHostUrl(request.nextUrl, host, found.slug, root), 308);
   }
-  return NextResponse.rewrite(new URL(`/h/${slug}${search}`, request.url));
+  const page = NextResponse.rewrite(new URL(`/h/${slug}${search}`, request.url));
+  // The strict hotel page headers (next.config.ts matches /h/<slug>, but here the page is at "/").
+  for (const { key, value } of hotelPageHeaders(process.env.NODE_ENV !== "production"))
+    page.headers.set(key, value);
+  return page;
 }
 
 /** /h/<slug> on the app host: live passes, renamed redirects, anything else is not live. */
