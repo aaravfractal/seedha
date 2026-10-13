@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from typing import get_args
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
+from app.deps import SessionDep
 from app.main import create_app
 
 
@@ -97,3 +99,9 @@ def test_payments_stay_simulated_even_with_razorpay_keys(
     keyed = replace(settings, razorpay_key_id="rzp_test_x", razorpay_key_secret="y" * 20)
     with TestClient(create_app(keyed, factory)) as client:
         assert client.get("/health").json()["payments"] == "simulated"
+
+
+def test_session_commits_before_the_response_is_sent() -> None:
+    """A caller that reads straight back after a 200 sees the write (the web
+    revalidates a hotel page right after an owner save)."""
+    assert get_args(SessionDep)[1].scope == "function"
