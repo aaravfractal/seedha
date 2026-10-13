@@ -22,7 +22,7 @@ const CONNECTIONS: [keyof Health, string][] = [
   ["llm", "Claude (statement reading, wording)"],
   ["whatsapp", "WhatsApp messages"],
   ["payments", "UPI payments"],
-  ["proof_chain", "Public proof chain"],
+  ["proof_chain", "Proof on Polygon Amoy testnet"],
 ];
 
 const noSubscribe = () => () => {};
@@ -123,7 +123,7 @@ export function HotelTab({ data, beforeReset }: { data: SettingsData; beforeRese
         ))}
       </div>
       <p className={s.help} style={{ marginTop: 8 }}>
-        Add keys in .env to switch a connection from simulated to live.
+        Add keys in .env (or the host&rsquo;s variables) to switch a connection from simulated to live.
       </p>
 
       {beforeReset}

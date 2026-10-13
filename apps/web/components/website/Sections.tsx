@@ -95,8 +95,8 @@ const FEATURES = [
   [
     "Site",
     "Seedha Site",
-    "No website? Send photos on WhatsApp and get one with direct booking.",
-    "Online in 10 minutes",
+    "No website? Add photos and a few lines, and get one with direct booking.",
+    "Review before it goes online",
   ],
   [
     "Proof",
@@ -430,8 +430,9 @@ export function NoWebsiteBand() {
             No website yet?
           </h2>
           <p className={styles.lede}>
-            Send 8 photos and a Hindi voice note on WhatsApp. Get a site with direct booking, packages, a rate
-            card and an agent deck. Nothing goes live until you publish.
+            Tap Build my site in the app and add 4 to 8 photos and a few lines, typed or spoken in Hindi. Get
+            a site with direct booking, packages, a rate card and an agent deck. Nothing goes live until you
+            publish. Coming soon: build on WhatsApp.
           </p>
           <div className={styles.ctaRow}>
             <Link href="/h/deodar-view" className={`${styles.pillOutline} ${styles.pillLg}`}>

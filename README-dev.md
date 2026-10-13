@@ -48,15 +48,21 @@ Stop with Ctrl+C. For development with reload use `make dev` instead.
 
 | Command | What it does |
 |---|---|
+| `make setup` | One-time: `.env` from `.env.example`, Python venv and npm install |
 | `make demo` | First run: `.env`, install, seed, build, start |
+| `make demo-prod` | Seeded sample hotel on a production build (after `make setup`) |
+| `make demo-lan` | Production demo for phones on this Wi-Fi |
+| `make demo-live` | Production demo on a public https link (needs `cloudflared`) |
 | `make dev` | API (8000, reload) and web (3000, dev) |
 | `make seed` | Fresh database: sample hotel, no statements loaded yet |
 | `make seed-full` | Same, with the 1,500 statement lines already loaded |
+| `make reset` | Same as `make seed` |
 | `make test` | API and web unit tests |
 | `make e2e` | Playwright suite (starts its own servers on 8001 and 3001) |
 | `make check` | Every quality gate (see below) |
 | `make secrets-history` | Scan every commit for secrets |
 | `make proof-nightly` | Build tonight's consent proof bundle |
+| `make proof-wallet` | New Polygon Amoy testnet key in `.env` (prints only the address) |
 | `make firmware` | Compile the Desk firmware for the ESP32 |
 
 ## Demo script (about 5 minutes)
@@ -111,6 +117,12 @@ code, never by a model, whatever is configured.
 | WhatsApp Cloud API | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`, `WHATSAPP_API_VERSION` | Sends are simulated and labelled; inbound webhooks are refused (503) |
 | Razorpay | `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Simulated UPI, labelled "test mode, no money moves". Razorpay checkout is not built yet |
 | Polygon Amoy | `PROOF_RPC_URL`, `PROOF_PRIVATE_KEY` | Without a funded testnet wallet the Merkle roots stay on Seedha's server, labelled "Local only" with the reason. With `PROOF_RPC_URL`, `PROOF_PRIVATE_KEY` and `PROOF_CHAIN_ID=80002` the root is written to the Polygon Amoy testnet (`make proof-wallet` creates a testnet key) |
+| Seedha Site | `SITE_GEN_MODEL` (with `ANTHROPIC_API_KEY`; for example `claude-haiku-5-5`), `SITE_GEN_MONTHLY_TOKEN_CAP` (default 300000), `SITE_ROOT_DOMAIN` (empty: sites live at `/h/<slug>`) | Site text is built from the owner's own words and labelled Sample; no AI credit is spent |
+
+Published sites live at `/h/<slug>`; locally `<slug>.localhost:3000` also
+works, and old `/hotel/<slug>` links redirect. HEIC photos need pillow-heif
+(in the requirements; its wheels bundle GPL and LGPL codecs, see
+docs/decisions.md D-102).
 
 To add a key, put it in `.env` and restart. Never commit `.env`; the
 pre-commit hook and `make check` scan for secrets.
@@ -214,7 +226,7 @@ These steps need your browser, your phone or test tokens, so they are not
 automated. Everything else falls back to the simulated mode when skipped.
 
 1. **Fund the proof wallet.** The address is printed by `make proof-wallet`
-   (already run once; the key is in `.env`, never shown). Open
+   (run it once; it writes the key to `.env` and prints only the address). Open
    https://faucet.polygon.technology, choose Polygon Amoy and POL, paste the
    address and request test POL. Testnet tokens have no value.
 2. **Write a real proof.** `make demo-prod`, sign in with Direct beta login,
@@ -241,7 +253,12 @@ automated. Everything else falls back to the simulated mode when skipped.
    `CLAUDE_MODEL` set, Claude reads it; without them you see a labelled
    sample extraction. Save it and check it shows "From your sources" with
    the source link. Seedha never suggests a price; you set any rate.
-8. **Stop and reset.** Ctrl+C stops the tunnel and servers. `make seed`
+8. **Build a real site.** With `ANTHROPIC_API_KEY` and `SITE_GEN_MODEL` set,
+   open Website, Build my site: add 4 photos, a few typed or spoken lines,
+   rooms and prices, then Generate. Review, Publish, and open `/h/<slug>`
+   and `<slug>.localhost:3000`. Try Copy, Share on WhatsApp and the QR
+   download. Settings shows the run's tokens and the month to date.
+9. **Stop and reset.** Ctrl+C stops the tunnel and servers. `make seed`
    resets the demo data.
 
 ## Hosted (Railway and Vercel)
@@ -270,8 +287,9 @@ are in [docs/HOSTING.md](docs/HOSTING.md). In short:
 - Owner routes need the owner token (added by the BFF after login); Desk
   routes need the device key. A test checks every route in the API schema.
 - Public routes (consent, Seedha Link, data deletion) and owner login are rate
-  limited per client (docs/decisions.md D-071). In production, put a proxy in
-  front of the web app that overwrites `X-Forwarded-For`.
+  limited per client (docs/decisions.md D-071). Hosted, the API trusts
+  `X-Forwarded-For` only with the web server's proof header
+  (`app/proxy_trust.py`); see docs/HOSTING.md.
 - Consent links are single use and expire in 10 minutes. Perk codes redeem
   once. Guest numbers are never logged, and nothing personal goes into a proof.
 - Security headers (CSP, frame and referrer policies) are set in

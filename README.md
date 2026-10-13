@@ -30,6 +30,7 @@ All hotel, guest and booking data in this repo is fictional sample data
 - **Savings:** commission and GST avoided on each direct booking, minus the UPI fee.
 - **Room board:** last night's rooms with each stay's ledger lines, channel filters and a 7-night scrubber.
 - **Guest inbox:** consented guests only, suggested replies the owner edits and sends, and a stay invoice built from the booking row.
+- **Seedha Site:** the owner adds 4 to 8 photos (HEIC too, resized, location data removed), a typed or spoken description and room prices; AI writes the site text in English and Hindi (3 runs a day, a monthly token cap, never a price or number); the owner reviews with Pine, Stone or Sky and EN or HI, edits, and publishes at `/h/<slug>` or `<slug>.<SITE_ROOT_DOMAIN>`, with Copy, Share on WhatsApp and a QR download.
 - **Pulse calendar:** sample town events turned into one channel decision each, plus events the owner pastes from official sources.
 - **Consent proof:** each consent becomes a salted SHA-256 fingerprint; a nightly Merkle root can be written to the Polygon Amoy testnet.
 - **Pro:** an overcharge audit with dispute drafts, rate floors by channel, group displacement and more, each labelled sample or illustration where it is.
@@ -62,23 +63,24 @@ flowchart LR
 - **API:** Python, FastAPI, SQLAlchemy 2 and Alembic. Money is integer paise internally and formatted with Indian grouping only at the edge.
 - **Database:** SQLite for the local demo; Postgres when hosted (Railway), chosen by `DATABASE_URL`. The full API suite runs on both in CI.
 - **Desk:** ESP32 firmware (PlatformIO) with a TFT screen, QR, LED ring and thermal printer; a phone or tablet can stand in at `/desk/device`.
-- **AI:** Claude reads unfamiliar statement layouts, breaks name-match ties and drafts message wording. It never produces a money figure; code checks every amount.
+- **AI:** Claude reads unfamiliar statement layouts, breaks name-match ties, drafts message wording and writes hotel site text. It never produces a money figure; code checks every amount.
 
 ## What is real and what is simulated
 
-| Part                                                           | Status                                                                                                                      |
-| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Ledger, net kept per channel, the flip, repeat guests, savings | Real: computed by code from the stored sample rows                                                                          |
-| Statement parsing for CSV and Excel                            | Real                                                                                                                        |
-| Statement parsing for PDFs and unknown layouts                 | Claude when a key is set; otherwise the sample statements are read from known layouts                                       |
-| Consent capture, salted fingerprints, Merkle roots             | Real                                                                                                                        |
-| Proof write to a public chain                                  | Polygon Amoy testnet only, when a funded testnet wallet and RPC are set; otherwise stored locally and labelled "Local only" |
-| WhatsApp messages                                              | Simulated send log unless WhatsApp Cloud API keys are set                                                                   |
-| UPI payment on Seedha Link                                     | Simulated (labelled); no payment gateway is connected                                                                                 |
-| Message drafts and event reading                               | Claude when a key is set; fixed templates and a labelled sample extraction otherwise                                        |
-| Stay invoice PDF                                               | Real, built from the booking row; marked Sample for the sample hotel                                                        |
-| Hotel, guests, bookings, events, second property               | Fictional sample data, labelled                                                                                             |
-| Seedha Desk hardware                                           | Firmware builds and its tests pass; the phone kiosk works today                                                             |
+| Part                                                           | Status                                                                                                                                                                                                                               |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Ledger, net kept per channel, the flip, repeat guests, savings | Real: computed by code from the stored sample rows                                                                                                                                                                                   |
+| Statement parsing for CSV and Excel                            | Real                                                                                                                                                                                                                                 |
+| Statement parsing for PDFs and unknown layouts                 | Claude when a key is set, for the owner; hosted and public-link visitors get the labelled fallback; otherwise the sample statements are read from known layouts                                                                      |
+| Consent capture, salted fingerprints, Merkle roots             | Real                                                                                                                                                                                                                                 |
+| Proof write to a public chain                                  | Polygon Amoy testnet only, when a funded testnet wallet, RPC and `PROOF_CHAIN_ID=80002` are set; otherwise stored locally and labelled "Local only"                                                                                  |
+| WhatsApp messages                                              | Simulated send log unless WhatsApp Cloud API keys are set                                                                                                                                                                            |
+| UPI payment on Seedha Link                                     | Simulated (labelled); no payment gateway is connected                                                                                                                                                                                |
+| Message drafts and event reading                               | Claude when a key is set, for the owner; fixed templates and a labelled sample extraction otherwise (hosted and public-link visitors always get these)                                                                               |
+| Seedha Site text                                               | Claude only when `SITE_GEN_MODEL` and `ANTHROPIC_API_KEY` are set; otherwise text from the owner's own words, labelled Sample. Hosted, the sample hotel's public page always shows the fixed sample page and visitors cannot publish |
+| Stay invoice PDF                                               | Real, built from the booking row; marked Sample for the sample hotel                                                                                                                                                                 |
+| Hotel, guests, bookings, events, second property               | Fictional sample data, labelled                                                                                                                                                                                                      |
+| Seedha Desk hardware                                           | Firmware builds and its tests pass; the phone kiosk works today                                                                                                                                                                      |
 
 No OTA website is scraped. Guest contacts from OTAs are never stored or
 messaged; only guests who said yes at the Desk can be messaged.
@@ -114,9 +116,9 @@ run and keep reset, Claude and testnet writes on the laptop.
 
 `make check` runs every gate:
 
-- **API:** 1,004 pytest tests, about 98% coverage overall and 100% on money code, mypy strict, pylint 9.97, bandit and pip-audit clean.
-- **Web:** TypeScript strict, ESLint with zero warnings, Prettier, 181 unit tests, npm audit gate.
-- **End to end:** 75 Playwright tests, including the full 8-step loop, accessibility (axe) in light and dark at phone and laptop widths, and a speed check on the flip.
+- **API:** 1,308 pytest tests, about 98% coverage overall and 100% on money code, mypy strict, pylint 9.98, bandit and pip-audit clean.
+- **Web:** TypeScript strict, ESLint with zero warnings, Prettier, 205 unit tests, npm audit gate.
+- **End to end:** 78 Playwright tests, including the full 8-step loop, accessibility (axe) in light and dark at phone and laptop widths, and a speed check on the flip.
 - **Secrets:** a scan of the whole git history.
 - **Firmware:** native tests and a device build.
 

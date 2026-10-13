@@ -187,7 +187,10 @@ def load_sample(  # noqa: PLR0913  (each argument is a distinct switch)
     sample guest inbox threads, dated relative to `now`.
     """
     if session.scalar(select(Property.id).limit(1)) is not None:
-        raise SeedError("database already has data; run make reset first")
+        raise SeedError(
+            "database already has data; reset it instead"
+            " (make reset locally, POST /demo/reset hosted)"
+        )
     prop = load_base(session)
     loader = RowLoader(session, prop)
     loader.load(read_csv("history_rows.csv"), "history")

@@ -163,11 +163,11 @@ const FAQ = [
   ],
   [
     "What does the AI do, and not do?",
-    "It reads statement layouts it has not seen before, helps decide when two guest names look alike, explains a figure in one line of Hindi or English, and drafts win-back messages. It never writes a rupee figure and never sends anything on its own.",
+    "It reads statement layouts it has not seen before, helps decide when two guest names look alike, explains a figure in one line of Hindi or English, drafts win-back messages, writes your hotel site's text from your own photos and words, and reads event notices you paste. It never writes a rupee figure or a price and never sends anything on its own; every amount comes from code.",
   ],
   [
     "Do I need a computer?",
-    "No. Seedha works on a phone, and the six questions owners ask most are answered on WhatsApp.",
+    "No. Seedha works on a phone, and the six questions owners ask most are answered in the app. Answers on WhatsApp are planned.",
   ],
 ] as const;
 

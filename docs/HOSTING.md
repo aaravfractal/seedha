@@ -121,6 +121,9 @@ API service, Variables. Mark the secret ones as sealed.
 | `ALLOW_CLAUDE_FOR_DEMO` | leave empty: visitors never spend your Claude credits | no |
 | `ALLOW_DEMO_PROOF_WRITES` | leave empty: visitors never spend testnet POL | no |
 | `ALLOW_OWNER_ACCOUNTS` | leave empty: sample hotel only, Direct beta login | no |
+| `SITE_GEN_MODEL` | the model id for Seedha Site text (optional, for example `claude-haiku-5-5`; only with `ANTHROPIC_API_KEY`; visitors still get the labelled Sample unless `ALLOW_CLAUDE_FOR_DEMO=1`). Read by the API | no |
+| `SITE_GEN_MONTHLY_TOKEN_CAP` | optional, default `300000` tokens a month across all hotels. Read by the API | no |
+| `SITE_ROOT_DOMAIN` | optional, section 8 (empty: hotel sites live at `/h/<slug>`). The API uses it for the address, QR and share text | no |
 
 Do not set `PORT` (Railway sets it). Leave the WhatsApp and Razorpay
 variables unset so messages and UPI stay simulated. If the build log shows
@@ -169,6 +172,7 @@ the Desk device key is registered from the sealed variable.
 | `SEEDHA_HOSTED` | `1` | no |
 | `WEB_ORIGIN` | `https://<project>.vercel.app` (optional, after the first deploy) | no |
 | `PUBLIC_CONTACT_EMAIL`, `PUBLIC_PRIVACY_EMAIL`, `PUBLIC_SECURITY_EMAIL` | role addresses (optional) | no |
+| `SITE_ROOT_DOMAIN` | optional, section 8; the same value as on Railway. The web proxy reads it to tell a hotel host from the app host | no |
 
 Mark `SESSION_SECRET`, `OWNER_API_TOKEN` and `DESK_DEVICE_KEY` as
 Sensitive and scope them to Production only (not Preview or Development).
@@ -254,10 +258,15 @@ dashboard; follow what the dashboard shows.
    nothing until then.
 7. Test:
    - `https://example.in/login` signs in as before.
-   - Publish the site (Website, Review, Publish site); the address shown is
-     `deodar-view.example.in`; open it on a phone over mobile data.
-   - `https://deodar-view.example.in/` shows the hotel page; a booking
-     button opens Seedha Link on the app host.
+   - Website shows the sample hotel's address as
+     `deodar-view.example.in`. Visitors on Direct beta login cannot publish
+     on the shared demo (the API refuses it), so a real owner publish can be
+     checked only with a real owner account (`ALLOW_OWNER_ACCOUNTS=1` and
+     the number in `OWNER_PHONES`): publish that hotel and open its
+     address on a phone over mobile data.
+   - `https://deodar-view.example.in/` shows the sample hotel's fixed
+     sample page (hosted, never a visitor's build); a booking button opens
+     Seedha Link on the app host.
    - `https://no-such-hotel.example.in/` answers 404 with "This hotel
      site isn't live yet" (`curl -sI` shows `HTTP/2 404`).
    - Owner pages 404 on a hotel host: `curl -sI
@@ -294,3 +303,11 @@ dashboard; follow what the dashboard shows.
    page eventually get "Too many tries" on that phone only.
 7. Safety: as a signed-in visitor, the Calendar's Add events shows a
    labelled sample extraction (no Claude spend) and proof writes stay local.
+8. Seedha Site: Website, Build my site, add 4 photos, a few lines and room
+   prices; Generate shows Sample text (no Claude spend); Review shows your
+   build in the owner preview. Publish is refused on the shared demo by
+   design. `https://<project>.vercel.app/h/deodar-view` shows the fixed
+   sample page, never a visitor's photos or text. Copy, Share on WhatsApp
+   (a wa.me link) and the QR download appear only after a publish, so they
+   and a real owner publish can be checked only with a real owner account
+   (`ALLOW_OWNER_ACCOUNTS=1` and the number in `OWNER_PHONES`).
