@@ -171,6 +171,21 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.seedhaBar a {
+  display: block;
+  min-height: 24px;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.seedhaBar a:hover {
+  text-decoration: underline;
+}
+.seedhaBar a:focus-visible {
+  outline: 2px solid var(--hs-cream);
+  outline-offset: -2px;
+}
 .langSwitch {
   display: inline-flex;
   padding: 2px;
@@ -779,6 +794,13 @@
 }
 .foot p {
   margin: 0 0 6px;
+}
+.footLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: underline;
 }
 
 /* sticky mobile bar: Call, WhatsApp, Book */

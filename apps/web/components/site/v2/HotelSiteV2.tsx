@@ -22,6 +22,7 @@ import {
   whatsappHref,
 } from "@/lib/hotelSiteV2";
 import { addDays } from "@/lib/linkPrefill";
+import { seedhaHomeHref, shortHotelName } from "@/lib/cardWelcome";
 import { HOTEL_SW_PATH, bookingLink } from "@/lib/siteHost";
 import type { Availability, Lang, SitePhoto } from "@/lib/types-site";
 import { GLOBE_BOX } from "@/lib/siteGlobe";
@@ -298,6 +299,7 @@ export function HotelSiteV2({
 
   const t = V2_COPY[lang];
   const c = COPY[lang];
+  const seedhaHome = seedhaHomeHref(site.booking_url, here);
   const d = site.details;
   const uid = useId();
   const id = (part: string) => `${uid}-${part}`;
@@ -441,7 +443,7 @@ export function HotelSiteV2({
       onClickCapture={preview ? stayInPreview : undefined}
     >
       <header className={s.head}>
-        {site.hide_branding ? null : <SeedhaBar hotel={name} t={t} />}
+        {site.hide_branding ? null : <SeedhaBar hotel={shortHotelName(name)} home={seedhaHome} t={t} />}
         <span className={`${s.brand} ${s.display}`}>{name}</span>
         <div className={s.langSwitch} role="group" aria-label={t.language}>
           {(["en", "hi"] as const).map((code) => (
@@ -483,6 +485,7 @@ export function HotelSiteV2({
             firstRoom={firstRoom}
             here={here}
             card={card}
+            rewards={site.rewards}
             gate={!preview && !hydrated}
             preview={preview}
           />
@@ -818,7 +821,13 @@ export function HotelSiteV2({
 
       <footer className={s.foot}>
         {site.sample ? <p>{t.sampleHotel}</p> : null}
-        {site.hide_branding ? null : <p>{t.built}</p>}
+        {site.hide_branding ? null : (
+          <p>
+            <a className={s.footLink} href={seedhaHome}>
+              {t.built}
+            </a>
+          </p>
+        )}
       </footer>
 
       {showBar ? (

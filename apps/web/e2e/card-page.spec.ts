@@ -4,12 +4,13 @@ import { axeViolations, scrollsSideways, signInOnce } from "./helpers";
 
 /**
  * The card link page (docs/CARD_PAGE.md, PART 2): /h/<slug>?src=card-* shows
- * the card welcome panel before the mini-site: thanks, Rate your stay (booking
- * reference, phone last 4 only when asked, 1 to 5 stars, one send), a private
- * note to the hotel, and Book again into Seedha Link with the stay prefilled.
- * The owner reads private notes on the Website screen's Ratings tab.
+ * the card welcome panel before the mini-site: thanks, one feedback form (name,
+ * booking reference optional, phone last 4 only when asked, overall and food
+ * stars, review, reward, WhatsApp consent unticked), and Book again into
+ * Seedha Link with the stay prefilled. The owner reads private notes on the
+ * Website screen's Ratings tab.
  *
- * MOCKED (NEEDS C1): the card verify, rate and feedback POSTs and the owner's
+ * MOCKED (NEEDS F1): the card verify and feedback POSTs and the owner's
  * GET/PATCH /api/site/feedback are answered with page.route, so these tests
  * check the page against the contract alone. The last test asks the real API
  * and skips itself when the card routes are not there yet.
@@ -26,29 +27,24 @@ test.beforeAll(async ({ browser }) => {
 });
 
 type Sent = { path: string; body: unknown };
+const API = `/api/public/site/${SLUG}`;
 
-/** Mock the three card routes; `verify` answers in turn, then repeats its last answer. */
-async function mockCard(
-  page: Page,
-  opts: { verify?: unknown[]; rate?: number; feedback?: number } = {},
-): Promise<Sent[]> {
+/**
+ * Mock the card verify and feedback routes; `verify` answers in turn, then
+ * repeats its last answer. `feedback` is the JSON answer (status 200).
+ */
+async function mockCard(page: Page, opts: { verify?: unknown[]; feedback?: unknown } = {}): Promise<Sent[]> {
   const sent: Sent[] = [];
   const answers = [...(opts.verify ?? [{ state: "not_found" }])];
-  await page.route(`**${CARD}/*`, async (route: Route) => {
-    const req = route.request();
-    const path = new URL(req.url()).pathname.slice(CARD.length + 1);
-    sent.push({ path, body: req.postDataJSON() as unknown });
-    if (path === "verify") {
-      const answer = answers.length > 1 ? answers.shift() : answers[0];
-      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(answer) });
-    }
-    const status = path === "rate" ? (opts.rate ?? 204) : (opts.feedback ?? 204);
-    if (status === 204) return route.fulfill({ status: 204, body: "" });
-    return route.fulfill({
-      status,
-      contentType: "application/json",
-      body: JSON.stringify({ error: { code: status === 409 ? "already_rated" : "invalid", message: "No" } }),
-    });
+  const reply = (route: Route, body: unknown) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
+  await page.route(`**${CARD}/verify`, async (route: Route) => {
+    sent.push({ path: "verify", body: route.request().postDataJSON() as unknown });
+    return reply(route, answers.length > 1 ? answers.shift() : answers[0]);
+  });
+  await page.route(`**${API}/feedback`, async (route: Route) => {
+    sent.push({ path: "feedback", body: route.request().postDataJSON() as unknown });
+    return reply(route, opts.feedback ?? { verified: false, reward: "none", state: "saved" });
   });
   return sent;
 }
@@ -107,13 +103,18 @@ test("card visit at 390: panel first, in the server HTML, no layout shift, axe c
   expect(await layoutShift(page)).toBeLessThan(0.01);
   expect(await scrollsSideways(page)).toBe(false);
   expect(await axeViolations(page)).toEqual([]);
-  for (const target of await panel.locator("button, a, input, summary").all()) {
+  // Radios and the checkbox: the whole label is the target.
+  for (const target of await panel
+    .locator(
+      "button, a, input:not([type=radio],[type=checkbox]), label:has(input[type=radio],input[type=checkbox])",
+    )
+    .all()) {
     const box = await target.boundingBox();
     if (box) expect(Math.min(box.width, box.height)).toBeGreaterThanOrEqual(44);
   }
 });
 
-test("rate: bad reference stays here, phone asked only when needed, stars sent once (mocked, NEEDS C1)", async ({
+test("feedback: checks each field, phone asked only when needed, consent unticked, sent once (mocked, NEEDS F1)", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -129,97 +130,135 @@ test("rate: bad reference stays here, phone asked only when needed, stars sent o
         perk_code: "DV-BRK-01",
       },
     ],
+    feedback: { verified: true, reward: "breakfast", state: "saved" },
   });
   await page.goto(`${PAGE}?src=card-room`);
   const panel = page.locator("[data-card-welcome]");
-  const ref = panel.getByLabel("Booking reference");
-  await ref.fill("DV 1001");
-  await panel.getByRole("button", { name: "Check my stay" }).click();
-  await expect(panel.getByRole("alert")).toContainText("letters, digits and dashes only");
-  expect(sent).toHaveLength(0);
+  const send = panel.getByRole("button", { name: "Send feedback" });
+  const consent = panel.getByRole("checkbox", {
+    name: "Send my reward code on WhatsApp. Reply STOP any time.",
+  });
+  await expect(consent).not.toBeChecked();
+  expect(await panel.getByRole("link", { name: "How we use your number" }).getAttribute("href")).toBe(
+    "/privacy",
+  );
 
-  await ref.fill("DV-1001");
-  await panel.getByRole("button", { name: "Check my stay" }).click();
+  // Name and overall stars are needed; the first bad field is marked and focused.
+  await send.click();
+  await expect(panel.getByRole("alert")).toHaveText("Type your name, up to 60 characters.");
+  await expect(panel.getByLabel("Your name")).toHaveAttribute("aria-invalid", "true");
+  await expect(panel.getByLabel("Your name")).toBeFocused();
+  await panel.getByLabel("Your name").fill("Asha Rawat");
+  await send.click();
+  await expect(panel.getByRole("alert")).toHaveText("Choose from 1 to 5 stars for your overall stay.");
+  const overall = panel.getByRole("radiogroup", { name: "Overall stay" });
+  await expect(overall.getByRole("radio")).toHaveCount(5);
+  await expect(
+    panel.getByRole("radiogroup", { name: "Food quality (optional)" }).getByRole("radio"),
+  ).toHaveCount(5);
+  await overall.getByRole("radio", { name: "5 stars" }).check();
+  await panel
+    .getByRole("radiogroup", { name: "Food quality (optional)" })
+    .getByRole("radio", { name: "4 stars" })
+    .check();
+
+  // WhatsApp is needed only once consent is ticked.
+  await consent.check();
+  await send.click();
+  await expect(panel.getByLabel("WhatsApp number")).toHaveAttribute("aria-invalid", "true");
+  await panel.getByLabel("WhatsApp number").fill("+91 98765 43210");
+
+  // A bad reference stays here; the phone's last 4 only once the API asks.
+  const ref = panel.getByLabel("Booking reference");
+  await ref.fill("DV 0142");
+  await send.click();
+  await expect(panel.getByRole("alert")).toContainText("letters, digits and dashes only");
+  await expect(panel.getByLabel("Last 4 digits of your phone")).toHaveCount(0);
+  await ref.fill("CL2101");
+  await send.click();
   const last4 = panel.getByLabel("Last 4 digits of your phone");
   await expect(last4).toBeVisible();
-  await last4.fill("48");
-  await panel.getByRole("button", { name: "Check my stay" }).click();
+  await expect(panel.getByRole("alert")).toHaveText(
+    "Add the last 4 digits of your phone to check this booking.",
+  );
+  await last4.fill("12");
+  await send.click();
   await expect(panel.getByRole("alert")).toHaveText("Type exactly 4 digits.");
   await last4.fill("4821");
-  await panel.getByRole("button", { name: "Check my stay" }).click();
+  await panel.getByLabel("Your review (optional)").fill("  Warm rooms and a kind team.  ");
+  await send.click();
 
-  const group = panel.getByRole("group", { name: "How was your stay?" });
-  await expect(group.getByRole("radio")).toHaveCount(5);
-  expect(sent.map((s) => s.body)).toEqual([
-    { booking_ref: "DV-1001" },
-    { booking_ref: "DV-1001", phone_last4: "4821" },
+  const done = panel.getByRole("status");
+  await expect(done).toContainText("Your feedback reached the hotel.");
+  await expect(done).toContainText("Your booking is verified, so your rating counts on this page.");
+  await expect(done).toContainText("they send your code on WhatsApp");
+  // The verified stay fills Book again (room, next check-in, nights, the guest's own code).
+  expect(sent.filter((x) => x.path === "verify").map((x) => x.body)).toEqual([
+    { booking_ref: "CL2101" },
+    { booking_ref: "CL2101", phone_last4: "4821" },
   ]);
-  // Verified: Book again carries the stay and the guest's own code.
-  const book = panel.locator("[data-book-again]");
-  await expect(book).toContainText("Your perk code DV-BRK-01 is filled in.");
-  expect(await book.getByRole("link", { name: "Open booking" }).getAttribute("href")).toBe(
+  expect(await panel.getByRole("link", { name: "Open booking" }).getAttribute("href")).toBe(
     "/link/DV-BRK-01?room=Deluxe+Valley+View&in=2027-03-12&nights=2",
   );
-
-  await panel.getByRole("button", { name: "Send rating" }).click();
-  await expect(panel.getByRole("alert")).toHaveText("Choose from 1 to 5 stars.");
-  await group.getByRole("radio", { name: "5 stars" }).check();
-  const comment = panel.getByLabel("A short comment (optional)");
-  await comment.fill("Warm <rooms>");
-  await expect(panel.getByText("Please leave out the < and > signs.")).toBeVisible();
-  await comment.fill("Warm rooms and a kind host");
-  expect(await axeViolations(page)).toEqual([]);
-  await panel.getByRole("button", { name: "Send rating" }).click();
-  await expect(panel.getByRole("status").filter({ hasText: "Your rating is saved" })).toBeVisible();
-  await expect(panel.getByRole("button", { name: "Send rating" })).toHaveCount(0);
-  expect(sent.filter((s) => s.path === "rate").map((s) => s.body)).toEqual([
-    { stay_token: "stay-1", stars: 5, comment: "Warm rooms and a kind host" },
-  ]);
-});
-
-test("rate: not found, not ended, already rated, and a 409 on send (mocked, NEEDS C1)", async ({ page }) => {
-  await mockCard(page, {
-    verify: [
-      { state: "not_found" },
-      { state: "not_ended" },
-      { state: "verified", stay_token: "stay-2" },
-      { state: "already_rated" },
-    ],
-    rate: 409,
+  expect((await done.textContent()) ?? "").not.toMatch(/instant|—|!/i);
+  await expect(send).toHaveCount(0);
+  const posts = sent.filter((x) => x.path === "feedback");
+  expect(posts).toHaveLength(1);
+  expect(posts[0]?.body).toMatchObject({
+    name: "Asha Rawat",
+    whatsapp: "+91 98765 43210",
+    booking_ref: "CL2101",
+    phone_last4: "4821",
+    overall: 5,
+    food: 4,
+    review: "Warm rooms and a kind team.",
+    consent: true,
   });
-  await page.goto(`${PAGE}?src=card-desk`);
-  const panel = page.locator("[data-card-welcome]");
-  const check = panel.getByRole("button", { name: "Check my stay" });
-  await panel.getByLabel("Booking reference").fill("NOPE-1");
-  await check.click();
-  await expect(panel.getByText("We could not find that booking.")).toBeVisible();
-  await check.click();
-  await expect(panel.getByText("You can rate after your stay.")).toBeVisible();
-  await check.click();
-  await panel.getByRole("radio", { name: "3 stars" }).check();
-  await panel.getByRole("button", { name: "Send rating" }).click();
-  await expect(panel.getByText("This stay has already been rated. Thank you.")).toBeVisible();
-  // Without a perk code Book again goes to /link with the first room only.
-  expect(await panel.getByRole("link", { name: "Open booking" }).getAttribute("href")).toMatch(
-    /^\/link\?room=[^&]+$/,
-  );
+  expect(await axeViolations(page)).toEqual([]);
 });
 
-test("private note: 1 to 500 characters, sent privately once (mocked, NEEDS C1)", async ({ page }) => {
-  const sent = await mockCard(page);
+test("feedback: no consent sends no number; unverified stays private; errors (mocked, NEEDS F1)", async ({
+  page,
+}) => {
+  const sent = await mockCard(page, { feedback: { verified: false, reward: "none", state: "saved" } });
   await page.goto(`${PAGE}?src=card-wallet`);
   const panel = page.locator("[data-card-welcome]");
-  await panel.getByText("Send a private note to the hotel").click();
-  await expect(
-    panel.getByText("It is not shown on this page and does not count in the rating."),
-  ).toBeVisible();
-  await panel.getByRole("button", { name: "Send privately" }).click();
-  await expect(panel.getByRole("alert")).toHaveText("Write a note first.");
-  await panel.getByLabel("Your note").fill("  The hot water ran out on Sunday morning.  ");
-  await panel.getByRole("button", { name: "Send privately" }).click();
-  await expect(panel.getByText("Sent privately to the hotel. Thank you.")).toBeVisible();
-  await expect(panel.getByRole("button", { name: "Send privately" })).toHaveCount(0);
-  expect(sent).toEqual([{ path: "feedback", body: { message: "The hot water ran out on Sunday morning." } }]);
+  await panel.getByLabel("Your name").fill("Ravi");
+  await panel.getByLabel("WhatsApp number").fill("98765 43210");
+  await panel
+    .getByRole("radiogroup", { name: "Overall stay" })
+    .getByRole("radio", { name: "3 stars" })
+    .check();
+
+  // Rewards come from the site payload (NEEDS F1): without a reference, discounts are off.
+  const rewards = panel.getByRole("radiogroup", { name: "Choose a thank-you for your next direct stay" });
+  if (await rewards.count()) {
+    await expect(rewards.getByRole("radio", { name: "No reward, thanks" })).toBeChecked();
+    await expect(panel.getByText("Discounts are for verified stays.")).toBeVisible();
+    for (const radio of await rewards.getByRole("radio").all()) {
+      const value = await radio.getAttribute("value");
+      if (value === "pct5" || value === "flat100") await expect(radio).toBeDisabled();
+      else await expect(radio).toBeEnabled();
+    }
+  }
+
+  await page.route(
+    `**${API}/feedback`,
+    (route) =>
+      route.fulfill({
+        status: 429,
+        contentType: "application/json",
+        body: '{"error":{"code":"rate_limited"}}',
+      }),
+    { times: 1 },
+  );
+  await panel.getByRole("button", { name: "Send feedback" }).click();
+  await expect(panel.getByRole("alert")).toHaveText("Too many tries. Wait a minute and try again.");
+  await panel.getByRole("button", { name: "Send feedback" }).click();
+  await expect(panel.getByRole("status")).toContainText("your rating stays private to the hotel");
+  const body = sent.filter((x) => x.path === "feedback").at(-1)?.body as Record<string, unknown>;
+  expect(body).toMatchObject({ name: "Ravi", overall: 3, reward: "none", consent: false });
+  expect(body).not.toHaveProperty("whatsapp");
 });
 
 test("Book again opens Seedha Link with the room prefilled; Hindi; 1440 clean", async ({ page }) => {

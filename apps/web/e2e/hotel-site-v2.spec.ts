@@ -81,10 +81,10 @@ test("390 px, English: every section, amenities expand, no sideways scroll", asy
   expect(await hero.getByRole("link", { name: "WhatsApp" }).getAttribute("href")).toBe(
     "https://wa.me/919000000000",
   );
-  // The slim Seedha line (plain text, no link).
-  const seedhaBar = page.getByText("Deodar View on Seedha", { exact: true });
+  // The slim Seedha line and the footer link to the main Seedha home.
+  const seedhaBar = page.getByRole("link", { name: "Deodar View on Seedha", exact: true });
   await expect(seedhaBar).toBeVisible();
-  await expect(seedhaBar.locator("a")).toHaveCount(0);
+  expect(await seedhaBar.getAttribute("href")).toBe("/");
   // At a glance: rooms, room types, check-in and check-out.
   const glance = page.locator("section").filter({ has: page.getByRole("heading", { name: "At a glance" }) });
   await expect(glance.getByText("Room types")).toBeVisible();
@@ -103,7 +103,9 @@ test("390 px, English: every section, amenities expand, no sideways scroll", asy
   await expect(page.locator("[data-ratings='shown']")).toHaveCount(0);
   await expect(page.getByText("Sample hotel. All details are fictional.")).toBeVisible();
   await expect(page.getByText("Phone and address are placeholders. Sample data.")).toBeVisible();
-  await expect(page.getByText("Built with Seedha")).toBeVisible();
+  expect(await page.getByRole("link", { name: "Powered by Seedha", exact: true }).getAttribute("href")).toBe(
+    "/",
+  );
   await expect(page.getByRole("button", { name: /Book direct · Powered by Seedha/ })).toBeVisible();
   // No ribbon without a card scan.
   await expect(page.locator("[data-card]")).toHaveCount(0);
