@@ -43,7 +43,7 @@ test("the front desk section describes a phone or tablet screen, not a device", 
   await expect(desk).toContainText("Front desk screen");
   await expect(desk).toContainText("on any phone or tablet at reception");
   await expect(desk).toContainText("says yes on their own phone");
-  await expect(desk).toContainText("shown on screen or sent by WhatsApp");
+  await expect(desk).toContainText("can follow on WhatsApp once you approve the message");
   expect(await desk.innerText()).not.toMatch(/ESP32|printer|LED ring|firmware/i);
 });
 
