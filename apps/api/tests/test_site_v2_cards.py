@@ -5,6 +5,7 @@ level H with a 4-module quiet zone pointing at the site with ?src=card-*."""
 from __future__ import annotations
 
 import io
+import math
 from typing import Any
 
 import pdfplumber
@@ -21,12 +22,13 @@ from app.services.site_cards import (
     CARDS,
     COLOURS,
     MM,
+    NEUTRAL_LINE,
+    PRINT_CMYK,
     QUIET_MODULES,
     CardData,
     card_data,
     card_url,
     cards_pdf,
-    cmyk_of,
     colour,
     dark_runs,
     fitted,
@@ -34,7 +36,9 @@ from app.services.site_cards import (
     qr_matrix,
     qr_png,
     qr_svg,
+    rgb_of_cmyk,
 )
+from app.services.site_details import SAMPLE_DETAILS
 
 SITE = "http://localhost:3000/h/deodar-view"
 PAGES = {"wallet": 3, "room": 3, "tent": 2, "all": 6}
@@ -107,8 +111,13 @@ def readable(page: Any) -> str:
     return f"{text}\n{text[::-1]}"
 
 
+def tone_of(value: Any) -> tuple[float, ...]:
+    return tuple(round(float(v), 4) for v in value)
+
+
 def ink_rects(page: Any) -> list[dict[str, Any]]:
-    ink = tuple(float(v) for v in colour("ink").cmyk())
+    """The QR modules: pure black (K100) rects."""
+    ink = tuple(float(v) for v in colour("black").cmyk())
     return [
         r for r in page.rects
         if r.get("non_stroking_color") is not None
@@ -179,7 +188,7 @@ def test_each_kind_is_a_print_ready_pdf(
         table = pdf.pages[-1].extract_text()
         assert "Print colours" in table
         for name, hex_colour in COLOURS.items():
-            c, m, y, k = cmyk_of(hex_colour)
+            c, m, y, k = PRINT_CMYK[name]
             assert hex_colour in table and f"C{c} M{m} Y{y} K{k}" in table, name
 
 
@@ -270,9 +279,8 @@ def test_qr_sizes_meet_the_brief_minimums() -> None:
 def test_helpers() -> None:
     assert dark_runs([True, True, False, True]) == [(0, 2), (3, 1)]
     assert not dark_runs([])
-    assert cmyk_of("#000000") == (0, 0, 0, 100)
-    assert cmyk_of("#FFFFFF") == (0, 0, 0, 0)
-    assert cmyk_of("#1F4D3A") == (60, 0, 25, 70)
+    assert rgb_of_cmyk((0, 0, 0, 100)) == (0, 0, 0)
+    assert rgb_of_cmyk((0, 0, 0, 0)) == (255, 255, 255)
     assert printable("  Deodar   View ") == "Deodar View"
     assert printable("देवदार व्यू") == ""
     assert fitted("A very long hotel name indeed", "Times-Bold", 30, 50, 9) == 9
@@ -305,7 +313,7 @@ def test_hindi_or_unprintable_text_is_left_off_not_boxed() -> None:
 def test_long_text_stays_on_the_card() -> None:
     long = "A long line about the hotel that goes on " * 6
     data = sample_card(hotel="The Exceptionally Long Named Heritage Hill Retreat",
-                       tagline=long, notes=[long] * 8,
+                       tagline=long, notes=[long] * 8, perk=long[:100],
                        nearby=[("Place", 5, "walk")] * 8,
                        contact={"phone": "+91 98000 00001", "whatsapp": "+91 98000 00002",
                                 "email": "stay@example.com", "address": long})  # fmt: skip
@@ -315,3 +323,110 @@ def test_long_text_stays_on_the_card() -> None:
             for ch in page.chars:
                 assert bleed - 0.5 <= ch["x0"] and ch["x1"] <= float(page.width) - bleed + 0.5
                 assert bleed - 0.5 <= ch["top"] and ch["bottom"] <= float(page.height) - bleed + 0.5
+
+
+# --- review fixes: perk honesty, print colours, stay lines, rate limit -----------------
+
+
+def gold_text(page: Any) -> str:
+    gold = tone_of(colour("gold").cmyk())
+    return "".join(c["text"] for c in page.chars if tone_of(c["non_stroking_color"]) == gold)
+
+
+def test_print_colours_are_hand_picked_and_close_to_the_brand() -> None:
+    """R2-4: pine carries magenta (no teal cast); each value converts back by
+    the naive formula to within 20 RGB units of its hex; the QR is K100."""
+    assert set(PRINT_CMYK) == set(COLOURS)
+    for name, hex_colour in COLOURS.items():
+        target = tuple(int(hex_colour[i : i + 2], 16) for i in (1, 3, 5))
+        assert math.dist(rgb_of_cmyk(PRINT_CMYK[name]), target) <= 20, name
+    assert PRINT_CMYK["pine"][1] >= 30  # magenta keeps pine green, not teal
+    assert PRINT_CMYK["black"] == (0, 0, 0, 100)
+    assert 'fill="#000000"' in qr_svg(card_url(SITE, "room"))
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_sample_cards_print_the_owner_perk_in_gold(
+    client: TestClient, owner: dict[str, str]
+) -> None:
+    """R2-1: the sample hotel's perk is its labelled sample perk, in gold."""
+    perk = SAMPLE_DETAILS.card_perk_en
+    assert perk.startswith("Sample perk:") and SAMPLE_DETAILS.card_perk_hi.startswith("नमूना")
+    with pdf_for(client, owner, "all") as pdf:
+        golds = [gold_text(p).replace(" ", "") for p in pdf.pages]
+        texts = [readable(p) for p in pdf.pages]
+    squashed = perk.replace(" ", "")
+    for i in (0, 2, 4):  # wallet front, room front, tent
+        assert squashed in golds[i] or squashed in golds[i][::-1] or squashed[:30] in golds[i]
+    assert not any(golds[i] for i in (1, 3))  # backs carry no gold
+    assert not any(NEUTRAL_LINE in t for t in texts)
+    assert not any("welcome perk" in t for t in texts)
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_without_an_owner_perk_the_cards_promise_none(
+    client: TestClient, owner: dict[str, str], session: Session
+) -> None:
+    """R2-1: no perk set means a neutral line in the text colour, no gold."""
+    prop = session.scalars(select(Property)).one()
+    prop.is_sample = False
+    session.commit()
+    with pdf_for(client, owner, "all") as pdf:
+        pages = list(pdf.pages)[:-1]
+        assert all(gold_text(p) == "" for p in pages)
+        texts = [readable(p) for p in pages]
+        for i in (0, 2, 4):
+            assert NEUTRAL_LINE in texts[i]
+        assert not any("perk" in t.lower() for t in texts)
+        pine, cream = tone_of(colour("pine").cmyk()), tone_of(colour("cream").cmyk())
+        room_neutral = [c for c in pages[2].chars if c["text"] == "B" and c["size"] < 8]
+        assert room_neutral and tone_of(room_neutral[0]["non_stroking_color"]) == pine
+        wallet = [c for c in pages[0].chars if c["text"] == "B"]
+        assert wallet and tone_of(wallet[-1]["non_stroking_color"]) == cream
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_an_owner_perk_prints_as_written(
+    client: TestClient, owner: dict[str, str], session: Session
+) -> None:
+    prop = session.scalars(select(Property)).one()
+    prop.is_sample = False
+    session.commit()
+    body = client.get("/site/details", headers=owner).json()
+    for key in ("amenity_labels", "sample"):
+        body.pop(key)
+    body["card_perk_en"] = "Hot pakoras on your first evening"
+    assert client.put("/site/details", headers=owner, json=body).status_code == 200
+    with pdf_for(client, owner, "room") as pdf:
+        assert gold_text(pdf.pages[0]).replace(" ", "") == "Hotpakorasonyourfirstevening"
+        assert NEUTRAL_LINE not in pdf.pages[0].extract_text()
+
+
+def test_room_back_prints_check_in_and_out_on_their_own_lines() -> None:
+    """R2-13."""
+    with pdfplumber.open(io.BytesIO(cards_pdf(sample_card(), "room"))) as pdf:
+        lines = (pdf.pages[1].extract_text() or "").splitlines()
+    assert "Check-in from 13:00" in lines and "Check-out by 10:00" in lines
+
+
+def test_room_qr_is_on_the_front_and_the_tent_has_two_faces() -> None:
+    """R2-3: the room card's QR is on its front; the tent's two faces each
+    have one (the layout the owner preview mirrors)."""
+    with pdfplumber.open(io.BytesIO(cards_pdf(sample_card(), "all"))) as pdf:
+        counts = [len(ink_rects(p)) > 0 for p in pdf.pages[:-1]]
+        tent = pdf.pages[4]
+        middle = float(tent.height) / 2
+        lower = [r for r in ink_rects(tent) if r["top"] > middle]
+        upper = [r for r in ink_rects(tent) if r["bottom"] < middle]
+    assert counts == [False, True, True, False, True]
+    assert lower and len(lower) == len(upper)
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_card_downloads_are_rate_limited(client: TestClient, owner: dict[str, str]) -> None:
+    """R1-11: 20 a minute per client across the PDF and QR routes."""
+    codes = [client.get("/site/cards/qr.svg?card=room", headers=owner).status_code
+             for _ in range(20)]  # fmt: skip
+    assert set(codes) == {200}
+    assert client.get("/site/cards.pdf?kind=wallet", headers=owner).status_code == 429
+    assert client.get("/site/cards/qr.png?card=desk", headers=owner).status_code == 429

@@ -4,6 +4,8 @@ scan counts (only counts, per card type per hotel day)."""
 
 from __future__ import annotations
 
+from dataclasses import replace
+from datetime import date
 from typing import Any
 
 import pytest
@@ -11,14 +13,19 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import Settings
 from app.models import Property, SiteCardScan
+from app.proxy_trust import proxy_proof, server_render
 from app.services.site_details import (
     AMENITIES,
     AMENITY_IDS,
+    DAILY_SCAN_CAP,
     SAMPLE_DETAILS,
     read_details,
+    record_scan,
     save_details,
 )
+from tests.conftest import OWNER_TOKEN
 
 SAMPLE = "/public/site/deodar-view"
 
@@ -90,6 +97,25 @@ def test_owner_saves_facts_and_the_site_shows_them(
         {"contact": {"phone": "+91 9", "fax": "1"}},
         {"geo": {"lat": 91, "lng": 0}},
         {"extra": 1},
+        # R1-10: control, bidi and zero-width characters; invisible-only names
+        {"nearby": [{"name_en": "\u202eHill", "minutes": 5, "mode": "walk"}]},
+        {"nearby": [{"name_en": "\u200b", "minutes": 5, "mode": "walk"}]},
+        {"nearby": [{"name_en": " \u2066 ", "minutes": 5, "mode": "walk"}]},
+        {"nearby": [{"name_en": "...", "minutes": 5, "mode": "walk"}]},
+        {"good_to_know": [{"text_en": "Bell\x00"}]},
+        {"how_to_reach": [{"mode": "road", "text_en": "By\u200broad"}]},
+        {"contact": {"phone": "²³⁴⁵⁶⁷"}},
+        {"contact": {"phone": "١٢٣٤٥٦"}},
+        {"contact": {"phone": "91+2345678"}},
+        {"contact": {"whatsapp": "+91 9"}},
+        {"contact": {"email": "a@b.co?cc=x&body=hi"}},
+        {"contact": {"email": "a=b@c.com"}},
+        # R2-1: a card perk is short owner text, never a price or discount
+        {"card_perk_en": "x" * 101},
+        {"card_perk_en": "10% off your next stay"},
+        {"card_perk_en": "Rs 500 back"},
+        {"card_perk_hi": "₹500"},
+        {"card_perk_en": "<b>Tea</b>"},
     ],
 )
 def test_bad_facts_are_refused(
@@ -141,5 +167,97 @@ def test_card_scans_count_only(client: TestClient, owner: dict[str, str], sessio
 
 @pytest.mark.usefixtures("base_sample")
 def test_card_scans_are_rate_limited(client: TestClient) -> None:
-    codes = [client.post(f"{SAMPLE}/scan", json={"card": "room"}).status_code for _ in range(31)]
-    assert 429 not in codes[:30] and codes[30] == 429
+    codes = [client.post(f"{SAMPLE}/scan", json={"card": "room"}).status_code for _ in range(11)]
+    assert 429 not in codes[:10] and codes[10] == 429
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_text_rules_keep_ordinary_owner_text(client: TestClient, owner: dict[str, str]) -> None:
+    """Line breaks become spaces; a Devanagari joiner is kept; a card perk is
+    optional and saved as written."""
+    body = facts(
+        good_to_know=[{"text_en": "Bring warm\nclothes.", "text_hi": "क्\u200dष ठंड"}],
+        card_perk_en="Masala chai on arrival",
+        card_perk_hi="पहुंचने पर मसाला चाय",
+    )
+    saved = client.put("/site/details", headers=owner, json=body).json()
+    assert saved["good_to_know"][0]["text_en"] == "Bring warm clothes."
+    assert saved["card_perk_en"] == "Masala chai on arrival"
+    assert client.get(SAMPLE).json()["details"]["card_perk_hi"] == "पहुंचने पर मसाला चाय"
+    empty = client.put("/site/details", headers=owner, json=facts()).json()
+    assert empty["card_perk_en"] == "" and empty["card_perk_hi"] == ""
+
+
+def test_sample_card_perk_is_labelled() -> None:
+    assert SAMPLE_DETAILS.card_perk_en == (
+        "Sample perk: masala chai on arrival for guests who book direct"
+    )
+    assert SAMPLE_DETAILS.card_perk_hi.startswith("नमूना")
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_scan_limit_is_per_hotel_per_client(client: TestClient, session: Session) -> None:
+    """R1-4: one client's allowance is counted per hotel."""
+    other = Property(name="Hotel Valley Inn", short_name="Valley Inn", city="Nainital",
+                     address="Sample address", rooms_count=10, owner_name="Sample Owner",
+                     perk_text="Tea", code_prefix="VI", is_sample=False)  # fmt: skip
+    session.add(other)
+    session.commit()
+    codes = [client.post(f"{SAMPLE}/scan", json={"card": "room"}).status_code for _ in range(11)]
+    assert set(codes[:10]) == {204} and codes[10] == 429
+    # Another slug has its own allowance (404 here: that hotel is not live).
+    assert client.post("/public/site/valley-inn/scan", json={"card": "room"}).status_code == 404
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_scans_above_the_daily_cap_are_not_counted(session: Session) -> None:
+    """R1-4: at most DAILY_SCAN_CAP per card type per hotel day."""
+    prop = session.scalars(select(Property)).one()
+    day = date(2026, 10, 13)
+    assert record_scan(session, prop.id, "desk", day)
+    row = session.scalars(select(SiteCardScan)).one()
+    row.count = DAILY_SCAN_CAP - 1
+    assert record_scan(session, prop.id, "desk", day)
+    assert not record_scan(session, prop.id, "desk", day)
+    assert row.count == DAILY_SCAN_CAP
+    assert record_scan(session, prop.id, "wallet", day)
+
+
+def proof_headers(**extra: str) -> dict[str, str]:
+    return {"x-seedha-proxy": proxy_proof(OWNER_TOKEN), **extra}
+
+
+@pytest.mark.usefixtures("base_sample")
+@pytest.mark.parametrize(
+    ("headers", "render"),
+    [
+        (proof_headers(), True),  # the web server's own cached render
+        ({}, False),  # an ordinary client
+        (proof_headers(**{"x-forwarded-for": "203.0.113.7"}), False),  # BFF, a visitor
+        ({"x-seedha-proxy": "0" * 64}, False),  # a wrong proof
+    ],
+)
+def test_server_renders_have_their_own_bucket(
+    client: TestClient, headers: dict[str, str], render: bool
+) -> None:
+    """R1-2: only a valid proof without a visitor address uses site_ssr."""
+    codes = [client.get(SAMPLE, headers=headers).status_code for _ in range(61)]
+    assert set(codes[:60]) == {200}
+    assert codes[60] == (200 if render else 429)
+    # Renders never draw down the ordinary bucket, and the reverse.
+    assert client.get(SAMPLE, headers=proof_headers()).status_code == 200
+
+
+def test_server_render_counts_the_hosting_hop_in_production(settings: Settings) -> None:
+    hosted = replace(settings, production=True)
+
+    def scope(*pairs: tuple[str, str]) -> dict[str, Any]:
+        return {"headers": [(k.encode(), v.encode()) for k, v in pairs]}
+
+    proof = ("x-seedha-proxy", proxy_proof(OWNER_TOKEN))
+    assert server_render(scope(proof, ("x-forwarded-for", "10.0.0.9")), hosted)  # Railway's hop
+    assert not server_render(scope(proof, ("x-forwarded-for", "203.0.113.7, 10.0.0.9")), hosted)
+    assert not server_render(scope(("x-forwarded-for", "10.0.0.9")), hosted)
+    assert not server_render(scope(proof, ("x-forwarded-for", "10.0.0.9")), settings)
+    assert server_render(scope(proof), settings)
+    assert not server_render(scope(proof), replace(settings, owner_api_token=""))

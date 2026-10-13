@@ -12,10 +12,11 @@ from __future__ import annotations
 from datetime import date
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Query, Response
+from fastapi import APIRouter, Depends, Query, Response
 from pydantic import BaseModel
 
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
+from app.ratelimit import rate_limited
 from app.routers.site import site_content
 from app.services.desk import business_date, utc_now
 from app.services.site import get_config
@@ -39,6 +40,8 @@ from app.services.site_details import (
 )
 
 router = APIRouter(prefix="/site", tags=["site"])
+# PDFs and QR images are CPU work; nobody needs them in a loop (R1-11).
+CARDS_LIMIT = Depends(rate_limited("cards"))
 
 
 class ScanDayOut(BaseModel):
@@ -119,10 +122,13 @@ def owner_card_data(site: dict[str, Any], prop: PropertyDep) -> CardData:
         notes=[n.text_en for n in details.good_to_know],
         sample=prop.is_sample,
         hide_branding=site["hide_branding"],
+        perk=details.card_perk_en,
     )  # fmt: skip
 
 
-@router.get("/cards.pdf", response_class=Response, responses=PDF_RESPONSE)
+@router.get(
+    "/cards.pdf", response_class=Response, responses=PDF_RESPONSE, dependencies=[CARDS_LIMIT]
+)
 def get_cards_pdf(
     _owner: OwnerDep,
     session: SessionDep,
@@ -151,6 +157,7 @@ def qr_target(session: SessionDep, prop: PropertyDep, settings: SettingsDep, car
 @router.get(
     "/cards/qr.svg",
     response_class=Response,
+    dependencies=[CARDS_LIMIT],
     responses={200: {"content": {"image/svg+xml": {}}}},
 )
 def get_card_qr_svg(
@@ -172,6 +179,7 @@ def get_card_qr_svg(
 @router.get(
     "/cards/qr.png",
     response_class=Response,
+    dependencies=[CARDS_LIMIT],
     responses={200: {"content": {"image/png": {}}}},
 )
 def get_card_qr_png(

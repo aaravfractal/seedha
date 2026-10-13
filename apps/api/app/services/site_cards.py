@@ -9,14 +9,30 @@ no reviews, ratings or awards, and the sample hotel's cards say "Sample"
 Print rules:
 - every card page is trim + 3 mm bleed on each side; backgrounds run into the
   bleed; crop marks sit in the bleed outside the trim, 1 mm clear of it;
-- colours are CMYK (`COLOURS`, converted from the brand hex by `cmyk_of`) and
-  a final page lists each colour with its hex and CMYK values;
+- colours are hand-picked CMYK print values (`PRINT_CMYK`, review R2-4), not a
+  naive conversion of the hex (which has no magenta and prints pine as teal);
+  each converts back (naive formula, `rgb_of_cmyk`) to within a small distance
+  of its brand hex; QR modules are pure black (K100) for scan contrast; a final
+  page lists each colour with its hex and CMYK values;
 - QR: error correction level H, a 4-module quiet zone, and a printed symbol
   (dark modules, without the quiet zone) of at least 18 mm (wallet), 25 mm
   (room) or 40 mm (tent);
 - the A5 tent card is one landscape A5 page folded along its horizontal
   centre line: two identical faces, the upper one turned 180 degrees so both
   read upright once the card stands; fold ticks sit in the bleed.
+
+The perk line is the owner's own `card_perk_en`, in gold, only when the owner
+set one; otherwise the card says NEUTRAL_LINE in the card's text colour and
+promises nothing (review R2-1).
+
+Faces (the owner preview matches these, review R2-3):
+- wallet front: name, place, tagline, perk or neutral line; wallet back: the
+  QR (card-wallet), name, "Scan to book direct", address, phone, WhatsApp;
+- room front: name, place, tagline on a pine band, ROOM_HEADLINE, the perk or
+  neutral line, the QR (card-room), SCAN_LINE, address; room back: "Your stay"
+  (check-in and check-out on their own lines), nearby, good to know, contact;
+- tent: two identical faces (name, place, perk or neutral line, SCAN_LINE,
+  address, QR card-desk); "Seedha" small on the rear face only.
 
 Fonts are the PDF built-ins (Times-Bold for headings, Helvetica for body).
 There is no Devanagari TrueType font in the repo (the web's Mukta is woff2,
@@ -52,14 +68,29 @@ COLOURS: dict[str, str] = {
     "ink": "#1D1D1F",
     "grey": "#6E6E73",
     "gold": "#E8A33D",
+    "black": "#000000",
+}
+# Hand-picked print values (C, M, Y, K in %), review R2-4. Pine has magenta
+# so it prints as a deep green, not teal; small text and grey are black-only
+# (one plate, no misregistration); QR modules are K100. Each converts back by
+# the naive formula to within 20 RGB units of its hex (tests check this).
+PRINT_CMYK: dict[str, tuple[int, int, int, int]] = {
+    "pine": (80, 40, 65, 45),
+    "cream": (3, 4, 10, 0),
+    "stone": (8, 10, 16, 0),
+    "ink": (0, 0, 0, 90),
+    "grey": (0, 0, 0, 55),
+    "gold": (0, 32, 76, 7),
+    "black": (0, 0, 0, 100),
 }
 COLOUR_USE: dict[str, str] = {
-    "pine": "Backgrounds",
+    "pine": "Backgrounds, headings on cream",
     "cream": "Backgrounds, QR panels, text on pine",
     "stone": "Secondary text on pine",
-    "ink": "QR modules, body text",
+    "ink": "Body text",
     "grey": "Small print",
-    "gold": "Returning guest perk line only",
+    "gold": "The owner's card perk line only",
+    "black": "QR code modules (100% black only)",
 }
 
 MM: float = 72 / 25.4  # points per millimetre (reportlab.lib.units.mm, typed)
@@ -73,7 +104,9 @@ HEAD = "Times-Bold"
 BODY = "Helvetica"
 BODY_BOLD = "Helvetica-Bold"
 
-PERK_LINE = "Book direct: a welcome perk for returning guests"
+NEUTRAL_LINE = "Book directly with the hotel"
+ROOM_HEADLINE = "Your next stay, booked direct"
+WALLET_SCAN = "Scan to book direct"
 SCAN_LINE = "Scan to see rooms and book direct"
 SAMPLE_LINE = "Sample card: fictional hotel"
 BRAND = "Seedha"
@@ -124,6 +157,7 @@ class CardData:  # pylint: disable=too-many-instance-attributes
     notes: tuple[str, ...] = ()
     sample: bool = False
     hide_branding: bool = False
+    perk: str = ""
 
 
 def printable(text: str) -> str:
@@ -149,9 +183,11 @@ def card_data(  # noqa: PLR0913  # pylint: disable=too-many-arguments
     notes: Sequence[str] = (),
     sample: bool = False,
     hide_branding: bool = False,
+    perk: str = "",
 ) -> CardData:
     """Build `CardData`, keeping only text the built-in fonts can print.
-    `nearby` is (name, minutes, "walk" | "drive")."""
+    `nearby` is (name, minutes, "walk" | "drive"). `perk` is the owner's card
+    perk (empty: none, so the cards promise nothing)."""
     places = tuple(
         f"{name}, {minutes} min {'walk' if mode == 'walk' else 'drive'}"
         for name, minutes, mode in nearby
@@ -173,26 +209,24 @@ def card_data(  # noqa: PLR0913  # pylint: disable=too-many-arguments
         notes=tuple(n for n in (printable(x) for x in notes) if n),
         sample=sample,
         hide_branding=hide_branding,
+        perk=printable(perk),
     )
 
 
 # --- colour ----------------------------------------------------------------------
 
 
-def cmyk_of(hex_colour: str) -> tuple[int, int, int, int]:
-    """Whole-percent CMYK from a hex colour (plain device conversion; ask the
-    printer for a proof on their stock)."""
-    r, g, b = (int(hex_colour[i : i + 2], 16) / 255 for i in (1, 3, 5))
-    k = 1 - max(r, g, b)
-    if k >= 1:
-        return (0, 0, 0, 100)
-    c, m, y = ((1 - v - k) / (1 - k) for v in (r, g, b))
-    return (round(c * 100), round(m * 100), round(y * 100), round(k * 100))
+def rgb_of_cmyk(cmyk: tuple[int, int, int, int]) -> tuple[int, int, int]:
+    """The naive screen colour of a CMYK value (a check on the hand-picked
+    values, not how a press prints)."""
+    c, m, y, k = (v / 100 for v in cmyk)
+    r, g, b = (round(255 * (1 - v) * (1 - k)) for v in (c, m, y))
+    return (r, g, b)
 
 
 def colour(name: str) -> CMYKColor:
-    """A brand colour as a CMYK fill or stroke."""
-    c, m, y, k = cmyk_of(COLOURS[name])
+    """A brand colour as a CMYK fill or stroke, from the print table."""
+    c, m, y, k = PRINT_CMYK[name]
     return CMYKColor(c / 100, m / 100, y / 100, k / 100)
 
 
@@ -245,7 +279,7 @@ def qr_svg(text: str) -> str:
         f'width="{side * 8}" height="{side * 8}" shape-rendering="crispEdges">'
         f"<title>{escape(text)}</title>"
         f'<rect width="{side}" height="{side}" fill="#FFFFFF"/>'
-        f'<path fill="{COLOURS["ink"]}" d="{path}"/></svg>\n'
+        f'<path fill="{COLOURS["black"]}" d="{path}"/></svg>\n'
     )
 
 
@@ -272,14 +306,14 @@ def qr_panel_side(text: str, qr_mm: float) -> float:
 
 
 def draw_qr(pdf: canvas.Canvas, text: str, x: float, y: float, qr_mm: float) -> float:
-    """A cream panel (the quiet zone) with ink modules; (x, y) is the panel's
-    lower left. Returns the panel side in points."""
+    """A cream panel (the quiet zone) with pure black (K100) modules; (x, y)
+    is the panel's lower left. Returns the panel side in points."""
     matrix = qr_matrix(text)
     module = qr_mm * MM / len(matrix)
     side = module * (len(matrix) + 2 * QUIET_MODULES)
     pdf.setFillColor(colour("cream"))
     pdf.rect(x, y, side, side, stroke=0, fill=1)
-    pdf.setFillColor(colour("ink"))
+    pdf.setFillColor(colour("black"))
     top = y + side - QUIET_MODULES * module
     for r, row in enumerate(matrix):
         for c, n in dark_runs(row):
@@ -430,17 +464,26 @@ def brand_mark(page: Page, data: CardData, tone: str = "grey") -> None:
         page.text(page.w - 3 * MM, 2.5 * MM, BRAND, size=5, tone=tone, align="right")
 
 
+def perk_line(data: CardData, ground: str) -> tuple[str, str]:
+    """(text, tone): the owner's perk in gold, or the neutral line in the
+    card's text colour (pine on cream, cream on pine). Never a made-up perk."""
+    if data.perk:
+        return data.perk, "gold"
+    return NEUTRAL_LINE, "cream" if ground == "pine" else "pine"
+
+
 # --- the cards ----------------------------------------------------------------------
 
 
 def wallet_front(page: Page, data: CardData) -> None:
-    """Pine: the hotel's name, place and tagline, and the gold perk line."""
+    """Pine: the hotel's name, place and tagline, and the perk (or neutral) line."""
     page.background("pine")
     left, width = 6 * MM, page.w - 12 * MM
     page.heading(left, page.h - 17 * MM, data.hotel, width, size=16, smallest=9, tone="cream")
     page.text(left, page.h - 23 * MM, data.location, size=7, tone="stone")
     page.lines(left, page.h - 30 * MM, data.tagline, width, size=6.5, tone="cream", most=2)
-    page.text(left, 6 * MM, PERK_LINE, font=BODY_BOLD, size=6, tone="gold")
+    line, tone = perk_line(data, "pine")
+    page.lines(left, 8 * MM, line, width, font=BODY_BOLD, size=6, tone=tone, most=2)
     sample_mark(page, data, "stone")
 
 
@@ -455,7 +498,7 @@ def wallet_back(page: Page, data: CardData) -> None:
     width = page.w - left - 4 * MM
     y = page.h - 12 * MM
     page.heading(left, y, data.hotel, width, size=10, smallest=6, tone="pine")
-    y = page.lines(left, y - 5 * MM, "Scan to book direct", width, font=BODY_BOLD, size=6.5)
+    y = page.lines(left, y - 5 * MM, WALLET_SCAN, width, font=BODY_BOLD, size=6.5)
     y = page.lines(left, y, data.display_url, width, size=6, tone="grey", most=2)
     for label, value in (("Phone", data.phone), ("WhatsApp", data.whatsapp)):
         if value:
@@ -465,7 +508,8 @@ def wallet_back(page: Page, data: CardData) -> None:
 
 
 def room_front(page: Page, data: CardData) -> None:
-    """A pine band with the hotel, then the perk line and the QR (room)."""
+    """A pine band with the hotel, then the headline, the perk (or neutral)
+    line and the QR (room). The QR is on the front: guests see it first."""
     page.background("cream")
     band = 60 * MM
     page.fill("pine", -page.bleed, page.h - band, page.w + 2 * page.bleed, band + page.bleed)
@@ -474,9 +518,11 @@ def room_front(page: Page, data: CardData) -> None:
     page.text(left, page.h - 31 * MM, data.location, size=9, tone="stone")
     page.lines(left, page.h - 39 * MM, data.tagline, width, size=8.5, tone="cream", most=3)
     centre = page.w / 2
-    page.text(centre, 76 * MM, "Your next stay, booked direct", font=HEAD, size=13,
-              tone="pine", align="centre")  # fmt: skip
-    page.text(centre, 69 * MM, PERK_LINE, font=BODY_BOLD, size=7.5, tone="gold", align="centre")
+    page.text(centre, 76 * MM, ROOM_HEADLINE, font=HEAD, size=13, tone="pine", align="centre")
+    line, tone = perk_line(data, "cream")
+    for i, row in enumerate(simpleSplit(line, BODY_BOLD, 7.5, page.w - 18 * MM)[:2]):
+        page.text(centre, (69 - 3.4 * i) * MM, row, font=BODY_BOLD, size=7.5, tone=tone,
+                  align="centre")  # fmt: skip
     spec = CARDS["room"]
     target = card_url(data.url, "room")
     side = qr_panel_side(target, spec.qr_mm)
@@ -493,8 +539,8 @@ def room_back(page: Page, data: CardData) -> None:
     y = page.h - 16 * MM
     page.heading(left, y, data.hotel, width, size=15, smallest=9, tone="pine")
     sections: list[tuple[str, list[str]]] = [
-        ("Your stay", [f"Check-in {data.check_in}  Check-out {data.check_out}"]
-         if data.check_in and data.check_out else []),
+        ("Your stay", [f"Check-in from {data.check_in}" if data.check_in else "",
+                       f"Check-out by {data.check_out}" if data.check_out else ""]),
         ("Nearby", list(data.nearby[:4])),
         ("Good to know", list(data.notes[:3])),
         ("Contact", [f"Phone {data.phone}" if data.phone else "",
@@ -528,7 +574,8 @@ def tent_face(page: Page, data: CardData, *, back: bool) -> None:
     left, width = 12 * MM, qr_x - 20 * MM
     page.heading(left, face_h - 20 * MM, data.hotel, width, size=26, smallest=14, tone="cream")
     page.text(left, face_h - 28 * MM, data.location, size=10, tone="stone")
-    y = page.lines(left, face_h - 40 * MM, PERK_LINE, width, font=BODY_BOLD, size=10, tone="gold")
+    line, tone = perk_line(data, "pine")
+    y = page.lines(left, face_h - 40 * MM, line, width, font=BODY_BOLD, size=10, tone=tone, most=2)
     y = page.lines(left, y - 2 * MM, SCAN_LINE, width, size=9, tone="cream", most=2)
     page.lines(left, y, data.display_url, width, size=8.5, tone="stone", most=2)
     if data.sample:
@@ -569,7 +616,11 @@ def colour_table(pdf: canvas.Canvas) -> None:
     pdf.setFont(BODY_BOLD, 16)
     pdf.drawString(left, y, "Print colours")
     pdf.setFont(BODY, 9)
-    pdf.drawString(left, y - 16, "CMYK values for the printer. Ask for a proof on your card stock.")
+    pdf.drawString(
+        left,
+        y - 16,
+        "CMYK values for the printer, chosen for print. Ask for a proof on your card stock.",
+    )
     y -= 52
     pdf.setFont(BODY_BOLD, 9)
     for x, head in ((left + 50, "Colour"), (left + 150, "Hex"), (left + 230, "CMYK"),
@@ -582,7 +633,7 @@ def colour_table(pdf: canvas.Canvas) -> None:
         pdf.setStrokeColor(colour("grey"))
         pdf.setLineWidth(0.5)
         pdf.rect(left, y - 6, 36, 24, stroke=1, fill=1)
-        c, m, ye, k = cmyk_of(hex_colour)
+        c, m, ye, k = PRINT_CMYK[name]
         pdf.setFillColor(colour("ink"))
         pdf.setFont(BODY, 10)
         pdf.drawString(left + 50, y + 4, name.capitalize())
@@ -594,6 +645,7 @@ def colour_table(pdf: canvas.Canvas) -> None:
     notes = (
         f"Cards have {BLEED_MM:g} mm bleed on every side; crop marks show the trim.",
         "QR codes: error correction level H with a 4-module quiet zone. Do not shrink.",
+        "Print QR modules in 100% black (K100) only, never a four-colour black.",
         "Tent card: fold along the centre ticks so both faces read upright.",
     )
     y -= 40

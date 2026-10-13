@@ -837,3 +837,25 @@ class SiteCardScan(Base):
     card: Mapped[str] = mapped_column(String(8))
     day: Mapped[date] = mapped_column(Date)
     count: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class SitePhotoVariant(Base):
+    """A resized, re-encoded copy of a site photo for responsive images
+    (Hotel Site V2, R3-1): one of a fixed set of widths and formats, made on
+    first request from the stored metadata-free JPEG and kept here. Deleted
+    with its photo; `source_sha256` ties it to the exact photo bytes."""
+
+    __tablename__ = "site_photo_variant"
+    __table_args__ = (UniqueConstraint("photo_id", "w", "fmt"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    photo_id: Mapped[int] = mapped_column(
+        ForeignKey("site_photo.id", ondelete="CASCADE"), index=True
+    )
+    w: Mapped[int] = mapped_column(Integer)
+    fmt: Mapped[str] = mapped_column(String(8))
+    width: Mapped[int] = mapped_column(Integer)
+    height: Mapped[int] = mapped_column(Integer)
+    source_sha256: Mapped[str] = mapped_column(String(64))
+    sha256: Mapped[str] = mapped_column(String(64))
+    data: Mapped[bytes] = mapped_column(LargeBinary)

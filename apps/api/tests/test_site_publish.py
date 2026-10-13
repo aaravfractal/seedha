@@ -10,6 +10,7 @@ from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from typing import Any
+from unittest.mock import patch
 
 import anthropic
 import pytest
@@ -20,7 +21,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings, root_domain
 from app.main import create_app
-from app.models import Property, SiteConfig, SitePhoto
+from app.models import Property, SiteConfig, SitePhoto, SitePhotoVariant
 from app.services import site_gen as gen
 from app.services import slug as slugs
 from app.services.site_photos import add_photo, clean_photo
@@ -465,7 +466,7 @@ def test_public_photo_route_caching_and_scope(
     publish(client, owner)
     res = client.get(url, params={"v": photos[0].sha256[:8]})
     assert res.status_code == 200 and res.headers["content-type"] == "image/jpeg"
-    assert res.headers["cache-control"] == "public, max-age=86400, immutable"
+    assert res.headers["cache-control"] == "public, max-age=86400, s-maxage=86400, immutable"
     assert res.headers["etag"] == f'"{photos[0].sha256}"' and res.content.startswith(b"\xff\xd8")
     again = client.get(url, headers={"If-None-Match": res.headers["etag"]})
     assert again.status_code == 304 and again.content == b""
@@ -479,6 +480,128 @@ def test_public_photo_route_caching_and_scope(
     assert client.get(f"/public/site/valley-inn/photos/{photos[0].id}").status_code == 404
     assert client.get("/public/site/nowhere/photos/1").status_code == 404
     assert client.get(f"/public/site/deodar-view/photos/{10_000}").status_code == 404
+
+
+def wide_photo(session: Session, prop: Property, size: tuple[int, int] = (1000, 600)) -> SitePhoto:
+    """A stored photo of the given size (stored at most 1024 px wide)."""
+    out = BytesIO()
+    Image.new("RGB", size, "green").save(out, "JPEG")
+    row = add_photo(session, prop.id, clean_photo(out.getvalue()))
+    session.commit()
+    return row
+
+
+@pytest.mark.usefixtures("base_sample")
+@pytest.mark.parametrize(
+    ("fmt", "kind", "pillow"),
+    [
+        ("avif", "image/avif", "AVIF"),
+        ("webp", "image/webp", "WEBP"),
+        ("jpeg", "image/jpeg", "JPEG"),
+    ],
+)
+def test_photo_variants_have_the_asked_format_and_width(
+    client: TestClient, owner: dict[str, str], session: Session, fmt: str, kind: str, pillow: str
+) -> None:
+    build(session, sample_prop(session))
+    photo = wide_photo(session, sample_prop(session))
+    publish(client, owner)
+    url = f"/public/site/deodar-view/photos/{photo.id}"
+    for w, width in ((480, 480), (768, 768), (1024, 1000)):  # never upscaled past 1000 px
+        res = client.get(url, params={"v": photo.sha256[:8], "w": w, "fmt": fmt})
+        assert res.status_code == 200 and res.headers["content-type"] == kind
+        assert res.headers["cache-control"] == "public, max-age=86400, s-maxage=86400, immutable"
+        image = Image.open(BytesIO(res.content))
+        assert image.format == pillow and image.size == (width, round(600 * width / 1000))
+        assert not image.getexif() and "exif" not in image.info
+        etag = res.headers["etag"]
+        assert etag != f'"{photo.sha256}"'
+        assert client.get(url, params={"w": w, "fmt": fmt},
+                          headers={"If-None-Match": etag}).status_code == 304  # fmt: skip
+    # Only one of the two: the other takes its default (1024 px, JPEG).
+    assert client.get(url, params={"fmt": fmt}).headers["content-type"] == kind
+    only_w = Image.open(BytesIO(client.get(url, params={"w": 480}).content))
+    assert only_w.format == "JPEG" and only_w.width == 480
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_photo_variants_are_cached_listed_and_deleted_with_the_photo(
+    client: TestClient, owner: dict[str, str], session: Session
+) -> None:
+    build(session, sample_prop(session))
+    photo = wide_photo(session, sample_prop(session), (600, 400))
+    publish(client, owner)
+    url = f"/public/site/deodar-view/photos/{photo.id}"
+    first = client.get(url, params={"w": 768, "fmt": "webp"})
+    assert Image.open(BytesIO(first.content)).size == (600, 400)  # no upscaling
+    stored = session.scalars(select(SitePhotoVariant)).all()
+    assert [(v.photo_id, v.w, v.fmt, v.width) for v in stored] == [(photo.id, 768, "webp", 600)]
+    with patch("app.services.site_photos.make_variant", side_effect=AssertionError("re-encoded")):
+        again = client.get(url, params={"w": 768, "fmt": "webp"})
+    assert again.content == first.content and again.headers["etag"] == first.headers["etag"]
+    # The public site lists the copies worth asking for, with their real widths.
+    listed = next(p for p in client.get(SAMPLE).json()["photos"] if p["id"] == photo.id)
+    assert listed["widths"] == [{"w": 480, "width": 480}, {"w": 768, "width": 600}]
+    assert listed["formats"] == ["avif", "webp", "jpeg"]
+    assert client.get("/site", headers=owner).json()["photos"][0]["widths"] == []
+    assert client.delete(f"/site/photos/{photo.id}", headers=owner).status_code == 200
+    session.expire_all()
+    assert session.scalars(select(SitePhotoVariant)).all() == []
+    assert client.get(url, params={"w": 768, "fmt": "webp"}).status_code == 404
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_a_stale_variant_is_rebuilt_when_the_photo_bytes_change(
+    client: TestClient, owner: dict[str, str], session: Session
+) -> None:
+    build(session, sample_prop(session))
+    photo = wide_photo(session, sample_prop(session))
+    publish(client, owner)
+    url = f"/public/site/deodar-view/photos/{photo.id}"
+    first = client.get(url, params={"w": 480, "fmt": "jpeg"}).headers["etag"]
+    out = BytesIO()
+    Image.new("RGB", (900, 600), "red").save(out, "JPEG")
+    clean = clean_photo(out.getvalue())
+    row = session.get(SitePhoto, photo.id)
+    assert row is not None
+    row.data, row.sha256, row.width, row.height = clean.data, clean.sha256, 900, 600
+    session.commit()
+    res = client.get(url, params={"w": 480, "fmt": "jpeg"})
+    assert res.headers["etag"] != first
+    pixel = Image.open(BytesIO(res.content)).convert("RGB").getpixel((10, 10))
+    assert isinstance(pixel, tuple) and pixel[0] > 200  # red now
+    assert len(session.scalars(select(SitePhotoVariant)).all()) == 1
+
+
+@pytest.mark.usefixtures("base_sample")
+@pytest.mark.parametrize(
+    "query",
+    ["w=500", "w=0480", "w=480.0", "w=abc", "w=", "fmt=png", "fmt=AVIF", "fmt=", "w=2048&fmt=webp"],
+)
+def test_photo_variant_params_come_from_a_fixed_list(
+    client: TestClient, owner: dict[str, str], session: Session, query: str
+) -> None:
+    photos = build(session, sample_prop(session))
+    publish(client, owner)
+    res = client.get(f"/public/site/deodar-view/photos/{photos[0].id}?{query}")
+    assert res.status_code == 422
+    assert session.scalars(select(SitePhotoVariant)).all() == []
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_photo_variants_keep_the_scope_rules(
+    client: TestClient, owner: dict[str, str], session: Session
+) -> None:
+    photos = build(session, sample_prop(session))
+    url = f"/public/site/deodar-view/photos/{photos[0].id}"
+    assert client.get(url, params={"w": 480, "fmt": "avif"}).status_code == 404  # not published
+    publish(client, owner)
+    other = other_hotel(session, "valley-inn")
+    theirs = add_photo(session, other.id, clean_photo(jpeg("red")))
+    session.commit()
+    path = f"/public/site/deodar-view/photos/{theirs.id}"
+    assert client.get(path, params={"w": 480, "fmt": "avif"}).status_code == 404
+    assert session.scalars(select(SitePhotoVariant)).all() == []
 
 
 @pytest.mark.usefixtures("base_sample")
