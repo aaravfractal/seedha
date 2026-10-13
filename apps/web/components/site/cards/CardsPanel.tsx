@@ -90,8 +90,8 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
           <h2 className={o.h2}>Print cards</h2>
           <p className={o.sub}>
             Cards for the wallet, the room and the front desk. Each QR opens your site, and scans are counted
-            below. Print-ready PDFs have bleed, crop marks and a colour table for the printer. Cards print in
-            English only.
+            below. Print-ready PDFs have bleed, crop marks and a colour table for the print shop. Cards print
+            in English only.
           </p>
         </div>
         <div className={c.actions}>{pdfLink("all", "Download all cards (PDF)", true)}</div>
