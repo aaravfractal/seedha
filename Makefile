@@ -122,9 +122,13 @@ demo: setup seed build-web
 # build (no dev badge), API without reload. Assumes `make setup` has run once.
 # Listens on localhost only: it uses the published demo secrets. Phones use
 # make demo-lan, which adds fresh secrets and public-mode safety.
-demo-prod: env seed build-web
+# The web build prerenders the sample hotel page from the API, so the API
+# starts first and the build waits for /health.
+demo-prod: env seed
 	@echo "Open http://localhost:3000 and tap Try the live demo (or Direct beta login on /login)"
-	trap 'kill 0' EXIT INT TERM; $(MAKE) api & ( $(LOAD_ENV) && cd $(WEB) && npx next start -H localhost --port 3000 ) & wait
+	trap 'kill 0' EXIT INT TERM; $(MAKE) api & \
+	until curl -sf -o /dev/null http://127.0.0.1:8000/health; do sleep 1; done; \
+	$(MAKE) build-web && ( $(LOAD_ENV) && cd $(WEB) && npx next start -H localhost --port 3000 ) & wait
 
 # Phones on the same Wi-Fi: web on every interface, API on 127.0.0.1 (scripts/demo-lan.sh).
 demo-lan: env
