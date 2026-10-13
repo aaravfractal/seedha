@@ -58,13 +58,13 @@ function Details({ d, night }: { d: RoomDetail; night: string }) {
   const [busy, setBusy] = useState(false);
   const consented = d.consent_status === "consented_at_desk" && d.consent_id !== null;
 
-  async function printSlip() {
+  async function sendSlip() {
     setBusy(true);
     try {
       await postJson(`rooms/${night}/${d.room}/slip`);
-      toast("Slip sent to the Desk.");
+      toast("Slip sent to the front desk screen.");
     } catch (err) {
-      toast(err instanceof ApiError ? err.message : "The slip did not print. Try again.");
+      toast(err instanceof ApiError ? err.message : "The slip could not be sent. Try again.");
     } finally {
       setBusy(false);
     }
@@ -86,7 +86,7 @@ function Details({ d, night }: { d: RoomDetail; night: string }) {
           </span>
         </div>
         <Chip tone={consented ? "ok" : "plain"} dot>
-          {consented ? "Consented at Desk" : "Not consented"}
+          {consented ? "Consented at front desk" : "Not consented"}
         </Chip>
       </div>
 
@@ -110,19 +110,19 @@ function Details({ d, night }: { d: RoomDetail; night: string }) {
 
       <div className={s.actions}>
         <Link href={`/desk?room=${d.room}`} className="btn ghost">
-          Open in Desk
+          Open at front desk
         </Link>
         {consented ? (
           <Link href={`/inbox?thread=${d.consent_id}`} className="btn ghost">
             Message guest
           </Link>
         ) : null}
-        <button type="button" className="btn" onClick={printSlip} disabled={busy}>
-          {busy ? "Sending" : "Print slip"}
+        <button type="button" className="btn" onClick={sendSlip} disabled={busy}>
+          {busy ? "Sending" : "Send slip to the front desk"}
         </button>
       </div>
       {consented ? null : (
-        <p className={s.sheetNote}>Seedha messages only guests who said yes at the Desk.</p>
+        <p className={s.sheetNote}>Seedha messages only guests who said yes at the front desk.</p>
       )}
     </>
   );
@@ -209,7 +209,7 @@ export function RoomSheet({ night, tile, onClose }: { night: string; tile: RoomT
             <p className={s.emptyText}>{tileLabel(tile)}. No guest stayed in this room that night.</p>
             <div className={s.actions}>
               <Link href={`/desk?room=${tile.room}`} className="btn ghost">
-                Open in Desk
+                Open at front desk
               </Link>
             </div>
           </>

@@ -342,7 +342,7 @@ export function Inbox() {
     <div className={styles.head}>
       <div>
         <h2 className="title">Guest inbox.</h2>
-        <p className="sub">WhatsApp with guests who said yes at the Desk. Bot drafts, you send.</p>
+        <p className="sub">WhatsApp with guests who said yes at the front desk. Bot drafts, you send.</p>
       </div>
       {threads.data ? (
         <div className={styles.headTools}>
@@ -415,16 +415,18 @@ export function Inbox() {
                 </button>
               ))}
             </div>
-            <p className={styles.section}>Consented at Desk</p>
+            <p className={styles.section}>Consented at front desk</p>
           </div>
           {visible.length === 0 ? (
             <div className={styles.empty}>
               {none ? (
                 <>
                   <h4>No guest conversations yet.</h4>
-                  <p>Guests appear here after they say yes at the Desk. Their WhatsApp replies land here.</p>
+                  <p>
+                    Guests appear here after they say yes at the front desk. Their WhatsApp replies land here.
+                  </p>
                   <Link className="btn small" href="/desk">
-                    Open Seedha Desk
+                    Open the front desk
                   </Link>
                 </>
               ) : (

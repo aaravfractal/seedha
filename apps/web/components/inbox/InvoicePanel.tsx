@@ -9,7 +9,7 @@ import { SampleChip } from "@/components/owner/ui";
 import styles from "./InvoicePanel.module.css";
 
 export type InvoicePanelProps = {
-  /** The inbox thread (an active Desk consent of this hotel). */
+  /** The inbox thread (an active front desk consent of this hotel). */
   consentId: number;
   /** Called with the invoice number when the owner taps "Attach to reply". Omit to hide the button. */
   onAttach?: (invoiceNumber: string) => void;

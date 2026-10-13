@@ -16,7 +16,11 @@ const SWITCHES: { key: keyof Notifications; label: string; hint: string }[] = [
     label: "8 AM line",
     hint: "One Hindi line on WhatsApp with yesterday's money kept.",
   },
-  { key: "close_slip", label: "9 PM close slip", hint: "The day's close, printed on the Desk at 9 PM." },
+  {
+    key: "close_slip",
+    label: "9 PM close slip",
+    hint: "The day's close, shown on the front desk screen at 9 PM.",
+  },
   { key: "approvals", label: "Approvals", hint: "A nudge when a win-back message waits for your approval." },
 ];
 
@@ -234,7 +238,7 @@ export function PrivacyTab({ data }: { data: SettingsData }) {
         <div className={s.row}>
           <span className={s.rowText}>
             <span className={s.rowLabel}>Guest consent logged</span>
-            <span className={s.rowHint}>Every Desk consent, sealed each night.</span>
+            <span className={s.rowHint}>Every front desk consent, sealed each night.</span>
           </span>
           <Link className={s.textBtn} href="/proof">
             Consent log

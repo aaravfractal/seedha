@@ -62,7 +62,7 @@ export function AwayDialog({
     <Dialog id="awayTitle" title="Your away message" onClose={onClose}>
       <p className="sub" style={{ margin: "6px 0 0" }}>
         When you are away, Seedha sends only this message, in your words. It goes only to guests who said yes
-        at the Desk and write to you first, at most once a day each.
+        at the front desk and write to you first, at most once a day each.
       </p>
       <label htmlFor="awayText" className="sr-only-text">
         Away message

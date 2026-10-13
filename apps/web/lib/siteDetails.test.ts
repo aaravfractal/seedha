@@ -384,7 +384,7 @@ test("card QR base: the site's own /h/<slug> address, else the app's", () => {
 });
 
 test("ratings in plain words", () => {
-  assert.equal(ratingSource("desk"), "Checked out at the Desk");
+  assert.equal(ratingSource("desk"), "Checked out at the front desk");
   assert.equal(ratingSource("link"), "Booked direct");
   assert.equal(ratingSource("something"), "Verified guest");
   assert.equal(ratingDate("2026-10-03T09:30:00Z"), "3 October 2026");

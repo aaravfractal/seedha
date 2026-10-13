@@ -5,9 +5,9 @@ import QRCode from "qrcode";
 import { expectedPublicOrigin, resetSampleHotel, signIn } from "./helpers";
 
 /**
- * The full-screen Desk kiosk (/desk/device) on a landscape tablet: idle ->
- * check-in -> the QR carries the URL the API sent -> the guest says yes ->
- * green ring and the slip on screen. These tests write a consent and a
+ * The full-screen Front desk screen (/desk/device) on a landscape tablet:
+ * idle -> check-in -> the QR carries the URL the API sent -> the guest says
+ * yes -> consent saved (green frame) and the slip on screen. These tests write a consent and a
  * checkout, so the sample hotel is reset afterwards and the 8-step loop
  * still starts from "0 of 8 done". This is one of the two specs that reset
  * (proof-live.spec.ts is the other), which keeps the suite inside the API's
@@ -25,7 +25,7 @@ test.afterAll(async ({ browser }) => {
   await context.close();
 });
 
-/** Start a check-in from the kiosk's staff panel and return the QR's URL. */
+/** Start a check-in from the screen's staff panel and return the QR's URL. */
 async function showQr(page: Page, room: string): Promise<string> {
   await page.getByText("Staff: check in or check out").click();
   await page.locator("#kioskRoom").selectOption(room);
@@ -54,7 +54,11 @@ async function guestSaysYes(browser: Browser, url: string, phone: string): Promi
   await context.close();
 }
 
-test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page, browser, baseURL }) => {
+test("front desk screen: idle, QR from the API, consent saved and slip on screen", async ({
+  page,
+  browser,
+  baseURL,
+}) => {
   const origin = expectedPublicOrigin(baseURL);
   await signIn(page);
   await page.goto("/desk/device");
@@ -64,9 +68,10 @@ test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page
   await expect(page.locator(".site-header")).toHaveCount(0);
   await expect(page.locator("footer")).toHaveCount(0);
   await expect(page.getByText("Connected, checking every 2 seconds")).toBeVisible();
-  const ring = page.getByTestId("desk-ring");
-  await expect(ring).toHaveAccessibleName("Desk light white: ready");
-  await expect(page.getByText("Desk ready.")).toBeAttached();
+  await expect(page.getByRole("heading", { name: "Front desk screen", level: 1 })).toBeAttached();
+  const status = page.getByTestId("desk-status");
+  await expect(status).toHaveAccessibleName("Front desk screen: ready");
+  await expect(page.getByText("Front desk ready.")).toBeAttached();
   await expect(page.getByText(/ · Ready$/)).toBeVisible();
   await expect(page.getByRole("img", { name: "Consent QR code" })).toHaveCount(0);
 
@@ -89,20 +94,23 @@ test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page
   await expect(drawn).toHaveAttribute("d", modules ?? "");
   await expect(page.getByText(`Opens ${new URL(origin).host}`, { exact: true })).toBeVisible();
 
-  // The guest says yes on their phone: thank you, green ring, pulsing.
+  // The guest says yes on their phone: thank you, consent saved, green frame pulsing.
   await guestSaysYes(browser, url, "98111 33355");
   await expect(page.getByText("Thank you, Kritika ji", { exact: true })).toBeVisible();
-  await expect(ring).toHaveAccessibleName("Desk light green: consent saved");
-  const stage = page.locator('[data-ring="green"]');
+  await expect(status).toHaveAccessibleName("Front desk screen: consent saved");
+  const stage = page.locator('[data-status="saved"]');
   await expect(stage).toBeVisible();
   expect(await stage.evaluate((el) => getComputedStyle(el).animationName)).toContain("kioskPulse");
 
   // Checkout: the slip shows on screen as a receipt.
-  await page.getByRole("button", { name: "Check out and print" }).click();
+  await page.getByRole("button", { name: "Check out and show slip" }).click();
   const slip = page.getByRole("figure", { name: "Slip on screen" });
   await expect(slip).toContainText("Hotel kept");
   await expect(slip).toContainText("DEODAR-");
-  await expect(page.getByText("This screen has no printer, so the slip is shown here.")).toBeVisible();
+  await expect(page.getByText("Show this slip to the guest on screen.")).toBeVisible();
+  // No printer, paper or light controls on the front desk screen.
+  await expect(page.getByRole("button", { name: /paper|print/i })).toHaveCount(0);
+  await expect(page.getByText(/printer|paper/i)).toHaveCount(0);
   // The whole receipt fits its card at kiosk widths: nothing clipped, or (if it
   // ever scrolls sideways) it can take keyboard focus (review K2).
   for (const width of [320, 390, 844, 1180]) {
@@ -114,33 +122,26 @@ test("kiosk: idle, QR from the API, consent, green ring and slip", async ({ page
       .toBe(true);
   }
   await page.setViewportSize({ width: 1280, height: 800 });
-
-  // Simulated paper out: red ring, clearly labelled, slip still on screen.
-  await page.getByRole("button", { name: "Simulated: no paper" }).click();
-  await expect(ring).toHaveAccessibleName("Desk light red: printer needs paper");
-  await expect(page.getByText("Printer needs paper, so the slip is shown here.")).toBeVisible();
   await expect(slip).toBeVisible();
 
-  // Paper loaded again: the ring is no longer red and the slip stays until put away.
-  await page.getByRole("button", { name: "Simulated: no paper" }).click();
-  await expect(ring).not.toHaveAccessibleName("Desk light red: printer needs paper");
-  await expect(page.getByText("Printer needs paper, so the slip is shown here.")).toHaveCount(0);
-  await expect(slip).toBeVisible();
+  // The slip stays until staff put it away.
+  await page.getByRole("button", { name: "Put the slip away" }).click();
+  await expect(slip).toHaveCount(0);
 });
 
-test("kiosk: reduced motion keeps the green ring still", async ({ page, browser }) => {
+test("front desk screen: reduced motion keeps the green frame still", async ({ page, browser }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await signIn(page);
   await page.goto("/desk/device");
   await expect(page.getByText("Connected, checking every 2 seconds")).toBeVisible();
   const url = await showQr(page, "102");
   await guestSaysYes(browser, url, "98111 33366");
-  const stage = page.locator('[data-ring="green"]');
+  const stage = page.locator('[data-status="saved"]');
   await expect(stage).toBeVisible();
   expect(await stage.evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
 });
 
-test("kiosk: a phone held upright gets a hint and still works", async ({ page }) => {
+test("front desk screen: a phone held upright gets a hint and still works", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page);
   await page.goto("/desk/device");
@@ -150,7 +151,7 @@ test("kiosk: a phone held upright gets a hint and still works", async ({ page })
   expect(overflow).toBe(false);
 });
 
-test("kiosk: a landscape phone shows the whole QR without scrolling", async ({ page }) => {
+test("front desk screen: a landscape phone shows the whole QR without scrolling", async ({ page }) => {
   await signIn(page);
   await page.setViewportSize({ width: 844, height: 390 });
   await page.goto("/desk/device");

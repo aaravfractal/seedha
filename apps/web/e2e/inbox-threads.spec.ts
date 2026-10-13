@@ -99,7 +99,7 @@ test("seeded threads, profile, draft and send, invoice slot", async ({ page }) =
 
   // Profile column: consent, stays, last invoice, notes and what Seedha remembers.
   const profile = page.getByRole("complementary", { name: "About Farhan Thapar" });
-  await expect(profile).toContainText("Said yes at the Desk");
+  await expect(profile).toContainText("Said yes at the front desk");
   await expect(profile).toContainText("Stays on record");
   await expect(profile).toContainText("Last invoice");
   await expect(profile.getByRole("heading", { name: "What Seedha remembers" })).toBeVisible();

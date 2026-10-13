@@ -82,7 +82,9 @@ export function StaffTab() {
         <span>{data.note}</span>
       </p>
       {data.staff.length === 0 ? (
-        <EmptyState title="No staff logins yet.">Invite your front desk so they can run the Desk.</EmptyState>
+        <EmptyState title="No staff logins yet.">
+          Invite your front desk so they can run check-in and checkout.
+        </EmptyState>
       ) : (
         <div className={s.list}>
           {data.staff.map((m) => (

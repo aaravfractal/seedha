@@ -1,5 +1,5 @@
 /**
- * Kiosk sound: the same two-tone chime as the Desk box (880 Hz then 1320 Hz),
+ * Kiosk sound: the same two-tone chime as the front desk page (880 Hz then 1320 Hz),
  * made with Web Audio, no audio files. Browsers allow sound only after a tap,
  * so the context is created by the "Sound" button and stays null until then.
  */

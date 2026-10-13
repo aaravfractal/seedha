@@ -30,7 +30,7 @@ test("Approvals: an edit with a price is refused, a perk edit is saved, nothing 
   page,
 }) => {
   await signIn(page);
-  // Neha says yes at the Desk and checks out: a fresh draft appears.
+  // Neha says yes at the front desk and checks out: a fresh draft appears.
   await page.goto("/desk");
   await page.selectOption("#guestSel", "104");
   await page.getByRole("button", { name: /Show QR/ }).click();
@@ -39,8 +39,8 @@ test("Approvals: an edit with a price is refused, a perk edit is saved, nothing 
   await phone.getByRole("checkbox").check();
   await phone.getByRole("button", { name: "Yes, send me offers" }).click();
   await expect(phone.getByText("You are in.")).toBeVisible();
-  await page.getByRole("button", { name: "Check out and print" }).click();
-  await expect(page.getByLabel("Printed slip")).toContainText("DEODAR-NG26");
+  await page.getByRole("button", { name: "Check out and show slip" }).click();
+  await expect(page.getByLabel("Slip on screen")).toContainText("DEODAR-NG26");
 
   await page.goto("/approvals");
   const card = page.getByRole("article", { name: "Draft for Neha Gupta" });

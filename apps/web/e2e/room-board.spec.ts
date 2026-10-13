@@ -46,9 +46,12 @@ test("a room opens a sheet with its money lines and initials only", async ({ pag
   await expect(ifDirect).toContainText("If this room had been direct");
   await expect(ifDirect).toContainText("Illustration");
   await expect(s.getByText(/Sample|Demo/)).toHaveCount(0);
-  await expect(s.getByRole("link", { name: "Open in Desk" })).toHaveAttribute("href", /\/desk\?room=\d+$/);
-  await s.getByRole("button", { name: "Print slip" }).click();
-  await expect(page.getByText("Slip sent to the Desk.")).toBeVisible();
+  await expect(s.getByRole("link", { name: "Open at front desk" })).toHaveAttribute(
+    "href",
+    /\/desk\?room=\d+$/,
+  );
+  await s.getByRole("button", { name: "Send slip to the front desk" }).click();
+  await expect(page.getByText("Slip sent to the front desk screen.")).toBeVisible();
 });
 
 test("arrow keys move between rooms, Enter opens, Escape closes and returns focus", async ({ page }) => {
@@ -107,7 +110,7 @@ test("the night scrubber changes the summary and the counts", async ({ page }) =
   await expect(summary).toHaveText(before ?? "");
 });
 
-test("Message guest shows only for a guest who consented at the Desk", async ({ page }) => {
+test("Message guest shows only for a guest who consented at the front desk", async ({ page }) => {
   let consented = false;
   await page.route(/\/api\/rooms\/\d{4}-\d{2}-\d{2}\/\d+$/, async (route) => {
     const response = await route.fetch();
@@ -127,7 +130,7 @@ test("Message guest shows only for a guest who consented at the Desk", async ({ 
 
   consented = true;
   await tile.click();
-  await expect(sheet(page).getByText("Consented at Desk")).toBeVisible();
+  await expect(sheet(page).getByText("Consented at front desk")).toBeVisible();
   await expect(sheet(page).getByRole("link", { name: "Message guest" })).toHaveAttribute(
     "href",
     "/inbox?thread=4242",
@@ -144,11 +147,11 @@ test("reduced motion makes the board and sheet instant", async ({ page }) => {
   expect(await sheet(page).evaluate((el) => getComputedStyle(el).animationName)).toBe("none");
 });
 
-test("Open in Desk preselects the room", async ({ page }) => {
+test("Open at front desk preselects the room", async ({ page }) => {
   const tile = await firstOtaTile(page);
   const room = (await tile.getAttribute("aria-label"))?.match(/^Room (\d+)/)?.[1] ?? "";
   await tile.click();
-  await sheet(page).getByRole("link", { name: "Open in Desk" }).click();
+  await sheet(page).getByRole("link", { name: "Open at front desk" }).click();
   await expect(page).toHaveURL(new RegExp(`/desk\\?room=${room}$`));
   await expect(page.locator("#guestSel")).toHaveValue(room);
 });

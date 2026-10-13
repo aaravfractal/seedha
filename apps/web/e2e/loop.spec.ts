@@ -3,7 +3,7 @@ import { signIn } from "./helpers";
 
 /**
  * The full 8-step loop from the prototype, on the real API and the sample
- * hotel: upload -> read -> flip -> repeat guests -> Desk consent -> slip ->
+ * hotel: upload -> read -> flip -> repeat guests -> front desk consent -> slip ->
  * approve win-back -> coded direct booking with the correct saving.
  */
 test("the full 8-step loop", async ({ page, context }) => {
@@ -31,9 +31,9 @@ test("the full 8-step loop", async ({ page, context }) => {
   await expect(page.getByText("₹41,800")).toBeVisible();
   await expect(page.locator(".stat b").first()).toHaveText("12");
 
-  // 5. Check-in consent for Rahul at the Desk.
+  // 5. Check-in consent for Rahul on the Front desk screen.
   await page.goto("/desk");
-  await expect(page.getByText("online, polling every 2 seconds")).toBeVisible();
+  await expect(page.getByText("online, checking every 2 seconds")).toBeVisible();
   await page.selectOption("#guestSel", "207");
   await page.getByRole("button", { name: "Show QR" }).click();
   await expect(page.getByRole("img", { name: "Consent QR code" })).toBeVisible();
@@ -48,10 +48,10 @@ test("the full 8-step loop", async ({ page, context }) => {
   await expect(phone.getByText("You are in.")).toBeVisible();
   await expect(page.getByText("Thank you, Rahul ji")).toBeVisible();
 
-  // 6. Checkout slip with the perk code.
-  await page.getByRole("button", { name: "Check out and print" }).click();
-  await expect(page.getByLabel("Printed slip")).toContainText("DEODAR-RS26");
-  await expect(page.getByLabel("Printed slip")).toContainText("Hotel kept");
+  // 6. Checkout slip with the perk code, shown on screen.
+  await page.getByRole("button", { name: "Check out and show slip" }).click();
+  await expect(page.getByLabel("Slip on screen")).toContainText("DEODAR-RS26");
+  await expect(page.getByLabel("Slip on screen")).toContainText("Hotel kept");
 
   // 7. Owner approves the win-back message.
   await page.goto("/approvals");

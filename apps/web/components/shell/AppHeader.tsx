@@ -107,7 +107,7 @@ function Notifications({ items }: { items: OverviewItem[] }) {
               </div>
               {items.length === 0 ? (
                 <p className={styles.empty}>
-                  Nothing new. Updates from your statements and the Desk show here.
+                  Nothing new. Updates from your statements and the front desk show here.
                 </p>
               ) : (
                 <ul className={styles.list}>

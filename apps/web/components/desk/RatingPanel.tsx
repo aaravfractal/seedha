@@ -10,7 +10,7 @@ export function shortLink(url: string): string {
 }
 
 /**
- * After a Desk checkout: the guest's one-time rating link as a QR and a short
+ * After a front desk checkout: the guest's one-time rating link as a QR and a short
  * link, shown on the screen for the guest to scan. Never messaged.
  */
 export function RatingPanel({ url, onClose }: { url: string; onClose: () => void }) {
