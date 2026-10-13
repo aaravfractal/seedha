@@ -10,12 +10,16 @@ import { PackagesTab } from "@/components/site/PackagesTab";
 import type { PackageChange } from "@/components/site/PackagesTab";
 import { BuildFlow } from "@/components/site/BuildFlow";
 import { Review } from "@/components/site/Review";
+import { CardsPanel } from "@/components/site/cards/CardsPanel";
+import { DetailsEditor } from "@/components/site/details/DetailsEditor";
 import o from "@/components/site/owner.module.css";
 
-type Tab = "site" | "packages" | "google";
+type Tab = "site" | "details" | "packages" | "cards" | "google";
 const TABS: ReadonlyArray<[Tab, string]> = [
   ["site", "Site"],
+  ["details", "Hotel details"],
   ["packages", "Packages"],
+  ["cards", "Print cards"],
   ["google", "Google kit"],
 ];
 const WHAT_YOU_ADD = [
@@ -57,6 +61,12 @@ export default function SitePage() {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<Tab>("site");
+  // Hotel details stays mounted once opened, so unsaved edits survive a tab switch.
+  const [detailsOpened, setDetailsOpened] = useState(false);
+  function openTab(next: Tab) {
+    if (next === "details") setDetailsOpened(true);
+    setTab(next);
+  }
   // After a stage change by button, the new screen takes focus once (its heading).
   const focusNext = useRef(false);
   const claimFocus = useCallback(() => {
@@ -102,7 +112,7 @@ export default function SitePage() {
       </div>
       <div className={o.seg} role="group" aria-label="Website sections">
         {TABS.map(([key, label]) => (
-          <button key={key} type="button" aria-pressed={tab === key} onClick={() => setTab(key)}>
+          <button key={key} type="button" aria-pressed={tab === key} onClick={() => openTab(key)}>
             {label}
           </button>
         ))}
@@ -150,6 +160,10 @@ export default function SitePage() {
         }
       />
     );
+  } else if (tab === "details") {
+    body = null;
+  } else if (tab === "cards") {
+    body = <CardsPanel site={s} />;
   } else if (tab === "google") {
     body = <GoogleKit site={s} onCopy={copy} />;
   } else if (s.stage === "empty") {
@@ -187,7 +201,7 @@ export default function SitePage() {
         onLook={(look: { mood?: Mood; lang?: Lang }) => run(() => patch("site", look))}
         onChange={() => void goStage("chat")}
         onSiteChanged={site.reload}
-        onPackages={() => setTab("packages")}
+        onPackages={() => openTab("packages")}
         claimFocus={claimFocus}
       />
     );
@@ -197,6 +211,11 @@ export default function SitePage() {
     <div className={o.stack}>
       {header}
       {body}
+      {detailsOpened ? (
+        <div hidden={tab !== "details"}>
+          <DetailsEditor live={s.live} />
+        </div>
+      ) : null}
     </div>
   );
 }
