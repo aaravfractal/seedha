@@ -25,6 +25,7 @@ from app.models import (
     StatementFile,
 )
 from app.money import per_unit_rounded, share_tenths_of_percent
+from app.services.card_page import recent_ratings, unread_notes
 from app.services.consent import as_utc
 from app.services.desk import business_date, in_house, utc_now
 from app.services.insight import build_insight
@@ -244,6 +245,9 @@ def savings_for(session: Session, property_id: int) -> Savings:
     return Savings(total_net_saving=int(total or 0), count=int(count or 0))
 
 
+WEBSITE_HREF = "/site"
+
+
 @dataclass(frozen=True, slots=True)
 class Item:
     """A Needs-you row or a notification. `at` is when it happened, if known."""
@@ -374,7 +378,29 @@ def needs_you(
                 as_utc(latest_consent) if latest_consent else None,
             )
         )
+    items.extend(website_items(session, prop.id))
     return items, len(drafts)
+
+
+def website_items(session: Session, property_id: int) -> list[Item]:
+    """Unread private notes from the card page and ratings guests gave in the
+    last 7 days; both open the Website screen (its Ratings tab lists them)."""
+    items: list[Item] = []
+    unread, newest_note = unread_notes(session, property_id)
+    if unread:
+        items.append(
+            Item("site-notes", f"Read {_plural(unread, 'private note')} from guests",
+                 "Left on your card page; only you see them", WEBSITE_HREF, "inbox",
+                 as_utc(newest_note) if newest_note else None)
+        )  # fmt: skip
+    rated, newest_rating = recent_ratings(session, property_id, utc_now())
+    if rated:
+        items.append(
+            Item("site-ratings", f"{_plural(rated, 'new rating')} this week",
+                 "From guests who stayed; hide a comment if you need to", WEBSITE_HREF,
+                 "star", as_utc(newest_rating) if newest_rating else None)
+        )  # fmt: skip
+    return items
 
 
 def notifications(session: Session, prop: Property, needs: list[Item]) -> list[Item]:

@@ -107,7 +107,8 @@ def rate(token: str, body: RatingIn, session: SessionDep) -> Response:
         raise ApiError(404, "no_such_rating_link", "This rating link is not valid")
     if state == "not_yet":
         raise ApiError(409, "not_open_yet", "You can rate your stay once it is over.")
-    if not use_token(session, row, body, utc_now()):
+    # "used" also when the stay was already rated another way (one per stay).
+    if state == "used" or not use_token(session, row, body, utc_now()):
         raise ApiError(409, "already_rated", "This stay has already been rated. Thank you.")
     return Response(status_code=204)
 
