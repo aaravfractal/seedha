@@ -390,3 +390,14 @@ def test_site_guard_catches_more_money_forms(text: str) -> None:
 @pytest.mark.parametrize("text", ["Percy centre stay", "Our inner garden", "Cars park here"])
 def test_site_guard_keeps_plain_words(text: str) -> None:
     assert gen.site_text_ok(text)
+
+
+def test_statement_upload_is_rate_limited(client: TestClient, owner: dict[str, str]) -> None:
+    """Final audit A1b-1: statement parsing is CPU-heavy, so uploads are limited per client."""
+    codes = [
+        client.post(
+            "/statements", headers=owner, files={"file": ("e.csv", b"", "text/csv")}
+        ).status_code
+        for _ in range(11)
+    ]
+    assert 429 not in codes[:10] and codes[10] == 429

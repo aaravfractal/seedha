@@ -38,6 +38,8 @@ class Limit:
 # Generous for a guest, tight for a script guessing tokens or codes.
 LIMITS: dict[str, Limit] = {
     "consent": Limit(20, 60),
+    # Statement parsing is CPU-heavy (final audit A1b-1).
+    "statement_upload": Limit(10, 60),
     "link": Limit(30, 60),
     "link_book": Limit(10, 60),
     "data_deletion": Limit(5, 60),

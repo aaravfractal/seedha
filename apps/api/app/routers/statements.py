@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
 from app.models import Booking, Channel, StatementFile
+from app.ratelimit import rate_limited
 from app.services.ingest import MAX_UPLOAD_BYTES, IngestOutcome, ingest_statement
 from app.services.llm import statement_reader
 from app.services.parser import ParseError, ReaderUnavailableError, StatementReader
@@ -179,16 +180,20 @@ def list_statements(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) ->
     return statement_summary(session, prop.id)
 
 
-@router.post("", response_model=OutcomeOut)
-async def upload_statement(
+@router.post(
+    "", response_model=OutcomeOut, dependencies=[Depends(rate_limited("statement_upload"))]
+)
+def upload_statement(
     _owner: OwnerDep,
     session: SessionDep,
     prop: PropertyDep,
     reader: ReaderDep,
     file: Annotated[UploadFile, File(description="PDF, XLSX or CSV statement")],
 ) -> OutcomeOut:
-    """Read one uploaded statement. Send files one at a time for progress."""
-    data = await file.read(MAX_UPLOAD_BYTES + 1)
+    """Read one uploaded statement. Send files one at a time for progress.
+    A plain def: FastAPI runs it in its threadpool, so parsing a large PDF never
+    blocks the event loop (final audit A1b-1)."""
+    data = file.file.read(MAX_UPLOAD_BYTES + 1)
     if len(data) > MAX_UPLOAD_BYTES:
         raise ApiError(413, "file_too_large", "Files must be 10 MB or smaller")
     if not data:

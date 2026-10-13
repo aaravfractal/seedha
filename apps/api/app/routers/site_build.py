@@ -234,14 +234,15 @@ def _photo_error(exc: PhotoError) -> ApiError:
 
 
 @router.post("/photos", response_model=PhotoOut, status_code=201, dependencies=[EDIT_LIMIT])
-async def upload_photo(
+def upload_photo(
     _owner: OwnerDep,
     session: SessionDep,
     prop: PropertyDep,
     photo: Annotated[UploadFile, File(description="One JPEG, PNG or WebP photo, 10 MB at most")],
 ) -> PhotoOut:
-    """Add one photo: checked by content, resized, every EXIF field removed."""
-    data = await photo.read(MAX_UPLOAD_BYTES + 1)
+    """Add one photo: checked by content, resized, every EXIF field removed.
+    A plain def so the image work runs in the threadpool (final audit A1b-1)."""
+    data = photo.file.read(MAX_UPLOAD_BYTES + 1)
     try:
         row = add_photo(session, prop.id, clean_photo(data))
     except PhotoError as exc:
