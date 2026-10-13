@@ -7,7 +7,7 @@
 import { MAX_NIGHTS, parseIsoDate } from "./linkPrefill.ts";
 import { perkWords } from "./hotelSiteV2.ts";
 import { bookingLink } from "./siteHost.ts";
-import type { CardVerify } from "./types-hotel-site.ts";
+import type { CardVerify, RewardId, SiteReward } from "./types-hotel-site.ts";
 import type { Lang } from "./types-site.ts";
 
 /** Longest booking reference the API takes. */
@@ -15,7 +15,13 @@ export const BOOKING_REF_MAX = 30;
 /** Longest private note the API takes. */
 export const FEEDBACK_MAX = 500;
 
+/** Longest guest name the feedback form takes. */
+export const NAME_MAX = 60;
+/** Longest WhatsApp number as typed (digits, spaces, a leading +). */
+export const WHATSAPP_MAX = 16;
+
 const BOOKING_REF = /^[A-Za-z0-9-]{1,30}$/;
+const WHATSAPP = /^\+?[0-9 ]+$/;
 const LAST4 = /^\d{4}$/;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -95,4 +101,115 @@ export function bookAgainHref(opts: {
   const base = opts.bookingUrl || "/link";
   if (/^https?:\/\//.test(base)) return `${base.replace(/\/+$/, "")}${codePart}${query}`;
   return bookingLink(base, `/link${codePart}${query}`, opts.here);
+}
+
+/** The guest's name: 1 to 60 characters after trimming, else null. */
+export function cleanName(raw: string): string | null {
+  const value = raw.trim().replace(/\s+/g, " ");
+  return value && [...value].length <= NAME_MAX ? value : null;
+}
+
+/** A WhatsApp number as the API takes it (digits, spaces, a leading +; at most 16; 10 to 15 digits), else null. */
+export function cleanWhatsapp(raw: string): string | null {
+  const value = raw.trim().replace(/\s+/g, " ");
+  if (!value || value.length > WHATSAPP_MAX || !WHATSAPP.test(value)) return null;
+  const digits = value.replace(/\D/g, "").length;
+  return digits >= 10 && digits <= 15 ? value : null;
+}
+
+export type FeedbackForm = {
+  name: string;
+  whatsapp: string;
+  ref: string;
+  last4: string;
+  askLast4: boolean;
+  overall: number;
+  food: number;
+  review: string;
+  reward: RewardId | "none";
+  consent: boolean;
+};
+
+export type FeedbackField = "name" | "whatsapp" | "ref" | "last4" | "overall" | "review" | "reward";
+
+/** Discounts are only for a stay the hotel can check: without a booking reference, breakfast only. */
+export function rewardAllowed(reward: RewardId | "none", hasRef: boolean): boolean {
+  return reward === "none" || reward === "breakfast" || hasRef;
+}
+
+/** The rewards the owner turned on, each once, in the API's order (anything unknown is left out). */
+export function rewardChoices(rewards: SiteReward[] | null | undefined): SiteReward[] {
+  const seen = new Set<string>();
+  return (rewards ?? []).filter((r) => {
+    if (!r || !["breakfast", "pct5", "flat100"].includes(r.id) || seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
+}
+
+/**
+ * Which fields stop the feedback form, in form order (empty when it can be
+ * sent), and the body the API takes when it can. WhatsApp is needed (and
+ * sent) only with consent; the phone digits only once the API asked for them.
+ */
+export function feedbackBody(f: FeedbackForm): {
+  problems: FeedbackField[];
+  body: Record<string, unknown> | null;
+} {
+  const problems: FeedbackField[] = [];
+  const name = cleanName(f.name);
+  if (!name) problems.push("name");
+  // The number is sent (and so stored) only with consent.
+  const whatsapp = f.consent ? cleanWhatsapp(f.whatsapp) : null;
+  if (f.consent && !whatsapp) problems.push("whatsapp");
+  const ref = f.ref.trim() ? cleanBookingRef(f.ref) : null;
+  if (f.ref.trim() && !ref) problems.push("ref");
+  const last4 = ref && f.askLast4 ? cleanLast4(f.last4) : null;
+  if (ref && f.askLast4 && !last4) problems.push("last4");
+  if (!Number.isInteger(f.overall) || f.overall < 1 || f.overall > 5) problems.push("overall");
+  const review = f.review.trim();
+  if ([...review].length > FEEDBACK_MAX) problems.push("review");
+  if (!rewardAllowed(f.reward, Boolean(ref))) problems.push("reward");
+  if (problems.length) return { problems, body: null };
+  const food = Number.isInteger(f.food) && f.food >= 1 && f.food <= 5 ? f.food : null;
+  return {
+    problems,
+    body: {
+      name,
+      ...(whatsapp ? { whatsapp } : {}),
+      ...(ref ? { booking_ref: ref } : {}),
+      ...(last4 ? { phone_last4: last4 } : {}),
+      overall: f.overall,
+      ...(food ? { food } : {}),
+      ...(review ? { review } : {}),
+      reward: f.reward,
+      consent: f.consent,
+    },
+  };
+}
+
+/** "Hotel Deodar View" -> "Deodar View" for the slim Seedha bar; the full name when nothing is left. */
+export function shortHotelName(name: string): string {
+  const full = name.trim();
+  const short = full
+    .replace(/^(hotel|the)\s+/i, "")
+    .replace(/^होटल\s+/, "")
+    .trim();
+  return short || full;
+}
+
+/**
+ * The main Seedha home ("/") for "on Seedha" and "Powered by Seedha": the
+ * app's own origin when the page has an absolute booking address (a hotel's
+ * own host), localhost on *.localhost, else the same origin.
+ */
+export function seedhaHomeHref(bookingUrl: string | null | undefined, here?: Here): string {
+  if (bookingUrl && /^https?:\/\//.test(bookingUrl)) {
+    try {
+      return `${new URL(bookingUrl).origin}/`;
+    } catch {
+      return "/";
+    }
+  }
+  return bookingLink(bookingUrl || "/link", "/", here);
 }

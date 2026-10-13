@@ -235,21 +235,53 @@ textarea.input {
   border: 0;
 }
 
-/* private note */
-.note {
-  margin-top: 12px;
-  padding: 0 16px;
-  border-radius: 16px;
-  background: var(--hs-white);
-  border: 1px solid var(--hs-line);
+/* reward picker and consent */
+.choices {
+  margin: 8px 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
 }
-.note[open] {
-  padding-bottom: 16px;
+.choices legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 600;
 }
-.summary {
+.choice,
+.consent {
   display: flex;
   align-items: center;
+  gap: 10px;
   min-height: 48px;
-  font-weight: 600;
+  font-size: 16px;
   cursor: pointer;
+}
+.choice input,
+.consent input {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--hs-pine);
+}
+.choice.off {
+  color: var(--hs-ink2);
+  cursor: not-allowed;
+}
+.consent {
+  margin-top: 8px;
+  align-items: flex-start;
+  padding: 12px 0;
+  font-weight: 600;
+}
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--hs-pine);
+  text-decoration: underline;
+}
+.done p {
+  margin: 0 0 8px;
 }

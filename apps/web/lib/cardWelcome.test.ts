@@ -6,7 +6,14 @@ import {
   bookAgainLine,
   cleanBookingRef,
   cleanLast4,
+  cleanName,
+  cleanWhatsapp,
+  feedbackBody,
   feedbackError,
+  rewardAllowed,
+  rewardChoices,
+  seedhaHomeHref,
+  shortHotelName,
   stayPrefill,
 } from "./cardWelcome.ts";
 
@@ -108,4 +115,89 @@ test("stay prefill: odd values are left out, never guessed", () => {
   assert.deepEqual(p, { room: "Deluxe Valley View", checkIn: null, nights: null, code: null });
   assert.equal(stayPrefill({ ...VERIFIED, nights: 1.5 }).nights, null);
   assert.equal(stayPrefill({ ...VERIFIED, nights: 14 }).nights, 14);
+});
+
+const FORM = {
+  name: " Asha  Rawat ",
+  whatsapp: "+91 98765 43210",
+  ref: "",
+  last4: "",
+  askLast4: false,
+  overall: 5,
+  food: 0,
+  review: "",
+  reward: "none" as const,
+  consent: false,
+};
+
+test("feedback: name and stars needed; the number is sent only with consent", () => {
+  const out = feedbackBody(FORM);
+  assert.deepEqual(out.problems, []);
+  assert.deepEqual(out.body, { name: "Asha Rawat", overall: 5, reward: "none", consent: false });
+  assert.deepEqual(feedbackBody({ ...FORM, name: " ", overall: 0 }).problems, ["name", "overall"]);
+  assert.deepEqual(feedbackBody({ ...FORM, name: "a".repeat(61) }).problems, ["name"]);
+  assert.deepEqual(feedbackBody({ ...FORM, consent: true, whatsapp: "" }).problems, ["whatsapp"]);
+  const yes = feedbackBody({ ...FORM, consent: true, food: 4, review: "  Warm rooms.  " });
+  assert.deepEqual(yes.body, {
+    name: "Asha Rawat",
+    whatsapp: "+91 98765 43210",
+    overall: 5,
+    food: 4,
+    review: "Warm rooms.",
+    reward: "none",
+    consent: true,
+  });
+  assert.deepEqual(feedbackBody({ ...FORM, review: "x".repeat(501) }).problems, ["review"]);
+});
+
+test("feedback: discounts only with a booking reference; phone digits only once asked", () => {
+  assert.deepEqual(feedbackBody({ ...FORM, reward: "pct5" }).problems, ["reward"]);
+  assert.deepEqual(feedbackBody({ ...FORM, reward: "breakfast" }).problems, []);
+  assert.deepEqual(feedbackBody({ ...FORM, ref: "DV 1" }).problems, ["ref"]);
+  const ref = feedbackBody({ ...FORM, ref: " CL2101 ", reward: "flat100", last4: "12" });
+  assert.equal(ref.body?.booking_ref, "CL2101");
+  assert.equal(ref.body?.phone_last4, undefined);
+  assert.deepEqual(feedbackBody({ ...FORM, ref: "CL2101", askLast4: true, last4: "12" }).problems, ["last4"]);
+  assert.equal(
+    feedbackBody({ ...FORM, ref: "CL2101", askLast4: true, last4: "4821" }).body?.phone_last4,
+    "4821",
+  );
+  assert.equal(rewardAllowed("flat100", false), false);
+  assert.equal(rewardAllowed("breakfast", false), true);
+});
+
+test("WhatsApp number: digits, spaces, a leading +, 10 to 15 digits, at most 16 characters", () => {
+  assert.equal(cleanWhatsapp(" 98765 43210 "), "98765 43210");
+  assert.equal(cleanWhatsapp("+919876543210"), "+919876543210");
+  assert.equal(cleanWhatsapp("98765"), null);
+  assert.equal(cleanWhatsapp("98-765-43210"), null);
+  assert.equal(cleanWhatsapp("+91 98765 43210 1"), null);
+  assert.equal(cleanName("  "), null);
+});
+
+test("rewards: known ids once, in order", () => {
+  const out = rewardChoices([
+    { id: "breakfast", en: "Free breakfast", hi: "मुफ़्त नाश्ता" },
+    { id: "breakfast", en: "Again", hi: "फिर" },
+    { id: "spa" as "pct5", en: "Spa", hi: "स्पा" },
+    { id: "pct5", en: "5% off", hi: "5% छूट" },
+  ]);
+  assert.deepEqual(
+    out.map((r) => r.id),
+    ["breakfast", "pct5"],
+  );
+  assert.deepEqual(rewardChoices(undefined), []);
+});
+
+test("Seedha bar: short hotel name and the Seedha home address", () => {
+  assert.equal(shortHotelName("Hotel Deodar View"), "Deodar View");
+  assert.equal(shortHotelName("Deodar View"), "Deodar View");
+  assert.equal(shortHotelName("होटल देवदार व्यू"), "देवदार व्यू");
+  assert.equal(shortHotelName("Hotel"), "Hotel");
+  assert.equal(seedhaHomeHref("https://app.seedha.in/link"), "https://app.seedha.in/");
+  assert.equal(seedhaHomeHref(null), "/");
+  assert.equal(
+    seedhaHomeHref("/link", { protocol: "http:", hostname: "deodar-view.localhost", port: "3000" }),
+    "http://localhost:3000/",
+  );
 });

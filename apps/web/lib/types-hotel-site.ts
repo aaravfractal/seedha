@@ -89,7 +89,20 @@ export type HotelSitePayload = PublicSite & {
   from_price_paise?: number | null;
   /** Verified-guest ratings; missing means none yet. */
   ratings?: RatingSummary;
+  /** The guest rewards the owner turned on (enabled only); missing means none. */
+  rewards?: SiteReward[];
 };
+
+/** A reward a guest can pick on the card feedback form. Discounts need a verified stay. */
+export type RewardId = "breakfast" | "pct5" | "flat100";
+export type SiteReward = { id: RewardId; en: string; hi: string };
+
+/**
+ * POST /public/site/{slug}/feedback. `verified` is true when the booking
+ * reference (and phone digits) matched a finished stay; `reward` is what the
+ * hotel will review (the owner approves before any code is sent).
+ */
+export type FeedbackOut = { verified: boolean; reward: RewardId | "none"; state: "saved" };
 
 /** Which printed card's QR brought the guest (?src=card-wallet|card-room|card-desk). */
 export type ScanCard = "wallet" | "room" | "desk";
