@@ -902,4 +902,11 @@ ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 1
   design QA and accessibility reviewers re-running the owner pass (their
   first runs could not reach the API).
 - Next: merge P6b and the ideas, fix review findings, P8 only if time
-  allows, then P9 (3 x Playwright, make check, demo-prod, summary).
+  allows, then P9 (3 x Playwright, make check, demo-prod, summary).## Hotel mini-site (docs/HOTEL_MINISITE.md), branch hotel-minisite
+
+- Based on hotel-site-v2. Merged: A3 owner UI (77fa1d5), A2 page (f340154).
+  Waiting: A1 API (worktree .worktrees/ma1, branch mini-a1). Then reviewer,
+  fixes, gates (make check, e2e once, Postgres, loop, Lighthouse), deploy.
+- Live: deploy = main = 9d61f95 on Railway and Vercel (seedha-demo).
+
+
