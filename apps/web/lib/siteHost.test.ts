@@ -5,7 +5,9 @@ import {
   hotelHost,
   hotelPathAllowed,
   hotelPathSlug,
+  hotelRoute,
   legacyHotelPath,
+  publicSlug,
   movedHostUrl,
   rootDomain,
   shareMessage,
@@ -112,12 +114,60 @@ test("hotel hosts serve only the page and their own public API", () => {
   assert.equal(allowed("/api/public/site/deodar-view", "POST"), false);
 });
 
+test("hotel hosts allow only their own card writes: scan count, verify, rate, feedback", () => {
+  const allowed = (path: string, method = "GET") => hotelPathAllowed(path, method, "deodar-view");
+  for (const w of ["scan", "feedback", "card/verify", "card/rate", "card/feedback"]) {
+    assert.ok(allowed(`/api/public/site/deodar-view/${w}`, "POST"), w);
+    assert.equal(allowed(`/api/public/site/other-hotel/${w}`, "POST"), false, `other hotel ${w}`);
+  }
+  for (const path of [
+    "/api/public/site/other-hotel/scan",
+    "/api/public/site/deodar-view/scan/x",
+    "/api/public/site/deodar-view/scans",
+    "/api/public/site/deodar-viewer/scan",
+    "/api/public/site/deodar-view/card",
+    "/api/public/site/deodar-view/card/verify/x",
+    "/api/public/site/deodar-view/card/other",
+    "/api/public/site/deodar-view",
+    "/api/public/site/deodar-view/availability",
+    "/api/site/scans",
+    "/api/demo/reset",
+    "/h-sw.js",
+  ]) {
+    assert.equal(allowed(path, "POST"), false, path);
+  }
+  for (const method of ["PUT", "PATCH", "DELETE"]) {
+    assert.equal(allowed("/api/public/site/deodar-view/scan", method), false, method);
+  }
+  // The service worker file is a plain read; nothing else at the root is.
+  assert.ok(allowed("/h-sw.js"));
+  assert.ok(allowed("/h-sw.js", "HEAD"));
+  assert.equal(allowed("/sw.js"), false);
+  assert.equal(allowed("/h-sw.js.map"), false);
+});
+
 test("paths: /h/<slug> and the old /hotel/<slug>", () => {
   assert.equal(hotelPathSlug("/h/deodar-view"), "deodar-view");
   assert.equal(hotelPathSlug("/h/Deodar-View/"), "deodar-view");
   assert.equal(hotelPathSlug("/h/deodar-view/x"), null);
   assert.equal(hotelPathSlug("/h/%E0%A4"), null);
   assert.equal(hotelPathSlug("/home"), null);
+  assert.deepEqual(hotelRoute("/h/deodar-view"), { slug: "deodar-view", raw: "deodar-view", rest: "" });
+  assert.deepEqual(hotelRoute("/h/Deodar-View/"), { slug: "deodar-view", raw: "Deodar-View", rest: "" });
+  assert.deepEqual(hotelRoute("/h/deodar-view/opengraph-image"), {
+    slug: "deodar-view",
+    raw: "deodar-view",
+    rest: "/opengraph-image",
+  });
+  assert.deepEqual(hotelRoute("/h/X-Y/opengraph-image-1a2b"), {
+    slug: "x-y",
+    raw: "X-Y",
+    rest: "/opengraph-image-1a2b",
+  });
+  assert.equal(hotelRoute("/h/deodar-view/x"), null);
+  assert.equal(hotelRoute("/h/deodar-view/opengraph-image/x"), null);
+  assert.equal(hotelRoute("/h/%E0%A4"), null);
+  assert.equal(hotelRoute("/home"), null);
   assert.equal(legacyHotelPath("/hotel/deodar-view"), "/h/deodar-view");
   assert.equal(legacyHotelPath("/hotel/deodar-view/"), "/h/deodar-view");
   assert.equal(legacyHotelPath("/hotels"), null);
@@ -177,4 +227,12 @@ test("booking buttons go to Seedha Link on the app host", () => {
 test("the live address preview", () => {
   assert.equal(siteAddress("deodar-view", "seedha.in", "app.seedha.in"), "deodar-view.seedha.in");
   assert.equal(siteAddress("deodar-view", "", "localhost:3000"), "localhost:3000/h/deodar-view");
+});
+
+test("public hotel slugs are lower case and invalid shapes never load (R1-1)", () => {
+  assert.equal(publicSlug("deodar-view"), "deodar-view");
+  assert.equal(publicSlug("DEODAR-View"), "deodar-view");
+  for (const bad of ["", "ab", "a".repeat(41), "-x-y", "x--y", "x_y", "x y", "हिन्दी", "../x", "x.y"]) {
+    assert.equal(publicSlug(bad), null, bad);
+  }
 });

@@ -101,6 +101,9 @@ class Settings:  # pylint: disable=too-many-instance-attributes
     site_gen_monthly_token_cap: int = DEFAULT_SITE_GEN_TOKEN_CAP
     # Hotel addresses: <slug>.<SITE_ROOT_DOMAIN> when set, else <web>/h/<slug>.
     site_root_domain: str = ""
+    # PUBLIC_BASE_URL alone (first entry); empty when not set. Card QR codes
+    # point at <PUBLIC_BASE_URL>/h/<slug> (hotel mini-site).
+    public_base_url: str = ""
 
     @property
     def llm_enabled(self) -> bool:
@@ -201,4 +204,5 @@ def load_settings() -> Settings:
         site_gen_model=_env("SITE_GEN_MODEL"),
         site_gen_monthly_token_cap=_count("SITE_GEN_MONTHLY_TOKEN_CAP", DEFAULT_SITE_GEN_TOKEN_CAP),
         site_root_domain=root_domain(_env("SITE_ROOT_DOMAIN")),
+        public_base_url=_env("PUBLIC_BASE_URL").split(",")[0].strip(),
     )

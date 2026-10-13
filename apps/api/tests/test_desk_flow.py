@@ -114,6 +114,8 @@ def test_full_desk_flow(
     printed = poll(client, device)
     assert [c["kind"] for c in printed] == ["show_text", "print_slip", "show_idle"]
     assert "DEODAR-NG26" in printed[1]["payload"]["text"]
+    assert "Rate your stay" not in printed[1]["payload"]["text"]
+    assert out["rating_url"]
 
     final = client.get("/desk/state", headers=owner).json()["guests"][0]
     assert (final["consent"], final["checked_out"], final["perk_code"]) == (

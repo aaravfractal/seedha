@@ -494,6 +494,9 @@ SITE_ROUTES: list[tuple[str, str, dict[str, Any] | None]] = [
     ("patch", "/site/build", {"owner_description": "Hijacked"}),
     ("post", "/site/build/generate", None),
     ("get", "/site/gen/usage", None),
+    ("get", "/site/cards.pdf?kind=all", None),
+    ("get", "/site/cards/qr.svg?card=wallet", None),
+    ("get", "/site/cards/qr.png?card=desk", None),
 ]
 
 
@@ -649,7 +652,7 @@ def test_public_photos_only_for_published_sites(
     assert res.status_code == 200
     again = ai.get(url, headers={"If-None-Match": res.headers["etag"]})
     assert again.status_code == 304
-    assert again.headers["cache-control"] == "public, max-age=86400, immutable"
+    assert again.headers["cache-control"] == "public, max-age=86400, s-maxage=86400, immutable"
     assert again.headers["etag"] == res.headers["etag"]
     private = ai.get(f"/site/photos/{mine.id}", headers=owner)
     assert private.headers["cache-control"] == "private, no-cache"

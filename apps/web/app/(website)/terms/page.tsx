@@ -16,14 +16,14 @@ export default function TermsPage() {
       points={{
         en: [
           "You approve every message before it is sent. Seedha never sends on its own.",
-          "Message only guests who said yes at your Desk. Never guests found in OTA data.",
+          "Message only guests who said yes at your front desk. Never guests found in OTA data.",
           "Use Seedha for perks for returning guests, not to sell rooms below your public rate.",
           "Seedha's numbers come from the statements you upload. Check them before you act.",
           "Indian law applies. Courts at Dehradun, Uttarakhand.",
         ],
         hi: [
           "Har message bhejne se pehle aap approve karte hain. Seedha khud kabhi nahi bhejta.",
-          "Sirf unhi guests ko message kijiye jinhone Desk par haan kaha. OTA data wale guests ko kabhi nahi.",
+          "Sirf unhi guests ko message kijiye jinhone front desk par haan kaha. OTA data wale guests ko kabhi nahi.",
           "Seedha wapas aane wale guests ko perk dene ke liye hai, public rate se kam mein room bechne ke liye nahi.",
           "Seedha ke numbers aapke upload kiye statements se bante hain. Faisla lene se pehle check kijiye.",
           "Bharat ka kanoon laagu hoga. Adalat: Dehradun, Uttarakhand.",
@@ -61,8 +61,8 @@ export default function TermsPage() {
       <h2 className="section">5. Consent and guest data</h2>
       <ul>
         <li>
-          Message only guests who gave consent through the Seedha Desk. The consent box must stay unticked
-          until the guest ticks it.
+          Message only guests who gave consent through the front desk screen. The consent box must stay
+          unticked until the guest ticks it.
         </li>
         <li>Do not use OTA-provided guest contacts for marketing, inside or outside Seedha.</li>
         <li>Honour STOP immediately. Seedha blocks further messages to that guest.</li>
@@ -80,8 +80,8 @@ export default function TermsPage() {
         <li>No scraping of OTA websites and no attempts to break or overload Seedha.</li>
         <li>No spam, no messages to people who did not opt in, no misleading offers.</li>
         <li>
-          Keep your WhatsApp number, sign-in codes and Desk device key private. Tell us at once if you think
-          one leaked.
+          Keep your WhatsApp number, sign-in codes and front desk screen key private. Tell us at once if you
+          think one leaked.
         </li>
       </ul>
 

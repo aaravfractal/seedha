@@ -12,7 +12,7 @@ const COLUMNS: ReadonlyArray<readonly [string, ReadonlyArray<readonly [string, s
       ["/#product", "The flip"],
       ["/#growth", "Growth"],
       ["/#pulse", "Seedha Pulse"],
-      ["/#desk", "Seedha Desk"],
+      ["/#desk", "Front desk screen"],
     ],
   ],
   [

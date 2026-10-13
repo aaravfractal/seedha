@@ -97,7 +97,9 @@ async function expectSheetMatches(page: Page, d: RoomDetail): Promise<void> {
   }
 
   const consented = d.consent_status === "consented_at_desk" && d.consent_id !== null;
-  await expect(s.getByText(consented ? "Consented at Desk" : "Not consented", { exact: true })).toBeVisible();
+  await expect(
+    s.getByText(consented ? "Consented at front desk" : "Not consented", { exact: true }),
+  ).toBeVisible();
   await expect(s.getByRole("link", { name: "Message guest" })).toHaveCount(consented ? 1 : 0);
 }
 
@@ -134,16 +136,16 @@ test("sheet lines equal the API detail for an OTA, a walk-in and a direct room",
     await expect(tile).toBeFocused();
   }
 
-  // Print slip on the OTA room: the API accepts it and the owner sees a toast.
+  // Send slip on the OTA room: the API accepts it and the owner sees a toast.
   const first = picks[0];
   if (!first) return;
   await tileFor(page, first.room).click();
   const slip = page.waitForResponse(
     (r) => r.url().endsWith(`/api/rooms/${last.night}/${first.room}/slip`) && r.request().method() === "POST",
   );
-  await sheet(page).getByRole("button", { name: "Print slip" }).click();
+  await sheet(page).getByRole("button", { name: "Send slip to the front desk" }).click();
   expect((await slip).ok()).toBe(true);
-  await expect(page.getByText("Slip sent to the Desk")).toBeVisible();
+  await expect(page.getByText("Slip sent to the front desk screen")).toBeVisible();
 });
 
 test("arrow keys move by the rendered columns; Enter opens; Escape returns focus", async ({ page }) => {
@@ -258,7 +260,7 @@ test("scrubber: every night shows that night's numbers from /rooms/nights", asyn
   if (last) await expect(page.getByTestId("night-summary")).toHaveText(expectedSummary(last));
 });
 
-test("Message guest only for a seeded guest who consented at the Desk", async ({ page }) => {
+test("Message guest only for a seeded guest who consented at the front desk", async ({ page }) => {
   const nights = await roomNights(page);
   const names = await threads(page);
   // Search the board nights, newest first, for a night with a consented
@@ -302,7 +304,7 @@ test("Message guest only for a seeded guest who consented at the Desk", async ({
   if (notConsented) {
     await tileFor(page, notConsented.room).click();
     await expectSheetMatches(page, notConsented);
-    await expect(sheet(page)).toContainText("Seedha messages only guests who said yes at the Desk.");
+    await expect(sheet(page)).toContainText("Seedha messages only guests who said yes at the front desk.");
     await page.keyboard.press("Escape");
     await expect(sheet(page)).toHaveCount(0);
   }
@@ -318,7 +320,7 @@ test("Message guest only for a seeded guest who consented at the Desk", async ({
     .join("");
   expect(hit.guest_initials).toBe(initials);
   for (const part of fullName.split(/\s+/)) await expect(sheet(page)).not.toContainText(part);
-  await expect(sheet(page)).not.toContainText("Seedha messages only guests who said yes at the Desk.");
+  await expect(sheet(page)).not.toContainText("Seedha messages only guests who said yes at the front desk.");
 
   const message = sheet(page).getByRole("link", { name: "Message guest" });
   await expect(message).toHaveAttribute("href", `/inbox?thread=${hit.consent_id}`);

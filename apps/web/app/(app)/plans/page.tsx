@@ -62,7 +62,7 @@ export default function PlansPage() {
         })}
       </div>
       <p className="calc" style={{ textAlign: "center" }}>
-        Prices are early estimates. The Desk is included with yearly plans.
+        Prices are early estimates. Yearly plans get 2 months free.
       </p>
       <p className="sub" style={{ textAlign: "center", margin: "4px auto 0" }}>
         Only need a website? Seedha Site setup {inr(SITE_SETUP_RUPEES * 100)} one time.

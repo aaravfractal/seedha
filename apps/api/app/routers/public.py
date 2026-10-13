@@ -21,6 +21,7 @@ from app.services.consent import (
     resolve_token,
 )
 from app.services.desk import enqueue, property_device, utc_now
+from app.services.guest_feedback import erase as erase_feedback
 from app.services.messages import draft_for_booking
 from app.services.proof import erase_consent
 
@@ -153,9 +154,13 @@ def data_deletion(body: DeletionIn, session: SessionDep) -> DeletionOut:
             Consent.erased_at.is_(None),
         )
     )
+    # Card-page feedback sent with this number (D-106); erase_consent also
+    # blanks the feedback for the consent's stay.
+    feedback = erase_feedback(session, number, now)
     if consent is not None:
         erase_consent(session, consent, now)
-    request = ErasureRequest(received_at=now, outcome="erased" if consent else "no_match")
+    matched = consent is not None or feedback > 0
+    request = ErasureRequest(received_at=now, outcome="erased" if matched else "no_match")
     session.add(request)
     session.flush()
     return DeletionOut(received=True, request_id=request.id, message=DELETION_MESSAGE)

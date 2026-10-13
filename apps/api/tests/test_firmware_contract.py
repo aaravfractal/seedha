@@ -32,6 +32,8 @@ def normalise(commands: list[dict[str, Any]]) -> dict[str, Any]:
         payload = dict(command["payload"])
         if "url" in payload:
             payload["url"] = re.sub(r"/consent/[^/]+$", "/consent/TOKEN", payload["url"])
+        if "text" in payload:  # the slip's one-time rating link
+            payload["text"] = re.sub(r"/rate/[^/\s]+$", "/rate/TOKEN", payload["text"])
         if "expires_at" in payload:
             payload["expires_at"] = "2026-10-13T09:10:00+00:00"
         out.append({"id": index, "kind": command["kind"], "payload": payload})

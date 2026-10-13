@@ -77,7 +77,7 @@ async function mockAmoy(page: Page, state: () => MockBundle): Promise<void> {
 
 type DeskGuest = { room: number | null; consent: boolean; checked_out: boolean };
 
-/** One guest says yes at the Desk so tonight has something to prove. */
+/** One guest says yes at the front desk so tonight has something to prove. */
 async function oneConsent(page: Page): Promise<void> {
   const state = (await (await page.request.get("/api/desk/state")).json()) as { guests: DeskGuest[] };
   // Rooms 104 and 207 belong to the owner and loop specs.

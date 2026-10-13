@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
 import { roomParam } from "@/lib/rooms";
 import type { DeskState, PropertyInfo, Slip } from "@/lib/types";
 import { DeskDevice } from "@/components/DeskDevice";
-import type { DeskHandle } from "@/components/DeskDevice";
+import { RatingPanel } from "@/components/desk/RatingPanel";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
 import styles from "@/components/desk/Desk.module.css";
@@ -21,15 +22,14 @@ export default function DeskPage() {
   const desk = useApi<DeskState>("desk/state");
   const property = useApi<PropertyInfo>("property");
   const toast = useToast();
-  const device = useRef<DeskHandle>(null);
   // ?room=204 (from the Overview room board) preselects that guest when they are in house.
   const roomQuery = useSearchParams().get("room");
   const [room, setRoom] = useState<number | null>(() => roomParam(roomQuery));
   const [consentPath, setConsentPath] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [noPaper, setNoPaper] = useState(false);
   const [simOnline, setSimOnline] = useState<boolean | null>(null);
   const [slips, setSlips] = useState<Slip[]>([]);
+  const [ratingUrl, setRatingUrl] = useState<string | null>(null);
 
   const guests = useMemo(() => desk.data?.guests ?? [], [desk.data]);
   const selected = guests.find((g) => g.room === room) ?? guests[0];
@@ -87,37 +87,26 @@ export default function DeskPage() {
         />
         <p className={styles.bannerText} role="status" aria-live="polite">
           {!info.registered
-            ? "No Desk is registered. Set DESK_DEVICE_KEY in .env and run make seed."
+            ? "The front desk screen is not set up for this hotel yet."
             : online
-              ? `Your Desk is connected · ${where}`
+              ? `Front desk screen connected · ${where}`
               : simOnline === false
-                ? "Your Desk is offline. Check its Wi-Fi and the API."
-                : "Connecting to your Desk"}
+                ? "The front desk screen is offline. Check the Wi-Fi and the Seedha server."
+                : "Connecting to the front desk screen"}
         </p>
-        <button
-          type="button"
-          className={styles.pill}
-          disabled={!online || busy}
-          onClick={() =>
-            act("desk/test-print", undefined, () =>
-              toast(noPaper ? "Printer needs paper. Load paper to print." : "Test print sent to the Desk"),
-            )
-          }
-        >
-          Test print
-        </button>
+        <Link className={styles.pill} href="/desk/device">
+          Open the front desk screen
+        </Link>
       </div>
       <p className={styles.intro}>
-        Run the full loop: show the QR, tick consent on the guest phone, print the checkout slip, then book
-        direct on Seedha Link.
+        Run the full loop: show the QR, tick consent on the guest phone, show the checkout slip on screen,
+        then book direct on Seedha Link. At reception, open the front desk screen on any phone or tablet.
       </p>
 
       <div className={styles.stage}>
         <div>
           <DeskDevice
-            ref={device}
             hotel={property.data?.short_name ?? "Hotel"}
-            noPaper={noPaper}
             knownSlips={slips}
             onEvent={onEvent}
             onOnline={setSimOnline}
@@ -161,14 +150,19 @@ export default function DeskPage() {
               disabled={busy || !selected || !canCheckout}
               aria-describedby="checkoutHint"
               onClick={() =>
-                act<{ perk_code: string; slip: Slip }>("desk/checkout", { room: selected?.room }, (r) => {
-                  remember(r.slip);
-                  toast(`Slip printed with ${r.perk_code}. A draft is waiting in Approvals.`);
-                  desk.reload();
-                })
+                act<{ perk_code: string; slip: Slip; rating_url?: string | null }>(
+                  "desk/checkout",
+                  { room: selected?.room },
+                  (r) => {
+                    remember(r.slip);
+                    setRatingUrl(r.rating_url ?? null);
+                    toast(`Slip ready with ${r.perk_code}. A draft is waiting in Approvals.`);
+                    desk.reload();
+                  },
+                )
               }
             >
-              Check out and print
+              Check out and show slip
             </button>
             <button
               type="button"
@@ -177,25 +171,11 @@ export default function DeskPage() {
               onClick={() =>
                 act<Slip>("desk/close-slip", undefined, (slip) => {
                   remember(slip);
-                  toast("Close slip sent to the Desk");
+                  toast("9 PM close slip is on screen");
                 })
               }
             >
               9 PM close slip
-            </button>
-            <button
-              type="button"
-              className={`${styles.ctl} ${noPaper ? styles.ctlWarn : ""}`}
-              onClick={() => {
-                if (noPaper) {
-                  setNoPaper(false);
-                  device.current?.paperLoaded();
-                } else {
-                  setNoPaper(true);
-                }
-              }}
-            >
-              {noPaper ? "Load paper" : "Simulate no paper"}
             </button>
           </div>
           <p id="checkoutHint" className={styles.hint}>
@@ -204,9 +184,10 @@ export default function DeskPage() {
               : selected.checked_out
                 ? `${selected.name} has checked out${selected.perk_code ? ` with code ${selected.perk_code}` : ""}.`
                 : canCheckout
-                  ? `${selected.name} said yes to offers. Check out prints the slip with their perk code.`
-                  : `${selected.name} · ${selected.channel}. No yes to offers yet: the slip still prints, and no messages will be sent.`}
+                  ? `${selected.name} said yes to offers. Check out shows the slip with their perk code.`
+                  : `${selected.name} · ${selected.channel}. No yes to offers yet: the slip still shows, and no messages will be sent.`}
           </p>
+          {ratingUrl ? <RatingPanel url={ratingUrl} onClose={() => setRatingUrl(null)} /> : null}
         </div>
 
         <div className={styles.phone} role="region" aria-label="Guest phone">
@@ -214,14 +195,14 @@ export default function DeskPage() {
           {consentPath ? (
             <iframe src={consentPath} title="Guest phone: consent page" key={consentPath} />
           ) : (
-            <p className={styles.phoneEmpty}>Show the QR on the Desk. The guest screen opens here.</p>
+            <p className={styles.phoneEmpty}>Show the QR. The guest&apos;s phone screen opens here.</p>
           )}
         </div>
       </div>
 
       <p className={styles.footnote}>
-        Desk screen 480 × 320 px. Slips are 58 mm thermal, black only. The QR opens the guest&apos;s real
-        consent page.
+        The QR opens the guest&apos;s real consent page on their own phone. The slip shows on screen. Nothing
+        needs to be printed.
       </p>
     </section>
   );

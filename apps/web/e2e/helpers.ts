@@ -1,8 +1,8 @@
-import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { mkdirSync, readFileSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { Browser, Page } from "@playwright/test";
 
 /** Sign in to the sample hotel with Direct beta login (D4); lands on Overview. */
 export async function signIn(page: Page): Promise<void> {
@@ -71,4 +71,30 @@ export async function axeViolations(page: Page): Promise<string[]> {
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
   return result.violations.map((v) => `${v.id} (${v.nodes.map((n) => n.target.join(" ")).join(", ")})`);
+}
+
+const signedInStates = new Map<string, string>();
+
+/**
+ * Sign in with Direct beta login once per spec file and keep the session as
+ * a Playwright storageState file under test-results/.auth/. Later calls in
+ * the same file (same worker) return the same path without signing in
+ * again, so a spec stays far below the login rate limit. Use it in
+ * beforeAll: `const state = await signInOnce(browser);` then
+ * `browser.newContext({ storageState: state })` for owner calls.
+ */
+export async function signInOnce(browser: Browser): Promise<string> {
+  const info = test.info();
+  const key = info.file;
+  const known = signedInStates.get(key);
+  if (known) return known;
+  const path = resolve(info.project.outputDir, ".auth", `${basename(key).replace(/\W+/g, "-")}.json`);
+  mkdirSync(dirname(path), { recursive: true });
+  const context = await browser.newContext({ baseURL: info.project.use.baseURL });
+  const page = await context.newPage();
+  await signIn(page);
+  await context.storageState({ path });
+  await context.close();
+  signedInStates.set(key, path);
+  return path;
 }

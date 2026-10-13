@@ -64,9 +64,9 @@ export function RoomBoard({ fallback }: { fallback: Overview["last_night"] }) {
     setBusy(true);
     try {
       await postJson<Slip>("desk/close-slip");
-      toast("Close slip sent to the Desk printer.");
+      toast("9 PM close slip sent to the front desk screen.");
     } catch (err) {
-      toast(err instanceof ApiError ? err.message : "The close slip did not print. Try again.");
+      toast(err instanceof ApiError ? err.message : "The close slip could not be sent. Try again.");
     } finally {
       setBusy(false);
     }
@@ -102,7 +102,7 @@ export function RoomBoard({ fallback }: { fallback: Overview["last_night"] }) {
           </span>
         </p>
         <button type="button" className="btn ghost" onClick={printClose} disabled={busy}>
-          {busy ? "Sending" : "Print close slip on Desk"}
+          {busy ? "Sending" : "Send 9 PM close slip to the front desk"}
         </button>
       </div>
 

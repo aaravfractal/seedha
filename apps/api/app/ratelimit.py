@@ -11,6 +11,14 @@ connection comes from a trusted proxy (FORWARDED_ALLOW_IPS, loopback by
 default), and the BFF sets that header. A client can only fake its address if
 no proxy in front of the web app overwrites that header, so every bucket also
 has a ceiling across all clients.
+
+Two refinements (Hotel Site V2 review R1):
+- a bucket can be keyed per client *and* per path value (`per`), so a script
+  hammering one hotel's scan counter has its own small allowance per hotel;
+- the web server's own cached server-side renders (a valid proxy proof and no
+  visitor address forwarded, see app/proxy_trust.server_render) use their own
+  larger bucket (`render`), so every hotel page render no longer shares one
+  ordinary per-client allowance. Nobody without the proof can reach it.
 """
 
 from __future__ import annotations
@@ -25,14 +33,17 @@ from dataclasses import dataclass
 from fastapi import Request
 
 from app.errors import ApiError
+from app.proxy_trust import server_render
 
 
 @dataclass(frozen=True, slots=True)
 class Limit:
-    """At most `count` requests per `seconds` from one client."""
+    """At most `count` requests per `seconds` from one client. `ceiling` sets
+    the all-client allowance when it is not `count` times GLOBAL_FACTOR."""
 
     count: int
     seconds: int
+    ceiling: int | None = None
 
 
 # Generous for a guest, tight for a script guessing tokens or codes.
@@ -46,8 +57,27 @@ LIMITS: dict[str, Limit] = {
     # Anyone signed in to the sample hotel can press reset (review S6).
     "demo_reset": Limit(2, 60),
     "site": Limit(60, 60),
+    # The web server's own cached renders of hotel pages (proof, no visitor
+    # address): one shared client, so a larger allowance (review R1-2).
+    "site_ssr": Limit(600, 60),
     # Up to 8 photos per hotel page view (browsers cache them a day).
     "site_photo": Limit(240, 60),
+    # A printed card's QR counts one scan per page load (Hotel Site V2). Per
+    # client per hotel (a guest scans once); the all-client ceiling stays 600.
+    "site_scan": Limit(10, 60, ceiling=600),
+    # Owner card PDFs and QR downloads: CPU work, never needed in a loop (R1-11).
+    "cards": Limit(20, 60),
+    # Verified-guest rating links: a guest opens and submits once (mini-site).
+    "rate": Limit(20, 60),
+    # Card page: verifying a booking reference, per client and per client per
+    # hotel (a script guessing references), rating once, private notes.
+    "card_verify": Limit(10, 60),
+    "card_verify_hotel": Limit(6, 60),
+    "card_rate": Limit(10, 60),
+    "card_feedback": Limit(5, 60),
+    # Card-page feedback form (D-106): per client and per client per hotel.
+    "guest_feedback": Limit(5, 60),
+    "guest_feedback_hotel": Limit(5, 60),
     # The public website loads the sample figures once per page view.
     "public_sample": Limit(60, 60),
 }
@@ -90,15 +120,33 @@ class RateLimiter:
             del self._hits[key]
 
 
-def rate_limited(bucket: str) -> Callable[[Request], None]:
-    """A route dependency that answers 429 when the client is over `bucket`'s limit."""
+def ceiling_of(limit: Limit) -> Limit:
+    """The all-client allowance for a bucket."""
+    return Limit(limit.ceiling or limit.count * GLOBAL_FACTOR, limit.seconds)
+
+
+def rate_limited(
+    bucket: str, *, per: str | None = None, render: str | None = None
+) -> Callable[[Request], None]:
+    """A route dependency that answers 429 when the client is over `bucket`'s limit.
+
+    `per` names a path parameter (for example "slug"): the client's allowance
+    is then counted per value of it, while the all-client ceiling stays one
+    per bucket. `render` names the bucket for the web server's own
+    server-side renders (valid proxy proof, no visitor address forwarded)."""
     limit = LIMITS[bucket]
-    ceiling = Limit(limit.count * GLOBAL_FACTOR, limit.seconds)
+    ceiling = ceiling_of(limit)
+    render_limit = LIMITS[render] if render else None
 
     def dependency(request: Request) -> None:
         limiter: RateLimiter = request.app.state.rate_limiter
         client = request.client.host if request.client else "unknown"
-        wait = limiter.check(bucket, client, limit) or limiter.check(bucket, ALL_CLIENTS, ceiling)
+        name, own, all_clients = bucket, limit, ceiling
+        if render and render_limit and server_render(request.scope, request.app.state.settings):
+            name, own, all_clients = render, render_limit, ceiling_of(render_limit)
+        elif per is not None:
+            client = f"{client}|{str(request.path_params.get(per, ''))[:80]}"
+        wait = limiter.check(name, client, own) or limiter.check(name, ALL_CLIENTS, all_clients)
         if wait > 0:
             raise ApiError(
                 429,

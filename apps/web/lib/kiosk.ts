@@ -1,9 +1,10 @@
 /**
- * The Desk kiosk (/desk/device): a phone or tablet acting as the Desk box.
- * It runs the same queued commands as the firmware and the simulator
- * (show_qr, show_ok, show_text, show_idle, set_ring, beep, print_slip).
+ * The front desk screen (/desk/device): a phone or tablet at reception.
+ * It runs the queued desk commands from the API (show_qr, show_ok,
+ * show_text, show_idle, set_ring, beep, print_slip). set_ring marks the
+ * consent as saved on screen; print_slip shows the slip on screen.
  * Pure state logic lives here so it can be tested without a browser.
- * The kiosk never builds a URL: it shows exactly the URL the API sent.
+ * The screen never builds a URL: it shows exactly the URL the API sent.
  */
 
 export type KioskCommand = { id: number; kind: string; payload: Record<string, unknown> };
@@ -19,19 +20,19 @@ export type KioskSlip = { seq: number; text: string };
 
 export type KioskState = {
   screen: KioskScreen;
-  /** The ring the API asked for. Paper out (red) is layered on top in `ringFor`. */
-  ring: "off" | "green";
+  /** "saved" after the guest says yes (the API's set_ring green), else "ready". */
+  status: KioskStatus;
   slip: KioskSlip | null;
 };
 
 /** Side effects the page runs after a command. */
 export type KioskEffect = "chime" | "idle_soon" | "cancel_idle";
 
-export type RingColour = "white" | "green" | "red";
+export type KioskStatus = "ready" | "saved";
 
-export const INITIAL_KIOSK: KioskState = { screen: { kind: "idle" }, ring: "off", slip: null };
+export const INITIAL_KIOSK: KioskState = { screen: { kind: "idle" }, status: "ready", slip: null };
 
-/** Back to idle a moment after printing, like the firmware. */
+/** Back to idle a moment after the slip shows. */
 export const IDLE_AFTER_PRINT_MS = 2600;
 export const POLL_MS = 2000;
 
@@ -40,6 +41,21 @@ function str(value: unknown, fallback = ""): string {
 }
 
 /** The API's URL if it is an absolute http(s) URL, else null. Never rewritten. */
+/**
+ * The device API still speaks of printing (firmware/ stays in the repo, D-105).
+ * The Front desk screen shows the slip on screen, so its words say that.
+ */
+const DEVICE_WORDS: Record<string, string> = {
+  "Printing slip": "Slip ready",
+  "Please take your receipt": "Shown on this screen",
+  "Test print": "Screen check",
+  "Please check the paper": "This screen is working",
+};
+
+export function screenWords(text: string, sub: string): { text: string; sub: string } {
+  return { text: DEVICE_WORDS[text] ?? text, sub: DEVICE_WORDS[sub] ?? sub };
+}
+
 export function safeUrl(value: unknown): string | null {
   // Whitespace or control characters would end up inside the QR: refuse them.
   if (typeof value !== "string" || value.length > 2048 || /[\s\u0000-\u001f\u007f]/.test(value)) return null;
@@ -83,15 +99,17 @@ export function applyCommand(
         state: { ...state, screen: { kind: "ok", text: str(p.text, "Thank you"), sub: str(p.sub) } },
         effects: ["cancel_idle"],
       };
-    case "show_text":
+    case "show_text": {
+      const shown = screenWords(str(p.text), str(p.sub));
       return {
-        state: { ...state, screen: { kind: "text", text: str(p.text), sub: str(p.sub) } },
+        state: { ...state, screen: { kind: "text", text: shown.text, sub: shown.sub } },
         effects: ["cancel_idle"],
       };
+    }
     case "show_idle":
       return { state, effects: ["idle_soon"] };
     case "set_ring":
-      return { state: { ...state, ring: str(p.color) === "green" ? "green" : "off" }, effects: [] };
+      return { state: { ...state, status: str(p.color) === "green" ? "saved" : "ready" }, effects: [] };
     case "beep":
       return { state, effects: ["chime"] };
     case "print_slip": {
@@ -104,9 +122,9 @@ export function applyCommand(
   }
 }
 
-/** The delayed idle after a print: screen idle, ring off, slip kept on screen. */
+/** The delayed idle after a slip: screen idle, status ready, slip kept on screen. */
 export function toIdle(state: KioskState): KioskState {
-  return { ...state, screen: { kind: "idle" }, ring: "off" };
+  return { ...state, screen: { kind: "idle" }, status: "ready" };
 }
 
 /** A QR past its expiry goes back to idle (the token no longer works). */
@@ -115,32 +133,23 @@ export function expireQr(state: KioskState, now: number): KioskState {
   return { ...state, screen: { kind: "idle" } };
 }
 
-/** Ring colour: red while the printer needs paper, green after consent, else white. */
-export function ringFor(state: KioskState, paperOut: boolean): RingColour {
-  if (paperOut) return "red";
-  return state.ring === "green" ? "green" : "white";
-}
-
-export const RING_LABEL: Record<RingColour, string> = {
-  white: "Desk light white: ready",
-  green: "Desk light green: consent saved",
-  red: "Desk light red: printer needs paper",
+export const STATUS_LABEL: Record<KioskStatus, string> = {
+  ready: "Front desk screen: ready",
+  saved: "Front desk screen: consent saved",
 };
 
 /** One sentence for screen readers when the screen changes. */
-export function describeScreen(state: KioskState, paperOut: boolean): string {
+export function describeScreen(state: KioskState): string {
   const s = state.screen;
-  const paper = paperOut ? " Printer needs paper. Slips show on this screen." : "";
   switch (s.kind) {
     case "idle":
-      return paperOut ? "Printer needs paper. Slips show on this screen." : "Desk ready.";
+      return "Front desk ready.";
     case "qr":
-      return `${s.text}. Consent QR code on screen.${paper}`;
+      return `${s.text}. Consent QR code on screen.`;
     case "ok":
-      return `${s.text}. ${s.sub ? `${s.sub}.` : ""}${paper}`.trim();
     case "text":
-      return `${s.text}. ${s.sub ? `${s.sub}.` : ""}${paper}`.trim();
+      return `${s.text}. ${s.sub ? `${s.sub}.` : ""}`.trim();
     case "bad_link":
-      return `The consent link from Seedha could not be read. Start the check-in again.${paper}`;
+      return "The consent link from Seedha could not be read. Start the check-in again.";
   }
 }

@@ -7,6 +7,11 @@ RGB, shrunk to at most 1024 px on the long side and saved as a new JPEG of
 about 200 KB built from pixels only, so no EXIF (including GPS), XMP or other
 metadata can survive. Bytes live in the database (site_photo), so they
 survive redeploys on an ephemeral disk and are covered by database backups.
+
+Public pages also get responsive copies (R3-1): a fixed set of widths
+(VARIANT_WIDTHS) and formats (AVIF, WebP, JPEG), made on first request from
+the stored JPEG's pixels (never upscaled, no metadata) and cached in
+site_photo_variant until the photo is deleted.
 """
 
 from __future__ import annotations
@@ -15,13 +20,15 @@ import hashlib
 import warnings
 from dataclasses import dataclass
 from io import BytesIO
+from typing import Any, Literal
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 from pillow_heif import register_heif_opener
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, defer
 
-from app.models import SitePhoto
+from app.models import SitePhoto, SitePhotoVariant
 
 # HEIC/HEIF decoding (owner-approved dependency; its wheels are GPLv2-labelled).
 register_heif_opener()
@@ -36,6 +43,18 @@ QUALITIES = (85, 80, 75, 70, 65, 60)
 MAX_PIXELS = 30_000_000
 ALLOWED_FORMATS = ("JPEG", "PNG", "WEBP", "HEIF")
 TYPE_MESSAGE = "Please upload a JPEG, PNG, WebP or HEIC photo."
+
+# Responsive copies for public pages: only these widths and formats exist, so
+# the cache is bounded (at most 9 copies per photo).
+VARIANT_WIDTHS = (480, 768, 1024)
+VARIANT_FORMATS = ("avif", "webp", "jpeg")
+VariantFormat = Literal["avif", "webp", "jpeg"]
+VARIANT_TYPES: dict[str, str] = {"avif": "image/avif", "webp": "image/webp", "jpeg": "image/jpeg"}
+VARIANT_SAVE: dict[str, dict[str, Any]] = {
+    "avif": {"format": "AVIF", "quality": 55, "speed": 6},
+    "webp": {"format": "WEBP", "quality": 75, "method": 4},
+    "jpeg": {"format": "JPEG", "quality": 82, "progressive": True, "optimize": True},
+}
 
 Image.MAX_IMAGE_PIXELS = MAX_PIXELS
 
@@ -179,6 +198,7 @@ def delete_photo(session: Session, property_id: int, photo_id: int) -> bool:
     row = find_photo(session, property_id, photo_id)
     if row is None:
         return False
+    session.execute(delete(SitePhotoVariant).where(SitePhotoVariant.photo_id == row.id))
     session.delete(row)
     session.flush()
     _renumber(list_photos(session, property_id))
@@ -193,3 +213,65 @@ def reorder_photos(session: Session, property_id: int, ids: list[int]) -> bool:
         return False
     _renumber([rows[i] for i in ids])
     return True
+
+
+def variant_width(photo_width: int, w: int) -> int:
+    """The pixel width a `w` copy really has: never wider than the photo."""
+    return min(w, photo_width)
+
+
+def variant_widths(photo_width: int) -> list[int]:
+    """The `w` values worth asking for: each gives a different real width
+    (a 600 px photo has 480 and 768, and 768 is 600 px wide)."""
+    out: list[int] = []
+    seen: set[int] = set()
+    for w in VARIANT_WIDTHS:
+        real = variant_width(photo_width, w)
+        if real not in seen:
+            seen.add(real)
+            out.append(w)
+    return out
+
+
+def make_variant(photo: SitePhoto, w: int, fmt: str) -> tuple[bytes, int, int]:
+    """Re-encode the stored JPEG at `w` px wide (never upscaled) in `fmt`.
+    Built from raw pixels, so no metadata is carried over."""
+    with Image.open(BytesIO(photo.data), formats=("JPEG",)) as src:
+        src.load()
+        width = variant_width(src.width, w)
+        height = max(1, round(src.height * width / src.width))
+        pixels = src.convert("RGB")
+        if (width, height) != pixels.size:
+            pixels = pixels.resize((width, height), Image.Resampling.LANCZOS)
+    clean = Image.frombytes("RGB", pixels.size, pixels.tobytes())
+    buffer = BytesIO()
+    clean.save(buffer, **VARIANT_SAVE[fmt])
+    return buffer.getvalue(), width, height
+
+
+def photo_variant(session: Session, photo: SitePhoto, w: int, fmt: str) -> SitePhotoVariant:
+    """The cached copy, made and stored on first request (or when the photo's
+    bytes changed since). A concurrent first request may store it first."""
+    query = select(SitePhotoVariant).where(
+        SitePhotoVariant.photo_id == photo.id,
+        SitePhotoVariant.w == w,
+        SitePhotoVariant.fmt == fmt,
+    )
+    row = session.scalar(query)
+    if row is not None and row.source_sha256 == photo.sha256:
+        return row
+    data, width, height = make_variant(photo, w, fmt)
+    fields = {"width": width, "height": height, "source_sha256": photo.sha256,
+              "sha256": hashlib.sha256(data).hexdigest(), "data": data}  # fmt: skip
+    if row is None:
+        try:
+            with session.begin_nested():
+                row = SitePhotoVariant(photo_id=photo.id, w=w, fmt=fmt, **fields)
+                session.add(row)
+            return row
+        except IntegrityError:  # another request stored it first
+            row = session.scalars(query).one()
+    for key, value in fields.items():
+        setattr(row, key, value)
+    session.flush()
+    return row

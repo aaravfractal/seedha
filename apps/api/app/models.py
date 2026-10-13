@@ -22,6 +22,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     false,
+    true,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,6 +46,7 @@ __all__ = [
     "OwnerSettings",
     "PlanEntry",
     "Guest",
+    "GuestFeedback",
     "InboxAway",
     "InboxMessage",
     "Message",
@@ -312,14 +314,16 @@ class PerkCode(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str] = mapped_column(String(30), unique=True)
-    guest_id: Mapped[int] = mapped_column(ForeignKey("guest.id"))
-    origin_booking_id: Mapped[int] = mapped_column(ForeignKey("booking.id"))
+    # Both empty only for a card-page feedback reward to an unverified visitor
+    # (Free breakfast; never a discount, D-106).
+    guest_id: Mapped[int | None] = mapped_column(ForeignKey("guest.id"), nullable=True)
+    origin_booking_id: Mapped[int | None] = mapped_column(ForeignKey("booking.id"), nullable=True)
     perk: Mapped[str] = mapped_column(String(120))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     redeemed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    guest: Mapped[Guest] = relationship()
-    origin_booking: Mapped[Booking] = relationship()
+    guest: Mapped[Guest | None] = relationship()
+    origin_booking: Mapped[Booking | None] = relationship()
 
 
 MESSAGE_STATUSES = ("draft", "approved", "sent", "rejected", "failed", "blocked")
@@ -379,7 +383,8 @@ class Saving(Base):
     __tablename__ = "saving"
     __table_args__ = (
         CheckConstraint(
-            "net_saving = commission_avoided + gst_avoided - upi_fee", name="saving_formula"
+            "net_saving = commission_avoided + gst_avoided - upi_fee - hotel_discount",
+            name="saving_formula",
         ),
     )
 
@@ -390,6 +395,8 @@ class Saving(Base):
     commission_avoided: Mapped[int] = mapped_column(Money)
     gst_avoided: Mapped[int] = mapped_column(Money)
     upi_fee: Mapped[int] = mapped_column(Money)
+    # A feedback reward code's hotel-funded discount (5% or Rs 100), else 0.
+    hotel_discount: Mapped[int] = mapped_column(Money, default=0, server_default="0")
     net_saving: Mapped[int] = mapped_column(Money)
 
     direct_booking: Mapped[DirectBooking] = relationship()
@@ -524,6 +531,10 @@ class SiteConfig(Base):
     previous_slug: Mapped[str | None] = mapped_column(String(40), nullable=True)
     slug_changed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     hide_branding: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    # Card-page feedback rewards the owner offers (discounts are off by default).
+    reward_breakfast: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
+    reward_pct5: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+    reward_flat100: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
 
 
 class ErasureRequest(Base):
@@ -810,3 +821,143 @@ class SiteGenRun(Base):
     cache_creation_tokens: Mapped[int] = mapped_column(Integer, default=0)
     cache_read_tokens: Mapped[int] = mapped_column(Integer, default=0)
     fields_fallback: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class SiteDetails(Base):
+    """The owner's hotel facts for the site: amenities, nearby places, how to
+    reach, good to know, contact and map position (JSON, validated by
+    app.services.site_details). Never guest data and never a price."""
+
+    __tablename__ = "site_details"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), unique=True)
+    details_json: Mapped[str] = mapped_column(Text, default="{}")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class SiteCardScan(Base):
+    """How many times a printed card's QR was scanned, per card type per hotel
+    day. Only a count: no IP, cookie, user agent or device data."""
+
+    __tablename__ = "site_card_scan"
+    __table_args__ = (UniqueConstraint("property_id", "card", "day"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    card: Mapped[str] = mapped_column(String(8))
+    day: Mapped[date] = mapped_column(Date)
+    count: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class SitePhotoVariant(Base):
+    """A resized, re-encoded copy of a site photo for responsive images
+    (Hotel Site V2, R3-1): one of a fixed set of widths and formats, made on
+    first request from the stored metadata-free JPEG and kept here. Deleted
+    with its photo; `source_sha256` ties it to the exact photo bytes."""
+
+    __tablename__ = "site_photo_variant"
+    __table_args__ = (UniqueConstraint("photo_id", "w", "fmt"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    photo_id: Mapped[int] = mapped_column(
+        ForeignKey("site_photo.id", ondelete="CASCADE"), index=True
+    )
+    w: Mapped[int] = mapped_column(Integer)
+    fmt: Mapped[str] = mapped_column(String(8))
+    width: Mapped[int] = mapped_column(Integer)
+    height: Mapped[int] = mapped_column(Integer)
+    source_sha256: Mapped[str] = mapped_column(String(64))
+    sha256: Mapped[str] = mapped_column(String(64))
+    data: Mapped[bytes] = mapped_column(LargeBinary)
+
+
+class SiteRating(Base):
+    """A verified guest's rating of the hotel (hotel mini-site). One row per
+    Seedha Link direct booking or Desk checkout, made when that happens, with
+    only the SHA-256 of the one-time token. `source_ref` is the direct_booking
+    id ('link') or the booking id ('desk'): never a guest name or phone.
+    `stars` is null until the guest uses the link (from `opens_on`, once the
+    stay is over); the owner can hide a comment but never change the stars.
+    A 'card' row (card page, booking id in `source_ref`) is made when a guest
+    verifies a stay; its token lives 30 minutes. One given rating per stay."""
+
+    __tablename__ = "site_rating"
+    __table_args__ = (
+        UniqueConstraint("source", "source_ref"),
+        CheckConstraint("source IN ('link', 'desk', 'card')", name="site_rating_source"),
+        CheckConstraint("stars IS NULL OR stars BETWEEN 1 AND 5", name="site_rating_stars"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    source: Mapped[str] = mapped_column(String(8))
+    source_ref: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # The hotel business date from which the guest can rate: the day the stay
+    # ends (check-in + nights) for a Link booking, the checkout day at the Desk.
+    opens_on: Mapped[date] = mapped_column(Date)
+    used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    stars: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    comment: Mapped[str] = mapped_column(String(200), default="")
+    hidden: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+
+
+class SiteFeedback(Base):
+    """A private note a guest left on the card page. Only the owner reads it:
+    never public, never counted in ratings, and no visitor data is kept."""
+
+    __tablename__ = "site_feedback"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    message: Mapped[str] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+FEEDBACK_REWARDS = ("breakfast", "pct5", "flat100", "none")
+FEEDBACK_STATUSES = ("new", "reward_sent", "hidden")
+
+
+class GuestFeedback(Base):
+    """Feedback a guest left with the card-page form (D-106). Private to the
+    owner; a verified stay's stars also become its one public 'card' rating.
+    `phone` (normalised, +91...) is kept only with consent, until STOP or
+    erasure. Nothing else about the visitor is stored."""
+
+    __tablename__ = "guest_feedback"
+    __table_args__ = (
+        UniqueConstraint("booking_id", name="uq_guest_feedback_booking_id"),
+        CheckConstraint(f"reward IN {FEEDBACK_REWARDS}", name="guest_feedback_reward"),
+        CheckConstraint(f"status IN {FEEDBACK_STATUSES}", name="guest_feedback_status"),
+        CheckConstraint("overall BETWEEN 1 AND 5", name="guest_feedback_overall"),
+        CheckConstraint("food IS NULL OR food BETWEEN 1 AND 5", name="guest_feedback_food"),
+        CheckConstraint(
+            "phone IS NULL OR consent_at IS NOT NULL", name="guest_feedback_phone_consent"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    booking_id: Mapped[int | None] = mapped_column(ForeignKey("booking.id"), nullable=True)
+    verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    name: Mapped[str] = mapped_column(String(60))
+    phone: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    consent_wording_version: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    overall: Mapped[int] = mapped_column(Integer)
+    food: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    review: Mapped[str] = mapped_column(String(500), default="")
+    reward: Mapped[str] = mapped_column(String(10))
+    perk_code_id: Mapped[int | None] = mapped_column(
+        ForeignKey("perk_code.id"), nullable=True, unique=True
+    )
+    status: Mapped[str] = mapped_column(String(12), default="new")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    booking: Mapped[Booking | None] = relationship()
+    perk_code: Mapped[PerkCode | None] = relationship()

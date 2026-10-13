@@ -9,16 +9,16 @@ import {
   IDLE_AFTER_PRINT_MS,
   INITIAL_KIOSK,
   POLL_MS,
-  RING_LABEL,
+  STATUS_LABEL,
   applyCommand,
   describeScreen,
   expireQr,
-  ringFor,
   toIdle,
   urlHost,
 } from "@/lib/kiosk";
 import type { KioskCommand, KioskEffect, KioskState } from "@/lib/kiosk";
 import { playChime, unlockAudio } from "./kioskAudio";
+import { RatingPanel } from "./RatingPanel";
 import styles from "./Kiosk.module.css";
 
 type LinkState = "connecting" | "online" | "offline" | "paused" | "login";
@@ -28,7 +28,7 @@ const LINK_TEXT: Record<LinkState, string> = {
   online: "Connected, checking every 2 seconds",
   offline: "Offline. Check the Wi-Fi and the Seedha server.",
   paused: "Paused while this screen is hidden",
-  login: "Signed out. Log in again to run the Desk.",
+  login: "Signed out. Log in again to run the front desk screen.",
 };
 
 /** Short link words for the one-row top bar on a landscape phone. */
@@ -40,23 +40,23 @@ const LINK_SHORT: Record<LinkState, string> = {
   login: "Signed out",
 };
 
-const RING_WORD = { white: "Ready", green: "Consent saved", red: "Needs paper" } as const;
+const STATUS_WORD = { ready: "Ready", saved: "Consent saved" } as const;
 
 /**
- * A full-screen Desk for a phone or tablet. It polls the same device queue
- * as the Desk box (through the server proxy, which adds the device key for
- * an owner session), runs each command and acknowledges it.
+ * The front desk screen, full screen on a phone or tablet at reception. It
+ * polls the desk command queue (through the server proxy, for an owner
+ * session), runs each command and acknowledges it. Slips show on screen.
  */
 export function Kiosk() {
   const property = useApi<PropertyInfo>("property");
   const [kiosk, setKiosk] = useState<KioskState>(INITIAL_KIOSK);
   const [link, setLink] = useState<LinkState>("connecting");
   const [qrSvg, setQrSvg] = useState<{ url: string; svg: string } | null>(null);
-  const [paperOut, setPaperOut] = useState(false);
   const [sound, setSound] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
   const [awake, setAwake] = useState(false);
+  const [ratingUrl, setRatingUrl] = useState<string | null>(null);
 
   const state = useRef<KioskState>(INITIAL_KIOSK);
   const soundOn = useRef(false);
@@ -81,7 +81,7 @@ export function Kiosk() {
     [commit],
   );
 
-  // Poll every 2 s like the firmware; stop while the tab is hidden.
+  // Poll every 2 s; stop while the tab is hidden.
   useEffect(() => {
     let alive = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -221,17 +221,17 @@ export function Kiosk() {
     else void document.documentElement.requestFullscreen().catch(() => {});
   }
 
-  const ring = ringFor(kiosk, paperOut);
+  const status = kiosk.status;
   const screen = kiosk.screen;
   const hotel = property.data?.short_name ?? "Front desk";
   const svg = qrSvg && qrUrl === qrSvg.url ? qrSvg.svg : null;
 
   return (
     <div className={styles.kiosk} data-screen={screen.kind}>
-      <h1 className={styles.srOnly}>Seedha Desk</h1>
+      <h1 className={styles.srOnly}>Front desk screen</h1>
       <div className={styles.top}>
         <p className={styles.brand}>
-          <span className={styles.brandName}>Seedha Desk</span>
+          <span className={styles.brandName}>Front desk</span>
           <span className={styles.hotel}>{hotel}</span>
         </p>
         <p className={styles.link} role="status">
@@ -263,45 +263,36 @@ export function Kiosk() {
               {fullscreen ? "Exit full screen" : "Full screen"}
             </button>
           ) : null}
-          <button
-            type="button"
-            className={`btn ghost small ${paperOut ? styles.warnBtn : ""}`}
-            aria-pressed={paperOut}
-            onClick={() => setPaperOut((v) => !v)}
-          >
-            Simulated: no paper
-          </button>
         </div>
       </div>
 
-      <p className={styles.turn}>Turn your phone sideways for a bigger QR. The Desk still works this way.</p>
+      <p className={styles.turn}>
+        Turn your phone sideways for a bigger QR. The front desk screen still works this way.
+      </p>
 
       <div className={styles.body}>
         <section
-          className={`${styles.stage} ${styles[`ring_${ring}`]}`}
-          data-ring={ring}
+          className={`${styles.stage} ${status === "saved" ? styles.status_saved : ""}`}
+          data-status={status}
           aria-labelledby="kiosk-screen-title"
         >
           <h2 id="kiosk-screen-title" className={styles.srOnly}>
-            Desk screen
+            Guest screen
           </h2>
-          <p className={styles.ringChip} role="img" aria-label={RING_LABEL[ring]} data-testid="desk-ring">
-            <span className={styles.ringDot} aria-hidden="true" />
-            {RING_WORD[ring]}
+          <p
+            className={styles.statusChip}
+            role="img"
+            aria-label={STATUS_LABEL[status]}
+            data-testid="desk-status"
+          >
+            <span className={styles.statusDot} aria-hidden="true" />
+            {STATUS_WORD[status]}
           </p>
-
-          {paperOut ? (
-            <p className={styles.paperBanner}>
-              <strong>Printer needs paper.</strong> Slips show on this screen until paper is loaded.
-            </p>
-          ) : null}
 
           {screen.kind === "idle" ? (
             <div className={styles.state}>
               <p className={styles.huge}>Seedha</p>
-              <p className={styles.sub}>
-                {paperOut ? "Load a 58 mm roll to print slips" : `${hotel} · Ready`}
-              </p>
+              <p className={styles.sub}>{`${hotel} · Ready`}</p>
             </div>
           ) : screen.kind === "qr" ? (
             <div className={`${styles.state} ${styles.qrState}`}>
@@ -350,17 +341,14 @@ export function Kiosk() {
         </section>
 
         <aside className={styles.side} aria-label="Slip and staff controls">
+          {ratingUrl ? <RatingPanel url={ratingUrl} onClose={() => setRatingUrl(null)} /> : null}
           <section className={styles.slipCard} aria-labelledby="kiosk-slip-title">
             <h2 id="kiosk-slip-title" className={styles.sideTitle}>
               Slip
             </h2>
             {kiosk.slip ? (
               <>
-                <p className={styles.sideNote}>
-                  {paperOut
-                    ? "Printer needs paper, so the slip is shown here."
-                    : "This screen has no printer, so the slip is shown here."}
-                </p>
+                <p className={styles.sideNote}>Show this slip to the guest on screen.</p>
                 <Receipt key={kiosk.slip.seq} text={kiosk.slip.text} />
                 <button
                   type="button"
@@ -371,24 +359,24 @@ export function Kiosk() {
                 </button>
               </>
             ) : (
-              <p className={styles.sideNote}>The checkout slip shows here when it prints.</p>
+              <p className={styles.sideNote}>The checkout slip shows here after checkout.</p>
             )}
           </section>
-          <StaffPanel />
+          <StaffPanel onRating={setRatingUrl} />
         </aside>
       </div>
 
       <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
-        {describeScreen(kiosk, paperOut)}
+        {describeScreen(kiosk)}
         {kiosk.slip ? " Slip on screen." : ""}
       </div>
-      {awake ? <p className={styles.awake}>Screen stays on while the Desk is open</p> : null}
+      {awake ? <p className={styles.awake}>Screen stays on while the front desk screen is open</p> : null}
     </div>
   );
 }
 
 /**
- * The slip as a paper receipt. The font follows the card width so all 32
+ * The slip on screen, laid out like a receipt. The font follows the card width so all 32
  * columns fit; if a very narrow screen still needs a sideways scroll, the
  * receipt joins the Tab order so a keyboard can scroll it.
  */
@@ -417,8 +405,11 @@ function Receipt({ text }: { text: string }) {
   );
 }
 
-/** Staff controls so a single tablet can run the desk: show a room's QR, or check out. */
-function StaffPanel() {
+/**
+ * Staff controls so a single tablet can run the desk: show a room's QR, or
+ * check out. A checkout hands the guest's rating link up to be shown.
+ */
+function StaffPanel({ onRating }: { onRating: (url: string | null) => void }) {
   const [open, setOpen] = useState(false);
   const desk = useApi<DeskState>(open ? "desk/state" : null);
   const [room, setRoom] = useState<number | null>(null);
@@ -432,7 +423,8 @@ function StaffPanel() {
     setBusy(true);
     setNote(null);
     try {
-      await postJson(path, { room: selected.room });
+      const res = await postJson<{ rating_url?: string | null }>(path, { room: selected.room });
+      if (path === "desk/checkout") onRating(res?.rating_url ?? null);
       setNote(done);
       desk.reload();
     } catch (err) {
@@ -485,9 +477,11 @@ function StaffPanel() {
                 type="button"
                 className="btn ghost small"
                 disabled={busy || !selected || selected.checked_out}
-                onClick={() => void act("desk/checkout", `Room ${selected?.room} checked out. Slip sent.`)}
+                onClick={() =>
+                  void act("desk/checkout", `Room ${selected?.room} checked out. Slip on screen.`)
+                }
               >
-                Check out and print
+                Check out and show slip
               </button>
             </div>
           </>

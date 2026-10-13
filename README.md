@@ -23,8 +23,8 @@ All hotel, guest and booking data in this repo is fictional sample data
 - **Statement upload:** OTA PDFs, Excel and CSV read into one ledger; rows that do not add up within ₹1 are flagged, not counted.
 - **The flip:** channels ranked by bookings, then by money kept; MakeMyTrip drops from 1st to 5th on the sample data.
 - **Repeat guests:** guests who came back through an OTA, and the commission and GST paid on them twice; the owner confirms each match.
-- **Seedha Desk:** a front desk device (ESP32, or a phone at `/desk/device`) shows a consent QR; the box is unticked by default.
-- **Checkout slip:** what the hotel kept on the guest's own booking, plus a perk code.
+- **Front desk screen:** any phone or tablet at reception (`/desk/device`) shows a consent QR; the guest says yes on their own phone, and the box is unticked by default.
+- **Checkout slip:** what the hotel kept on the guest's own booking, plus a perk code, shown on screen, and the perk code can follow on WhatsApp once you approve the message.
 - **Approvals:** win-back drafts that go out only after the owner approves, each ending "Reply STOP to opt out".
 - **Seedha Link:** a direct booking page with a perk for returning guests (never a lower rate) and UPI payment.
 - **Savings:** commission and GST avoided on each direct booking, minus the UPI fee.
@@ -51,7 +51,7 @@ All hotel, guest and booking data in this repo is fictional sample data
 flowchart LR
   Owner[Owner browser] --> Web[Next.js web app]
   Guest[Guest phone] --> Web
-  Desk[Seedha Desk<br/>ESP32 or phone kiosk] -->|polls every 2 s| Web
+  Desk[Front desk screen<br/>phone or tablet] --> Web
   Web -->|server-side proxy| API[FastAPI API]
   API --> DB[(SQLite locally<br/>Postgres when hosted)]
   API -.->|optional| Claude[Claude API]
@@ -62,7 +62,7 @@ flowchart LR
 - **Web:** Next.js (App Router, TypeScript, Tailwind) for the owner app, the guest pages and the public website. The browser talks only to the web app, which proxies to the API.
 - **API:** Python, FastAPI, SQLAlchemy 2 and Alembic. Money is integer paise internally and formatted with Indian grouping only at the edge.
 - **Database:** SQLite for the local demo; Postgres when hosted (Railway), chosen by `DATABASE_URL`. The full API suite runs on both in CI.
-- **Desk:** ESP32 firmware (PlatformIO) with a TFT screen, QR, LED ring and thermal printer; a phone or tablet can stand in at `/desk/device`.
+- **Front desk screen:** a web page at `/desk/device` for a phone or tablet at reception; it shows the consent QR and the slip.
 - **AI:** Claude reads unfamiliar statement layouts, breaks name-match ties, drafts message wording and writes hotel site text. It never produces a money figure; code checks every amount.
 
 ## What is real and what is simulated
@@ -80,7 +80,6 @@ flowchart LR
 | Seedha Site text                                               | Claude only when `SITE_GEN_MODEL` and `ANTHROPIC_API_KEY` are set; otherwise text from the owner's own words, labelled Sample. Hosted, the sample hotel's public page always shows the fixed sample page and visitors cannot publish |
 | Stay invoice PDF                                               | Real, built from the booking row; marked Sample for the sample hotel                                                                                                                                                                 |
 | Hotel, guests, bookings, events, second property               | Fictional sample data, labelled                                                                                                                                                                                                      |
-| Seedha Desk hardware                                           | Firmware builds and its tests pass; the phone kiosk works today                                                                                                                                                                      |
 
 No OTA website is scraped. Guest contacts from OTAs are never stored or
 messaged; only guests who said yes at the Desk can be messaged.
@@ -102,8 +101,8 @@ The 8-step demo path (Home shows "0 of 8 done"):
 1. **Upload:** "Use sample statements". 1,500 rows matched, 3 flagged for review.
 2. **The flip:** paid to channels ₹10,39,108; switch to "By money kept" and MakeMyTrip falls from 1st to 5th (₹2,737 kept per room night).
 3. **Repeat guests:** 12 guests, ₹41,800 of commission and GST paid twice.
-4. **Desk consent:** on Desk pick room 207 and "Show QR"; on the guest phone tick the box and agree.
-5. **Checkout slip:** "Check out and print" shows what the hotel kept and the perk code **DEODAR-RS26**.
+4. **Front desk consent:** on the front desk screen pick room 207 and show the QR; on the guest phone tick the box and agree.
+5. **Checkout slip:** check out room 207; the slip on screen shows what the hotel kept and the perk code **DEODAR-RS26**.
 6. **Approve:** approve the win-back draft on Approvals.
 7. **Direct booking:** open `/link/DEODAR-RS26`, book with simulated UPI. The code works once.
 8. **Savings:** ₹2,233 commission and GST avoided, ₹2,199 net after the UPI fee. Home shows "8 of 8 done".
@@ -120,7 +119,6 @@ run and keep reset, Claude and testnet writes on the laptop.
 - **Web:** TypeScript strict, ESLint with zero warnings, Prettier, 205 unit tests, npm audit gate.
 - **End to end:** 78 Playwright tests, including the full 8-step loop, accessibility (axe) in light and dark at phone and laptop widths, and a speed check on the flip.
 - **Secrets:** a scan of the whole git history.
-- **Firmware:** native tests and a device build.
 
 The locked sample numbers (₹10,39,108 paid to channels, MakeMyTrip ₹2,737
 net per room night, direct ₹4,283, total net ₹47,33,012) are asserted in
@@ -140,3 +138,5 @@ All planned; none of these are live.
 Setup, environment variables, the full demo script, the manual checklist
 for the live features and troubleshooting are in
 [README-dev.md](README-dev.md).
+
+The firmware/ folder and the device API remain in the repo but are not part of the product shown to users.

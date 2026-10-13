@@ -18,7 +18,7 @@ import p from "./proof.module.css";
 
 const TITLE = "Consent proof.";
 const SUB =
-  "Every night at 9 PM, Seedha seals the day's Desk consents into one bundle. Anyone can later check a consent was given and not changed. No guest names or numbers leave Seedha.";
+  "Every night at 9 PM, Seedha seals the day's front desk consents into one bundle. Anyone can later check a consent was given and not changed. No guest names or numbers leave Seedha.";
 
 export default function ProofPage() {
   const proof = useApi<OwnerProof>("proof");
@@ -140,7 +140,7 @@ export default function ProofPage() {
             title="No consents yet"
             action={
               <Link className="btn small" href="/desk">
-                Open Seedha Desk
+                Open the front desk
               </Link>
             }
           >

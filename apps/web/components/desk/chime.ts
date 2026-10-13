@@ -1,5 +1,5 @@
 /**
- * The Desk success chime: 880 Hz then 1320 Hz, short. Browsers only allow
+ * The front desk success chime: 880 Hz then 1320 Hz, short. Browsers only allow
  * sound after a user gesture, so the context is created on the first tap or
  * key press and the chime stays silent until then and under reduced motion.
  */

@@ -1,70 +1,100 @@
-import { cache } from "react";
-import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { clientAddress } from "@/lib/ratelimit";
-import type { Lang, Mood, PublicSite } from "@/lib/types-site";
-import { apiUrl, proxyProof } from "@/lib/webEnv";
+import { Suspense } from "react";
+import { preload } from "react-dom";
+import type { Metadata, Viewport } from "next";
+import { connection } from "next/server";
+import { hotelJsonLd, jsonLdText, metaDescription, photoSources } from "@/lib/hotelSiteV2";
+import type { HotelSitePayload } from "@/lib/types-hotel-site";
+import { SAMPLE_SLUG, tryLoadPublicSite } from "./data";
 import { HotelPage } from "./HotelPage";
+import s from "@/components/site/v2/hotel.module.css";
 
 type Params = Promise<{ slug: string }>;
-type Search = Promise<Record<string, string | string[] | undefined>>;
-type Loaded = { status: number; site: PublicSite | null };
-
-const MOODS: ReadonlyArray<string> = ["pine", "stone", "sky"];
-
-/**
- * The public site payload, read on the server so the page (and its hero
- * image) is in the first HTML, not fetched after hydration. Same headers as
- * the /api proxy's public routes: the guest's address for rate limits and
- * the proxy proof. status 0 means the API did not answer.
- */
-const loadSite = cache(async (slug: string): Promise<Loaded> => {
-  const incoming = await headers();
-  try {
-    const res = await fetch(apiUrl(`public/site/${encodeURIComponent(slug)}`), {
-      cache: "no-store",
-      headers: {
-        accept: "application/json",
-        "x-forwarded-for": clientAddress(new Headers(incoming)),
-        "x-seedha-proxy": await proxyProof(),
-      },
-    });
-    if (!res.ok) return { status: res.status, site: null };
-    return { status: res.status, site: (await res.json()) as PublicSite };
-  } catch {
-    return { status: 0, site: null };
-  }
-});
-
-function one(value: string | string[] | undefined): string | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const { site } = await loadSite((await params).slug);
-  if (!site) return {};
-  return { title: `${site.hotel} · ${site.location.en}`, description: site.tagline.en || undefined };
-}
 
 /**
  * The hotel's public site at /h/<slug> (and at <slug>.<SITE_ROOT_DOMAIN>,
- * which the proxy rewrites here). Rendered on the server; the client part
- * only switches language and handles a renamed address.
+ * which the proxy rewrites here). Static per hotel: the sample hotel is
+ * prerendered at build; any other published hotel is rendered on its first
+ * visit and then served from the cache until the hotel's own save or the
+ * 15-minute refresh (app/h/[slug]/data.ts). The slug is lower-cased and
+ * checked before the cache is touched (the proxy already 308s capitals and
+ * 404s unknown slugs). Nothing here reads the request: the language, the
+ * card-scan ribbon and the hotel-host booking links are applied in the
+ * browser. Never calls AI.
  */
-export default async function Page({ params, searchParams }: { params: Params; searchParams: Search }) {
+export function generateStaticParams() {
+  return [{ slug: SAMPLE_SLUG }];
+}
+
+export const viewport: Viewport = { themeColor: "#F5F1E8", colorScheme: "light" };
+
+export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
+  const { site } = await tryLoadPublicSite((await params).slug);
+  if (!site) return { robots: { index: false } };
+  const title = site.sample
+    ? `${site.hotel} (sample) · ${site.location.en}`
+    : `${site.hotel} · ${site.location.en}`;
+  const description = metaDescription(site);
+  return {
+    title,
+    description,
+    alternates: { canonical: site.url },
+    // The fictional sample hotel is never indexed (rule 11, reviews R1-5 and R2-6).
+    ...(site.sample ? { robots: { index: false, follow: false } } : {}),
+    openGraph: {
+      type: "website",
+      siteName: site.hotel,
+      locale: "en_IN",
+      title,
+      description,
+      url: site.url,
+    },
+    twitter: { card: "summary_large_image", title, description },
+  };
+}
+
+/** What shows for the moment before a hotel's first render streams in. */
+function Fallback() {
+  return <div className={s.fallback} aria-busy="true" />;
+}
+
+/** The hero photo, AVIF first, asked for before the page's own <picture> is parsed. */
+function preloadHero(site: HotelSitePayload): void {
+  const hero = site.photos[0];
+  const sources = hero ? photoSources(hero.url, hero.width) : null;
+  if (!hero || !sources) return;
+  preload(hero.url, {
+    as: "image",
+    imageSrcSet: sources.avif,
+    imageSizes: "100vw",
+    type: "image/avif",
+    fetchPriority: "high",
+  });
+}
+
+async function Hotel({ params }: { params: Params }) {
   const { slug } = await params;
-  const query = await searchParams;
-  const { status, site } = await loadSite(slug);
-  // ?lang=hi and ?mood=stone let the owner share a version.
-  const lang = one(query.lang);
-  const mood = one(query.mood);
+  const { status, site } = await tryLoadPublicSite(slug);
+  // The API did not answer: render at request time (never cached) and let the
+  // browser load the site with a retry.
+  if (status === 0) await connection();
+  if (site) preloadHero(site);
   return (
-    <HotelPage
-      slug={slug}
-      initial={site}
-      missing={status === 404}
-      lang={lang === "en" || lang === "hi" ? (lang as Lang) : null}
-      mood={mood && MOODS.includes(mood) ? (mood as Mood) : null}
-    />
+    <>
+      {site ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdText(hotelJsonLd(site)) }}
+        />
+      ) : null}
+      <HotelPage slug={site?.slug ?? slug.toLowerCase()} initial={site} missing={status === 404} />
+    </>
+  );
+}
+
+export default function Page({ params }: { params: Params }) {
+  return (
+    <Suspense fallback={<Fallback />}>
+      <Hotel params={params} />
+    </Suspense>
   );
 }

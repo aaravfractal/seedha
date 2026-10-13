@@ -1,0 +1,208 @@
+/* Print cards and card scans on the Website screen. Card faces are SVG
+   pictures of the printed PDF (lib/cardLayout.ts), in the Pine mood colours;
+   they are pictures of paper, so they keep these colours in dark mode too. */
+
+.stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  min-width: 0;
+}
+.section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--card);
+  min-width: 0;
+}
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.hint {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* card previews */
+.cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+@media (min-width: 900px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.faces {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.faceWrap {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+}
+.faceWrap figcaption {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.face {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Paper cards have square corners; the wallet card's 3.18 mm round corner is set inline. */
+  border-radius: 2px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 8px 22px rgba(0, 0, 0, 0.12);
+}
+.spec {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.links {
+  display: flex;
+  gap: 6px 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* scans */
+.total {
+  margin: 0;
+  font-size: clamp(40px, 6vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.byCard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.byCard div {
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg2);
+  min-width: 0;
+}
+.byCard dt {
+  font-size: 14px;
+  color: var(--ink2);
+}
+.byCard dd {
+  margin: 4px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.days {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.days li {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.days li span:last-child {
+  text-align: right;
+}
+.bar {
+  height: 12px;
+  border-radius: 980px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+.empty {
+  margin: 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--bg2);
+  font-size: 16px;
+}
+
+/* Card QR */
+.qrs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 900px) {
+  .qrs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.qr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-content: start;
+  min-width: 0;
+}
+.qrTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+/* A white tile in both themes: a QR needs dark modules on light paper. */
+.qrBox {
+  width: max-content;
+  padding: 8px;
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+.url {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}

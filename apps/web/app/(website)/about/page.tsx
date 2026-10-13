@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const TEAM: [string, string][] = [
   ["Founder", "Sets the product direction and the rules Seedha never breaks."],
   ["Product", "Designs the screens hotel owners and guests see, and checks every number they show."],
-  ["Hardware", "Builds the Seedha Desk box for the reception counter."],
+  ["Engineering", "Builds the ledger, the front desk screen and the guest booking pages."],
 ];
 
 export default function AboutPage() {

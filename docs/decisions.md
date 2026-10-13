@@ -780,3 +780,35 @@ the full 8-step loop with DEODAR-RS26 passed on make demo-prod from
 site-real (2 of 2, 20.8 s; the loop asserts every locked number) and its
 own tests pass; the web app never called the removed slip/seen route.
 D-102 already records the pillow-heif licence note the owner asked for.
+
+**D-105 No hardware in anything users see (H1, 13 October 2026).** Per
+docs/NO_HARDWARE.md part 2, hardware is removed from everything users
+see: the public website, Pricing, Plans, FAQ, About, legal pages and
+README.md no longer mention the ESP32 box, printer, LED ring, firmware,
+a hardware engineer role or a device included with yearly plans. Plan
+prices are unchanged (no price existed only for hardware). The firmware/
+folder and the device API stay in the repo, outside the product shown to
+users. /desk/device becomes the "Front desk screen" for a phone or
+tablet at reception: it shows the consent QR, the guest says yes on
+their own phone, and the slip is shown on screen or sent by WhatsApp
+(simulated in the demo; the owner still approves every message).
+apps/web/lib/no-hardware.test.ts guards the public pages and README.
+
+**D-106 Card page feedback is a second consent path (F1, 13 October 2026).**
+Rule 4 is extended: besides the Desk flow, a guest may give consent on the
+card-page feedback form (/h/<slug>), with the same rules. The box "Send my
+reward code on WhatsApp. Reply STOP any time." is unticked by default; the
+number is stored (normalised) only when it is ticked, never shown in public
+or to the owner (only whether the guest can be messaged), and never taken
+from an OTA. Nothing is sent until the owner approves the reward (rule 7);
+the message carries "Reply STOP to opt out." and is simulated without
+WhatsApp keys. STOP from the number sets withdrawn_at; /data-deletion and
+every consent erasure blank the name, number and review. A booking
+reference (plus the last 4 digits when a Desk number is on file) verifies
+the stay: one rating per stay, shown publicly only from 3. Unverified
+feedback stays private and can only get Free breakfast. Discounts (5% or
+Rs 100 off, owner switches, off by default) are for verified stays only:
+a private one-time code, valid 12 months on one direct booking at the
+public rate, never stacked, recorded as a hotel-funded discount line on
+the booking and its saving row (rule 6 still holds: no public rate is
+lowered). Sample feedback for CL2101 and CL3108 is fictional.

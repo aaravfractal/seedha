@@ -46,7 +46,11 @@ def get_session(request: Request) -> Iterator[Session]:
         session.close()
 
 
-SessionDep = Annotated[Session, Depends(get_session)]
+# scope="function": commit before the response is sent. With the default
+# ("request") the commit ran after the client had its 200, so a caller that
+# read straight back (the web's per-hotel page revalidation after an owner
+# save) could cache the old row (e2e site-address, hide_branding).
+SessionDep = Annotated[Session, Depends(get_session, scope="function")]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 

@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from app.deps import OwnerDep, PropertyDep, SessionDep
+from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
 from app.models import Channel, DirectBooking, Saving
 from app.money import PAISE_PER_RUPEE
@@ -19,13 +19,22 @@ from app.ratelimit import rate_limited
 from app.services.consent import as_utc
 from app.services.desk import business_date, utc_now
 from app.services.ledger import DEFAULT_END, DEFAULT_START
-from app.services.link import BookingRequest, LinkError, book, code_status, date_options, room_rates
+from app.services.link import (
+    BookingRequest,
+    LinkError,
+    book,
+    code_status,
+    date_options,
+    feedback_reward,
+    room_rates,
+)
 from app.services.savings import (
     MAX_PERK_COST_PER_NIGHT,
     SAMPLE_PERK_COST_PER_NIGHT,
     perk_split,
     season_review,
 )
+from app.services.site_ratings import guest_link_base, issue_token, rating_url, stay_end
 
 public_router = APIRouter(prefix="/public/link", tags=["link"])
 savings_router = APIRouter(prefix="/savings", tags=["savings"])
@@ -81,9 +90,13 @@ class BookOut(BaseModel):
     nights: int
     room_type: str
     perk_applied: bool
+    # A feedback reward code's hotel-funded discount (paise); `amount` is after it.
+    discount: int = 0
     payment: str
     # Only once the code has been accepted with a booking (D-076).
     guest_short_name: str | None
+    # The guest's one-time verified rating link (hotel mini-site); shown, never sent.
+    rating_url: str | None = None
 
 
 def stay_label(start: date, nights: int) -> str:
@@ -110,7 +123,11 @@ def link_page(
         address=prop.address,
         code=status.perk.code if status.perk else None,
         code_status=status.status,
-        perk=prop.perk_text,
+        perk=(
+            status.perk.perk
+            if status.perk and feedback_reward(session, status.perk)
+            else prop.perk_text
+        ),
         rooms=[
             RoomOut(room_type=t, nightly_rate=r) for t, r in room_rates(session, prop.id).items()
         ],
@@ -121,7 +138,9 @@ def link_page(
 @public_router.post(
     "/book", response_model=BookOut, dependencies=[Depends(rate_limited("link_book"))]
 )
-def link_book(body: BookIn, session: SessionDep, prop: PropertyDep) -> BookOut:
+def link_book(
+    body: BookIn, session: SessionDep, prop: PropertyDep, settings: SettingsDep
+) -> BookOut:
     """Book directly. A valid code is redeemed once and its saving recorded."""
     now = utc_now()
     req = BookingRequest(body.code, body.check_in, body.nights, body.room_type)
@@ -137,10 +156,23 @@ def link_book(body: BookIn, session: SessionDep, prop: PropertyDep) -> BookOut:
         nights=done.booking.nights,
         room_type=body.room_type,
         perk_applied=done.perk_applied,
+        discount=done.booking.discount,
         payment="Simulated UPI (test mode)",
         guest_short_name=(
             done.booking.guest.short_name if done.perk_applied and done.booking.guest else None
         ),
+        # Rating opens once the stay is over (check-in + nights).
+        rating_url=rating_url(
+            guest_link_base(settings),
+            issue_token(
+                session,
+                prop.id,
+                "link",
+                done.direct.id,
+                now,
+                stay_end(done.booking.check_in, done.booking.nights),
+            ),
+        ),  # fmt: skip
     )
 
 
@@ -156,6 +188,7 @@ class SavingOut(BaseModel):
     commission_avoided: int
     gst_avoided: int
     upi_fee: int
+    hotel_discount: int = 0
     net_saving: int
     booked_at: datetime
     nights: int
@@ -188,8 +221,9 @@ class SavingsOut(BaseModel):
 def split_fields(saving: Saving, nights: int, cost_per_night: int) -> dict[str, int]:
     """The perk split of one saving row (ruling 5 lines untouched)."""
     split = perk_split(
-        saving.commission_avoided + saving.gst_avoided, saving.upi_fee, nights, cost_per_night
-    )
+        saving.commission_avoided + saving.gst_avoided, saving.upi_fee, nights, cost_per_night,
+        saving.hotel_discount,
+    )  # fmt: skip
     return {"perk_cost": split.perk_cost, "kept_after_perk": split.kept_after_perk}
 
 
@@ -230,6 +264,7 @@ def get_savings(
             commission_avoided=s.commission_avoided,
             gst_avoided=s.gst_avoided,
             upi_fee=s.upi_fee,
+            hotel_discount=s.hotel_discount,
             net_saving=s.net_saving,
             booked_at=d.created_at,
             nights=d.booking.nights,

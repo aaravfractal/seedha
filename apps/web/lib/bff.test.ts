@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { accessFor } from "./bff.ts";
 
 test("owner routes", () => {
@@ -28,6 +29,21 @@ test("owner routes", () => {
   assert.equal(accessFor("events"), "owner");
   assert.equal(accessFor("events/extract"), "owner");
   assert.equal(accessFor("events/morning-preview/send"), "owner");
+});
+
+test("Hotel Site V2 owner routes: details, scans, card PDF and QR files", () => {
+  assert.equal(accessFor("site/details"), "owner");
+  assert.equal(accessFor("site/scans"), "owner");
+  assert.equal(accessFor("site/cards.pdf"), "owner");
+  assert.equal(accessFor("site/cards/qr.svg"), "owner");
+  assert.equal(accessFor("site/cards/qr.png"), "owner");
+});
+
+test("the proxy forwards PUT (PUT /site/details replaces the hotel's facts)", () => {
+  const route = readFileSync(new URL("../app/api/[...path]/route.ts", import.meta.url), "utf8");
+  for (const method of ["GET", "POST", "PUT", "PATCH", "DELETE"]) {
+    assert.match(route, new RegExp(`export async function ${method}\\(request: NextRequest, ctx: Ctx\\)`));
+  }
 });
 
 test("device routes win over the owner desk prefix", () => {

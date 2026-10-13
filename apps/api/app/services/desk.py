@@ -171,7 +171,8 @@ def check_in(
 def check_out(
     session: Session, prop: Property, stay: InHouse, now: datetime
 ) -> tuple[Slip, PerkCode]:
-    """Issue the perk code, mark the stay checked out and print the slip."""
+    """Issue the perk code, mark the stay checked out and print the slip (with
+    the guest's one-time rating link under it, when there is one)."""
     perk = issue_perk(
         session, prop.code_prefix, prop.perk_text, stay.guest, stay.booking, now,
         sample_property=prop.is_sample,
@@ -193,6 +194,8 @@ def check_out(
     enqueue(
         session, device, "show_text", {"text": "Printing slip", "sub": "Please take your receipt"}
     )
+    # The slip text stays the slip (it fits a 32-column slip); the guest gets the
+    # rating link from the QR panel on the Front desk screen (out["rating_url"]).
     enqueue(session, device, "print_slip", {"text": slip.as_text()})
     enqueue(session, device, "show_idle", {})
     session.flush()

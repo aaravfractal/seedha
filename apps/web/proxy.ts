@@ -3,12 +3,18 @@
  *
  * 1. Hotel hosts (<slug>.<SITE_ROOT_DOMAIN>, and <slug>.localhost in
  *    development; lib/siteHost.ts): "/" shows the hotel's public page
- *    (rewritten to /h/<slug>), the page's own public API GETs pass, and every
- *    other path is a 404, so a hotel address never serves an owner screen,
- *    a sign-in route or an API write. A renamed hotel 308s to its new host.
- * 2. App host /h/<slug>: a renamed slug 308s to /h/<new> (for 30 days), an
- *    unknown or unpublished one is a 404 "This hotel site isn't live yet".
- *    The old /hotel/<slug> address 308s to /h/<slug>.
+ *    (rewritten to /h/<slug>, with the strict hotel page headers), the page's
+ *    own public API GETs, its offline service worker and its one card-scan
+ *    POST pass, and every other path is a 404, so a hotel address never
+ *    serves an owner screen, a sign-in route or any other API write. A
+ *    renamed hotel 308s to its new host.
+ * 2. App host /h/<slug> and its /h/<slug>/opengraph-image: a slug with
+ *    capitals 308s to its lower-case form, a renamed slug 308s to /h/<new>
+ *    (for 30 days), an unknown or unpublished one is a 404 ("This hotel site
+ *    isn't live yet" for the page, an empty 404 for the image), so neither
+ *    the page nor the image is ever drawn or cached for a slug that is not
+ *    live (security review R1-1). The old /hotel/<slug> address 308s to
+ *    /h/<slug>.
  * 3. Optimistic page guard (unchanged): owner screens (and onboarding)
  *    redirect to /login without a valid session. The real check happens again
  *    in /api/* for every data request. /login, /signup, /otp and /demo stay public.
@@ -18,12 +24,14 @@
  */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import type { HotelRoute } from "@/lib/siteHost";
+import { hotelPageHeaders } from "@/lib/hotelSiteV2";
 import { clientAddress } from "@/lib/ratelimit";
 import { SESSION_COOKIE, nowSeconds, verifySession } from "@/lib/session";
 import {
   hotelHost,
   hotelPathAllowed,
-  hotelPathSlug,
+  hotelRoute,
   legacyHotelPath,
   movedHostUrl,
   rootDomain,
@@ -111,17 +119,27 @@ async function hotelHostResponse(request: NextRequest, slug: string, root: strin
     const host = request.headers.get("host") ?? "";
     return NextResponse.redirect(movedHostUrl(request.nextUrl, host, found.slug, root), 308);
   }
-  return NextResponse.rewrite(new URL(`/h/${slug}${search}`, request.url));
+  const page = NextResponse.rewrite(new URL(`/h/${slug}${search}`, request.url));
+  // The strict hotel page headers (next.config.ts matches /h/<slug>, but here the page is at "/").
+  for (const { key, value } of hotelPageHeaders(process.env.NODE_ENV !== "production"))
+    page.headers.set(key, value);
+  return page;
 }
 
-/** /h/<slug> on the app host: live passes, renamed redirects, anything else is not live. */
-async function hotelPathResponse(request: NextRequest, slug: string): Promise<NextResponse> {
-  if (slugProblem(slug) === "slug_invalid") return notLive();
-  const found = await resolveSlug(slug, request);
-  if (found?.state === "none") return notLive();
+/** /h/<slug> (and its Open Graph image) on the app host: live passes, renamed redirects, anything else is a 404. */
+async function hotelPathResponse(request: NextRequest, route: HotelRoute): Promise<NextResponse> {
+  const missing = () => (route.rest ? notFound() : notLive());
+  if (slugProblem(route.slug) === "slug_invalid") return missing();
+  if (route.raw !== route.slug) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/h/${route.slug}${route.rest}`;
+    return NextResponse.redirect(url, 308);
+  }
+  const found = await resolveSlug(route.slug, request);
+  if (found?.state === "none") return missing();
   if (found?.state === "moved") {
     const url = request.nextUrl.clone();
-    url.pathname = `/h/${found.slug}`;
+    url.pathname = `/h/${found.slug}${route.rest}`;
     return NextResponse.redirect(url, 308);
   }
   return NextResponse.next();
@@ -152,8 +170,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     url.pathname = legacy;
     return NextResponse.redirect(url, 308);
   }
-  const slug = hotelPathSlug(pathname);
-  if (slug !== null) return hotelPathResponse(request, slug);
+  const route = hotelRoute(pathname);
+  if (route !== null) return hotelPathResponse(request, route);
   if (OWNER_PATHS.has(pathname)) return ownerGuard(request);
   return NextResponse.next();
 }

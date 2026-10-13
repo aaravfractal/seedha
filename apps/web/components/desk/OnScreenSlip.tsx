@@ -2,15 +2,15 @@ import { inr } from "@/lib/format";
 import type { Slip } from "@/lib/types";
 import styles from "./Desk.module.css";
 
-/** What the printer got: the slip as data when the page asked for it, else the printer text. */
-export type PrintJob = { slip: Slip | null; text: string };
+/** The slip the API sent: as data when this page asked for it, else its plain text. */
+export type SlipJob = { slip: Slip | null; text: string };
 
 /**
- * A 58 mm thermal slip, black only. Lines and amounts come from the API; the
- * structured slip is shown when the page knows it (same text the Desk got),
- * otherwise the printer's ASCII text as it would come out of the printer.
+ * The slip on screen, black on white. Lines and amounts come from the API;
+ * the structured slip is shown when the page knows it (same text the front
+ * desk screen got), otherwise the slip's plain text exactly as sent.
  */
-export function ThermalSlip({ job }: { job: PrintJob }) {
+export function OnScreenSlip({ job }: { job: SlipJob }) {
   const { slip } = job;
   if (!slip) {
     return <pre className={styles.slipText}>{job.text}</pre>;

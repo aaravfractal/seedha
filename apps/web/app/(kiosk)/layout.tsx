@@ -6,7 +6,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-/** The Desk kiosk: full screen, no site header or footer, one main landmark. */
+/** The front desk screen: full screen, no site header or footer, one main landmark. */
 export default function KioskLayout({ children }: { children: React.ReactNode }) {
   return (
     <main id="main" tabIndex={-1}>

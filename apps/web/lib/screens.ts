@@ -51,8 +51,13 @@ export const PIPELINE_STEPS: PipelineStepCopy[] = [
   { key: "ai", title: "AI reads every row", desc: "Math check flags bad rows", href: "/upload" },
   { key: "flip", title: "See the flip", desc: "Gross vs net by channel", href: "/flip" },
   { key: "rep", title: "Confirm repeat guests", desc: "Commission paid twice", href: "/repeat" },
-  { key: "desk", title: "Check-in consent at the Desk", desc: "Guest scans the Desk QR", href: "/desk" },
-  { key: "slip", title: "Print a checkout slip", desc: "Bill and perk code printed", href: "/desk" },
+  {
+    key: "desk",
+    title: "Check-in consent at the front desk",
+    desc: "Guest scans the QR at reception",
+    href: "/desk",
+  },
+  { key: "slip", title: "Show the checkout slip", desc: "Bill and perk code on screen", href: "/desk" },
   { key: "msg", title: "Approve the win-back", desc: "Owner approves WhatsApp", href: "/approvals" },
   { key: "book", title: "Guest books direct", desc: "Code used, saving counted", href: "/link" },
 ];

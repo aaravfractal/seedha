@@ -56,7 +56,7 @@ export function OwnerSidebar() {
       </ul>
       <div className={styles.deskCard}>
         <Link href="/desk">
-          Open Seedha Desk <span aria-hidden="true">↗</span>
+          Open the front desk <span aria-hidden="true">↗</span>
         </Link>
       </div>
     </nav>

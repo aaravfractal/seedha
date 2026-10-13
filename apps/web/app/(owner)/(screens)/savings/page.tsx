@@ -65,11 +65,11 @@ export default function SavingsPage() {
             title="No coded bookings yet"
             action={
               <Link className="btn small" href="/desk">
-                Open Seedha Desk
+                Open the front desk
               </Link>
             }
           >
-            Complete the loop: Desk, Approvals, then Seedha Link.
+            Complete the loop: Front desk, Approvals, then Seedha Link.
           </EmptyState>
         </div>
       ) : (

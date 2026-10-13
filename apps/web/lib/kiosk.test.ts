@@ -1,11 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  screenWords,
   INITIAL_KIOSK,
+  STATUS_LABEL,
   applyCommand,
   describeScreen,
   expireQr,
-  ringFor,
   safeUrl,
   toIdle,
   urlHost,
@@ -48,10 +49,10 @@ test("a URL that is not http(s) is never shown as a QR", () => {
   assert.equal(safeUrl("http://192.168.0.10:3000/consent/x"), "http://192.168.0.10:3000/consent/x");
   const { state } = run(INITIAL_KIOSK, cmd("show_qr", { url: "data:text/html,hi" }));
   assert.equal(state.screen.kind, "bad_link");
-  assert.match(describeScreen(state, false), /could not be read/);
+  assert.match(describeScreen(state), /could not be read/);
 });
 
-test("consent: thank you, green ring and one chime", () => {
+test("consent: thank you, consent saved and one chime", () => {
   const { state, effects } = run(
     INITIAL_KIOSK,
     cmd("set_ring", { color: "off" }),
@@ -61,14 +62,14 @@ test("consent: thank you, green ring and one chime", () => {
     cmd("beep", { pattern: "chime" }),
   );
   assert.equal(state.screen.kind, "ok");
-  assert.equal(ringFor(state, false), "green");
+  assert.equal(state.status, "saved");
   assert.equal(effects.filter((e) => e === "chime").length, 1);
-  assert.equal(describeScreen(state, false), "Thank you, Neha ji. Consent saved.");
+  assert.equal(describeScreen(state), "Thank you, Neha ji. Consent saved.");
 });
 
 test("print_slip keeps the slip on screen through the idle that follows", () => {
   const { state, effects } = run(
-    { ...INITIAL_KIOSK, ring: "green" },
+    { ...INITIAL_KIOSK, status: "saved" },
     cmd("show_text", { text: "Printing slip", sub: "Please take your receipt" }),
     cmd("print_slip", { text: "Hotel Deodar View\nHotel kept   Rs 2,675" }),
     cmd("show_idle"),
@@ -77,7 +78,7 @@ test("print_slip keeps the slip on screen through the idle that follows", () => 
   assert.equal(state.slip?.seq, 1);
   const idle = toIdle(state);
   assert.equal(idle.screen.kind, "idle");
-  assert.equal(idle.ring, "off");
+  assert.equal(idle.status, "ready");
   assert.equal(idle.slip?.text, "Hotel Deodar View\nHotel kept   Rs 2,675");
 });
 
@@ -88,12 +89,12 @@ test("a new check-in puts the last slip away; empty slips are ignored", () => {
   assert.equal(next.slip, null);
 });
 
-test("paper out turns the ring red and says so", () => {
-  const green = { ...INITIAL_KIOSK, ring: "green" as const };
-  assert.equal(ringFor(green, true), "red");
-  assert.equal(ringFor(INITIAL_KIOSK, false), "white");
-  assert.equal(describeScreen(INITIAL_KIOSK, true), "Printer needs paper. Slips show on this screen.");
-  assert.equal(describeScreen(INITIAL_KIOSK, false), "Desk ready.");
+test("the screen starts ready and says so", () => {
+  assert.equal(INITIAL_KIOSK.status, "ready");
+  assert.equal(describeScreen(INITIAL_KIOSK), "Front desk ready.");
+  const saved = run(INITIAL_KIOSK, cmd("set_ring", { color: "green" })).state;
+  assert.equal(saved.status, "saved");
+  assert.equal(run(saved, cmd("set_ring", { color: "off" })).state.status, "ready");
 });
 
 test("an expired QR goes back to idle; unknown commands change nothing", () => {
@@ -110,11 +111,10 @@ test("copy has no em dashes or exclamation marks", () => {
     run(INITIAL_KIOSK, cmd("show_ok", { text: "Thank you", sub: "Consent saved" })).state,
   ];
   for (const s of states) {
-    for (const paper of [true, false]) {
-      const text = describeScreen(s, paper);
-      assert.ok(!/[—!]/.test(text), text);
-    }
+    const text = describeScreen(s);
+    assert.ok(!/[—!]/.test(text), text);
   }
+  for (const text of Object.values(STATUS_LABEL)) assert.ok(!/[—!]/.test(text), text);
 });
 
 test("QR URLs with whitespace or control characters are refused", () => {
@@ -127,4 +127,18 @@ test("a show_qr command with no payload shows the bad-link screen instead of thr
   const command = { id: 9, kind: "show_qr", payload: null } as unknown as KioskCommand;
   const { state } = applyCommand(INITIAL_KIOSK, command);
   assert.equal(state.screen.kind, "bad_link");
+});
+
+test("device printing words become on-screen words on the Front desk screen", () => {
+  const { state } = run(
+    INITIAL_KIOSK,
+    cmd("show_text", { text: "Printing slip", sub: "Please take your receipt" }),
+  );
+  assert.deepEqual(state.screen, { kind: "text", text: "Slip ready", sub: "Shown on this screen" });
+  const closing = run(INITIAL_KIOSK, cmd("show_text", { text: "Printing slip", sub: "Close of day" })).state;
+  assert.deepEqual(closing.screen, { kind: "text", text: "Slip ready", sub: "Close of day" });
+  assert.deepEqual(screenWords("Test print", "Please check the paper"), {
+    text: "Screen check",
+    sub: "This screen is working",
+  });
 });

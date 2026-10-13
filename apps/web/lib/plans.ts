@@ -13,7 +13,7 @@ export const PLANS: Plan[] = [
     features: [
       "Statement reading and the flip",
       "Repeat guests and Saturday move",
-      "Seedha Desk with slips",
+      "Front desk screen with slips",
       "Win-back, Seedha Link, savings ledger",
       "Six Hindi WhatsApp answers",
       "Simple one-page website",

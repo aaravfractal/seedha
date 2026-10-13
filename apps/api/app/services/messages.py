@@ -13,10 +13,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from app.models import Booking, Consent, Message, OptOutEvent, PerkCode, Property
+from app.models import Booking, Consent, GuestFeedback, Message, OptOutEvent, PerkCode, Property
 from app.services.consent import normalise_mobile
 from app.services.drafter import (
     MAX_LENGTH,
@@ -224,4 +224,11 @@ def handle_inbound(
     ).all()
     for consent in consents:
         withdraw(session, consent, source, now)
+    # The card-page feedback consent path (D-106): no more reward messages.
+    session.execute(
+        update(GuestFeedback)
+        .where(GuestFeedback.phone == number, GuestFeedback.withdrawn_at.is_(None))
+        .values(withdrawn_at=now)
+        .execution_options(synchronize_session=False)
+    )
     return len(consents)

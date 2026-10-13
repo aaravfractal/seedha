@@ -14,7 +14,7 @@ import a from "./approvals.module.css";
 
 const TITLE = "Messages waiting for you.";
 const SUB =
-  "Seedha drafts a thank-you with a perk for guests who said yes at the Desk. Nothing is sent until you approve.";
+  "Seedha drafts a thank-you with a perk for guests who said yes at the front desk. Nothing is sent until you approve.";
 
 const STATUS_CHIP: Record<string, { tone: "ok" | "bad" | "plain"; label: string }> = {
   sent: { tone: "ok", label: "Sent" },
@@ -23,10 +23,10 @@ const STATUS_CHIP: Record<string, { tone: "ok" | "bad" | "plain"; label: string 
   failed: { tone: "bad", label: "Not sent" },
 };
 
-/** "7:42 PM at Desk, 13 Oct 2026" (India time). */
+/** "7:42 PM at front desk, 13 Oct 2026" (India time). */
 function deskStamp(iso: string): string {
   const [day, time] = istStamp(iso).split(", ");
-  return `${time} at Desk, ${day}`;
+  return `${time} at front desk, ${day}`;
 }
 
 export default function ApprovalsPage() {
@@ -104,7 +104,7 @@ export default function ApprovalsPage() {
           title="No guests waiting."
           action={
             <Link className="btn small" href="/desk">
-              Open Seedha Desk
+              Open the front desk
             </Link>
           }
         >
@@ -138,7 +138,8 @@ export default function ApprovalsPage() {
         ))}
       </div>
       <p className={ui.calc}>
-        Only guests who ticked yes at the Desk appear here. Guests found through OTA data are never messaged.
+        Only guests who ticked yes at the front desk appear here. Guests found through OTA data are never
+        messaged.
       </p>
       {proofFor !== null ? <ProofDialog consentId={proofFor} onClose={() => setProofFor(null)} /> : null}
     </Screen>
