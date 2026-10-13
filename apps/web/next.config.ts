@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { hotelPageHeaders } from "./lib/hotelSiteV2.ts";
 
 const dev = process.env.NODE_ENV !== "production";
 
@@ -33,7 +34,13 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   poweredByHeader: false,
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // The public hotel pages: the same policy, tightened (lib/hotelSiteV2.ts).
+      // Later entries win for the same header. The hotel's own host gets
+      // these from proxy.ts, since its page is served at "/".
+      { source: "/h/:slug", headers: hotelPageHeaders(dev) },
+    ];
   },
   turbopack: {
     // Tailwind runs on globals.css only. A "*.css" rule would also catch

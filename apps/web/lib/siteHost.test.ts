@@ -112,6 +112,32 @@ test("hotel hosts serve only the page and their own public API", () => {
   assert.equal(allowed("/api/public/site/deodar-view", "POST"), false);
 });
 
+test("hotel hosts allow exactly one write: POST to their own card scan count", () => {
+  const allowed = (path: string, method = "GET") => hotelPathAllowed(path, method, "deodar-view");
+  assert.ok(allowed("/api/public/site/deodar-view/scan", "POST"));
+  for (const path of [
+    "/api/public/site/other-hotel/scan",
+    "/api/public/site/deodar-view/scan/x",
+    "/api/public/site/deodar-view/scans",
+    "/api/public/site/deodar-viewer/scan",
+    "/api/public/site/deodar-view",
+    "/api/public/site/deodar-view/availability",
+    "/api/site/scans",
+    "/api/demo/reset",
+    "/h-sw.js",
+  ]) {
+    assert.equal(allowed(path, "POST"), false, path);
+  }
+  for (const method of ["PUT", "PATCH", "DELETE"]) {
+    assert.equal(allowed("/api/public/site/deodar-view/scan", method), false, method);
+  }
+  // The service worker file is a plain read; nothing else at the root is.
+  assert.ok(allowed("/h-sw.js"));
+  assert.ok(allowed("/h-sw.js", "HEAD"));
+  assert.equal(allowed("/sw.js"), false);
+  assert.equal(allowed("/h-sw.js.map"), false);
+});
+
 test("paths: /h/<slug> and the old /hotel/<slug>", () => {
   assert.equal(hotelPathSlug("/h/deodar-view"), "deodar-view");
   assert.equal(hotelPathSlug("/h/Deodar-View/"), "deodar-view");

@@ -3,6 +3,7 @@
  * checks the owner session where needed and forwards to the FastAPI service
  * with the server-only OWNER_API_TOKEN or DESK_DEVICE_KEY attached.
  */
+import { revalidateTag } from "next/cache";
 import type { NextRequest } from "next/server";
 import { accessFor } from "@/lib/bff";
 import { sameOrigin } from "@/lib/authServer";
@@ -13,6 +14,7 @@ import {
   hasNoBody,
   pickHeaders,
 } from "@/lib/proxyHeaders";
+import { HOTEL_SITES_TAG, revalidatesHotelSites } from "@/lib/hotelSiteV2";
 import { clientAddress } from "@/lib/ratelimit";
 import { refuseRemoteReset } from "@/lib/requestOrigin";
 import { SESSION_COOKIE, nowSeconds, readSession } from "@/lib/session";
@@ -76,6 +78,12 @@ async function forward(request: NextRequest, path: string[]): Promise<Response> 
       body: body ? Buffer.from(body) : undefined,
       cache: "no-store",
     });
+    // The public hotel pages are static per hotel (app/h/[slug]/data.ts): any
+    // owner save (publish, site edits, branding, prices, the demo reset) marks
+    // them stale at once, so the next guest gets a fresh page.
+    if (revalidatesHotelSites(access, request.method, upstream.status)) {
+      revalidateTag(HOTEL_SITES_TAG, { expire: 0 });
+    }
     const responseHeaders = pickHeaders(upstream.headers, FORWARD_RESPONSE_HEADERS);
     // A 304 (the browser's cached photo is current) has no body.
     const out = hasNoBody(upstream.status) ? null : upstream.body;
