@@ -13,6 +13,7 @@ import { BuildFlow } from "@/components/site/BuildFlow";
 import { Review, SitePreview } from "@/components/site/Review";
 import { CardsPanel } from "@/components/site/cards/CardsPanel";
 import { DetailsEditor } from "@/components/site/details/DetailsEditor";
+import { FeedbackList } from "@/components/site/ratings/FeedbackList";
 import { RatingsPanel } from "@/components/site/ratings/RatingsPanel";
 import o from "@/components/site/owner.module.css";
 
@@ -252,7 +253,12 @@ export default function SitePage() {
   } else if (tab === "cards") {
     body = <CardsPanel site={s} />;
   } else if (tab === "ratings") {
-    body = <RatingsPanel />;
+    body = (
+      <>
+        <RatingsPanel />
+        <FeedbackList />
+      </>
+    );
   } else if (tab === "google") {
     body = <GoogleKit site={s} onCopy={copy} />;
   } else if (s.stage === "empty") {

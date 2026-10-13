@@ -11,7 +11,6 @@ import { inr } from "@/lib/format";
 import {
   AMENITIES_SHOWN,
   cardPerk,
-  cardPerkSentence,
   langFrom,
   mapsHref,
   photoSources,
@@ -30,6 +29,7 @@ import type { HotelSitePayload, RoomDetail, ScanCard } from "@/lib/types-hotel-s
 import { COPY, defaultCheckIn, linkHref, nightsLabel } from "../copy";
 import { AmenityIcon, ReachIcon } from "./AmenityIcon";
 import { AtAGlance } from "./AtAGlance";
+import { CardWelcome } from "./CardWelcome";
 import { Ratings } from "./Ratings";
 import { RoomCards } from "./RoomCards";
 import { SeedhaBar } from "./SeedhaBar";
@@ -96,6 +96,7 @@ function hasCanvas2d(): boolean {
   return canvasOk;
 }
 const yes = () => true;
+const no = () => false;
 
 /** One count of the printed card that brought the guest. No cookies, nothing about the guest. */
 function pingScan(slug: string, card: ScanCard): void {
@@ -264,17 +265,17 @@ export type HotelSiteV2Props = {
   /** Controlled language (for the preview's EN/HI switch); the page's own switch then calls onLangChange. */
   lang?: Lang;
   onLangChange?: (lang: Lang) => void;
-  /** Preview only: show the card-scan ribbon as a guest from this card would see it. */
+  /** Preview only: show the card welcome panel as a guest from this card would see it (nothing is sent). */
   previewCard?: ScanCard | null;
 };
 
 /**
  * The hotel's own website, V2 (docs/HOTEL_SITE_V2.md). Rooms and packages
  * exactly as the API prices them; booking goes to Seedha Link. A guest who
- * scanned a printed card (?src=card-wallet|card-room|card-desk) sees the
- * owner's own card perk when the owner wrote one, else a neutral welcome
- * that promises nothing, and the scan is counted once, with nothing stored
- * about them. Never calls AI.
+ * scanned a printed card (?src=card-wallet|card-room|card-desk) first sees
+ * the card welcome panel (CardWelcome: thanks, rate your stay, a private note,
+ * Book again with the owner's own perk words only), and the scan is counted
+ * once, with nothing stored about them. Never calls AI.
  */
 export function HotelSiteV2({
   site,
@@ -334,7 +335,11 @@ export function HotelSiteV2({
   const [locationRef, locationNear] = useNearViewport<HTMLDivElement>();
   const formRef = useRef<HTMLFormElement | null>(null);
   const dateRef = useRef<HTMLInputElement | null>(null);
-  const perk = cardPerkSentence(cardPerk(d, lang), lang);
+  const perk = cardPerk(d, lang);
+  // False on the server and while hydrating, true after: before then the card
+  // panel is rendered hidden and shown by CSS on a card visit (no layout shift).
+  const hydrated = useSyncExternalStore(noSubscribe, yes, no);
+  const showCard = preview ? Boolean(card) : Boolean(card) || !hydrated;
   const isSample = site.sample || d.sample;
   const hasLocation = Boolean(d.geo) || d.nearby.length > 0;
   // Reduced motion hides the globe's box in CSS (hotel.module.css), from the first paint.
@@ -465,6 +470,23 @@ export function HotelSiteV2({
       </header>
 
       <Main id={preview ? undefined : "main"} className={s.main}>
+        {showCard ? (
+          <CardWelcome
+            slug={site.slug}
+            hotel={name}
+            lang={lang}
+            t={t.card}
+            sampleText={t.sample}
+            perk={perk}
+            isSample={isSample}
+            bookingUrl={site.booking_url}
+            firstRoom={firstRoom}
+            here={here}
+            card={card}
+            gate={!preview && !hydrated}
+            preview={preview}
+          />
+        ) : null}
         <section className={s.hero} aria-labelledby={id("hotel-name")}>
           {hero ? (
             <Picture className={s.heroPic} photo={hero} alt={caption(hero, lang)} sizes="100vw" eager />
@@ -472,18 +494,6 @@ export function HotelSiteV2({
             <span className={s.chip}>{c.samplePhoto}</span>
           )}
           <div className={s.heroText}>
-            {card ? (
-              perk ? (
-                <aside className={s.perk} aria-label={t.perkLabel} data-card={card}>
-                  {isSample ? <span className={s.sampleTag}>{t.sample}</span> : null}
-                  {perk}
-                </aside>
-              ) : (
-                <aside className={s.welcome} aria-label={t.welcomeLabel} data-card={card}>
-                  {t.welcome}
-                </aside>
-              )
-            ) : null}
             {site.location[lang] ? <p className={s.place}>{site.location[lang]}</p> : null}
             <h1 id={id("hotel-name")} className={`${s.display} ${s.h1}`}>
               {name}
