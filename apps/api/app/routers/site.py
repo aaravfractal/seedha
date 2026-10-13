@@ -44,7 +44,8 @@ from app.services.site import (
     rooms_copy,
     slugify,
 )
-from app.services.site_details import SiteDetailsOut, read_details
+from app.services.site_cards import card_urls
+from app.services.site_details import SiteDetailsOut, read_details, with_room_photos
 from app.services.site_gen import read_content, read_rooms
 from app.services.site_photos import (
     VARIANT_FORMATS,
@@ -188,6 +189,8 @@ class SiteContentOut(BaseModel):
     photos: list[SitePhotoOut] = Field(default_factory=list)
     hide_branding: bool = False
     booking_url: str = "/link"
+    # The lowest nightly price among `rooms` (paise), computed here; null without rooms.
+    from_price_paise: int | None = None
 
 
 class SetupOut(BaseModel):
@@ -224,6 +227,8 @@ class SiteOut(SiteContentOut):
     packages: list[PackageOut]
     setup: SetupOut
     google: GoogleKitOut
+    # What each printed card's QR encodes: <PUBLIC_BASE_URL>/h/<slug>?src=card-<type>.
+    card_urls: dict[str, str] = Field(default_factory=dict)
 
 
 class SitePatchIn(BaseModel):
@@ -406,6 +411,12 @@ def site_content(
     if row is not None and public and (config.published_at is None or locked):
         row = None
     photos = site_photos(session, prop, slug, public=public) if row is not None else []
+    rooms = (
+        built_rooms(row, room_rates(session, prop.id))
+        if row is not None
+        else sample_rooms(session, prop)
+    )
+    details = read_details(session, prop.id, is_sample=prop.is_sample, locked=locked)
     return {
         "slug": slug,
         "address": display_address(url),
@@ -418,15 +429,12 @@ def site_content(
         "location": LOCATION if prop.is_sample else {"en": prop.city, "hi": prop.city},
         "tagline": TAGLINE if prop.is_sample else {"en": "", "hi": ""},
         "rooms_count": prop.rooms_count,
-        "rooms": (
-            built_rooms(row, room_rates(session, prop.id))
-            if row is not None
-            else sample_rooms(session, prop)
-        ),
+        "rooms": rooms,
+        "from_price_paise": min((r.nightly_rate for r in rooms), default=None),
         "nearby": [NearbyOut(place=p, distance=d) for p, d in NEARBY] if prop.is_sample else [],
         "gallery": [] if photos else list(GALLERY),
         "contact": contact_out(prop),
-        "details": read_details(session, prop.id, is_sample=prop.is_sample, locked=locked),
+        "details": with_room_photos(details, {p.id for p in photos}),
         "source": row.source if row is not None else "none",
         "text": site_text(row) if row is not None else None,
         "photos": photos,
@@ -458,8 +466,10 @@ def site_out(session: Session, prop: Property, settings: Settings) -> SiteOut:
     """Shape the site for the screen."""
     config = get_config(session, prop.id)
     rates = room_rates(session, prop.id)
+    content = site_content(session, prop, config, settings, public=False)
     return SiteOut(
-        **site_content(session, prop, config, settings, public=False),
+        **content,
+        card_urls=card_urls(settings, content["slug"], content["url"]),
         stage=config.stage,
         live=config.published_at is not None,
         published_at=config.published_at,

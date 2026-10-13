@@ -20,6 +20,8 @@ PUBLIC = {
     ("GET", "/public/site/{slug}/resolve"),
     ("GET", "/public/site/{slug}/photos/{photo_id}"),
     ("POST", "/public/site/{slug}/scan"),
+    ("GET", "/public/rate/{token}"),
+    ("POST", "/public/rate/{token}"),
     ("GET", "/public/sample"),
     ("GET", "/webhooks/whatsapp"),
     ("POST", "/webhooks/whatsapp"),

@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
-from app.deps import OwnerDep, PropertyDep, SessionDep
+from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
 from app.errors import ApiError
 from app.models import Channel, DirectBooking, Saving
 from app.money import PAISE_PER_RUPEE
@@ -26,6 +26,7 @@ from app.services.savings import (
     perk_split,
     season_review,
 )
+from app.services.site_ratings import issue_token, rating_url
 
 public_router = APIRouter(prefix="/public/link", tags=["link"])
 savings_router = APIRouter(prefix="/savings", tags=["savings"])
@@ -84,6 +85,8 @@ class BookOut(BaseModel):
     payment: str
     # Only once the code has been accepted with a booking (D-076).
     guest_short_name: str | None
+    # The guest's one-time verified rating link (hotel mini-site); shown, never sent.
+    rating_url: str | None = None
 
 
 def stay_label(start: date, nights: int) -> str:
@@ -121,7 +124,9 @@ def link_page(
 @public_router.post(
     "/book", response_model=BookOut, dependencies=[Depends(rate_limited("link_book"))]
 )
-def link_book(body: BookIn, session: SessionDep, prop: PropertyDep) -> BookOut:
+def link_book(
+    body: BookIn, session: SessionDep, prop: PropertyDep, settings: SettingsDep
+) -> BookOut:
     """Book directly. A valid code is redeemed once and its saving recorded."""
     now = utc_now()
     req = BookingRequest(body.code, body.check_in, body.nights, body.room_type)
@@ -140,6 +145,9 @@ def link_book(body: BookIn, session: SessionDep, prop: PropertyDep) -> BookOut:
         payment="Simulated UPI (test mode)",
         guest_short_name=(
             done.booking.guest.short_name if done.perk_applied and done.booking.guest else None
+        ),
+        rating_url=rating_url(
+            settings.web_origin, issue_token(session, prop.id, "link", done.direct.id, now)
         ),
     )
 

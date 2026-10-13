@@ -38,6 +38,7 @@ from app.routers import (
     public,
     public_sample,
     public_site,
+    ratings,
     repeat,
     rooms,
     scenario,
@@ -154,37 +155,41 @@ def create_app(
     def get_property_info(_owner: OwnerDep, prop: PropertyDep) -> PropertyOut:
         return PropertyOut.model_validate(prop, from_attributes=True)
 
-    api.include_router(auth.router)
-    api.include_router(pipeline.router)
-    api.include_router(overview.router)
-    api.include_router(rooms.router)
-    api.include_router(statements.router)
-    api.include_router(ledger.router)
-    api.include_router(repeat.router)
-    api.include_router(scenario.router)
-    api.include_router(desk.router)
-    api.include_router(public.router)
-    api.include_router(public_sample.router)
-    api.include_router(messages.router)
-    api.include_router(webhooks.router)
-    api.include_router(link.public_router)
-    api.include_router(link.savings_router)
-    api.include_router(proof.router)
-    api.include_router(ask.router)
-    api.include_router(inbox.router)
-    api.include_router(invoice.router)
-    api.include_router(assistant.router)
-    api.include_router(site.site_router)
-    api.include_router(site_build.router)
-    api.include_router(site_details.router)
-    api.include_router(site.pro_router)
-    api.include_router(pro_views.router)
-    api.include_router(site.demo_router)
-    api.include_router(public_site.router)
-    api.include_router(owner_settings.router)
-    api.include_router(calendar.router)
-    api.include_router(events.router)
-    api.include_router(myplace.router)
+    for router in (
+        auth.router,
+        pipeline.router,
+        overview.router,
+        rooms.router,
+        statements.router,
+        ledger.router,
+        repeat.router,
+        scenario.router,
+        desk.router,
+        public.router,
+        public_sample.router,
+        messages.router,
+        webhooks.router,
+        link.public_router,
+        link.savings_router,
+        proof.router,
+        ask.router,
+        inbox.router,
+        invoice.router,
+        assistant.router,
+        site.site_router,
+        site_build.router,
+        site_details.router,
+        site.pro_router,
+        pro_views.router,
+        site.demo_router,
+        public_site.router,
+        ratings.router,
+        owner_settings.router,
+        calendar.router,
+        events.router,
+        myplace.router,
+    ):
+        api.include_router(router)
     return api
 
 

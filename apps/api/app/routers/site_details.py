@@ -16,14 +16,17 @@ from fastapi import APIRouter, Depends, Query, Response
 from pydantic import BaseModel
 
 from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
+from app.errors import ApiError
 from app.ratelimit import rate_limited
-from app.routers.site import site_content
+from app.routers.site import built_content, site_content
 from app.services.desk import business_date, utc_now
+from app.services.link import room_rates
 from app.services.site import get_config
 from app.services.site_cards import (
     CardData,
     CardKind,
     QrCard,
+    card_base_url,
     card_data,
     card_url,
     cards_pdf,
@@ -34,10 +37,13 @@ from app.services.site_details import (
     SCAN_CARDS,
     SiteDetailsIn,
     SiteDetailsOut,
+    check_rooms,
     month_scans,
     read_details,
     save_details,
 )
+from app.services.site_gen import read_rooms
+from app.services.site_photos import list_photos
 
 router = APIRouter(prefix="/site", tags=["site"])
 # PDFs and QR images are CPU work; nobody needs them in a loop (R1-11).
@@ -73,7 +79,15 @@ def get_details(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> Sit
 def put_details(
     body: SiteDetailsIn, _owner: OwnerDep, session: SessionDep, prop: PropertyDep
 ) -> SiteDetailsOut:
-    """Replace the hotel's facts. Every field is validated; markup is refused."""
+    """Replace the hotel's facts. Every field is validated; markup is refused.
+    Room details must name rooms the hotel sells and use its own site photos."""
+    built = built_content(session, prop.id)
+    names = set(room_rates(session, prop.id))
+    if built is not None:
+        names |= {r.name for r in read_rooms(built)}
+    reason = check_rooms(body, names, {p.id for p in list_photos(session, prop.id)})
+    if reason is not None:
+        raise ApiError(422, "bad_room_details", reason)
     save_details(session, prop.id, body)
     return read_details(session, prop.id, is_sample=prop.is_sample, locked=False)
 
@@ -105,13 +119,13 @@ def owner_site(session: SessionDep, prop: PropertyDep, settings: SettingsDep) ->
     return site_content(session, prop, get_config(session, prop.id), settings, public=False)
 
 
-def owner_card_data(site: dict[str, Any], prop: PropertyDep) -> CardData:
+def owner_card_data(site: dict[str, Any], prop: PropertyDep, settings: SettingsDep) -> CardData:
     """The cards' text from the owner's view of the site (English only)."""
     details = site["details"]
     contact = details.contact
     return card_data(
         hotel=site["hotel"],
-        url=site["url"],
+        url=card_base_url(settings, site["slug"], site["url"]),
         display_url=site["address"],
         location=site["location"]["en"],
         tagline=site["tagline"]["en"],
@@ -140,7 +154,7 @@ def get_cards_pdf(
     a CMYK colour page."""
     site = owner_site(session, prop, settings)
     return Response(
-        content=cards_pdf(owner_card_data(site, prop), kind),
+        content=cards_pdf(owner_card_data(site, prop, settings), kind),
         media_type="application/pdf",
         headers={
             "Content-Disposition": f'attachment; filename="{site["slug"]}-cards-{kind}.pdf"',
@@ -150,8 +164,9 @@ def get_cards_pdf(
 
 
 def qr_target(session: SessionDep, prop: PropertyDep, settings: SettingsDep, card: QrCard) -> str:
-    """The site address with ?src=card-<type>."""
-    return card_url(owner_site(session, prop, settings)["url"], card)
+    """<PUBLIC_BASE_URL>/h/<slug>?src=card-<type> (the site address without PUBLIC_BASE_URL)."""
+    site = owner_site(session, prop, settings)
+    return card_url(card_base_url(settings, site["slug"], site["url"]), card)
 
 
 @router.get(

@@ -14,7 +14,7 @@ from datetime import date, datetime, timedelta
 from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Header, Query, Response
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.deps import SessionDep, SettingsDep
 from app.errors import ApiError
@@ -38,6 +38,7 @@ from app.services.site_photos import (
     find_photo,
     photo_variant,
 )
+from app.services.site_ratings import RatingsSummary, summary
 from app.services.slug import resolve
 
 router = APIRouter(prefix="/public/site", tags=["public"])
@@ -67,6 +68,8 @@ class PublicSiteOut(SiteContentOut):
     today: date
     packages: list[PublicPackageOut]
     redirect_to: str | None = None
+    # Verified-guest ratings; the hosted sample hotel always shows none.
+    ratings: RatingsSummary = Field(default_factory=RatingsSummary)
 
 
 class ResolveOut(BaseModel):
@@ -116,6 +119,7 @@ def public_site(
         today=business_date(session, prop.id, utc_now().date()),
         packages=[public_package(p) for p in packages(session, prop, config) if p.approved],
         redirect_to=moved_to,
+        ratings=RatingsSummary() if sample_locked(prop, settings) else summary(session, prop.id),
     )
 
 

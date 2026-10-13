@@ -57,6 +57,8 @@ from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
+from app.config import Settings
+
 CardKind = Literal["wallet", "room", "tent", "all"]
 QrCard = Literal["wallet", "room", "desk"]
 
@@ -235,6 +237,21 @@ PAPER = CMYKColor(0, 0, 0, 0)
 
 
 # --- QR ---------------------------------------------------------------------------
+
+
+def card_base_url(settings: Settings, slug: str, site_url: str) -> str:
+    """The address printed cards and QR codes point at: <PUBLIC_BASE_URL>/h/<slug>
+    (the mini-site inside Seedha), or the site's own address when
+    PUBLIC_BASE_URL is not set."""
+    if settings.public_base_url:
+        return f"{settings.public_base_url.rstrip('/')}/h/{slug}"
+    return site_url
+
+
+def card_urls(settings: Settings, slug: str, site_url: str) -> dict[str, str]:
+    """What each card's QR encodes: wallet, room and desk."""
+    base = card_base_url(settings, slug, site_url)
+    return {card: card_url(base, card) for card in QR_SOURCE}
 
 
 def card_url(site_url: str, card: str) -> str:
