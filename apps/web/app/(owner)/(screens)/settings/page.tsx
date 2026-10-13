@@ -9,6 +9,7 @@ import { Screen } from "@/components/owner/ui";
 import { NotificationsTab, PrivacyTab, SecurityTab } from "@/components/settings/AccountTabs";
 import { ContractsTab, HotelTab, PlanTab } from "@/components/settings/HotelTabs";
 import { AiUsage } from "@/components/settings/AiUsage";
+import { GuestRewardsSetting } from "@/components/settings/GuestRewardsSetting";
 import { InvoiceGstSetting } from "@/components/settings/InvoiceGstSetting";
 import { PersonalTab } from "@/components/settings/PersonalTab";
 import { SimulateMessage } from "@/components/settings/SimulateMessage";
@@ -80,7 +81,15 @@ export default function SettingsPage() {
         ) : tab === "personal" ? (
           <PersonalTab key={data.kind} data={data} onSaved={settings.setData} />
         ) : tab === "hotel" ? (
-          <HotelTab data={data} beforeReset={<InvoiceGstSetting />} />
+          <HotelTab
+            data={data}
+            beforeReset={
+              <>
+                <InvoiceGstSetting />
+                <GuestRewardsSetting />
+              </>
+            }
+          />
         ) : tab === "plan" ? (
           <>
             <PlanTab />

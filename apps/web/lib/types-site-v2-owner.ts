@@ -123,3 +123,39 @@ export type SiteFeedback = {
   created_at: string;
   read: boolean;
 };
+
+/** GET/PUT /settings/rewards: which rewards guests may pick on the card page feedback form. */
+export type GuestRewardSettings = {
+  breakfast: boolean;
+  pct5: boolean;
+  flat100: boolean;
+};
+
+export type GuestFeedbackStatus = "new" | "reward_sent" | "hidden";
+
+/**
+ * GET /site/guest-feedback item: feedback a guest left on the card page form.
+ * The phone number itself never reaches the browser; only whether one is on file.
+ */
+export type GuestFeedback = {
+  id: number;
+  created_at: string;
+  verified: boolean;
+  name: string;
+  overall: number;
+  food: number | null;
+  review: string;
+  reward: string;
+  consent: boolean;
+  has_phone: boolean;
+  status: GuestFeedbackStatus;
+  read: boolean;
+  booking_ref: string | null;
+};
+
+/** POST /site/guest-feedback/{id}/send-reward result. */
+export type SendRewardResult = {
+  code: string;
+  sent: "simulated" | "whatsapp" | "not_sent";
+  reason?: string;
+};

@@ -76,3 +76,30 @@
   display: grid;
   gap: 4px;
 }
+.name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.tags,
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px 16px;
+  margin: 0;
+}
+.facts dt {
+  font-size: 14px;
+  color: var(--ink2);
+}
+.facts dd {
+  margin: 2px 0 0;
+  font-size: 16px;
+}

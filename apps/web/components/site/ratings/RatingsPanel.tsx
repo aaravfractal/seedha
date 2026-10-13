@@ -9,7 +9,7 @@ import { useToast } from "@/components/Toast";
 import o from "../owner.module.css";
 import r from "./ratings.module.css";
 
-function Stars({ stars }: { stars: number }) {
+export function Stars({ stars }: { stars: number }) {
   return (
     <span className={r.stars} role="img" aria-label={starsLabel(stars)}>
       {[1, 2, 3, 4, 5].map((n) => (

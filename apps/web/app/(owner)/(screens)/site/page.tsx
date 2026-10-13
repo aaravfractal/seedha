@@ -14,6 +14,7 @@ import { Review, SitePreview } from "@/components/site/Review";
 import { CardsPanel } from "@/components/site/cards/CardsPanel";
 import { DetailsEditor } from "@/components/site/details/DetailsEditor";
 import { FeedbackList } from "@/components/site/ratings/FeedbackList";
+import { GuestFeedbackList } from "@/components/site/ratings/GuestFeedbackList";
 import { RatingsPanel } from "@/components/site/ratings/RatingsPanel";
 import o from "@/components/site/owner.module.css";
 
@@ -256,6 +257,7 @@ export default function SitePage() {
     body = (
       <>
         <RatingsPanel />
+        <GuestFeedbackList />
         <FeedbackList />
       </>
     );
