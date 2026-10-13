@@ -264,6 +264,8 @@ test("owner sets a room's size, beds, guests, features and photo, saves and sees
   await first.getByLabel("Size in sq ft (optional)").fill("320");
   await first.getByLabel("Most guests (optional)").fill("3");
   await first.getByLabel("Beds in English").fill("1 queen bed");
+  // The sample rooms come with facts (A1): feature 2 keeps its saved value.
+  const feature2 = await first.getByLabel("Feature 2 in English").inputValue();
   await first.getByLabel("Feature 1 in English").fill("Mountain view");
   await page.getByRole("button", { name: "Save hotel details" }).click();
   await expect(page.getByRole("status").filter({ hasText: "All changes saved" })).toBeVisible();
@@ -281,7 +283,7 @@ test("owner sets a room's size, beds, guests, features and photo, saves and sees
     size_sqft: 320,
     max_guests: 3,
     beds_en: "1 queen bed",
-    features_en: ["Mountain view"],
+    features_en: ["Mountain view", feature2].filter(Boolean),
   });
   await openTab(page, "Hotel details");
   await expect(
