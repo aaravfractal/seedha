@@ -120,3 +120,11 @@ for good, the repo's git hook (.git/hooks/pre-commit) now defaults
 Resolved 11 Oct 2026: on the owner's instruction both `~/.platformio` and
 `~/.cache/pre-commit` were deleted, and a listing (this time not truncated)
 confirmed both are gone.
+
+## B-005 Hotel page can show the previous branding for one load (13 Oct 2026) — open, low
+
+After an owner hides or shows "Powered by Seedha", the per-hotel cached page
+was once served stale to the very next load in a full e2e run (1 of 3 runs;
+passes alone). The next load shows the change. e2e/site-address.spec.ts now
+allows a few reloads for this one check. Root cause to look at: the timing of
+revalidateTag in the BFF route against the cached hotel page read.
