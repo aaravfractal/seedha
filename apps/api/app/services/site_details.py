@@ -5,16 +5,32 @@ Facts are plain owner text, validated strictly: capped lengths, no markup and
 amenities only from a fixed list of 40. Nothing here is a price (rule 1) and
 nothing here is guest data. The sample hotel's facts are fixed and fictional
 (rule 11). A scan is only a count per card type per hotel day: no IP, cookie,
-user agent or device data is stored.
+user agent or device data is stored in the database (hosting access logs keep
+request addresses for their normal retention).
+
+Text rules (review R1-10): line breaks and tabs become a space; then no
+markup, no control, format (bidi override or
+isolate, zero-width), separator or private-use characters, and any non-empty
+text has at least one letter or digit. The one exception is a zero-width
+joiner or non-joiner right after a Devanagari character, which Hindi spelling
+can need. Phones are ASCII digits and spaces with one optional leading +, and
+an email is a plain address that cannot carry extra mailto: parameters.
+
+The card perk (`card_perk_en`, `card_perk_hi`) is the owner's own words for
+what a guest who scans a printed card and books direct gets. Empty means the
+hotel offers no card perk, and then nothing anywhere promises one (R2-1). It
+is a perk, never a price or a discount (rule 6), so currency and % are refused.
 """
 
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
 from datetime import date, timedelta
 from typing import Annotated, Literal
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, ValidationError
+from pydantic import AfterValidator, BaseModel, BeforeValidator, ConfigDict, Field, ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -69,6 +85,8 @@ AMENITY_IDS: tuple[str, ...] = tuple(a[0] for a in AMENITIES)
 AMENITY_LABELS: dict[str, tuple[str, str]] = {a[0]: (a[1], a[2]) for a in AMENITIES}
 
 SCAN_CARDS = ("wallet", "room", "desk")
+# Scans counted per card type per hotel day at most; more are not counted.
+DAILY_SCAN_CAP = 2_000
 ScanCard = Literal["wallet", "room", "desk"]
 NearbyKind = Literal[
     "viewpoint", "temple", "market", "waterfall", "trek", "lake", "station", "airport", "other"
@@ -76,17 +94,57 @@ NearbyKind = Literal[
 TIME_PATTERN = r"^([01]\d|2[0-3]):[0-5]\d$"
 
 
+# Unicode categories never allowed in owner text: control, format (bidi
+# overrides and isolates, zero-width), surrogate, private use, unassigned,
+# line and paragraph separators.
+BANNED_CATEGORIES = frozenset({"Cc", "Cf", "Cs", "Co", "Cn", "Zl", "Zp"})
+JOINERS = frozenset({"\u200c", "\u200d"})  # zero-width non-joiner and joiner
+PHONE_PATTERN = re.compile(r"\+?[0-9][0-9 ]*")
+MIN_PHONE_DIGITS = 6
+EMAIL_PATTERN = r"^$|^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+PRICE_WORDS = re.compile(r"[₹%]|\b(rs|inr|rupees?|discount)\b|रुपये|रुपए|छूट", re.IGNORECASE)
+
+
+def devanagari(char: str) -> bool:
+    """A character from the Devanagari block."""
+    return "\u0900" <= char <= "\u097f"
+
+
 def no_markup(value: str) -> str:
-    """Plain text only: the site escapes everything, and markup is never needed."""
+    """Plain, visible text only: the site escapes everything, and markup,
+    control or invisible characters are never needed."""
     if "<" in value or ">" in value:
         raise ValueError("Use plain text without < or >")
+    for i, char in enumerate(value):
+        joiner_ok = char in JOINERS and i > 0 and devanagari(value[i - 1])
+        if unicodedata.category(char) in BANNED_CATEGORIES and not joiner_ok:
+            raise ValueError(
+                "Remove hidden or control characters (line breaks, tabs, invisible marks)"
+            )
+    if value and not any(unicodedata.category(c)[0] in "LN" for c in value):
+        raise ValueError("Use at least one letter or number")
     return value
 
 
 def phone_ok(value: str) -> str:
-    """Digits, spaces and a leading +, or empty."""
-    if value and not (value.lstrip("+").replace(" ", "").isdigit() and "+" not in value[1:]):
-        raise ValueError("Use digits, spaces and a leading +")
+    """ASCII digits and spaces with one optional leading +, or empty."""
+    if value and not (
+        PHONE_PATTERN.fullmatch(value) and sum(c.isdigit() for c in value) >= MIN_PHONE_DIGITS
+    ):
+        raise ValueError("Use digits 0 to 9, spaces and one leading +")
+    return value
+
+
+def flatten(value: object) -> object:
+    """Line breaks and tabs (an owner pressing Enter in a text box) become one
+    space; every other control character is refused by `no_markup`."""
+    return re.sub(r"[\t\r\n]+", " ", value) if isinstance(value, str) else value
+
+
+def no_price(value: str) -> str:
+    """A perk is something the guest gets, never a price or discount (rule 6)."""
+    if PRICE_WORDS.search(value):
+        raise ValueError("Describe a perk such as tea on arrival, not a price or discount")
     return value
 
 
@@ -98,14 +156,16 @@ def amenities_ok(value: list[str]) -> list[str]:
     return [a for a in AMENITY_IDS if a in set(value)]
 
 
+Flat = BeforeValidator(flatten)
 PlainText = AfterValidator(no_markup)
-Name = Annotated[str, Field(min_length=1, max_length=60), PlainText]
-OptName = Annotated[str, Field(max_length=60), PlainText]
-Line = Annotated[str, Field(min_length=1, max_length=200), PlainText]
-OptLine = Annotated[str, Field(max_length=200), PlainText]
-Short = Annotated[str, Field(min_length=1, max_length=160), PlainText]
-OptShort = Annotated[str, Field(max_length=160), PlainText]
+Name = Annotated[str, Field(min_length=1, max_length=60), Flat, PlainText]
+OptName = Annotated[str, Field(max_length=60), Flat, PlainText]
+Line = Annotated[str, Field(min_length=1, max_length=200), Flat, PlainText]
+OptLine = Annotated[str, Field(max_length=200), Flat, PlainText]
+Short = Annotated[str, Field(min_length=1, max_length=160), Flat, PlainText]
+OptShort = Annotated[str, Field(max_length=160), Flat, PlainText]
 Phone = Annotated[str, Field(max_length=16), AfterValidator(phone_ok)]
+Perk = Annotated[str, Field(max_length=100), Flat, PlainText, AfterValidator(no_price)]
 
 
 class Strict(BaseModel):
@@ -145,9 +205,7 @@ class Contact(Strict):
 
     phone: Phone = ""
     whatsapp: Phone = ""
-    email: Annotated[str, Field(max_length=120, pattern=r"^$|^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$")] = (
-        ""
-    )
+    email: Annotated[str, Field(max_length=120, pattern=EMAIL_PATTERN)] = ""
     address_en: OptLine = ""
     address_hi: OptLine = ""
 
@@ -174,6 +232,9 @@ class SiteDetailsIn(Strict):
     check_out: Annotated[str, Field(pattern=TIME_PATTERN)] = "11:00"
     contact: Contact = Field(default_factory=Contact)
     geo: Geo | None = None
+    # The owner's own perk for guests who scan a printed card; empty = none.
+    card_perk_en: Perk = ""
+    card_perk_hi: Perk = ""
 
 
 class AmenityOut(BaseModel):
@@ -230,6 +291,8 @@ SAMPLE_DETAILS = SiteDetailsIn(
         address_hi="मॉल रोड, मसूरी, उत्तराखंड (नमूना पता)",
     ),
     geo=Geo(lat=30.4598, lng=78.0664),
+    card_perk_en="Sample perk: masala chai on arrival for guests who book direct",
+    card_perk_hi="नमूना पर्क: सीधे बुक करने वाले मेहमानों के लिए पहुंचने पर मसाला चाय",
 )  # fmt: skip
 
 
@@ -279,8 +342,10 @@ def save_details(session: Session, property_id: int, details: SiteDetailsIn) -> 
     session.flush()
 
 
-def record_scan(session: Session, property_id: int, card: str, day: date) -> None:
-    """Count one scan of a printed card's QR. Stores only the count."""
+def record_scan(session: Session, property_id: int, card: str, day: date) -> bool:
+    """Count one scan of a printed card's QR. Stores only the count. False
+    (not counted) once the card type has DAILY_SCAN_CAP scans that hotel day,
+    so a script cannot inflate the owner's numbers without bound (R1-4)."""
     row = session.scalar(
         select(SiteCardScan).where(
             SiteCardScan.property_id == property_id,
@@ -292,7 +357,7 @@ def record_scan(session: Session, property_id: int, card: str, day: date) -> Non
         try:
             with session.begin_nested():
                 session.add(SiteCardScan(property_id=property_id, card=card, day=day, count=1))
-            return
+            return True
         except IntegrityError:  # another scan created today's row first
             row = session.scalars(
                 select(SiteCardScan).where(
@@ -301,8 +366,11 @@ def record_scan(session: Session, property_id: int, card: str, day: date) -> Non
                     SiteCardScan.day == day,
                 )
             ).one()
+    if row.count >= DAILY_SCAN_CAP:
+        return False
     row.count += 1
     session.flush()
+    return True
 
 
 def month_scans(session: Session, property_id: int, month_start: date) -> list[SiteCardScan]:

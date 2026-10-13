@@ -46,7 +46,12 @@ from app.services.site import (
 )
 from app.services.site_details import SiteDetailsOut, read_details
 from app.services.site_gen import read_content, read_rooms
-from app.services.site_photos import list_photos
+from app.services.site_photos import (
+    VARIANT_FORMATS,
+    list_photos,
+    variant_width,
+    variant_widths,
+)
 from app.services.slug import (
     SlugProblem,
     current_slug,
@@ -122,9 +127,20 @@ class ContactOut(BaseModel):
     placeholder: bool
 
 
+class PhotoWidthOut(BaseModel):
+    """A responsive copy: ask with `&w=<w>`; it is `width` px wide (never
+    wider than the photo)."""
+
+    w: int
+    width: int
+
+
 class SitePhotoOut(BaseModel):
     """One of the owner's photos. `url` is versioned (?v=) on public pages.
-    `caption_hi` falls back to the English caption."""
+    `caption_hi` falls back to the English caption.
+
+    Public pages only: `widths` and `formats` list the responsive copies,
+    each at `<url>&w=<w>&fmt=<fmt>` (R3-1); empty on the owner's preview."""
 
     id: int
     url: str
@@ -132,6 +148,8 @@ class SitePhotoOut(BaseModel):
     height: int
     caption_en: str
     caption_hi: str
+    widths: list[PhotoWidthOut] = Field(default_factory=list)
+    formats: list[str] = Field(default_factory=list)
 
 
 class SiteTextOut(BaseModel):
@@ -308,7 +326,13 @@ def site_photos(session: Session, prop: Property, slug: str, *, public: bool) ->
             height=p.height,
             caption_en=p.caption_en,
             caption_hi=p.caption_hi or p.caption_en,
-        )
+            widths=[
+                PhotoWidthOut(w=w, width=variant_width(p.width, w)) for w in variant_widths(p.width)
+            ]
+            if public
+            else [],
+            formats=list(VARIANT_FORMATS) if public else [],
+        )  # fmt: skip
         for p in list_photos(session, prop.id)
     ]
 
