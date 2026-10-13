@@ -115,3 +115,11 @@ export type SiteRating = {
   created_at: string;
   source: RatingSource;
 };
+
+/** GET /site/feedback item: a private note a guest sent from the card page. Never public, never counted. */
+export type SiteFeedback = {
+  id: number;
+  message: string;
+  created_at: string;
+  read: boolean;
+};

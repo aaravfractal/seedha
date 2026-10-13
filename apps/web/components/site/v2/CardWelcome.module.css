@@ -1,0 +1,255 @@
+/* The card welcome panel (CardWelcome.tsx), in the hotel page's Pine tokens
+   (hotel.module.css). Hidden unless this is a card visit: the server HTML
+   carries the panel, an inline script marks <html> before it is parsed, so
+   it shows from the first paint and nothing below it moves. Gold is used
+   only for the returning-guest perk. Targets are at least 44 px. */
+
+.panel {
+  display: none;
+  background: var(--hs-stone);
+  border-bottom: 1px solid var(--hs-line);
+}
+.panel[data-on],
+:global(html[data-hs-card]) .panel {
+  display: block;
+}
+.inner {
+  max-width: var(--hs-max);
+  margin: 0 auto;
+  padding: 20px var(--hs-gutter) 16px;
+}
+.kicker {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hs-ink2);
+}
+.title {
+  margin: 0 0 16px;
+  font-family: var(--hs-display);
+  font-weight: 600;
+  font-size: clamp(28px, 4.4vw, 38px);
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+}
+.panel:lang(hi) .title {
+  font-family: var(--font-mukta), sans-serif;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+.block {
+  min-width: 0;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--hs-white);
+  border: 1px solid var(--hs-line);
+}
+.h3 {
+  margin: 0 0 4px;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.label {
+  display: block;
+  margin: 8px 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+}
+.input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #8f877a;
+  background: var(--hs-white);
+  color: var(--hs-ink);
+  font: inherit;
+  font-size: 16px;
+}
+textarea.input {
+  min-height: 96px;
+  resize: vertical;
+}
+.short {
+  max-width: 10ch;
+  font-variant-numeric: tabular-nums;
+}
+.help {
+  margin: 4px 0 8px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--hs-ink2);
+}
+.bad,
+.error {
+  color: #a1281c;
+}
+.error {
+  margin: 4px 0 8px;
+  font-size: 15px;
+}
+.notice {
+  margin: 4px 0 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--hs-cream);
+  font-size: 15px;
+}
+.done {
+  margin: 8px 0 0;
+  font-weight: 600;
+}
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 44px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.primary {
+  border: 0;
+  background: var(--hs-pine);
+  color: var(--hs-white);
+}
+.primary:hover {
+  background: var(--hs-pine-dark);
+}
+.secondary {
+  border: 1.5px solid var(--hs-pine);
+  background: var(--hs-white);
+  color: var(--hs-pine);
+}
+.primary:disabled,
+.secondary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.book .primary {
+  margin-top: 4px;
+}
+.perkLine {
+  margin: 4px 0 8px;
+  font-size: 17px;
+  line-height: 1.45;
+}
+.perkLine strong {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--hs-gold);
+  color: var(--hs-ink);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.sample {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--hs-ink);
+  color: var(--hs-white);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 2px;
+}
+
+/* star radio group */
+.stars {
+  margin: 4px 0 8px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.stars legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.starRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.star {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #8f877a;
+  background: var(--hs-white);
+  color: var(--hs-ink2);
+  font-size: 26px;
+  cursor: pointer;
+}
+.star input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.star.on {
+  color: var(--hs-white);
+  border-color: var(--hs-pine);
+  background: var(--hs-pine);
+}
+.star:has(input:focus-visible) {
+  outline: 3px solid var(--hs-pine);
+  outline-offset: 2px;
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* private note */
+.note {
+  margin-top: 12px;
+  padding: 0 16px;
+  border-radius: 16px;
+  background: var(--hs-white);
+  border: 1px solid var(--hs-line);
+}
+.note[open] {
+  padding-bottom: 16px;
+}
+.summary {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font-weight: 600;
+  cursor: pointer;
+}

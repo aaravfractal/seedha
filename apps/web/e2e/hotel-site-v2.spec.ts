@@ -8,7 +8,7 @@ import { axeViolations, resetSampleHotel, scrollsSideways, signInOnce } from "./
  * at 390 and 1440, in English and Hindi: the sections, 12 amenities then all
  * of them, the location, honest empty reviews, Hotel JSON-LD without any
  * review or rating markup (labelled sample, noindex, not in the sitemap),
- * the strict headers, the card-scan ribbon with ?src=card-room (the owner's
+ * the strict headers, the card welcome panel with ?src=card-room (the owner's
  * own perk or a neutral welcome, never a made-up perk; one scan POST, no
  * cookies, counted by the API), and the offline page from the service
  * worker. Sample data only. Signs in once for the whole file (signInOnce),
@@ -17,10 +17,10 @@ import { axeViolations, resetSampleHotel, scrollsSideways, signInOnce } from "./
 
 const SLUG = "deodar-view";
 const PAGE = `/h/${SLUG}`;
-const WELCOME = "Welcome. Booking here goes straight to the hotel.";
 // The owner's own card perk in a sentence, or the neutral welcome.
-const PERK = "Scanned our card? Book direct for";
-const RIBBON = /Scanned our card\? Book direct for |Welcome\. Booking here goes straight to the hotel\./;
+// The card welcome panel (CardWelcome, docs/CARD_PAGE.md) folds in the old ribbon.
+const PERK = "Book direct next time:";
+const RIBBON = /Thanks for staying at /;
 let ownerState = "";
 
 test.describe.configure({ mode: "serial" });
@@ -259,9 +259,7 @@ test("a card scan shows the owner's perk or a plain welcome and counts once, wit
   expect(ribbonText).not.toMatch(/Sample perk:/);
   if (ribbonText.includes(PERK)) {
     // The sample hotel's perk carries a small "Sample" label (rule 11).
-    await expect(ribbon).toContainText(/^Sample/);
-  } else {
-    await expect(ribbon).toHaveText(WELCOME);
+    await expect(ribbon.locator("[data-book-again]")).toContainText(/Sample/);
   }
   // The ribbon never covers the "Sample photo" label (rule 11, R2-5).
   const chip = await page.getByText("Sample photo").first().boundingBox();

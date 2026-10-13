@@ -87,3 +87,20 @@ export type HotelSitePayload = PublicSite & {
 
 /** Which printed card's QR brought the guest (?src=card-wallet|card-room|card-desk). */
 export type ScanCard = "wallet" | "room" | "desk";
+
+/**
+ * POST /public/site/{slug}/card/verify: a guest's booking reference from the
+ * checkout slip (and the phone's last 4 digits when the API asks for them).
+ * Only `verified` carries a stay token and the Book again prefill (room,
+ * nights, next check-in, the guest's own perk code); never a price.
+ */
+export type CardVerifyState = "verified" | "needs_phone" | "not_found" | "not_ended" | "already_rated";
+export type CardVerify = {
+  state: CardVerifyState;
+  stay_token?: string;
+  room_type?: string;
+  nights?: number;
+  /** YYYY-MM-DD. */
+  next_check_in?: string;
+  perk_code?: string | null;
+};
