@@ -217,6 +217,33 @@ class Geo(Strict):
     lng: float = Field(ge=-180, le=180)
 
 
+Feature = Annotated[str, Field(min_length=1, max_length=40), Flat, PlainText]
+Beds = Annotated[str, Field(max_length=40), Flat, PlainText]
+
+
+class RoomDetail(Strict):
+    """Owner facts for one room type the hotel sells, keyed by its name (the
+    name must be one of the hotel's room types or built rooms, checked on
+    save). Never a price: the price comes from the rooms table or the build."""
+
+    name: Name
+    size_sqft: int | None = Field(default=None, ge=50, le=5000)
+    beds_en: Beds = ""
+    beds_hi: Beds = ""
+    max_guests: int | None = Field(default=None, ge=1, le=12)
+    features_en: list[Feature] = Field(default_factory=list, max_length=2)
+    features_hi: list[Feature] = Field(default_factory=list, max_length=2)
+    photo_id: int | None = Field(default=None, ge=1)
+
+
+def rooms_unique(value: list[RoomDetail]) -> list[RoomDetail]:
+    """One entry per room name."""
+    names = [r.name for r in value]
+    if len(set(names)) != len(names):
+        raise ValueError("Each room can be listed only once")
+    return value
+
+
 class SiteDetailsIn(Strict):
     """Everything the owner can set. PUT replaces the whole object."""
 
@@ -235,6 +262,9 @@ class SiteDetailsIn(Strict):
     # The owner's own perk for guests who scan a printed card; empty = none.
     card_perk_en: Perk = ""
     card_perk_hi: Perk = ""
+    rooms: Annotated[list[RoomDetail], Field(max_length=12), AfterValidator(rooms_unique)] = Field(
+        default_factory=list
+    )
 
 
 class AmenityOut(BaseModel):
@@ -293,6 +323,20 @@ SAMPLE_DETAILS = SiteDetailsIn(
     geo=Geo(lat=30.4598, lng=78.0664),
     card_perk_en="Sample perk: masala chai on arrival for guests who book direct",
     card_perk_hi="नमूना पर्क: सीधे बुक करने वाले मेहमानों के लिए पहुंचने पर मसाला चाय",
+    rooms=[
+        RoomDetail(name="Family Suite", size_sqft=520, beds_en="1 king bed and 2 single beds",
+                   beds_hi="1 किंग बेड और 2 सिंगल बेड", max_guests=4,
+                   features_en=["Separate sitting room", "Valley view"],
+                   features_hi=["अलग बैठक", "घाटी का नज़ारा"]),
+        RoomDetail(name="Deluxe Valley View", size_sqft=320, beds_en="1 king bed",
+                   beds_hi="1 किंग बेड", max_guests=3,
+                   features_en=["Private balcony", "Valley view"],
+                   features_hi=["निजी बालकनी", "घाटी का नज़ारा"]),
+        RoomDetail(name="Standard", size_sqft=240, beds_en="1 queen bed",
+                   beds_hi="1 क्वीन बेड", max_guests=2,
+                   features_en=["Room heater", "Tea and coffee maker"],
+                   features_hi=["रूम हीटर", "चाय-कॉफ़ी मेकर"]),
+    ],
 )  # fmt: skip
 
 
@@ -303,6 +347,29 @@ def details_out(details: SiteDetailsIn, *, sample: bool) -> SiteDetailsOut:
         for a in details.amenities
     ]
     return SiteDetailsOut(**details.model_dump(), amenity_labels=labels, sample=sample)
+
+
+def check_rooms(details: SiteDetailsIn, room_names: set[str], photo_ids: set[int]) -> str | None:
+    """Why the room details cannot be saved, or None. Every name must be a
+    room the hotel sells and every photo one of the hotel's site photos."""
+    for room in details.rooms:
+        if room.name not in room_names:
+            return f"{room.name} is not one of your rooms"
+        if room.photo_id is not None and room.photo_id not in photo_ids:
+            return f"The photo for {room.name} is not one of your site photos"
+    return None
+
+
+def with_room_photos(details: SiteDetailsOut, photo_ids: set[int]) -> SiteDetailsOut:
+    """Room photos only when the photo is one this view shows (a public page
+    never points at an unpublished or removed photo)."""
+    rooms = [
+        r
+        if r.photo_id is None or r.photo_id in photo_ids
+        else r.model_copy(update={"photo_id": None})
+        for r in details.rooms
+    ]
+    return details.model_copy(update={"rooms": rooms})
 
 
 def stored_details(session: Session, property_id: int) -> SiteDetailsIn | None:

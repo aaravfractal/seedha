@@ -67,6 +67,8 @@ LIMITS: dict[str, Limit] = {
     "site_scan": Limit(10, 60, ceiling=600),
     # Owner card PDFs and QR downloads: CPU work, never needed in a loop (R1-11).
     "cards": Limit(20, 60),
+    # Verified-guest rating links: a guest opens and submits once (mini-site).
+    "rate": Limit(20, 60),
     # The public website loads the sample figures once per page view.
     "public_sample": Limit(60, 60),
 }

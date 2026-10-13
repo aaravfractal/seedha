@@ -31,6 +31,7 @@ from app.services.desk import (
 )
 from app.services.messages import draft_for_booking
 from app.services.pipeline import record_slip
+from app.services.site_ratings import issue_token, rating_url
 from app.services.slips import Slip
 
 router = APIRouter(prefix="/desk", tags=["desk"])
@@ -104,6 +105,9 @@ class CheckoutOut(BaseModel):
     booking_id: int
     perk_code: str
     slip: SlipOut
+    # The guest's one-time verified rating link (hotel mini-site); null when
+    # this stay already has one (a reprint). Shown, never sent.
+    rating_url: str | None = None
 
 
 class CommandOut(BaseModel):
@@ -208,10 +212,13 @@ def desk_checkout(
     """Print the checkout slip from the guest's own booking (ruling 4) and,
     if the guest said yes at the Desk, prepare a win-back draft."""
     stay = stay_for_room(session, prop, body.room)
-    slip, perk = check_out(session, prop, stay, utc_now())
+    now = utc_now()
+    slip, perk = check_out(session, prop, stay, now)
     draft_for_booking(session, prop, stay.booking.id, settings.web_origin, wording)
     record_slip(session, stay.booking.id)
-    return CheckoutOut(booking_id=stay.booking.id, perk_code=perk.code, slip=slip_out(slip))
+    token = issue_token(session, prop.id, "desk", stay.booking.id, now)
+    return CheckoutOut(booking_id=stay.booking.id, perk_code=perk.code, slip=slip_out(slip),
+                       rating_url=rating_url(settings.web_origin, token))  # fmt: skip
 
 
 @router.get("/close-slip", response_model=SlipOut)
