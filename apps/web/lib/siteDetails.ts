@@ -699,7 +699,7 @@ export const RATINGS_PUBLIC_FROM = 3;
 /** Where a rating came from, in plain words. */
 export function ratingSource(source: string): string {
   if (source === "link" || source === "direct" || source === "seedha_link") return "Booked direct";
-  if (source === "desk") return "Checked out at the Desk";
+  if (source === "desk") return "Checked out at the front desk";
   return "Verified guest";
 }
 

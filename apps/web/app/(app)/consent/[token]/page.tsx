@@ -20,9 +20,9 @@ function Tick() {
   );
 }
 
-/** The guest's consent page, opened from the Desk QR. Unticked by default (rule 5). */
+/** The guest's consent page, opened from the front desk QR. Unticked by default (rule 5). */
 export default function ConsentScreen({ params }: { params: Promise<{ token: string }> }) {
-  // Inside the Desk simulator's phone frame, show the guest screen alone,
+  // Inside the front desk page's phone frame, show the guest screen alone,
   // without the site header and footer (design QA D1).
   useEffect(() => {
     if (window.self !== window.top) document.documentElement.dataset.embedded = "true";
@@ -71,7 +71,7 @@ export default function ConsentScreen({ params }: { params: Promise<{ token: str
           {used
             ? "Your answer is saved. Your perk arrives after checkout."
             : ended
-              ? "Links from the Desk work for 10 minutes. Ask the front desk for a new QR."
+              ? "Links from the front desk QR work for 10 minutes. Ask the front desk for a new QR."
               : (page.error?.message ?? "No connection. Try again.")}
         </p>
         {ended ? null : (

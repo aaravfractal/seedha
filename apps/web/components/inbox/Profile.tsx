@@ -66,7 +66,7 @@ export function Profile({
           <span className={`tag ${verified ? "ok" : ""}`}>{verified ? "✓ Verified" : "◷ Pending proof"}</span>
         </div>
         <div className={styles.kv}>
-          <span>Said yes at the Desk</span>
+          <span>Said yes at the front desk</span>
           <span>{dateTime(p.consent_given_at)}</span>
         </div>
         <p className={styles.note}>Messages only while this consent stands. STOP ends it at once.</p>

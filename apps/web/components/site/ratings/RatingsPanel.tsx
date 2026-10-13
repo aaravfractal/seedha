@@ -27,7 +27,7 @@ function isRating(value: unknown): value is SiteRating {
 
 /**
  * Ratings from verified guests (a direct booking through Seedha Link or a
- * Desk checkout). The owner can hide or show a comment; stars cannot be
+ * front desk checkout). The owner can hide or show a comment; stars cannot be
  * edited, and nothing here is ever invented.
  */
 export function RatingsPanel() {
@@ -65,7 +65,7 @@ export function RatingsPanel() {
           </h2>
           <p className={o.sub}>
             Only verified guests can rate: guests who booked direct through Seedha Link or checked out at the
-            Desk get a one-time link.
+            front desk get a one-time link.
           </p>
         </div>
       </div>

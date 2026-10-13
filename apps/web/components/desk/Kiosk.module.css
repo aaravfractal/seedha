@@ -1,10 +1,10 @@
-/* Desk kiosk (/desk/device): full screen, landscape first, large type. */
+/* Front desk screen (/desk/device): full screen, landscape first, large type. */
 
 .kiosk {
-  --ring-white: var(--hint);
-  --ring-glow: color-mix(in srgb, var(--gainFill) 45%, transparent);
-  --ring-glow-still: color-mix(in srgb, var(--gainFill) 35%, transparent);
-  --ring-glow-end: color-mix(in srgb, var(--gainFill) 0%, transparent);
+  --status-ready: var(--hint);
+  --status-glow: color-mix(in srgb, var(--gainFill) 45%, transparent);
+  --status-glow-still: color-mix(in srgb, var(--gainFill) 35%, transparent);
+  --status-glow-end: color-mix(in srgb, var(--gainFill) 0%, transparent);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -100,10 +100,6 @@
   min-height: 44px;
 }
 
-.warnBtn {
-  box-shadow: inset 0 0 0 2px var(--loss);
-}
-
 .turn {
   display: none;
   margin: 0;
@@ -121,7 +117,7 @@
   align-items: stretch;
 }
 
-/* The screen, framed by the Desk ring colour. */
+/* The screen, framed green once the guest says yes. */
 .stage {
   position: relative;
   display: flex;
@@ -133,36 +129,32 @@
   padding: 64px 24px 28px;
   border-radius: var(--r-panel);
   background: var(--card);
-  border: 6px solid var(--ring-white);
+  border: 6px solid var(--status-ready);
   text-align: center;
 }
 
-.ring_green {
+.status_saved {
   border-color: var(--gainFill);
   animation: kioskPulse 1.8s ease-out infinite;
 }
 
-.ring_red {
-  border-color: var(--lossFill);
-}
-
 @keyframes kioskPulse {
   0% {
-    box-shadow: 0 0 0 0 var(--ring-glow);
+    box-shadow: 0 0 0 0 var(--status-glow);
   }
   100% {
-    box-shadow: 0 0 0 18px var(--ring-glow-end);
+    box-shadow: 0 0 0 18px var(--status-glow-end);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ring_green {
+  .status_saved {
     animation: none;
-    box-shadow: 0 0 0 6px var(--ring-glow-still);
+    box-shadow: 0 0 0 6px var(--status-glow-still);
   }
 }
 
-.ringChip {
+.statusChip {
   position: absolute;
   top: 14px;
   left: 16px;
@@ -178,31 +170,15 @@
   font-weight: 600;
 }
 
-.ringDot {
+.statusDot {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: var(--ring-white);
+  background: var(--status-ready);
 }
 
-.ring_green .ringDot {
+.status_saved .statusDot {
   background: var(--gainFill);
-}
-
-.ring_red .ringDot {
-  background: var(--lossFill);
-}
-
-.paperBanner {
-  margin: 0;
-  max-width: 34em;
-  padding: 10px 16px;
-  border-left: 4px solid var(--loss);
-  border-radius: var(--r-input);
-  background: var(--lossSoft);
-  color: var(--ink);
-  font-size: 17px;
-  text-align: left;
 }
 
 .state {
@@ -309,7 +285,7 @@
   color: var(--ink2);
 }
 
-/* Thermal paper stays white in both themes, black text only. */
+/* The slip stays white in both themes, black text only. */
 .receipt {
   margin: 0;
   max-width: 100%;
@@ -461,7 +437,7 @@
     gap: 10px;
     padding: 46px 20px 10px;
   }
-  .ringChip {
+  .statusChip {
     top: 8px;
     padding: 4px 12px;
   }

@@ -31,7 +31,7 @@ from app.services.desk import (
 )
 from app.services.messages import draft_for_booking
 from app.services.pipeline import record_slip
-from app.services.site_ratings import issue_token, rating_url
+from app.services.site_ratings import guest_link_base, issue_token, rating_url
 from app.services.slips import Slip
 
 router = APIRouter(prefix="/desk", tags=["desk"])
@@ -213,12 +213,15 @@ def desk_checkout(
     if the guest said yes at the Desk, prepare a win-back draft."""
     stay = stay_for_room(session, prop, body.room)
     now = utc_now()
-    slip, perk = check_out(session, prop, stay, now)
+    # Checkout means the stay is over: the rating link opens today. Shown on
+    # the Desk screen and printed on the slip, never messaged.
+    token = issue_token(session, prop.id, "desk", stay.booking.id, now, today(session, prop))
+    link = rating_url(guest_link_base(settings), token)
+    slip, perk = check_out(session, prop, stay, now, link)
     draft_for_booking(session, prop, stay.booking.id, settings.web_origin, wording)
     record_slip(session, stay.booking.id)
-    token = issue_token(session, prop.id, "desk", stay.booking.id, now)
     return CheckoutOut(booking_id=stay.booking.id, perk_code=perk.code, slip=slip_out(slip),
-                       rating_url=rating_url(settings.web_origin, token))  # fmt: skip
+                       rating_url=link)  # fmt: skip
 
 
 @router.get("/close-slip", response_model=SlipOut)

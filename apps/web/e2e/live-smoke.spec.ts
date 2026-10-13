@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { axeViolations, scrollsSideways, signIn } from "./helpers";
 
 /**
- * Live features smoke: the Desk kiosk, the Calendar's Add events sheet and
+ * Live features smoke: the front desk screen, the Calendar's Add events sheet and
  * the Proof screen in light and dark, on a phone (390) and a laptop (1440).
  * No sideways scroll, the key text on screen, and no axe WCAG 2.1 A/AA
  * violation. Read only: the sheet is closed without reading or saving, and
@@ -12,7 +12,7 @@ import { axeViolations, scrollsSideways, signIn } from "./helpers";
 const THEMES = ["light", "dark"] as const;
 const WIDTHS = [390, 1440] as const;
 
-test("Desk kiosk, Calendar sheet and Proof: both themes, phone and laptop", async ({
+test("Front desk screen, Calendar sheet and Proof: both themes, phone and laptop", async ({
   page,
   context,
   baseURL,
@@ -32,7 +32,7 @@ test("Desk kiosk, Calendar sheet and Proof: both themes, phone and laptop", asyn
       await page.goto("/desk/device");
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await expect(page.getByText("Connected, checking every 2 seconds")).toBeVisible();
-      await expect(page.getByTestId("desk-ring")).toHaveAccessibleName("Desk light white: ready");
+      await expect(page.getByTestId("desk-status")).toHaveAccessibleName("Front desk screen: ready");
       await expect(page.getByText(/ · Ready$/)).toBeVisible();
       await expect(page.getByText("Staff: check in or check out")).toBeVisible();
       if (width === 390)

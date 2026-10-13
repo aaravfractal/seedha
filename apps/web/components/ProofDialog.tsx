@@ -27,12 +27,12 @@ function copy(p: ConsentProof): { title: string; body: string } {
   if (p.bundle && p.matches) {
     return {
       title: "Consent verified",
-      body: `${p.guest_name} said yes at the Desk. The record still hashes to the fingerprint sealed in the bundle, so it has not been changed.`,
+      body: `${p.guest_name} said yes at the front desk. The record still hashes to the fingerprint sealed in the bundle, so it has not been changed.`,
     };
   }
   return {
     title: "Waiting for tonight's bundle",
-    body: `${p.guest_name} said yes at the Desk. The fingerprint is sealed into tonight's bundle at 9 PM.`,
+    body: `${p.guest_name} said yes at the front desk. The fingerprint is sealed into tonight's bundle at 9 PM.`,
   };
 }
 

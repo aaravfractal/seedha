@@ -1,90 +1,63 @@
 "use client";
 
 import QRCode from "qrcode";
-import { useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import type { Ref } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, postJson } from "@/lib/api";
 import type { DeskCommand, Slip } from "@/lib/types";
 import { armChime, chime } from "./desk/chime";
-import { ThermalSlip } from "./desk/ThermalSlip";
-import type { PrintJob } from "./desk/ThermalSlip";
+import { OnScreenSlip } from "./desk/OnScreenSlip";
+import type { SlipJob } from "./desk/OnScreenSlip";
 import styles from "./desk/Desk.module.css";
 
-/** What the Desk screen shows (480 x 320). */
+/** What the front desk screen shows. */
 type Screen =
   | { kind: "idle" }
   | { kind: "qr"; svg: string; text: string; expiresAt: number }
   | { kind: "ok"; text: string; sub: string }
   | { kind: "text"; text: string; sub: string };
 
-type Led = "white" | "green" | "red";
-
-/** Actions the page can run on the simulated box. */
-export type DeskHandle = {
-  /** Paper is back: print whatever waited. */
-  paperLoaded: () => void;
-};
-
 const POLL_MS = 2000;
-const IDLE_AFTER_PRINT_MS = 2600;
-const LED_LABEL: Record<Led, string> = {
-  white: "Desk light white: ready",
-  green: "Desk light green: consent saved",
-  red: "Desk light red: printer needs paper",
-};
+const IDLE_AFTER_SLIP_MS = 2600;
 
 function str(value: unknown, fallback = ""): string {
   return typeof value === "string" ? value : fallback;
 }
 
-function Check({ tone }: { tone: "ok" | "bad" }) {
+function Check() {
   return (
-    <div className={`${styles.badge} ${tone === "ok" ? styles.badgeOk : styles.badgeBad}`} aria-hidden="true">
-      {tone === "ok" ? (
-        <svg width="44%" height="44%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
-          <path d="M5 12l5 5 9-10" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ) : (
-        <svg width="40%" height="40%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
-          <path d="M12 5v9M12 19v.5" strokeLinecap="round" />
-        </svg>
-      )}
+    <div className={`${styles.badge} ${styles.badgeOk}`} aria-hidden="true">
+      <svg width="44%" height="44%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3">
+        <path d="M5 12l5 5 9-10" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </div>
   );
 }
 
 /**
- * The Desk box, simulated in the browser. It behaves like the firmware: polls
- * the API every 2 seconds with its device key (added by the server proxy),
- * runs each command, then acknowledges it. "No paper" is a simulator-only
- * state: slips wait in the box until paper is loaded.
+ * A preview of the front desk screen (the phone or tablet at reception). It
+ * polls the desk command queue every 2 seconds through the server proxy, runs
+ * each command, then acknowledges it. The checkout slip shows on screen.
  */
 export function DeskDevice({
   hotel,
-  noPaper,
   knownSlips,
   onEvent,
   onOnline,
-  ref,
 }: {
   hotel: string;
-  noPaper: boolean;
   knownSlips: readonly Slip[];
   onEvent: (kind: string) => void;
   onOnline?: (online: boolean) => void;
-  ref?: Ref<DeskHandle>;
 }) {
   const [screen, setScreen] = useState<Screen>({ kind: "idle" });
-  const [ring, setRing] = useState(false);
-  const [paper, setPaper] = useState<{ seq: number; job: PrintJob } | null>(null);
+  const [shown, setShown] = useState<{ seq: number; job: SlipJob } | null>(null);
   const [online, setOnline] = useState<boolean | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const latest = useRef({ onEvent, onOnline, knownSlips, noPaper });
-  const pending = useRef<PrintJob | null>(null);
+  const latest = useRef({ onEvent, onOnline, knownSlips });
 
   useEffect(() => {
-    latest.current = { onEvent, onOnline, knownSlips, noPaper };
-  }, [onEvent, onOnline, knownSlips, noPaper]);
+    latest.current = { onEvent, onOnline, knownSlips };
+  }, [onEvent, onOnline, knownSlips]);
 
   useEffect(() => armChime(), []);
 
@@ -92,24 +65,9 @@ export function DeskDevice({
     timers.current.push(setTimeout(fn, ms));
   }, []);
 
-  const print = useCallback((job: PrintJob, force = false) => {
-    if (latest.current.noPaper && !force) {
-      pending.current = job;
-      return;
-    }
-    pending.current = null;
-    setPaper((prev) => ({ seq: (prev?.seq ?? 0) + 1, job }));
+  const showSlip = useCallback((job: SlipJob) => {
+    setShown((prev) => ({ seq: (prev?.seq ?? 0) + 1, job }));
   }, []);
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      paperLoaded: () => {
-        if (pending.current) print(pending.current, true);
-      },
-    }),
-    [print],
-  );
 
   const run = useCallback(
     async (command: DeskCommand) => {
@@ -131,20 +89,14 @@ export function DeskDevice({
           setScreen({ kind: "text", text: str(p.text), sub: str(p.sub) });
           break;
         case "show_idle":
-          later(() => {
-            setScreen({ kind: "idle" });
-            setRing(false);
-          }, IDLE_AFTER_PRINT_MS);
-          break;
-        case "set_ring":
-          setRing(str(p.color) === "green");
+          later(() => setScreen({ kind: "idle" }), IDLE_AFTER_SLIP_MS);
           break;
         case "beep":
           chime();
           break;
         case "print_slip": {
           const text = str(p.text);
-          print({ slip: latest.current.knownSlips.find((s) => s.text === text) ?? null, text });
+          showSlip({ slip: latest.current.knownSlips.find((s) => s.text === text) ?? null, text });
           break;
         }
         default:
@@ -152,7 +104,7 @@ export function DeskDevice({
       }
       latest.current.onEvent(command.kind);
     },
-    [later, print],
+    [later, showSlip],
   );
 
   useEffect(() => {
@@ -192,77 +144,53 @@ export function DeskDevice({
     return () => clearTimeout(t);
   }, [screen]);
 
-  const led: Led = noPaper ? "red" : ring ? "green" : "white";
-  const last = paper?.job ?? null;
-
   return (
     <div className={styles.deviceCol}>
       <div className={styles.device}>
-        <div className={`${styles.led} ${styles[`led_${led}`]}`} role="img" aria-label={LED_LABEL[led]} />
-        <div className={styles.panel}>
-          <div className={styles.screen} role="status" aria-live="polite" aria-label="Desk screen">
-            {noPaper ? (
-              <div className={styles.state} key="err">
-                <Check tone="bad" />
-                <p className={styles.big}>Printer needs paper</p>
-                <p className={styles.small}>Load a 58 mm roll to keep printing.</p>
-              </div>
-            ) : screen.kind === "idle" ? (
-              <div className={styles.state} key="idle">
-                <p className={styles.huge}>Seedha</p>
-                <p className={styles.small}>{hotel} · Ready</p>
-              </div>
-            ) : screen.kind === "qr" ? (
-              <div className={`${styles.state} ${styles.qrState}`} key="qr">
-                <div
-                  className={styles.qr}
-                  role="img"
-                  aria-label="Consent QR code"
-                  dangerouslySetInnerHTML={{ __html: screen.svg }}
-                />
-                <p className={styles.mid}>{screen.text}</p>
-              </div>
-            ) : screen.kind === "ok" ? (
-              <div className={styles.state} key="ok">
-                <Check tone="ok" />
-                <p className={styles.big}>{screen.text}</p>
-                <p className={styles.small}>{screen.sub ? `${screen.sub} · ` : ""}Proof added tonight</p>
-              </div>
-            ) : (
-              <div className={styles.state} key="text">
-                <p className={styles.big}>{screen.text}</p>
-                <p className={styles.small}>{screen.sub}</p>
-              </div>
-            )}
-          </div>
-          <div className={styles.panelFoot}>
-            <span className={styles.brand}>Seedha</span>
-            <button
-              type="button"
-              className={styles.printBtn}
-              disabled={!last || noPaper}
-              onClick={() => last && print(last)}
-            >
-              Print
-            </button>
-          </div>
+        <div className={styles.screen} role="status" aria-live="polite" aria-label="Front desk screen">
+          {screen.kind === "idle" ? (
+            <div className={styles.state} key="idle">
+              <p className={styles.huge}>Seedha</p>
+              <p className={styles.small}>{hotel} · Ready</p>
+            </div>
+          ) : screen.kind === "qr" ? (
+            <div className={`${styles.state} ${styles.qrState}`} key="qr">
+              <div
+                className={styles.qr}
+                role="img"
+                aria-label="Consent QR code"
+                dangerouslySetInnerHTML={{ __html: screen.svg }}
+              />
+              <p className={styles.mid}>{screen.text}</p>
+            </div>
+          ) : screen.kind === "ok" ? (
+            <div className={styles.state} key="ok">
+              <Check />
+              <p className={styles.big}>{screen.text}</p>
+              <p className={styles.small}>{screen.sub ? `${screen.sub} · ` : ""}Proof added tonight</p>
+            </div>
+          ) : (
+            <div className={styles.state} key="text">
+              <p className={styles.big}>{screen.text}</p>
+              <p className={styles.small}>{screen.sub}</p>
+            </div>
+          )}
         </div>
-        <div className={styles.slot} aria-hidden="true" />
       </div>
-      <div className={styles.paperWell}>
-        {paper ? (
-          <figure key={paper.seq} className={styles.paper} aria-label="Printed slip">
-            <ThermalSlip job={paper.job} />
+      <div className={styles.slipWell}>
+        {shown ? (
+          <figure key={shown.seq} className={styles.paper} aria-label="Slip on screen">
+            <OnScreenSlip job={shown.job} />
           </figure>
         ) : null}
       </div>
       <p className={styles.status} role="status">
-        Desk box (simulated in the browser):{" "}
+        Front desk screen:{" "}
         {online === null
           ? "connecting"
           : online
-            ? "online, polling every 2 seconds"
-            : "offline. Is the API running?"}
+            ? "online, checking every 2 seconds"
+            : "offline. Is the Seedha server running?"}
       </p>
     </div>
   );

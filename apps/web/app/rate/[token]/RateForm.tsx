@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { ApiError, postJson, useApi } from "@/lib/api";
+import { longDate } from "@/lib/format";
 import { RATING_COMMENT_MAX, ratingCommentError } from "@/lib/hotelSiteV2";
 import type { Lang } from "@/lib/types-site";
 import type { RatePage } from "@/lib/types-hotel-site";
@@ -28,6 +29,9 @@ const COPY = {
     usedSub: "Each stay can be rated once.",
     invalid: "This rating link does not work.",
     invalidSub: "Check the link from your booking or checkout slip.",
+    notYet: (day: string) =>
+      day ? `You can rate your stay from ${longDate(day)}.` : "You can rate your stay once it is over.",
+    notYetSub: "Keep this link. It opens on the day your stay ends.",
     loading: "Opening",
     failed: "That did not load.",
     retry: "Try again",
@@ -52,6 +56,11 @@ const COPY = {
     usedSub: "हर ठहराव को एक बार रेटिंग दी जा सकती है।",
     invalid: "यह रेटिंग लिंक काम नहीं करता।",
     invalidSub: "अपनी बुकिंग या चेक-आउट पर्ची वाला लिंक देखें।",
+    notYet: (day: string) =>
+      day
+        ? `आप ${hindiDate(day)} से अपने ठहराव को रेटिंग दे सकते हैं।`
+        : "ठहराव पूरा होने के बाद आप रेटिंग दे सकते हैं।",
+    notYetSub: "यह लिंक संभाल कर रखें। यह आपके ठहराव के आखिरी दिन खुलेगा।",
     loading: "खुल रहा है",
     failed: "यह लोड नहीं हुआ।",
     retry: "फिर कोशिश करें",
@@ -59,7 +68,19 @@ const COPY = {
   },
 } as const;
 
-type Done = "none" | "saved" | "used";
+type Done = "none" | "saved" | "used" | "not_yet";
+
+/** "2026-10-15" -> "15 अक्टूबर 2026" (the day as stored, no time zone shift). */
+function hindiDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const day = new Date(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1));
+  return new Intl.DateTimeFormat("hi-IN", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(day);
+}
 
 /** The rating form: a 1 to 5 star radio group, an optional comment, sent once. */
 export function RateForm({ token }: { token: string }) {
@@ -86,7 +107,8 @@ export function RateForm({ token }: { token: string }) {
       await postJson(`public/rate/${encodeURIComponent(token)}`, text ? { stars, comment: text } : { stars });
       setDone("saved");
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) setDone("used");
+      if (err instanceof ApiError && err.status === 409)
+        setDone(err.code === "not_open_yet" ? "not_yet" : "used");
       else setError(err instanceof ApiError && err.status !== 0 ? err.message : t.offline);
     } finally {
       setBusy(false);
@@ -129,6 +151,13 @@ export function RateForm({ token }: { token: string }) {
       <div role="status">
         <h1 className={s.title}>{t.used}</h1>
         <p className={s.sub}>{t.usedSub}</p>
+      </div>
+    );
+  } else if (done === "not_yet" || state === "not_yet") {
+    body = (
+      <div role="status">
+        <h1 className={s.title}>{t.notYet(page.data?.opens_on ?? "")}</h1>
+        <p className={s.sub}>{t.notYetSub}</p>
       </div>
     );
   } else if (state === "invalid") {

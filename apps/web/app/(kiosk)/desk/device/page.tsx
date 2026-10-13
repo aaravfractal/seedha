@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Kiosk } from "@/components/desk/Kiosk";
 
 export const metadata: Metadata = {
-  title: "Seedha Desk",
-  description: "The front desk screen: consent QR, ring and slips on a phone or tablet.",
+  title: "Front desk screen",
+  description:
+    "The front desk screen: the consent QR and the checkout slip on a phone or tablet at reception.",
   robots: { index: false, follow: false },
 };
 

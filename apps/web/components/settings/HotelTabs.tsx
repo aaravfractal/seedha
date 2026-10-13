@@ -59,7 +59,7 @@ export function HotelTab({ data, beforeReset }: { data: SettingsData; beforeRese
     setBusy(true);
     try {
       const result = await postJson<{ ok: boolean; demo_date: string }>("demo/reset");
-      toast(`Sample hotel reset. Desk date ${result.demo_date}.`);
+      toast(`Sample hotel reset. Demo date ${result.demo_date}.`);
       shell.reload();
       setConfirming(false);
     } catch (err) {
