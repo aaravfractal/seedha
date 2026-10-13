@@ -6,14 +6,14 @@ import { DeletionForm } from "./DeletionForm";
 export const metadata: Metadata = {
   title: "Delete my data · Seedha",
   description:
-    "Guests can ask a hotel using Seedha to erase the consent they gave at its Desk, with a booking reference and WhatsApp number.",
+    "Guests can ask a hotel using Seedha to erase the consent they gave at its front desk, with a booking reference and WhatsApp number.",
 };
 
 export default function DataDeletionPage() {
   return (
     <LegalPage
       title="Delete my data"
-      lede="Ask the hotel to erase the consent you gave at its Desk."
+      lede="Ask the hotel to erase the consent you gave at its front desk."
       points={{
         en: [
           "Give the booking reference from your bill or slip and the WhatsApp number you entered.",

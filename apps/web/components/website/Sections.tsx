@@ -391,8 +391,8 @@ export function DeskSection() {
             </li>
             <li>The guest scans it and says yes on their own phone. Nothing is ticked for them.</li>
             <li>
-              At checkout the slip is shown on screen or sent by WhatsApp, with a perk code for next time. You
-              approve every message first.
+              At checkout the slip, with a perk code for next time, is shown on screen, and the code can
+              follow on WhatsApp once you approve the message. You approve every message first.
             </li>
           </ol>
           <div className={styles.ctaRow} style={{ justifyContent: "flex-start" }}>

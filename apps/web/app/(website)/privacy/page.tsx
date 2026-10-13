@@ -15,14 +15,14 @@ export default function PrivacyPage() {
       lede="How Seedha handles personal data, written with India's Digital Personal Data Protection Act, 2023 and the Digital Personal Data Protection Rules, 2025 in mind."
       points={{
         en: [
-          "Guests get WhatsApp offers only if they tick yes at the hotel's Desk. The box starts unticked.",
+          "Guests get WhatsApp offers only if they tick yes at the hotel's front desk. The box starts unticked.",
           "Contacts that come from OTAs (MakeMyTrip, Booking.com, Agoda) are never used for messages.",
           "Reply STOP to any message and the messages stop.",
           "No name, phone number or booking detail goes on a public blockchain. Only the night's Merkle root can, and only on the Polygon Amoy testnet when that option is on.",
           "You can ask for your consent record to be erased on the Delete my data page.",
         ],
         hi: [
-          "Guest ko WhatsApp offer tabhi milte hain jab woh Desk par khud tick karke haan kehte hain. Box pehle se khaali hota hai.",
+          "Guest ko WhatsApp offer tabhi milte hain jab woh front desk par khud tick karke haan kehte hain. Box pehle se khaali hota hai.",
           "OTA (MakeMyTrip, Booking.com, Agoda) se aaye contact kabhi message ke liye use nahi hote.",
           "Kisi bhi message par STOP likhiye, message band ho jayenge.",
           "Public blockchain par naam, phone ya booking ki koi jaankari nahi jaati. Sirf raat ka Merkle root jaa sakta hai, aur woh bhi tabhi jab Polygon Amoy testnet option chalu ho.",
@@ -76,9 +76,9 @@ export default function PrivacyPage() {
           came back through an OTA. Basis: processing on the hotel&apos;s behalf, under its contract with us.
         </li>
         <li>
-          <b>Desk consent records.</b> The WhatsApp number the guest types, the time, the wording version they
-          agreed to, a random salt and a fingerprint. Used to send that guest offers the owner approves.
-          Basis: the guest&apos;s consent, given by ticking an unticked box.
+          <b>Front desk consent records.</b> The WhatsApp number the guest types, the time, the wording
+          version they agreed to, a random salt and a fingerprint. Used to send that guest offers the owner
+          approves. Basis: the guest&apos;s consent, given by ticking an unticked box.
         </li>
         <li>
           <b>Messages.</b> Drafts the owner approves, and the text of messages the guest and the hotel send
@@ -215,7 +215,7 @@ export default function PrivacyPage() {
 
       <h2 className="section">13. Children</h2>
       <p>
-        Seedha is not intended for anyone under 18. The Desk consent is for adult guests, and we do not
+        Seedha is not intended for anyone under 18. The front desk consent is for adult guests, and we do not
         knowingly collect a child&apos;s data for messages.
       </p>
 

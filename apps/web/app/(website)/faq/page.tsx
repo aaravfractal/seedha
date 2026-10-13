@@ -30,7 +30,7 @@ const FAQ: [string, string][] = [
   ],
   [
     "Can I message guests I found in OTA statements?",
-    "No. Guest contacts from OTAs are never used for messages. Only guests who tick yes at your Desk can be messaged, and they can reply STOP at any time.",
+    "No. Guest contacts from OTAs are never used for messages. Only guests who tick yes at your front desk can be messaged, and they can reply STOP at any time.",
   ],
   [
     "Does Seedha make me drop my prices?",
@@ -42,7 +42,7 @@ const FAQ: [string, string][] = [
   ],
   [
     "What is the front desk screen?",
-    "A page you open on any phone or tablet at reception. At check-in it shows a QR code for one booking, and the guest says yes on their own phone. At checkout the slip, with what the hotel kept and the guest's perk code, is shown on screen or sent by WhatsApp. You approve every message first.",
+    "A page you open on any phone or tablet at reception. At check-in it shows a QR code for one booking, and the guest says yes on their own phone. At checkout the slip, with what the hotel kept and the guest's perk code, is shown on screen, and the perk code can follow on WhatsApp once you approve the message. You approve every message first.",
   ],
   [
     "What goes on the blockchain?",

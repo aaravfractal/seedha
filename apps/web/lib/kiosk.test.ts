@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  screenWords,
   INITIAL_KIOSK,
   STATUS_LABEL,
   applyCommand,
@@ -126,4 +127,18 @@ test("a show_qr command with no payload shows the bad-link screen instead of thr
   const command = { id: 9, kind: "show_qr", payload: null } as unknown as KioskCommand;
   const { state } = applyCommand(INITIAL_KIOSK, command);
   assert.equal(state.screen.kind, "bad_link");
+});
+
+test("device printing words become on-screen words on the Front desk screen", () => {
+  const { state } = run(
+    INITIAL_KIOSK,
+    cmd("show_text", { text: "Printing slip", sub: "Please take your receipt" }),
+  );
+  assert.deepEqual(state.screen, { kind: "text", text: "Slip ready", sub: "Shown on this screen" });
+  const closing = run(INITIAL_KIOSK, cmd("show_text", { text: "Printing slip", sub: "Close of day" })).state;
+  assert.deepEqual(closing.screen, { kind: "text", text: "Slip ready", sub: "Close of day" });
+  assert.deepEqual(screenWords("Test print", "Please check the paper"), {
+    text: "Screen check",
+    sub: "This screen is working",
+  });
 });

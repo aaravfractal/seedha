@@ -213,11 +213,11 @@ def desk_checkout(
     if the guest said yes at the Desk, prepare a win-back draft."""
     stay = stay_for_room(session, prop, body.room)
     now = utc_now()
-    # Checkout means the stay is over: the rating link opens today. Shown on
-    # the Desk screen and printed on the slip, never messaged.
+    # Checkout means the stay is over: the rating link opens today. Shown as a
+    # QR on the Front desk screen, never messaged.
     token = issue_token(session, prop.id, "desk", stay.booking.id, now, today(session, prop))
     link = rating_url(guest_link_base(settings), token)
-    slip, perk = check_out(session, prop, stay, now, link)
+    slip, perk = check_out(session, prop, stay, now)
     draft_for_booking(session, prop, stay.booking.id, settings.web_origin, wording)
     record_slip(session, stay.booking.id)
     return CheckoutOut(booking_id=stay.booking.id, perk_code=perk.code, slip=slip_out(slip),

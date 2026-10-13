@@ -154,7 +154,7 @@ const FAQ = [
   ],
   [
     "What is the front desk screen?",
-    "A page you open on any phone or tablet at reception. It shows a QR code for one booking. The guest scans it and says yes on their own phone. The slip is shown on screen or sent by WhatsApp, and you approve every message first.",
+    "A page you open on any phone or tablet at reception. It shows a QR code for one booking. The guest scans it and says yes on their own phone. The slip is shown on screen, and the perk code can follow on WhatsApp once you approve the message.",
   ],
   [
     "Is this allowed under OTA rules and DPDP?",

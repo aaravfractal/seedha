@@ -41,6 +41,21 @@ function str(value: unknown, fallback = ""): string {
 }
 
 /** The API's URL if it is an absolute http(s) URL, else null. Never rewritten. */
+/**
+ * The device API still speaks of printing (firmware/ stays in the repo, D-105).
+ * The Front desk screen shows the slip on screen, so its words say that.
+ */
+const DEVICE_WORDS: Record<string, string> = {
+  "Printing slip": "Slip ready",
+  "Please take your receipt": "Shown on this screen",
+  "Test print": "Screen check",
+  "Please check the paper": "This screen is working",
+};
+
+export function screenWords(text: string, sub: string): { text: string; sub: string } {
+  return { text: DEVICE_WORDS[text] ?? text, sub: DEVICE_WORDS[sub] ?? sub };
+}
+
 export function safeUrl(value: unknown): string | null {
   // Whitespace or control characters would end up inside the QR: refuse them.
   if (typeof value !== "string" || value.length > 2048 || /[\s\u0000-\u001f\u007f]/.test(value)) return null;
@@ -84,11 +99,13 @@ export function applyCommand(
         state: { ...state, screen: { kind: "ok", text: str(p.text, "Thank you"), sub: str(p.sub) } },
         effects: ["cancel_idle"],
       };
-    case "show_text":
+    case "show_text": {
+      const shown = screenWords(str(p.text), str(p.sub));
       return {
-        state: { ...state, screen: { kind: "text", text: str(p.text), sub: str(p.sub) } },
+        state: { ...state, screen: { kind: "text", text: shown.text, sub: shown.sub } },
         effects: ["cancel_idle"],
       };
+    }
     case "show_idle":
       return { state, effects: ["idle_soon"] };
     case "set_ring":

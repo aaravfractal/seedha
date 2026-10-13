@@ -24,7 +24,7 @@ All hotel, guest and booking data in this repo is fictional sample data
 - **The flip:** channels ranked by bookings, then by money kept; MakeMyTrip drops from 1st to 5th on the sample data.
 - **Repeat guests:** guests who came back through an OTA, and the commission and GST paid on them twice; the owner confirms each match.
 - **Front desk screen:** any phone or tablet at reception (`/desk/device`) shows a consent QR; the guest says yes on their own phone, and the box is unticked by default.
-- **Checkout slip:** what the hotel kept on the guest's own booking, plus a perk code, shown on screen or sent by WhatsApp.
+- **Checkout slip:** what the hotel kept on the guest's own booking, plus a perk code, shown on screen, and the perk code can follow on WhatsApp once you approve the message.
 - **Approvals:** win-back drafts that go out only after the owner approves, each ending "Reply STOP to opt out".
 - **Seedha Link:** a direct booking page with a perk for returning guests (never a lower rate) and UPI payment.
 - **Savings:** commission and GST avoided on each direct booking, minus the UPI fee.

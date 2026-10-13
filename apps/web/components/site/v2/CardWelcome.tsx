@@ -270,6 +270,7 @@ export function CardWelcome({
             setRef(e.target.value);
             setRateError("");
           }}
+          aria-invalid={rateError ? true : undefined}
           aria-describedby={id("ref-help")}
         />
         <p id={id("ref-help")} className={s.help}>

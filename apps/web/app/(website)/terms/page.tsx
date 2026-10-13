@@ -16,14 +16,14 @@ export default function TermsPage() {
       points={{
         en: [
           "You approve every message before it is sent. Seedha never sends on its own.",
-          "Message only guests who said yes at your Desk. Never guests found in OTA data.",
+          "Message only guests who said yes at your front desk. Never guests found in OTA data.",
           "Use Seedha for perks for returning guests, not to sell rooms below your public rate.",
           "Seedha's numbers come from the statements you upload. Check them before you act.",
           "Indian law applies. Courts at Dehradun, Uttarakhand.",
         ],
         hi: [
           "Har message bhejne se pehle aap approve karte hain. Seedha khud kabhi nahi bhejta.",
-          "Sirf unhi guests ko message kijiye jinhone Desk par haan kaha. OTA data wale guests ko kabhi nahi.",
+          "Sirf unhi guests ko message kijiye jinhone front desk par haan kaha. OTA data wale guests ko kabhi nahi.",
           "Seedha wapas aane wale guests ko perk dene ke liye hai, public rate se kam mein room bechne ke liye nahi.",
           "Seedha ke numbers aapke upload kiye statements se bante hain. Faisla lene se pehle check kijiye.",
           "Bharat ka kanoon laagu hoga. Adalat: Dehradun, Uttarakhand.",

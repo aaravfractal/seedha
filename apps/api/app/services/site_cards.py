@@ -636,7 +636,7 @@ def colour_table(pdf: canvas.Canvas) -> None:
     pdf.drawString(
         left,
         y - 16,
-        "CMYK values for the printer, chosen for print. Ask for a proof on your card stock.",
+        "CMYK values for the print shop, chosen for print. Ask for a proof on your card stock.",
     )
     y -= 52
     pdf.setFont(BODY_BOLD, 9)
