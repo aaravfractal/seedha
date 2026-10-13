@@ -902,11 +902,13 @@ ruff 0 · pylint 9.99 (app) / 9.98 (tests) · mypy 0 · coverage 98.99% (money 1
   design QA and accessibility reviewers re-running the owner pass (their
   first runs could not reach the API).
 - Next: merge P6b and the ideas, fix review findings, P8 only if time
-  allows, then P9 (3 x Playwright, make check, demo-prod, summary).## Hotel mini-site (docs/HOTEL_MINISITE.md), branch hotel-minisite
+  allows, then P9 (3 x Playwright, make check, demo-prod, summary).## Card page build (docs/CARD_PAGE.md), branch hotel-minisite
 
-- Based on hotel-site-v2. Merged: A3 owner UI (77fa1d5), A2 page (f340154).
-  Waiting: A1 API (worktree .worktrees/ma1, branch mini-a1). Then reviewer,
-  fixes, gates (make check, e2e once, Postgres, loop, Lighthouse), deploy.
-- Live: deploy = main = 9d61f95 on Railway and Vercel (seedha-demo).
+- Merged: mini-site A1/A2/A3, review fixes, no-hardware H1 (public) and H2
+  (owner app), card page web C2, review 2 fixes (b46cce9).
+- Waiting: C1 card page API (worktree .worktrees/cp1, branch card-api).
+- Then: gates (make check, e2e once, Postgres, loop on demo-prod,
+  Lighthouse on /h/deodar-view?src=card-wallet), deploy per CARD_PAGE.md.
+- Live now: deploy = main = 9d61f95 (Railway + Vercel seedha-demo).
 
 
