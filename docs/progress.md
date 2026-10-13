@@ -5,6 +5,29 @@ docs/rulings.md. Decisions: docs/decisions.md. Needs: docs/needs-from-owner.md.
 
 
 
+## Morning report (overnight run, 13 October 2026)
+
+Full details: docs/READY_REPORT.md.
+
+- **Stage 1, site-real:** passed and merged.
+- **Stage 2, final readiness:** passed and merged. Audit fixes in 708bbe6
+  (docs and honesty) and b1d5424 (A1b-1 upload limits).
+- **Stage 3, Hotel Site V2 + cards:** in progress on branch `hotel-site-v2`
+  (foundation a042dd7); not merged.
+- **Gates on deploy b1d5424 (master identical):**
+  - make check: passed (pylint 9.98/9.99, coverage 98%, money 100%,
+    pip-audit clean, web 205/205, e2e 78/78, secrets 0 in 212 commits,
+    firmware SUCCESS).
+  - e2e three runs: 78/78 each.
+  - Postgres 16.2 API suite: 1,309 passed, 0 failed.
+  - 8-step loop on make demo-prod: 3 of 3.
+- **Merged vs branch:** master = deploy (this commit). On branches only:
+  hotel-site-v2 (stage 3), event-discovery (not in the brief).
+- **Blockers:** Amoy RPC unreachable here (proofs Local only); commit
+  email rewrite not done (no address given); event discovery unfinished.
+- **Push:** `git push -u origin master` and `git push -u origin deploy`
+  after adding your remote (READY_REPORT section 4).
+
 ## Overnight run (docs/OVERNIGHT.md), live status
 
 - **Answers applied:** pillow-heif kept (D-102); helper commits 1a7838e,
