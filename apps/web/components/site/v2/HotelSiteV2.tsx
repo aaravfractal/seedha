@@ -11,6 +11,7 @@ import { inr } from "@/lib/format";
 import {
   AMENITIES_SHOWN,
   cardPerk,
+  cardPerkSentence,
   langFrom,
   mapsHref,
   photoSources,
@@ -25,9 +26,13 @@ import { addDays } from "@/lib/linkPrefill";
 import { HOTEL_SW_PATH, bookingLink } from "@/lib/siteHost";
 import type { Availability, Lang, SitePhoto } from "@/lib/types-site";
 import { GLOBE_BOX } from "@/lib/siteGlobe";
-import type { HotelSitePayload, ScanCard } from "@/lib/types-hotel-site";
+import type { HotelSitePayload, RoomDetail, ScanCard } from "@/lib/types-hotel-site";
 import { COPY, defaultCheckIn, linkHref, nightsLabel } from "../copy";
 import { AmenityIcon, ReachIcon } from "./AmenityIcon";
+import { AtAGlance } from "./AtAGlance";
+import { Ratings } from "./Ratings";
+import { RoomCards } from "./RoomCards";
+import { SeedhaBar } from "./SeedhaBar";
 import { V2_COPY } from "./copy";
 import s from "./hotel.module.css";
 
@@ -72,6 +77,25 @@ function readHere(): string {
   return `${protocol}|${hostname}|${port}`;
 }
 const pinged = new Set<string>();
+
+let canvasOk: boolean | null = null;
+/**
+ * True when this browser gives a canvas a 2D context (checked once). Without
+ * one the globe draws nothing, so its box is dropped and the static map is
+ * the whole location view. The server assumes yes, so the box is reserved
+ * from the first paint in the normal case (no layout shift).
+ */
+function hasCanvas2d(): boolean {
+  if (canvasOk === null) {
+    try {
+      canvasOk = Boolean(document.createElement("canvas").getContext("2d"));
+    } catch {
+      canvasOk = false;
+    }
+  }
+  return canvasOk;
+}
+const yes = () => true;
 
 /** One count of the printed card that brought the guest. No cookies, nothing about the guest. */
 function pingScan(slug: string, card: ScanCard): void {
@@ -310,8 +334,12 @@ export function HotelSiteV2({
   const [locationRef, locationNear] = useNearViewport<HTMLDivElement>();
   const formRef = useRef<HTMLFormElement | null>(null);
   const dateRef = useRef<HTMLInputElement | null>(null);
-  const perk = cardPerk(d, lang);
+  const perk = cardPerkSentence(cardPerk(d, lang), lang);
+  const isSample = site.sample || d.sample;
   const hasLocation = Boolean(d.geo) || d.nearby.length > 0;
+  // Reduced motion hides the globe's box in CSS (hotel.module.css), from the first paint.
+  const canvas = useSyncExternalStore(noSubscribe, hasCanvas2d, yes);
+  const showGlobe = Boolean(d.geo) && canvas;
   const showBar = Boolean(telLink || waLink || canBook);
 
   // Once per visit: count the card scan, drop ?src from the address (a reload
@@ -388,6 +416,17 @@ export function HotelSiteV2({
           : "";
   const bookAnchor = `#${id("book")}`;
 
+  /** The owner's chosen photo for the room, else the usual photo order, else a labelled sample. */
+  const roomPhoto = (_room: unknown, i: number, detail: RoomDetail | null) => {
+    const chosen = detail?.photo_id != null ? photos.find((p) => p.id === detail.photo_id) : undefined;
+    const photo = chosen ?? (photos.length ? photos[(i + 1) % photos.length] : undefined);
+    return photo ? (
+      <OwnerPhoto photo={photo} lang={lang} sizes="(min-width: 720px) 360px, 100vw" />
+    ) : (
+      <SamplePhoto background={ROOM_PHOTOS[i % ROOM_PHOTOS.length] ?? ""} chip={c.samplePhoto} />
+    );
+  };
+
   const Main = preview ? "div" : "main";
 
   return (
@@ -397,6 +436,7 @@ export function HotelSiteV2({
       onClickCapture={preview ? stayInPreview : undefined}
     >
       <header className={s.head}>
+        {site.hide_branding ? null : <SeedhaBar hotel={name} t={t} />}
         <span className={`${s.brand} ${s.display}`}>{name}</span>
         <div className={s.langSwitch} role="group" aria-label={t.language}>
           {(["en", "hi"] as const).map((code) => (
@@ -435,7 +475,7 @@ export function HotelSiteV2({
             {card ? (
               perk ? (
                 <aside className={s.perk} aria-label={t.perkLabel} data-card={card}>
-                  <strong>{t.perkLabel}</strong>
+                  {isSample ? <span className={s.sampleTag}>{t.sample}</span> : null}
                   {perk}
                 </aside>
               ) : (
@@ -541,6 +581,8 @@ export function HotelSiteV2({
           </form>
         ) : null}
 
+        <AtAGlance site={site} t={t} titleId={id("glance")} />
+
         {about ? (
           <Section id={id("about")} title={t.about}>
             <p className={s.about}>{about}</p>
@@ -565,50 +607,18 @@ export function HotelSiteV2({
         </Section>
 
         <Section id={id("rooms")} title={c.rooms}>
-          <div className={s.rooms}>
-            {site.rooms.map((r, i) => {
-              const photo = photos.length ? photos[(i + 1) % photos.length] : undefined;
-              return (
-                <article key={r.room_type} className={s.room}>
-                  {photo ? (
-                    <OwnerPhoto photo={photo} lang={lang} sizes="(min-width: 720px) 360px, 100vw" />
-                  ) : (
-                    <SamplePhoto
-                      background={ROOM_PHOTOS[i % ROOM_PHOTOS.length] ?? ""}
-                      chip={c.samplePhoto}
-                    />
-                  )}
-                  <div className={s.roomBody}>
-                    <h3 className={s.display}>{roomName(r)}</h3>
-                    {r.detail[lang] ? <p className={s.muted}>{r.detail[lang]}</p> : null}
-                    <div className={s.priceRow}>
-                      <p className={s.price}>
-                        <b className={s.num}>{inr(r.nightly_rate)}</b> <span>{c.aNight}</span>
-                      </p>
-                      {r.bookable ? (
-                        <a
-                          className={s.pill}
-                          href={href(r.room_type, checkIn, nights)}
-                          aria-label={`${c.bookShort}: ${roomName(r)}`}
-                        >
-                          {c.bookShort}
-                        </a>
-                      ) : waLink ? (
-                        <a
-                          className={s.pill}
-                          href={waLink}
-                          rel="noopener noreferrer"
-                          aria-label={`${t.askHotel}: ${roomName(r)}`}
-                        >
-                          {t.askHotel}
-                        </a>
-                      ) : null}
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
+          <RoomCards
+            rooms={site.rooms}
+            details={d.rooms}
+            lang={lang}
+            t={t}
+            aNight={c.aNight}
+            bookShort={c.bookShort}
+            roomName={roomName}
+            photo={roomPhoto}
+            bookHref={(r) => href(r.room_type, checkIn, nights)}
+            waLink={waLink}
+          />
         </Section>
 
         <Section id={id("packages")} title={c.packages}>
@@ -683,23 +693,13 @@ export function HotelSiteV2({
           </div>
         </Section>
 
-        <Section id={id("reviews")} title={t.reviews}>
-          <div className={s.empty}>
-            <p className={s.emptyTitle}>{t.noReviews}</p>
-            <p className={s.muted}>{t.noReviewsSub}</p>
-            {waLink ? (
-              <a className={s.link} href={waLink} rel="noopener noreferrer">
-                {t.askHotel}
-              </a>
-            ) : null}
-          </div>
-        </Section>
+        <Ratings ratings={site.ratings} lang={lang} t={t} titleId={id("ratings")} waLink={waLink} />
 
         {hasLocation ? (
           <Section id={id("location")} title={t.location}>
-            <div className={s.locationGrid} ref={locationRef}>
-              {d.geo ? (
-                <div className={s.globeCell}>
+            <div className={`${s.locationGrid} ${showGlobe ? "" : s.noGlobe}`} ref={locationRef}>
+              {showGlobe && d.geo ? (
+                <div className={s.globeCell} data-globe-cell="">
                   {locationNear ? (
                     <LocationGlobe geo={d.geo} nearby={d.nearby} hotel={name} lang={lang} />
                   ) : (
@@ -708,7 +708,7 @@ export function HotelSiteV2({
                 </div>
               ) : null}
               {d.nearby.length ? (
-                <div className={s.mapCard}>
+                <div className={s.mapCard} data-map-card="">
                   {locationNear ? <LocalMap geo={d.geo} nearby={d.nearby} hotel={name} lang={lang} /> : null}
                 </div>
               ) : null}
@@ -741,7 +741,7 @@ export function HotelSiteV2({
           </Section>
         ) : null}
 
-        <Section id={id("know")} title={t.goodToKnow}>
+        <Section id={id("know")} title={t.houseRules}>
           <div className={s.times}>
             <p>
               {t.checkIn} <b className={s.num}>{d.check_in}</b>

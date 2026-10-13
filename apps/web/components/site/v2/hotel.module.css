@@ -202,6 +202,23 @@
 .headBook {
   flex: none;
 }
+/* The slim "<Hotel> on Seedha" line, a full row above the header's controls. */
+.head {
+  flex-wrap: wrap;
+}
+.seedhaBar {
+  flex: 1 0 100%;
+  margin: -8px calc(-1 * var(--hs-gutter)) 0;
+  padding: 3px var(--hs-gutter);
+  background: var(--hs-pine);
+  color: var(--hs-cream);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 @media (max-width: 719.98px) {
   .headBook {
     display: none;
@@ -657,6 +674,20 @@
 .globeCell {
   min-width: 0;
 }
+/* No globe (reduced motion, or no 2D canvas): no empty box; the static map takes the whole row. */
+@media (min-width: 900px) {
+  .locationGrid.noGlobe {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .globeCell {
+    display: none;
+  }
+  .locationGrid {
+    grid-template-columns: 1fr;
+  }
+}
 /* White behind the map's grey text (#6E6E73 is 4.49:1 on cream, 5.1:1 on white). */
 .mapCard {
   min-width: 0;
@@ -818,4 +849,104 @@
 .preview .head,
 .preview .mobileBar {
   position: static;
+}
+
+/* card ribbon: the small "Sample" label for the sample hotel's perk (rule 11) */
+.sampleTag {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--hs-ink);
+  color: var(--hs-white);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: 2px;
+}
+
+/* at a glance */
+.fromPrice {
+  margin: 0 0 16px;
+  font-size: 22px;
+  font-weight: 600;
+}
+.glance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+@media (min-width: 720px) {
+  .glance {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.glance div {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--hs-white);
+  border: 1px solid var(--hs-line);
+}
+.glance dt {
+  color: var(--hs-ink2);
+  font-size: 15px;
+}
+.glance dd {
+  margin: 2px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* room facts and features */
+.roomFacts,
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.roomFacts li {
+  color: var(--hs-ink);
+  font-size: 15px;
+}
+.features li {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--hs-stone);
+  color: var(--hs-ink);
+  font-size: 14px;
+}
+
+/* ratings */
+.ratingBox {
+  padding: 24px;
+  border-radius: 18px;
+  background: var(--hs-white);
+  border: 1px solid var(--hs-line);
+}
+.ratingBig {
+  margin: 0;
+  font-size: 20px;
+}
+.stars {
+  color: var(--hs-pine);
+  letter-spacing: 2px;
+}
+.comments {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.comments li {
+  padding: 14px 0 0;
+  border-top: 1px solid var(--hs-line);
+}
+.comments p {
+  margin: 0 0 4px;
 }

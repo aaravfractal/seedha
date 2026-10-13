@@ -7,7 +7,14 @@
 import { inr } from "./format.ts";
 import { mapsUrl } from "./localMap.ts";
 import type { Lang } from "./types-site.ts";
-import type { HotelSitePayload, ScanCard, SiteDetailsData } from "./types-hotel-site.ts";
+import type {
+  HotelSitePayload,
+  RatingComment,
+  RatingSummary,
+  RoomDetail,
+  ScanCard,
+  SiteDetailsData,
+} from "./types-hotel-site.ts";
 import type { Geo } from "./types-site-v2.ts";
 
 const CARDS: Readonly<Record<string, ScanCard>> = {
@@ -30,6 +37,7 @@ export const EMPTY_DETAILS: SiteDetailsData = {
   sample: false,
   card_perk_en: "",
   card_perk_hi: "",
+  rooms: [],
 };
 
 /**
@@ -54,6 +62,7 @@ export function withDetails(
       geo: d.geo ?? null,
       card_perk_en: d.card_perk_en ?? "",
       card_perk_hi: d.card_perk_hi ?? "",
+      rooms: d.rooms ?? [],
     },
   };
 }
@@ -68,6 +77,102 @@ export function cardPerk(
   lang: Lang,
 ): string {
   return pick((details.card_perk_en ?? "").trim(), (details.card_perk_hi ?? "").trim(), lang);
+}
+
+// The sample hotel's perk starts "Sample perk:" in the API's data; the page
+// shows its own small "Sample" label instead (rule 11).
+const SAMPLE_PERK_PREFIX = /^\s*(?:sample perk|नमूना पर्क)\s*:\s*/i;
+
+/** The perk's own words: no "Sample perk:" prefix and no closing full stop, so it fits a sentence. */
+export function perkWords(perk: string): string {
+  return perk
+    .replace(SAMPLE_PERK_PREFIX, "")
+    .trim()
+    .replace(/[\s.।]+$/u, "");
+}
+
+/**
+ * The card ribbon's sentence around the owner's perk ("Scanned our card?
+ * Book direct for <perk>."), or "" when there is no perk. The perk is the
+ * owner's text; nothing is added to it.
+ */
+export function cardPerkSentence(perk: string, lang: Lang): string {
+  const words = perkWords(perk);
+  if (!words) return "";
+  return lang === "hi"
+    ? `हमारा कार्ड स्कैन किया? सीधे बुक करें और पाएं: ${words}।`
+    : `Scanned our card? Book direct for ${words}.`;
+}
+
+/** The owner's facts for a room type (matched by name, ignoring case and spaces), or null. */
+export function roomDetailFor(rooms: readonly RoomDetail[] | undefined, roomType: string): RoomDetail | null {
+  const key = roomType.trim().toLowerCase();
+  return (rooms ?? []).find((r) => (r.name ?? "").trim().toLowerCase() === key) ?? null;
+}
+
+/** The starting price exactly as the API computed it (integer paise), or null to show none. */
+export function fromPrice(site: Pick<HotelSitePayload, "from_price_paise">): number | null {
+  const p = site.from_price_paise;
+  return typeof p === "number" && Number.isInteger(p) && p > 0 ? p : null;
+}
+
+export type RatingsView =
+  { kind: "new" } | { kind: "shown"; average: string; count: number; comments: RatingComment[] };
+
+/** Show a rating only as the API sums it, and only with at least 3 ratings; else "new". */
+export function ratingsView(ratings: RatingSummary | undefined): RatingsView {
+  const avg = ratings?.average;
+  if (!ratings || typeof avg !== "number" || !Number.isFinite(avg) || ratings.count < 3)
+    return { kind: "new" };
+  const comments = (ratings.comments ?? []).filter((c) => (c.comment ?? "").trim());
+  return { kind: "shown", average: avg.toFixed(1), count: ratings.count, comments };
+}
+
+const MONTHS: Record<Lang, readonly string[]> = {
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  hi: [
+    "जनवरी",
+    "फ़रवरी",
+    "मार्च",
+    "अप्रैल",
+    "मई",
+    "जून",
+    "जुलाई",
+    "अगस्त",
+    "सितंबर",
+    "अक्टूबर",
+    "नवंबर",
+    "दिसंबर",
+  ],
+};
+
+/** "2026-09" as "Sep 2026" (Hindi: "सितंबर 2026"); anything else as it came. */
+export function monthLabel(month: string, lang: Lang): string {
+  const m = /^(\d{4})-(\d{2})/.exec(month);
+  const name = m ? MONTHS[lang][Number(m[2]) - 1] : undefined;
+  return m && name ? `${name} ${m[1]}` : month;
+}
+
+/** Longest rating comment (the API's limit). */
+export const RATING_COMMENT_MAX = 200;
+
+/** Why a rating comment cannot be sent, or null: at most 200 characters, no < or >. */
+export function ratingCommentError(text: string): "too_long" | "bad_chars" | null {
+  if ([...text].length > RATING_COMMENT_MAX) return "too_long";
+  if (/[<>]/.test(text)) return "bad_chars";
+  return null;
+}
+
+/** A rating link from the API as a safe href: a same-site path or an http(s) address, else "". */
+export function ratingHref(url: string | null | undefined): string {
+  const u = (url ?? "").trim();
+  if (u.startsWith("/") && !u.startsWith("//")) return u;
+  try {
+    const parsed = new URL(u);
+    return parsed.protocol === "https:" || parsed.protocol === "http:" ? parsed.toString() : "";
+  } catch {
+    return "";
+  }
 }
 
 /** How many amenities the hotel page shows before "Show all". */

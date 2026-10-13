@@ -18,8 +18,9 @@ import { axeViolations, resetSampleHotel, scrollsSideways, signInOnce } from "./
 const SLUG = "deodar-view";
 const PAGE = `/h/${SLUG}`;
 const WELCOME = "Welcome. Booking here goes straight to the hotel.";
-// The owner's own card perk (the sample's starts "Sample perk:"), or the neutral welcome.
-const RIBBON = /Sample perk:|Welcome\. Booking here goes straight to the hotel\./;
+// The owner's own card perk in a sentence, or the neutral welcome.
+const PERK = "Scanned our card? Book direct for";
+const RIBBON = /Scanned our card\? Book direct for |Welcome\. Booking here goes straight to the hotel\./;
 let ownerState = "";
 
 test.describe.configure({ mode: "serial" });
@@ -59,15 +60,16 @@ test("390 px, English: every section, amenities expand, no sideways scroll", asy
   await expect(page.locator("[lang='en']").first()).toBeVisible();
   for (const name of [
     "Book your stay",
+    "At a glance",
     "Why book direct",
     "Rooms",
     "Packages",
     "Amenities",
     "Photos",
-    "Guest reviews",
+    "Guest ratings",
     "Location",
     "How to reach",
-    "Good to know",
+    "House rules",
     "Contact",
   ]) {
     await expect(root.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
@@ -79,8 +81,26 @@ test("390 px, English: every section, amenities expand, no sideways scroll", asy
   expect(await hero.getByRole("link", { name: "WhatsApp" }).getAttribute("href")).toBe(
     "https://wa.me/919000000000",
   );
-  // Honest, empty reviews; sample labels.
-  await expect(page.getByText("No reviews yet.")).toBeVisible();
+  // The slim Seedha line (plain text, no link).
+  const seedhaBar = page.getByText("Deodar View on Seedha", { exact: true });
+  await expect(seedhaBar).toBeVisible();
+  await expect(seedhaBar.locator("a")).toHaveCount(0);
+  // At a glance: rooms, room types, check-in and check-out.
+  const glance = page.locator("section").filter({ has: page.getByRole("heading", { name: "At a glance" }) });
+  await expect(glance.getByText("Room types")).toBeVisible();
+  await expect(glance.locator("dd").first()).toHaveText(/^\d+$/);
+  // NEEDS A1 (from_price_paise): "From ₹X a night", exactly the API's number, formatted.
+  const from = page.getByTestId("from-price");
+  if (await from.count()) await expect(from).toHaveText(/^From ₹[\d,]+ a night$/);
+  // NEEDS A1 (details.rooms): room facts on at least one card.
+  const facts = page.locator("article ul[aria-label='Room facts']");
+  if (await facts.count()) await expect(facts.first()).toContainText(/sq ft|guest/);
+  // Every room's Book goes to Seedha Link with the room preselected.
+  const roomBook = page.getByRole("link", { name: /^Book: / }).first();
+  expect(await roomBook.getAttribute("href")).toMatch(/\/link\?room=[^&]+&in=/);
+  // Honest ratings: the sample has none; sample labels.
+  await expect(page.getByText("New on Seedha, no ratings yet")).toBeVisible();
+  await expect(page.locator("[data-ratings='shown']")).toHaveCount(0);
   await expect(page.getByText("Sample hotel. All details are fictional.")).toBeVisible();
   await expect(page.getByText("Phone and address are placeholders. Sample data.")).toBeVisible();
   await expect(page.getByText("Built with Seedha")).toBeVisible();
@@ -112,7 +132,7 @@ test("390 px, English: every section, amenities expand, no sideways scroll", asy
   expect(await maps.getAttribute("href")).toBe(
     "https://www.google.com/maps/search/?api=1&query=30.45980,78.06640",
   );
-  // Good to know, with check-in and check-out.
+  // House rules, with check-in and check-out.
   await expect(page.getByText("Check-in 12:00")).toBeVisible();
   await expect(page.getByText("Check-out 11:00")).toBeVisible();
 
@@ -135,10 +155,19 @@ test("1440 px, Hindi: the toggle and ?lang=hi, Devanagari, no sideways scroll", 
   await expect(page.getByRole("button", { name: "हिन्दी" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { level: 1, name: "देवदार व्यू" })).toBeVisible();
   await expect(page.locator("div[lang='hi']").first()).toBeVisible();
-  for (const name of ["सुविधाएं", "मेहमानों की राय", "जगह", "कैसे पहुंचें", "जानने लायक बातें", "संपर्क"]) {
+  for (const name of [
+    "सुविधाएं",
+    "मेहमानों की रेटिंग",
+    "जगह",
+    "कैसे पहुंचें",
+    "घर के नियम",
+    "एक नज़र में",
+    "संपर्क",
+  ]) {
     await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
   }
-  await expect(page.getByText("अभी कोई राय नहीं।")).toBeVisible();
+  await expect(page.getByText("Seedha पर नया, अभी कोई रेटिंग नहीं")).toBeVisible();
+  await expect(page.getByText("देवदार व्यू Seedha पर", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "सभी 20 सुविधाएं देखें" })).toBeVisible();
   expect(await scrollsSideways(page)).toBe(false);
   expect(await axeViolations(page)).toEqual([]);
@@ -226,8 +255,14 @@ test("a card scan shows the owner's perk or a plain welcome and counts once, wit
   await expect(ribbon).toBeVisible();
   await expect(ribbon).toContainText(RIBBON);
   expect(await ribbon.textContent()).not.toMatch(/returning-guest perk|₹/);
-  if (!((await ribbon.textContent()) ?? "").includes("Sample perk:"))
+  const ribbonText = (await ribbon.textContent()) ?? "";
+  expect(ribbonText).not.toMatch(/Sample perk:/);
+  if (ribbonText.includes(PERK)) {
+    // The sample hotel's perk carries a small "Sample" label (rule 11).
+    await expect(ribbon).toContainText(/^Sample/);
+  } else {
     await expect(ribbon).toHaveText(WELCOME);
+  }
   // The ribbon never covers the "Sample photo" label (rule 11, R2-5).
   const chip = await page.getByText("Sample photo").first().boundingBox();
   const box = await ribbon.boundingBox();
@@ -270,6 +305,24 @@ test("a card scan shows the owner's perk or a plain welcome and counts once, wit
   );
   expect(hostWrite.status()).toBe(404);
   await owner.context().close();
+});
+
+test("reduced motion: no globe box, the static map is the whole location view", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(PAGE);
+  const location = page.locator("section").filter({ has: page.getByRole("heading", { name: "Location" }) });
+  await location.scrollIntoViewIfNeeded();
+  await expect(location.locator("[data-globe-cell]")).toBeHidden();
+  await expect(location.locator("canvas")).toHaveCount(0);
+  const map = location.locator("[data-map-card]");
+  await expect(map).toBeVisible();
+  await expect(map.locator("svg").first()).toBeVisible();
+  // The map fills the row: no empty column where the globe was.
+  const row = await location.locator("[data-map-card]").locator("xpath=..").boundingBox();
+  const box = await map.boundingBox();
+  expect(row && box && Math.abs(row.width - box.width) < 2).toBe(true);
+  expect(await scrollsSideways(page)).toBe(false);
 });
 
 test("offline: the service worker shows the hotel's name and contact", async ({ page, context }) => {

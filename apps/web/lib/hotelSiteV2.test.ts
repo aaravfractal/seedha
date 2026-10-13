@@ -4,7 +4,15 @@ import {
   HOTEL_SITES_TAG,
   ROBOTS_RULES,
   cardPerk,
+  cardPerkSentence,
   clip,
+  fromPrice,
+  monthLabel,
+  perkWords,
+  ratingCommentError,
+  ratingHref,
+  ratingsView,
+  roomDetailFor,
   hotelJsonLd,
   hotelPageHeaders,
   hotelSiteTag,
@@ -302,4 +310,83 @@ test("a payload without details (an older API) still gets every list", () => {
   assert.equal(partial.details.contact.phone, "+91 1234567");
   assert.equal(partial.details.contact.email, "");
   assert.equal(partial.details.check_in, "12:00");
+});
+
+test("card perk sentence: the owner's words, no 'Sample perk:' prefix, nothing when unset", () => {
+  assert.equal(perkWords("Sample perk: masala chai on arrival."), "masala chai on arrival");
+  assert.equal(perkWords("नमूना पर्क: मसाला चाय।"), "मसाला चाय");
+  assert.equal(
+    cardPerkSentence("Sample perk: masala chai on arrival", "en"),
+    "Scanned our card? Book direct for masala chai on arrival.",
+  );
+  assert.equal(
+    cardPerkSentence("free breakfast", "hi"),
+    "हमारा कार्ड स्कैन किया? सीधे बुक करें और पाएं: free breakfast।",
+  );
+  assert.equal(cardPerkSentence("  ", "en"), "");
+  assert.equal(cardPerkSentence("Sample perk:", "en"), "");
+});
+
+test("room details match the room type by name; missing rooms list is fine", () => {
+  const room = {
+    name: "Deluxe Valley",
+    size_sqft: 240,
+    beds_en: "1 king bed",
+    beds_hi: "",
+    max_guests: 2,
+    features_en: ["Balcony"],
+    features_hi: [],
+    photo_id: null,
+  };
+  assert.equal(roomDetailFor([room], " deluxe valley "), room);
+  assert.equal(roomDetailFor([room], "Suite"), null);
+  assert.equal(roomDetailFor(undefined, "Suite"), null);
+  assert.deepEqual(withDetails({ ...site(), details: undefined } as never).details.rooms, []);
+});
+
+test("from price only as the API sends it", () => {
+  assert.equal(fromPrice({ from_price_paise: 430000 }), 430000);
+  for (const p of [undefined, null, 0, -5, 12.5])
+    assert.equal(fromPrice({ from_price_paise: p as never }), null);
+});
+
+test("ratings: a number only with 3 or more real ratings", () => {
+  assert.deepEqual(ratingsView(undefined), { kind: "new" });
+  assert.deepEqual(ratingsView({ count: 2, average: null, comments: [] }), { kind: "new" });
+  assert.deepEqual(ratingsView({ count: 2, average: 5, comments: [] }), { kind: "new" });
+  const shown = ratingsView({
+    count: 4,
+    average: 4.25,
+    comments: [
+      { stars: 5, comment: "Quiet rooms", month: "2026-09" },
+      { stars: 4, comment: " ", month: "2026-09" },
+    ],
+  });
+  assert.equal(shown.kind, "shown");
+  if (shown.kind === "shown") {
+    assert.equal(shown.average, "4.3");
+    assert.equal(shown.count, 4);
+    assert.equal(shown.comments.length, 1);
+  }
+  assert.equal(monthLabel("2026-09", "en"), "Sep 2026");
+  assert.equal(monthLabel("2026-10", "hi"), "अक्टूबर 2026");
+  assert.equal(monthLabel("soon", "en"), "soon");
+});
+
+test("JSON-LD carries no rating even with real ratings", () => {
+  const text = JSON.stringify(
+    hotelJsonLd({ ...site(), ratings: { count: 9, average: 4.5, comments: [] } } as HotelSitePayload),
+  );
+  assert.doesNotMatch(text, /aggregateRating|ratingValue|review/i);
+});
+
+test("rating comment and rating link checks", () => {
+  assert.equal(ratingCommentError(""), null);
+  assert.equal(ratingCommentError("a".repeat(200)), null);
+  assert.equal(ratingCommentError("a".repeat(201)), "too_long");
+  assert.equal(ratingCommentError("nice <b>"), "bad_chars");
+  assert.equal(ratingHref("/rate/abc"), "/rate/abc");
+  assert.equal(ratingHref("https://seedha.example/rate/abc"), "https://seedha.example/rate/abc");
+  for (const bad of ["//evil.example/x", "javascript:alert(1)", "", null, undefined])
+    assert.equal(ratingHref(bad), "");
 });
