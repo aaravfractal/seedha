@@ -50,7 +50,9 @@ export default function SecurityPage() {
         </li>
         <li>Built: no OTA scraping. Seedha reads only the statements the owner uploads.</li>
         <li>Built: owner sign-in with a one-time code, limits on tries, and rate limits on public pages.</li>
-        <li>Built: consent links and Desk device keys stored only as hashes. Guest numbers never logged.</li>
+        <li>
+          Built: consent links and front desk screen keys stored only as hashes. Guest numbers never logged.
+        </li>
         <li>
           Built: consent fingerprints are salted SHA-256 hashes. The nightly Merkle root is stored by Seedha
           and, when the testnet option is on, also written to the Polygon Amoy testnet.
@@ -70,7 +72,7 @@ export default function SecurityPage() {
         <li>Any way to message a guest who did not consent, or after they replied STOP.</li>
         <li>Any way to redeem a perk code twice, or change a rupee figure Seedha shows.</li>
         <li>
-          Any way to reach owner screens or the Desk connection without the right session or device key.
+          Any way to reach owner screens or the front desk screen without the right session or screen key.
         </li>
         <li>Any way to link a published consent fingerprint back to a person.</li>
       </ul>

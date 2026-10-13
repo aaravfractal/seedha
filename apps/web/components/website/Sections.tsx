@@ -87,8 +87,8 @@ export function FlipExplainer({ data }: { data: Sample }) {
 const FEATURES = [
   [
     "Desk",
-    "Seedha Desk",
-    "A reception box. Guests tick consent by QR, the ring turns green, the slip prints.",
+    "Front desk screen",
+    "A QR code on any phone or tablet at reception. Guests say yes on their own phone.",
     "4-second consent",
   ],
   ["Link", "Seedha Link", "One-page direct booking with the perk code prefilled and UPI.", "Book direct"],
@@ -373,23 +373,26 @@ export function GuestMap({ data }: { data: Sample }) {
   );
 }
 
-/* ---------- Seedha Desk ---------- */
+/* ---------- Front desk screen ---------- */
 
 export function DeskSection() {
   return (
     <section id="desk" className={styles.section} aria-labelledby="desk-title">
       <div className={`${styles.container} ${styles.split}`}>
         <div>
-          <p className={styles.kicker}>Seedha Desk</p>
+          <p className={styles.kicker}>Front desk screen</p>
           <h2 id="desk-title" className={styles.h2}>
             One scan at check-in. One slip at checkout.
           </h2>
           <ol className={styles.deskSteps}>
-            <li>The front desk taps the room. The Desk shows a QR code for that one booking.</li>
-            <li>The guest scans it and ticks consent on their own phone. Nothing is ticked for them.</li>
             <li>
-              The ring turns green. At checkout the slip prints what the hotel kept and a perk code for next
-              time.
+              Open the front desk screen on any phone or tablet at reception and tap the room. It shows a QR
+              code for that one booking.
+            </li>
+            <li>The guest scans it and says yes on their own phone. Nothing is ticked for them.</li>
+            <li>
+              At checkout the slip is shown on screen or sent by WhatsApp, with a perk code for next time. You
+              approve every message first.
             </li>
           </ol>
           <div className={styles.ctaRow} style={{ justifyContent: "flex-start" }}>
@@ -402,15 +405,13 @@ export function DeskSection() {
           <div
             className={styles.device}
             role="img"
-            aria-label="Seedha Desk showing Thank you, Neha ji. Consent saved."
+            aria-label="Front desk screen on a tablet showing Thank you, Neha ji. Consent saved."
           >
             <div className={styles.deviceScreen}>
               <span className={styles.deviceCheck}>✓</span>
               <span className={styles.deviceText}>Thank you, Neha ji</span>
               <span className={styles.deviceSub}>Consent saved · Sample</span>
             </div>
-            <div className={styles.ledBar} />
-            <div className={styles.slot} />
           </div>
         </div>
       </div>

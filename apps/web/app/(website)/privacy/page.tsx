@@ -193,7 +193,7 @@ export default function PrivacyPage() {
           simulated in the prototype.
         </li>
         <li>Built: consent links that work once and expire in 10 minutes, stored only as hashes.</li>
-        <li>Built: Desk device keys stored only as hashes, and rate limits on public pages.</li>
+        <li>Built: front desk screen keys stored only as hashes, and rate limits on public pages.</li>
         <li>Built: guest numbers are never written to logs, and secrets are kept out of the code.</li>
         <li>Planned: encryption at rest for the database.</li>
         <li>Planned: two-step sign-in for owners.</li>

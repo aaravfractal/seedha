@@ -9,7 +9,7 @@ export const NAV: ReadonlyArray<readonly [string, string]> = [
   ["/#product", "Product"],
   ["/#growth", "Growth"],
   ["/#pulse", "Pulse"],
-  ["/#desk", "Desk"],
+  ["/#desk", "Front desk"],
   ["/#pricing", "Pricing"],
   ["/#careers", "Careers"],
 ];

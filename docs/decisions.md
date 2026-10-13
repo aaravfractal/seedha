@@ -780,3 +780,16 @@ the full 8-step loop with DEODAR-RS26 passed on make demo-prod from
 site-real (2 of 2, 20.8 s; the loop asserts every locked number) and its
 own tests pass; the web app never called the removed slip/seen route.
 D-102 already records the pillow-heif licence note the owner asked for.
+
+**D-105 No hardware in anything users see (H1, 13 October 2026).** Per
+docs/NO_HARDWARE.md part 2, hardware is removed from everything users
+see: the public website, Pricing, Plans, FAQ, About, legal pages and
+README.md no longer mention the ESP32 box, printer, LED ring, firmware,
+a hardware engineer role or a device included with yearly plans. Plan
+prices are unchanged (no price existed only for hardware). The firmware/
+folder and the device API stay in the repo, outside the product shown to
+users. /desk/device becomes the "Front desk screen" for a phone or
+tablet at reception: it shows the consent QR, the guest says yes on
+their own phone, and the slip is shown on screen or sent by WhatsApp
+(simulated in the demo; the owner still approves every message).
+apps/web/lib/no-hardware.test.ts guards the public pages and README.

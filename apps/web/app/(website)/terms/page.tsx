@@ -61,8 +61,8 @@ export default function TermsPage() {
       <h2 className="section">5. Consent and guest data</h2>
       <ul>
         <li>
-          Message only guests who gave consent through the Seedha Desk. The consent box must stay unticked
-          until the guest ticks it.
+          Message only guests who gave consent through the front desk screen. The consent box must stay
+          unticked until the guest ticks it.
         </li>
         <li>Do not use OTA-provided guest contacts for marketing, inside or outside Seedha.</li>
         <li>Honour STOP immediately. Seedha blocks further messages to that guest.</li>
@@ -80,8 +80,8 @@ export default function TermsPage() {
         <li>No scraping of OTA websites and no attempts to break or overload Seedha.</li>
         <li>No spam, no messages to people who did not opt in, no misleading offers.</li>
         <li>
-          Keep your WhatsApp number, sign-in codes and Desk device key private. Tell us at once if you think
-          one leaked.
+          Keep your WhatsApp number, sign-in codes and front desk screen key private. Tell us at once if you
+          think one leaked.
         </li>
       </ul>
 

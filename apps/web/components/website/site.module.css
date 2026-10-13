@@ -1279,7 +1279,7 @@
   flex: none;
 }
 
-/* ---------- Desk ---------- */
+/* ---------- Front desk screen ---------- */
 
 .deskStage {
   display: flex;
@@ -1289,8 +1289,8 @@
 
 .device {
   width: min(100%, 420px);
-  border-radius: 30px;
-  padding: 18px 18px 24px;
+  border-radius: 26px;
+  padding: 14px;
   background: linear-gradient(180deg, #2c2c2e, #1c1c1e);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
@@ -1331,31 +1331,6 @@
 .deviceSub {
   font-size: 14px;
   color: #c7c7cc;
-}
-
-.ledBar {
-  margin: 16px auto 0;
-  width: 70%;
-  height: 6px;
-  border-radius: 6px;
-  background: #4cc38a;
-  box-shadow: 0 0 18px #4cc38a;
-  animation: led 1.2s ease-in-out infinite;
-}
-
-@keyframes led {
-  50% {
-    box-shadow: 0 0 6px #4cc38a;
-    opacity: 0.75;
-  }
-}
-
-.slot {
-  margin: 16px auto 0;
-  width: 60%;
-  height: 6px;
-  border-radius: 6px;
-  background: #000;
 }
 
 .deskSteps {

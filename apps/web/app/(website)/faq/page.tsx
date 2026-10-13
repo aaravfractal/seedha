@@ -41,8 +41,8 @@ const FAQ: [string, string][] = [
     "Only when a perk code is used. Seedha takes the commission rate of the channel the guest first came through, adds 18% GST on it, and subtracts the UPI fee you paid. No code, no saving claimed.",
   ],
   [
-    "What is the Seedha Desk?",
-    "A small box on your reception counter. It shows a QR at check-in for the guest's consent, lights green when they say yes, and prints a slip at checkout with what the hotel kept and the guest's perk code.",
+    "What is the front desk screen?",
+    "A page you open on any phone or tablet at reception. At check-in it shows a QR code for one booking, and the guest says yes on their own phone. At checkout the slip, with what the hotel kept and the guest's perk code, is shown on screen or sent by WhatsApp. You approve every message first.",
   ],
   [
     "What goes on the blockchain?",

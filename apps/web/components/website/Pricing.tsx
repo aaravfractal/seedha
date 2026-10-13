@@ -90,12 +90,11 @@ export function Pricing() {
 }
 
 const ROLES = [
-  ["Founding engineer, full stack", "Python and TypeScript. Statements, ledgers and the Desk API."],
+  ["Founding engineer, full stack", "Python and TypeScript. Statements, ledgers and the front desk screen."],
   [
     "Hotel success lead, Uttarakhand",
     "Visit owners in Mussoorie, Nainital and Rishikesh. Hindi and English.",
   ],
-  ["Hardware engineer, Seedha Desk", "ESP32, thermal printers and small runs of reception boxes."],
   ["Product designer", "Owner app, guest pages and hotel sites, in Hindi and English."],
 ] as const;
 
@@ -154,8 +153,8 @@ const FAQ = [
     "It costs less. UPI payments carry a small fee that the hotel pays, and Seedha subtracts it in every direct figure.",
   ],
   [
-    "What is the Seedha Desk?",
-    "A small box at reception with a screen, a light ring and a slip printer. The guest scans a QR code and ticks consent on their own phone, the ring turns green, and the slip prints at checkout.",
+    "What is the front desk screen?",
+    "A page you open on any phone or tablet at reception. It shows a QR code for one booking. The guest scans it and says yes on their own phone. The slip is shown on screen or sent by WhatsApp, and you approve every message first.",
   ],
   [
     "Is this allowed under OTA rules and DPDP?",
