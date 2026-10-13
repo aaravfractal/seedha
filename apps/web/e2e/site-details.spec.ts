@@ -4,15 +4,18 @@ import { axeViolations, resetSampleHotel, scrollsSideways, signIn } from "./help
 
 /**
  * Hotel Site V2, owner side (docs/HOTEL_SITE_V2.md): the "Hotel details"
- * editors on the Website screen (amenities, nearby places, how to reach,
- * good to know, contact, map position), one Save that PUTs the whole object,
- * plain-word errors (client checks and the API's own 422), "Print cards"
- * previews with the PDF and QR downloads, and "Card scans this month".
+ * editors on the Website screen (rooms, amenities, nearby places, how to
+ * reach, house rules, contact, map position), one Save that PUTs the whole
+ * object, plain-word errors (client checks and the API's own 422), "Print
+ * cards" previews with the PDF downloads, "Card QR" (preview, the exact URL,
+ * SVG and PNG), "Card scans this month" and ratings moderation.
  * Sample hotel only; it is reset before and after.
  *
  * The PDF and QR files come from GET /site/cards.pdf and /site/cards/qr.*
  * (helper V2-API). Without those routes in the API under test, the download
- * test fails on the 404: it asserts the contract, not a stand-in.
+ * test fails on the 404: it asserts the contract, not a stand-in. The rooms
+ * and ratings tests need the API's `rooms` in /site/details and GET
+ * /site/ratings (minisite A1).
  */
 
 test.describe.configure({ mode: "serial" });
@@ -22,7 +25,9 @@ test.describe.configure({ mode: "serial" });
 let context: BrowserContext;
 let page: Page;
 
-async function openTab(page: Page, name: "Hotel details" | "Print cards") {
+type TabName = "Hotel details" | "Print cards" | "Ratings";
+
+async function openTab(page: Page, name: TabName) {
   await page.goto("/site");
   await page.getByRole("group", { name: "Website sections" }).getByRole("button", { name }).click();
 }
@@ -177,7 +182,7 @@ test("Print cards shows previews, PDF and QR downloads, and the scans empty stat
   await expect(page.getByText("No scans yet this month.")).toBeVisible();
 
   for (const title of ["Wallet card", "In-room card", "Desk tent card"]) {
-    await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: title, exact: true, level: 3 })).toBeVisible();
   }
   // Faces as the PDF prints them: the room QR on the front, the tent's two faces on one sheet.
   for (const [name, src] of [
@@ -220,15 +225,89 @@ test("Print cards shows previews, PDF and QR downloads, and the scans empty stat
   const download = page.waitForEvent("download");
   await allPdf.click();
   expect((await download).suggestedFilename()).toMatch(/\.pdf$/);
+
+  // Card QR: per card the QR, the exact URL it opens (/h/<slug>?src=card-*) and SVG and PNG downloads.
+  const qr = page.getByRole("region", { name: "Card QR" });
+  await expect(qr).toBeVisible();
+  for (const [title, card] of [
+    ["Wallet card", "wallet"],
+    ["In-room card", "room"],
+    ["Desk tent card", "desk"],
+  ] as const) {
+    await expect(
+      qr.getByRole("img", { name: new RegExp(`^QR code of the ${title.toLowerCase()} to `) }),
+    ).toBeVisible();
+    await expect(qr.getByText(new RegExp(`/h/[a-z0-9-]+\\?src=card-${card}$`))).toBeVisible();
+    await expect(
+      qr.getByRole("link", { name: `Download QR of the ${title.toLowerCase()} as SVG` }),
+    ).toHaveAttribute("href", `/api/site/cards/qr.svg?card=${card}`);
+    await expect(
+      qr.getByRole("link", { name: `Download QR of the ${title.toLowerCase()} as PNG` }),
+    ).toHaveAttribute("href", `/api/site/cards/qr.png?card=${card}`);
+  }
+  const png = page.waitForEvent("download");
+  await qr.getByRole("link", { name: "Download QR of the wallet card as PNG" }).click();
+  expect((await png).suggestedFilename()).toMatch(/\.png$/);
 });
 
-test("Hotel details and Print cards fit 390 and 1440 with no sideways scroll and pass axe, light and dark", async ({
+test("owner sets a room's size, beds, guests, features and photo, saves and sees them after reload", async () => {
+  await openTab(page, "Hotel details");
+  const rooms = page.getByRole("region", { name: "Rooms" });
+  await expect(rooms).toBeVisible();
+  await expect(page.getByRole("heading", { name: "House rules", level: 3 })).toBeVisible();
+  const first = rooms.getByRole("listitem").first();
+  const name = (await first.getByRole("heading", { level: 4 }).textContent()) ?? "";
+  await first.getByLabel("Size in sq ft (optional)").fill("40");
+  await page.getByRole("button", { name: "Save hotel details" }).click();
+  await expect(page.getByRole("alert").filter({ hasText: "to save" })).toContainText("Use 50 to 5000 sq ft.");
+  await first.getByLabel("Size in sq ft (optional)").fill("320");
+  await first.getByLabel("Most guests (optional)").fill("3");
+  await first.getByLabel("Beds in English").fill("1 queen bed");
+  await first.getByLabel("Feature 1 in English").fill("Mountain view");
+  await page.getByRole("button", { name: "Save hotel details" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "All changes saved" })).toBeVisible();
+  const saved = (await (await page.request.get("/api/site/details")).json()) as {
+    rooms: {
+      name: string;
+      size_sqft: number | null;
+      max_guests: number | null;
+      beds_en: string;
+      features_en: string[];
+    }[];
+  };
+  const room = saved.rooms.find((r) => r.name === name);
+  expect(room).toMatchObject({
+    size_sqft: 320,
+    max_guests: 3,
+    beds_en: "1 queen bed",
+    features_en: ["Mountain view"],
+  });
+  await openTab(page, "Hotel details");
+  await expect(
+    page
+      .getByRole("region", { name: "Rooms" })
+      .getByRole("listitem")
+      .first()
+      .getByLabel("Size in sq ft (optional)"),
+  ).toHaveValue("320");
+});
+
+test("Ratings explains the rules and shows the honest empty state", async () => {
+  await openTab(page, "Ratings");
+  await expect(page.getByRole("heading", { name: "Ratings", level: 2 })).toBeVisible();
+  await expect(page.getByText("Stars cannot be edited.", { exact: false })).toBeVisible();
+  await expect(page.getByText(/only from 3 ratings/)).toBeVisible();
+  // The sample hotel has zero ratings after a reset.
+  await expect(page.getByText(/^No ratings yet\./)).toBeVisible();
+});
+
+test("Hotel details, Print cards and Ratings fit 390 and 1440 with no sideways scroll and pass axe, light and dark", async ({
   baseURL,
 }) => {
   const found: string[] = [];
   for (const theme of ["light", "dark"] as const) {
     await context.addCookies([{ name: "seedha_theme", value: theme, url: baseURL ?? "" }]);
-    for (const tab of ["Hotel details", "Print cards"] as const) {
+    for (const tab of ["Hotel details", "Print cards", "Ratings"] as const) {
       for (const width of [390, 1440]) {
         await page.setViewportSize({ width, height: 900 });
         await openTab(page, tab);

@@ -38,8 +38,31 @@ export type Contact = {
 
 export type Geo = { lat: number; lng: number };
 
+/**
+ * The owner's facts about one room type the hotel sells (keyed by `name`, the
+ * room type). Owner-entered only; no price here (prices stay in the rooms and
+ * rates data). Null or empty means "not set".
+ */
+export type RoomDetail = {
+  name: string;
+  /** 50 to 5000, or null. */
+  size_sqft: number | null;
+  /** Plain text, 0 to 40 letters ("1 king bed"). */
+  beds_en: string;
+  beds_hi: string;
+  /** 1 to 12, or null. */
+  max_guests: number | null;
+  /** Up to 2 lines of 1 to 40 letters each. */
+  features_en: string[];
+  features_hi: string[];
+  /** One of the hotel's site photos, or null. */
+  photo_id: number | null;
+};
+
 /** PUT /site/details body. PUT replaces the whole object. */
 export type SiteDetailsIn = {
+  /** Up to 12, one per room type the hotel sells. */
+  rooms: RoomDetail[];
   amenities: AmenityId[];
   nearby: NearbyPlace[];
   how_to_reach: ReachItem[];
@@ -78,3 +101,17 @@ export type SiteScans = {
 /** A printed card. The tent card stands on the front desk, so its QR says card-desk. */
 export type CardKind = "wallet" | "room" | "tent";
 export type PdfKind = CardKind | "all";
+
+/** Where a rating came from: a direct booking through Seedha Link, or a Desk checkout. */
+export type RatingSource = string;
+
+/** GET /site/ratings item. Stars cannot be edited; the owner can only hide the comment. */
+export type SiteRating = {
+  id: number;
+  stars: number;
+  /** Empty or null when the guest wrote none. */
+  comment: string | null;
+  hidden: boolean;
+  created_at: string;
+  source: RatingSource;
+};

@@ -13,14 +13,16 @@ import { BuildFlow } from "@/components/site/BuildFlow";
 import { Review, SitePreview } from "@/components/site/Review";
 import { CardsPanel } from "@/components/site/cards/CardsPanel";
 import { DetailsEditor } from "@/components/site/details/DetailsEditor";
+import { RatingsPanel } from "@/components/site/ratings/RatingsPanel";
 import o from "@/components/site/owner.module.css";
 
-type Tab = "site" | "details" | "packages" | "cards" | "google";
+type Tab = "site" | "details" | "packages" | "cards" | "ratings" | "google";
 const TABS: ReadonlyArray<[Tab, string]> = [
   ["site", "Site"],
   ["details", "Hotel details"],
   ["packages", "Packages"],
   ["cards", "Print cards"],
+  ["ratings", "Ratings"],
   ["google", "Google kit"],
 ];
 const WHAT_YOU_ADD = [
@@ -249,6 +251,8 @@ export default function SitePage() {
     body = null;
   } else if (tab === "cards") {
     body = <CardsPanel site={s} />;
+  } else if (tab === "ratings") {
+    body = <RatingsPanel />;
   } else if (tab === "google") {
     body = <GoogleKit site={s} onCopy={copy} />;
   } else if (s.stage === "empty") {
@@ -327,7 +331,13 @@ export default function SitePage() {
       {body}
       {detailsOpened ? (
         <div hidden={tab !== "details"}>
-          <DetailsEditor live={s.live} sampleHotel={s.sample} onSaved={site.reload} />
+          <DetailsEditor
+            live={s.live}
+            sampleHotel={s.sample}
+            roomTypes={s.rooms.map((r) => r.room_type)}
+            photos={s.photos}
+            onSaved={site.reload}
+          />
         </div>
       ) : null}
     </div>

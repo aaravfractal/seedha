@@ -6,7 +6,7 @@ import type { Note } from "@/lib/types-site-v2-owner";
 import { Block, ItemTools, TextBox } from "./fields";
 import d from "./details.module.css";
 
-/** Check-in and check-out times and up to 8 "good to know" lines. */
+/** Check-in and check-out times and up to 8 house rules (the API's "good_to_know" lines). */
 export function NotesEditor({
   notes,
   checkIn,
@@ -29,9 +29,9 @@ export function NotesEditor({
   return (
     <Block
       id="details-notes"
-      title="Good to know"
+      title="House rules"
       count={`${notes.length} of ${max}`}
-      hint="Times and the small things guests should know before they come."
+      hint="Times and the rules and small things guests should know before they come."
     >
       <div className={d.pair}>
         <TextBox
@@ -53,11 +53,11 @@ export function NotesEditor({
         {notes.map((n, i) => (
           <li key={i} className={d.item}>
             <div className={d.itemHead}>
-              <h4 className={d.itemTitle}>Line {i + 1}</h4>
+              <h4 className={d.itemTitle}>Rule {i + 1}</h4>
               <ItemTools
                 index={i}
                 total={notes.length}
-                noun="line"
+                noun="rule"
                 onMove={(from, to) => onNotes(moveItem(notes, from, to))}
                 onRemove={(at) => onNotes(notes.filter((_, j) => j !== at))}
               />
@@ -89,7 +89,7 @@ export function NotesEditor({
           disabled={notes.length >= max}
           onClick={() => onNotes([...notes, { text_en: "", text_hi: "" }])}
         >
-          {notes.length >= max ? `${max} lines added` : "Add a line"}
+          {notes.length >= max ? `${max} rules added` : "Add a rule"}
         </button>
       </div>
       {errors.good_to_know ? <p className={d.error}>{errors.good_to_know}</p> : null}
