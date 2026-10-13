@@ -867,12 +867,14 @@ class SiteRating(Base):
     only the SHA-256 of the one-time token. `source_ref` is the direct_booking
     id ('link') or the booking id ('desk'): never a guest name or phone.
     `stars` is null until the guest uses the link (from `opens_on`, once the
-    stay is over); the owner can hide a comment but never change the stars."""
+    stay is over); the owner can hide a comment but never change the stars.
+    A 'card' row (card page, booking id in `source_ref`) is made when a guest
+    verifies a stay; its token lives 30 minutes. One given rating per stay."""
 
     __tablename__ = "site_rating"
     __table_args__ = (
         UniqueConstraint("source", "source_ref"),
-        CheckConstraint("source IN ('link', 'desk')", name="site_rating_source"),
+        CheckConstraint("source IN ('link', 'desk', 'card')", name="site_rating_source"),
         CheckConstraint("stars IS NULL OR stars BETWEEN 1 AND 5", name="site_rating_stars"),
     )
 
@@ -889,3 +891,16 @@ class SiteRating(Base):
     stars: Mapped[int | None] = mapped_column(Integer, nullable=True)
     comment: Mapped[str] = mapped_column(String(200), default="")
     hidden: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
+
+
+class SiteFeedback(Base):
+    """A private note a guest left on the card page. Only the owner reads it:
+    never public, never counted in ratings, and no visitor data is kept."""
+
+    __tablename__ = "site_feedback"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    property_id: Mapped[int] = mapped_column(ForeignKey("property.id"), index=True)
+    message: Mapped[str] = mapped_column(String(500))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -15,6 +15,10 @@ comment but never change the stars, and hidden comments are never public.
 The public summary shows an average only from 3 ratings up; below that the
 site says the hotel has no ratings yet. Nothing here is invented: the sample
 hotel starts with zero ratings and a demo reset restores zero.
+
+The card page (app.services.card_page) adds a third source, 'card': a guest
+who verifies a stay with its booking reference gets a 30-minute token in a
+'card' row. Every source shares one rule: one given rating per stay.
 """
 
 from __future__ import annotations
@@ -33,7 +37,7 @@ from app.config import Settings
 from app.models import Booking, DirectBooking, SiteRating
 from app.services.site_details import Flat, PlainText
 
-RatingSource = Literal["link", "desk"]
+RatingSource = Literal["link", "desk", "card"]
 RatingState = Literal["open", "used", "not_yet", "invalid"]
 MIN_PUBLIC_COUNT = 3
 MAX_PUBLIC_COMMENTS = 12
@@ -122,28 +126,49 @@ def rating_url(base_url: str, token: str | None) -> str | None:
 
 def rated_booking(session: Session, row: SiteRating) -> Booking | None:
     """The booking a rating link was issued for (via the direct booking for Link)."""
-    if row.source == "desk":
+    if row.source in ("desk", "card"):
         return session.get(Booking, row.source_ref)
     direct = session.get(DirectBooking, row.source_ref)
     return direct.booking if direct is not None else None
 
 
+def stay_rated(session: Session, booking_id: int) -> bool:
+    """Whether this stay already has a given rating from any source (Link via
+    its direct booking, Desk or card page): one rating per stay."""
+    directs = select(DirectBooking.id).where(DirectBooking.booking_id == booking_id)
+    found = session.scalar(
+        select(SiteRating.id)
+        .where(
+            SiteRating.stars.is_not(None),
+            (SiteRating.source.in_(("desk", "card")) & (SiteRating.source_ref == booking_id))
+            | ((SiteRating.source == "link") & SiteRating.source_ref.in_(directs)),
+        )
+        .limit(1)
+    )
+    return found is not None
+
+
 def rating_state(session: Session, row: SiteRating, today: date) -> RatingState:
-    """used, open, not_yet (before `opens_on`), or invalid when the booking is
-    gone, cancelled or not a stay (such a link never opens)."""
+    """used (also when the stay was rated another way), open, not_yet (before
+    `opens_on`), or invalid when the booking is gone, cancelled or not a stay
+    (such a link never opens)."""
     if row.used_at is not None:
         return "used"
     booking = rated_booking(session, row)
     if booking is None or booking.status != "stay":
         return "invalid"
+    if stay_rated(session, booking.id):
+        return "used"
     return "not_yet" if today < row.opens_on else "open"
 
 
-def find_token(session: Session, token: str) -> SiteRating | None:
-    """The rating row for a raw token, or None."""
+def find_token(session: Session, token: str, *, card: bool = False) -> SiteRating | None:
+    """The rating row for a raw token, or None. A card-page token is found
+    only with `card` (it never works as a /rate link, and the reverse)."""
     if not token or len(token) > MAX_TOKEN_LENGTH:
         return None
-    return session.scalar(select(SiteRating).where(SiteRating.token_hash == token_hash(token)))
+    row = session.scalar(select(SiteRating).where(SiteRating.token_hash == token_hash(token)))
+    return row if row is not None and (row.source == "card") == card else None
 
 
 def use_token(session: Session, row: SiteRating, rating: RatingIn, now: datetime) -> bool:
@@ -205,13 +230,13 @@ def set_hidden(
 
 def erase_guest_comments(session: Session, guest_id: int) -> None:
     """Guest erasure: blank the comments of ratings for this guest's bookings
-    (Desk) or direct bookings (Link). The stars stay; no text remains."""
+    (Desk, card page) or direct bookings (Link). The stars stay; no text remains."""
     bookings = select(Booking.id).where(Booking.guest_id == guest_id)
     directs = select(DirectBooking.id).where(DirectBooking.booking_id.in_(bookings))
     session.execute(
         update(SiteRating)
         .where(
-            ((SiteRating.source == "desk") & SiteRating.source_ref.in_(bookings))
+            (SiteRating.source.in_(("desk", "card")) & SiteRating.source_ref.in_(bookings))
             | ((SiteRating.source == "link") & SiteRating.source_ref.in_(directs))
         )
         .values(comment="")

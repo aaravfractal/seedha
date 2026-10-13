@@ -69,6 +69,12 @@ LIMITS: dict[str, Limit] = {
     "cards": Limit(20, 60),
     # Verified-guest rating links: a guest opens and submits once (mini-site).
     "rate": Limit(20, 60),
+    # Card page: verifying a booking reference, per client and per client per
+    # hotel (a script guessing references), rating once, private notes.
+    "card_verify": Limit(10, 60),
+    "card_verify_hotel": Limit(6, 60),
+    "card_rate": Limit(10, 60),
+    "card_feedback": Limit(5, 60),
     # The public website loads the sample figures once per page view.
     "public_sample": Limit(60, 60),
 }
