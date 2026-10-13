@@ -78,7 +78,7 @@ The main problems:
 
 ## Screenshots
 
-All are in `/private/tmp/claude-501/-Users-aaravsharma-Projects-seedha-real/9d04038f-5044-4db6-bda6-66bccd7b848a/scratchpad/r2/shots/` (scratchpad, not committed):
+All are in the session scratchpad (`r2/shots/`) (scratchpad, not committed):
 
 - **Public page:** `public-{390,1440}-{light,dark}-{en,hi}-{top,full,mid}.png` and crops `crop-{390,1440}-light-{en,hi}-N.png`
 - **Perk:** `perk-390-en.png`, `perk-390-hi.png`
