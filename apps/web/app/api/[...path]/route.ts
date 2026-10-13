@@ -93,6 +93,9 @@ export async function GET(request: NextRequest, ctx: Ctx): Promise<Response> {
 export async function POST(request: NextRequest, ctx: Ctx): Promise<Response> {
   return forward(request, (await ctx.params).path);
 }
+export async function PUT(request: NextRequest, ctx: Ctx): Promise<Response> {
+  return forward(request, (await ctx.params).path);
+}
 export async function PATCH(request: NextRequest, ctx: Ctx): Promise<Response> {
   return forward(request, (await ctx.params).path);
 }

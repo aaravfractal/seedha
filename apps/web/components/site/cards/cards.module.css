@@ -1,0 +1,258 @@
+/* Print cards and card scans on the Website screen. Card faces use the Pine
+   mood (docs/HOTEL_SITE_V2.md): pine #1F4D3A, cream #F5F1E8, stone #E6E0D4,
+   ink #1D1D1F, grey #6E6E73. They are pictures of paper, so they keep these
+   colours in dark mode too. */
+
+.stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  min-width: 0;
+}
+.section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--card);
+  min-width: 0;
+}
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+}
+.title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+.hint {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* card previews */
+.cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+}
+@media (min-width: 900px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.faces {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.faceWrap {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+}
+.faceWrap figcaption {
+  font-size: 13px;
+  color: var(--ink2);
+}
+.face {
+  container-type: inline-size;
+  position: relative;
+  overflow: hidden;
+  /* Paper cards have square corners; the wallet card's rounded corner is set inline.
+     (cqw on this element would measure an outer container, not the card.) */
+  border-radius: 2px;
+  background: #f5f1e8;
+  color: #1d1d1f;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 8px 22px rgba(0, 0, 0, 0.12);
+  font-family:
+    var(--font-mukta-latin),
+    var(--font-mukta),
+    -apple-system,
+    "Helvetica Neue",
+    sans-serif;
+}
+.pine {
+  background: #1f4d3a;
+  color: #f5f1e8;
+}
+.inner {
+  position: absolute;
+  inset: 7cqw;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.centre {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.name {
+  margin: 0;
+  font-family: var(--font-wb-pine), "Cormorant Garamond", Georgia, serif;
+  font-weight: 600;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+.hi {
+  font-family: var(--font-deva), var(--font-mukta), "Noto Sans Devanagari", sans-serif;
+}
+.small {
+  margin: 0;
+  color: inherit;
+  opacity: 0.85;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.rule {
+  width: 18cqw;
+  height: 0.6cqw;
+  margin: 3cqw 0;
+  background: currentColor;
+  opacity: 0.35;
+  border-radius: 1cqw;
+}
+.nowrap {
+  white-space: nowrap;
+}
+.qr {
+  display: block;
+  background: #fff;
+  border-radius: 1cqw;
+}
+.qr rect {
+  fill: #fff;
+}
+.qr path {
+  fill: #1d1d1f;
+}
+.brand {
+  position: absolute;
+  right: 5cqw;
+  bottom: 4cqw;
+  font-size: max(9px, 2.6cqw);
+  /* Darker than the #6E6E73 grey: on cream at this size it needs 4.5:1. */
+  color: #545458;
+  letter-spacing: 0.02em;
+}
+.sampleTag {
+  position: absolute;
+  left: 4cqw;
+  top: 4cqw;
+  padding: 0.6cqw 2cqw;
+  border-radius: 980px;
+  background: #e6e0d4;
+  color: #1d1d1f;
+  font-size: max(10px, 2.6cqw);
+  font-weight: 600;
+}
+.pine .sampleTag {
+  background: rgba(245, 241, 232, 0.2);
+  color: #f5f1e8;
+}
+.spec {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink2);
+}
+.links {
+  display: flex;
+  gap: 6px 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* scans */
+.total {
+  margin: 0;
+  font-size: clamp(40px, 6vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.byCard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+.byCard div {
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--bg2);
+  min-width: 0;
+}
+.byCard dt {
+  font-size: 14px;
+  color: var(--ink2);
+}
+.byCard dd {
+  margin: 4px 0 0;
+  font-size: 24px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.days {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.days li {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 40px;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.days li span:last-child {
+  text-align: right;
+}
+.bar {
+  height: 12px;
+  border-radius: 980px;
+  background: var(--fill);
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+}
+.empty {
+  margin: 0;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--bg2);
+  font-size: 16px;
+}
