@@ -3,11 +3,15 @@
 import { LinkBooking } from "@/components/LinkBooking";
 import { usePrefill } from "@/components/guest/usePrefill";
 import { useToast } from "@/components/Toast";
+import { useState } from "react";
+import { RatingNote } from "./[code]/RatingNote";
+import type { BookedWithRating } from "./[code]/RatingNote";
 import styles from "./link.module.css";
 
 export default function LinkDemoPage() {
   const toast = useToast();
   const prefill = usePrefill();
+  const [booked, setBooked] = useState<BookedWithRating | null>(null);
   return (
     <section className={`view ${styles.layout}`}>
       <div>
@@ -25,14 +29,16 @@ export default function LinkDemoPage() {
             initialCode={prefill.code ?? ""}
             prefill={prefill}
             contained
-            onBooked={(r) =>
+            onBooked={(r) => {
+              setBooked(r);
               toast(
                 r.perk_applied
                   ? "Booked with a perk code. See Savings for the commission avoided."
                   : "Booked directly. No perk code, so no saving is claimed.",
-              )
-            }
+              );
+            }}
           />
+          <RatingNote result={booked} />
         </div>
       </div>
     </section>

@@ -23,6 +23,36 @@ export type HotelContact = {
 
 export type AmenityLabel = { id: string; en: string; hi: string };
 
+/**
+ * The owner's facts about one room type, keyed by `name` (the room type as
+ * `rooms[].room_type` names it). Every number is owner-entered; none is a
+ * price. null or "" means "not set".
+ */
+export type RoomDetail = {
+  name: string;
+  size_sqft: number | null;
+  beds_en: string;
+  beds_hi: string;
+  max_guests: number | null;
+  /** At most 2 each. */
+  features_en: string[];
+  features_hi: string[];
+  /** One of the site's photos (`photos[].id`), or null. */
+  photo_id: number | null;
+};
+
+/** One shown comment from a verified guest (the owner can hide a comment, never edit the stars). */
+export type RatingComment = { stars: number; comment: string; month: string };
+
+/**
+ * Verified-guest ratings as the API sums them. `average` is null until at
+ * least 3 ratings exist; the page then shows no number at all.
+ */
+export type RatingSummary = { count: number; average: number | null; comments: RatingComment[] };
+
+/** GET /public/rate/{token}. */
+export type RatePage = { hotel: string; slug: string; state: "open" | "used" | "invalid" };
+
 /** GET /public/site/{slug} `details`. `sample` marks the sample hotel's fixed facts. */
 export type SiteDetailsData = {
   amenities: string[];
@@ -42,10 +72,18 @@ export type SiteDetailsData = {
    */
   card_perk_en?: string;
   card_perk_hi?: string;
+  /** Room facts (optional: an older API does not send them; missing means none). */
+  rooms?: RoomDetail[];
 };
 
 /** The public site as the V2 hotel page reads it. */
-export type HotelSitePayload = PublicSite & { details: SiteDetailsData };
+export type HotelSitePayload = PublicSite & {
+  details: SiteDetailsData;
+  /** The lowest room price, computed by the API (integer paise); missing or null means none shown. */
+  from_price_paise?: number | null;
+  /** Verified-guest ratings; missing means none yet. */
+  ratings?: RatingSummary;
+};
 
 /** Which printed card's QR brought the guest (?src=card-wallet|card-room|card-desk). */
 export type ScanCard = "wallet" | "room" | "desk";
