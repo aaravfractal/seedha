@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import type { FormEvent, ReactNode } from "react";
+import type { FormEvent, MouseEvent, ReactNode } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { api } from "@/lib/api";
 import type { AmenityId } from "@/lib/amenities";
 import { isAmenityId } from "@/lib/amenityIcons";
@@ -11,8 +10,10 @@ import { hotelFonts } from "@/lib/fonts-hotel";
 import { inr } from "@/lib/format";
 import {
   AMENITIES_SHOWN,
+  cardPerk,
   langFrom,
   mapsHref,
+  photoSources,
   pick,
   scanCardFrom,
   searchWithoutSrc,
@@ -53,13 +54,12 @@ const GALLERY_PHOTOS = [
   "linear-gradient(160deg,#8A6E5E,#5D5A63)",
 ];
 const MAX_NIGHTS = 14;
-// Seedha branding on hotel pages; a Pro setting (hide_branding) removes it.
-const BRAND = { book: "Book direct", powered: "Powered by Seedha" } as const;
 
 type Status = { kind: "idle" } | { kind: "checking" } | { kind: "open" } | { kind: "closed"; reason: string };
 type Here = { protocol: string; hostname: string; port: string };
 
 const noSubscribe = () => () => {};
+const noSearch = () => "";
 // The address as the page first loaded, read once: the scan source is then
 // removed from the bar, and the perk stays for this visit.
 let firstSearch: string | null = null;
@@ -102,6 +102,45 @@ function caption(photo: SitePhoto, lang: Lang): string {
   return pick(photo.caption_en, photo.caption_hi, lang);
 }
 
+/**
+ * A hotel photo as <picture>: AVIF, then WebP, then JPEG, each at the
+ * widths the public photo route serves, so a phone downloads a phone-sized
+ * file (review R3-1). A photo not on the public route (the owner's preview)
+ * is shown as it is.
+ */
+function Picture({
+  photo,
+  alt,
+  sizes,
+  className,
+  eager = false,
+}: {
+  photo: SitePhoto;
+  alt: string;
+  sizes: string;
+  className?: string;
+  eager?: boolean;
+}) {
+  const set = photoSources(photo.url, photo.width);
+  return (
+    <picture className={className}>
+      {set ? <source type="image/avif" srcSet={set.avif} sizes={sizes} /> : null}
+      {set ? <source type="image/webp" srcSet={set.webp} sizes={sizes} /> : null}
+      <img
+        src={set ? set.src : photo.url}
+        srcSet={set ? set.jpeg : undefined}
+        sizes={set ? sizes : undefined}
+        alt={alt}
+        width={photo.width}
+        height={photo.height}
+        loading={eager ? "eager" : "lazy"}
+        fetchPriority={eager ? "high" : undefined}
+        decoding={eager ? undefined : "async"}
+      />
+    </picture>
+  );
+}
+
 function OwnerPhoto({
   photo,
   lang,
@@ -115,16 +154,7 @@ function OwnerPhoto({
 }) {
   return (
     <div className={s.photo}>
-      <Image
-        className={s.photoImg}
-        src={photo.url}
-        alt={caption(photo, lang)}
-        width={photo.width}
-        height={photo.height}
-        sizes={sizes}
-        loading="lazy"
-        unoptimized
-      />
+      <Picture className={s.photoPic} photo={photo} alt={caption(photo, lang)} sizes={sizes} />
       {label ? (
         <span className={s.photoLabel} aria-hidden="true">
           {label}
@@ -195,15 +225,41 @@ function Section({
   );
 }
 
+export type HotelSiteV2Props = {
+  site: HotelSitePayload;
+  /**
+   * Owner preview (the Website screen's Review): no scan count, no service
+   * worker, no address-bar or title changes, no API calls, no navigation
+   * (links and the booking form do nothing), the header and the mobile bar
+   * stay in the flow instead of sticking to the window, the page's own
+   * background stays off the owner app, and no <main> landmark is added
+   * (the owner screen has its own). `?lang` and `?src` in the owner's
+   * address are ignored.
+   */
+  preview?: boolean;
+  /** Controlled language (for the preview's EN/HI switch); the page's own switch then calls onLangChange. */
+  lang?: Lang;
+  onLangChange?: (lang: Lang) => void;
+  /** Preview only: show the card-scan ribbon as a guest from this card would see it. */
+  previewCard?: ScanCard | null;
+};
+
 /**
  * The hotel's own website, V2 (docs/HOTEL_SITE_V2.md). Rooms and packages
  * exactly as the API prices them; booking goes to Seedha Link. A guest who
  * scanned a printed card (?src=card-wallet|card-room|card-desk) sees the
- * returning-guest perk and the scan is counted once, with nothing stored
+ * owner's own card perk when the owner wrote one, else a neutral welcome
+ * that promises nothing, and the scan is counted once, with nothing stored
  * about them. Never calls AI.
  */
-export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
-  const search = useSyncExternalStore(noSubscribe, readFirstSearch, () => "");
+export function HotelSiteV2({
+  site,
+  preview = false,
+  lang: langProp,
+  onLangChange,
+  previewCard = null,
+}: HotelSiteV2Props) {
+  const search = useSyncExternalStore(noSubscribe, preview ? noSearch : readFirstSearch, noSearch);
   const hereKey = useSyncExternalStore(noSubscribe, readHere, () => "");
   const here = useMemo<Here | undefined>(() => {
     if (!hereKey) return undefined;
@@ -211,8 +267,9 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
     return { protocol, hostname, port };
   }, [hereKey]);
   const [chosenLang, setChosenLang] = useState<Lang | null>(null);
-  const lang: Lang = chosenLang ?? langFrom(search) ?? (site.lang === "hi" ? "hi" : "en");
-  const card = scanCardFrom(search);
+  const lang: Lang = langProp ?? chosenLang ?? langFrom(search) ?? (site.lang === "hi" ? "hi" : "en");
+  const chooseLang = (code: Lang) => (onLangChange ? onLangChange(code) : setChosenLang(code));
+  const card = preview ? previewCard : scanCardFrom(search);
 
   const t = V2_COPY[lang];
   const c = COPY[lang];
@@ -251,12 +308,16 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
   const [allAmenities, setAllAmenities] = useState(false);
   const shownAmenities = allAmenities ? amenities : amenities.slice(0, AMENITIES_SHOWN);
   const [locationRef, locationNear] = useNearViewport<HTMLDivElement>();
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const dateRef = useRef<HTMLInputElement | null>(null);
+  const perk = cardPerk(d, lang);
   const hasLocation = Boolean(d.geo) || d.nearby.length > 0;
   const showBar = Boolean(telLink || waLink || canBook);
 
   // Once per visit: count the card scan, drop ?src from the address (a reload
   // or a shared link does not count again), and register the offline page.
   useEffect(() => {
+    if (preview) return;
     const scanned = scanCardFrom(window.location.search);
     if (scanned) {
       pingScan(site.slug, scanned);
@@ -268,14 +329,32 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
       );
     }
     registerOffline(site.slug);
-  }, [site.slug]);
+  }, [site.slug, preview]);
 
   useEffect(() => {
-    document.title = `${name} · ${site.location[lang] || site.location.en}`;
-  }, [name, site.location, lang]);
+    if (preview) return;
+    const sample = site.sample ? (lang === "hi" ? " (नमूना)" : " (sample)") : "";
+    document.title = `${name}${sample} · ${site.location[lang] || site.location.en}`;
+  }, [name, site.location, site.sample, lang, preview]);
+
+  /** "Book directly" and the Book buttons: to the booking form, with the check-in date focused (R2-8). */
+  function goToBooking(event: MouseEvent<HTMLAnchorElement>) {
+    const form = formRef.current;
+    if (!form) return;
+    event.preventDefault();
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    form.scrollIntoView({ behavior: still ? "auto" : "smooth", block: "start" });
+    dateRef.current?.focus({ preventScroll: true });
+  }
+
+  /** Preview: links lead nowhere (the in-page Book buttons still move to the form). */
+  function stayInPreview(event: MouseEvent<HTMLElement>) {
+    const link = (event.target as Element | null)?.closest("a");
+    if (link && !(link.getAttribute("href") ?? "").startsWith("#")) event.preventDefault();
+  }
 
   async function check(day: string, n: number, type: string): Promise<boolean> {
-    if (!day || !type) return true;
+    if (preview || !day || !type) return true;
     const ticket = ++asked.current;
     setStatus({ kind: "checking" });
     const q = new URLSearchParams({ check_in: day, nights: String(n), room_type: type });
@@ -294,7 +373,7 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (status.kind === "closed") return;
+    if (preview || status.kind === "closed") return;
     if (await check(checkIn, nights, room)) window.location.assign(href(room, checkIn, nights));
   }
 
@@ -309,8 +388,14 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
           : "";
   const bookAnchor = `#${id("book")}`;
 
+  const Main = preview ? "div" : "main";
+
   return (
-    <div className={`${s.root} ${hotelFonts} ${showBar ? s.withBar : ""}`} lang={lang}>
+    <div
+      className={`${s.root} ${hotelFonts} ${showBar ? s.withBar : ""} ${preview ? s.preview : ""}`}
+      lang={lang}
+      onClickCapture={preview ? stayInPreview : undefined}
+    >
       <header className={s.head}>
         <span className={`${s.brand} ${s.display}`}>{name}</span>
         <div className={s.langSwitch} role="group" aria-label={t.language}>
@@ -320,15 +405,16 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
               type="button"
               lang={code}
               aria-pressed={lang === code}
-              aria-label={code === "en" ? "English" : "हिन्दी"}
-              onClick={() => setChosenLang(code)}
+              onClick={() => chooseLang(code)}
             >
+              {/* The accessible name starts with the visible label (WCAG 2.5.3, review R3-10). */}
               {code === "en" ? "EN" : "हि"}
+              <span className={s.srOnly}>{code === "en" ? " English" : " हिन्दी"}</span>
             </button>
           ))}
         </div>
         {canBook ? (
-          <a className={`${s.pill} ${s.headBook}`} href={bookAnchor}>
+          <a className={`${s.pill} ${s.headBook}`} href={bookAnchor} onClick={goToBooking}>
             {c.book}
           </a>
         ) : waLink ? (
@@ -338,30 +424,26 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
         ) : null}
       </header>
 
-      <main id="main" className={s.main}>
+      <Main id={preview ? undefined : "main"} className={s.main}>
         <section className={s.hero} aria-labelledby={id("hotel-name")}>
           {hero ? (
-            <Image
-              className={s.heroImg}
-              src={hero.url}
-              alt={caption(hero, lang)}
-              width={hero.width}
-              height={hero.height}
-              sizes="100vw"
-              loading="eager"
-              fetchPriority="high"
-              unoptimized
-            />
+            <Picture className={s.heroPic} photo={hero} alt={caption(hero, lang)} sizes="100vw" eager />
           ) : (
             <span className={s.chip}>{c.samplePhoto}</span>
           )}
-          {card ? (
-            <aside className={s.perk} aria-label={t.perkLabel} data-card={card}>
-              <strong>{t.perkLabel}</strong>
-              {t.perk}
-            </aside>
-          ) : null}
           <div className={s.heroText}>
+            {card ? (
+              perk ? (
+                <aside className={s.perk} aria-label={t.perkLabel} data-card={card}>
+                  <strong>{t.perkLabel}</strong>
+                  {perk}
+                </aside>
+              ) : (
+                <aside className={s.welcome} aria-label={t.welcomeLabel} data-card={card}>
+                  {t.welcome}
+                </aside>
+              )
+            ) : null}
             {site.location[lang] ? <p className={s.place}>{site.location[lang]}</p> : null}
             <h1 id={id("hotel-name")} className={`${s.display} ${s.h1}`}>
               {name}
@@ -369,7 +451,7 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
             {site.tagline[lang] ? <p className={s.tagline}>{site.tagline[lang]}</p> : null}
             <div className={s.heroActions}>
               {canBook ? (
-                <a className={s.pillLight} href={href(firstRoom, checkIn, nights)}>
+                <a className={s.pillLight} href={bookAnchor} onClick={goToBooking}>
                   {t.bookDirectly}
                 </a>
               ) : null}
@@ -384,6 +466,7 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
 
         {canBook ? (
           <form
+            ref={formRef}
             id={id("book")}
             className={s.bar}
             onSubmit={submit}
@@ -397,6 +480,7 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
               <label className={s.field}>
                 <span>{c.checkIn}</span>
                 <input
+                  ref={dateRef}
                   type="date"
                   value={checkIn}
                   min={addDays(site.today, 1)}
@@ -443,11 +527,11 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
               </label>
               <button type="submit" className={s.barBook} aria-disabled={status.kind === "closed"}>
                 {site.hide_branding ? (
-                  c.bookShort
+                  t.bookDirect
                 ) : (
-                  <span lang="en">
-                    {BRAND.book} <span className={s.powered}>· {BRAND.powered}</span>
-                  </span>
+                  <>
+                    {t.bookDirect} <span className={s.powered}>· {t.powered}</span>
+                  </>
                 )}
               </button>
               <p className={`${s.barNote} ${closedReason ? s.closed : ""}`} role="status" aria-live="polite">
@@ -720,11 +804,11 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
             {d.sample || site.contact.placeholder ? <p className={s.note}>{t.sampleContact}</p> : null}
           </Section>
         ) : null}
-      </main>
+      </Main>
 
       <footer className={s.foot}>
         {site.sample ? <p>{t.sampleHotel}</p> : null}
-        {site.hide_branding ? null : <p lang="en">{t.built}</p>}
+        {site.hide_branding ? null : <p>{t.built}</p>}
       </footer>
 
       {showBar ? (
@@ -736,7 +820,7 @@ export function HotelSiteV2({ site }: { site: HotelSitePayload }) {
             </a>
           ) : null}
           {canBook ? (
-            <a className={s.barPrimary} href={bookAnchor}>
+            <a className={s.barPrimary} href={bookAnchor} onClick={goToBooking}>
               {c.bookShort}
             </a>
           ) : null}

@@ -4,6 +4,7 @@
  * tested in lib/hotelSiteV2.test.ts. Nothing here computes a price: rooms and
  * packages are shown exactly as the API sends them.
  */
+import { inr } from "./format.ts";
 import { mapsUrl } from "./localMap.ts";
 import type { Lang } from "./types-site.ts";
 import type { HotelSitePayload, ScanCard, SiteDetailsData } from "./types-hotel-site.ts";
@@ -27,6 +28,8 @@ export const EMPTY_DETAILS: SiteDetailsData = {
   contact: { phone: "", whatsapp: "", email: "", address_en: "", address_hi: "" },
   geo: null,
   sample: false,
+  card_perk_en: "",
+  card_perk_hi: "",
 };
 
 /**
@@ -49,8 +52,22 @@ export function withDetails(
       good_to_know: d.good_to_know ?? [],
       contact: { ...EMPTY_DETAILS.contact, ...(d.contact ?? {}) },
       geo: d.geo ?? null,
+      card_perk_en: d.card_perk_en ?? "",
+      card_perk_hi: d.card_perk_hi ?? "",
     },
   };
+}
+
+/**
+ * The owner's card perk in the page language (Hindi falls back to English),
+ * or "" when the owner set none. The page shows a perk only when this is not
+ * empty: it never promises one the owner did not write (reviews R1-9, R2-1).
+ */
+export function cardPerk(
+  details: Pick<SiteDetailsData, "card_perk_en" | "card_perk_hi">,
+  lang: Lang,
+): string {
+  return pick((details.card_perk_en ?? "").trim(), (details.card_perk_hi ?? "").trim(), lang);
 }
 
 /** How many amenities the hotel page shows before "Show all". */
@@ -100,20 +117,49 @@ export function pick(en: string, hi: string, lang: Lang): string {
   return lang === "hi" && hi.trim() ? hi : en;
 }
 
-/** Cache tags for the static hotel pages (revalidated when an owner saves anything). */
+/**
+ * Cache tags for the static hotel pages: every page carries both, so one
+ * hotel can be marked stale alone (hotel-site:<slug>) or all at once.
+ */
 export const HOTEL_SITES_TAG = "hotel-sites";
 export function hotelSiteTag(slug: string): string {
   return `hotel-site:${slug.slice(0, 64)}`;
 }
 
+export type HotelRevalidation = "none" | "own" | "all";
+
 /**
- * Whether a BFF response should mark every hotel page stale: a successful
- * owner write (publish, site edits, branding, rooms, prices, the demo reset).
- * Reads and guest calls never do.
+ * Which static hotel pages a BFF response marks stale (security review R1-3):
+ * - "own": a successful owner write to the hotel's own site (`site` and
+ *   `site/*`: publish, text, photos, rooms on the site, packages, details,
+ *   branding). Only that hotel's tag is cleared.
+ * - "all": the demo reset, which reloads every table.
+ * - "none": reads, failures, guest and device calls, every other owner
+ *   write, and any write by the Direct beta demo login on the hosted site,
+ *   where the sample's public page is locked to its fixed sample content.
+ * No other owner write changes a public page: room prices on the page come
+ * from the rack rates, which no owner route edits.
  */
-export function revalidatesHotelSites(access: string, method: string, status: number): boolean {
-  return access === "owner" && method !== "GET" && method !== "HEAD" && status >= 200 && status < 300;
+export function hotelRevalidation(write: {
+  access: string;
+  method: string;
+  status: number;
+  path: string;
+  subject: string | null;
+  hosted: boolean;
+}): HotelRevalidation {
+  const { access, method, status, path, subject, hosted } = write;
+  if (access !== "owner" || method === "GET" || method === "HEAD" || status < 200 || status >= 300) {
+    return "none";
+  }
+  if (hosted && subject === "demo") return "none";
+  if (path === "demo/reset") return "all";
+  if (path === "site" || path.startsWith("site/")) return "own";
+  return "none";
 }
+
+/** Crawl rules: public pages and hotel photos (under /api/public/site/), never the rest of the API. */
+export const ROBOTS_RULES = { userAgent: "*", allow: ["/", "/api/public/site/"], disallow: ["/api/"] };
 
 /** The service worker's scope: "/" on the hotel's own host, else the page's own path. */
 export function serviceWorkerScope(pathname: string, slug: string): string {
@@ -129,34 +175,110 @@ function absolute(path: string, base: string): string {
   }
 }
 
+/** The photo widths and formats the public photo route serves (`?w=&fmt=`). */
+export const PHOTO_WIDTHS = [480, 768, 1024] as const;
+export type PhotoFormat = "avif" | "webp" | "jpeg";
+
+export type PhotoSources = { avif: string; webp: string; jpeg: string; src: string };
+
+/**
+ * srcset strings for a public hotel photo in AVIF, WebP and JPEG, at the
+ * widths the API resizes to (never wider than the stored photo, which the
+ * API does not upscale), plus the JPEG fallback src. null for a photo that
+ * is not on the public photo route (the owner's preview), which is shown as
+ * it is.
+ */
+export function photoSources(url: string, width: number): PhotoSources | null {
+  if (!url.startsWith("/api/public/site/") || !(width > 0)) return null;
+  const sep = url.includes("?") ? "&" : "?";
+  const at = (w: number, fmt: PhotoFormat) => `${url}${sep}w=${w}&fmt=${fmt}`;
+  const steps: { w: number; shown: number }[] = [];
+  for (const w of PHOTO_WIDTHS) {
+    steps.push({ w, shown: Math.min(w, Math.round(width)) });
+    if (w >= width) break;
+  }
+  const set = (fmt: PhotoFormat) => steps.map((x) => `${at(x.w, fmt)} ${x.shown}w`).join(", ");
+  const largest = steps[steps.length - 1]!.w;
+  return { avif: set("avif"), webp: set("webp"), jpeg: set("jpeg"), src: at(largest, "jpeg") };
+}
+
+/** Cut text to at most `max` characters at a word boundary, with an ellipsis when cut. */
+export function clip(text: string, max: number): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).replace(/[\s,.;:]+$/, "")}…`;
+}
+
+/**
+ * The page's meta description (about 155 characters): the owner's own
+ * description when there is one, else the tagline with the hotel and place.
+ * The sample hotel says it is a sample first (rule 11).
+ */
+export function metaDescription(site: HotelSitePayload): string {
+  const place = site.location.en;
+  const lead = site.sample ? "Sample hotel with fictional details. " : "";
+  const where = place ? `${site.hotel} in ${place}` : site.hotel;
+  const own = site.text?.description.en.trim() ?? "";
+  if (own) return clip(`${lead}${own}`, 155);
+  const tagline = site.tagline.en.trim().replace(/[.\s]+$/, "");
+  const body = tagline
+    ? `${tagline}. ${where}. Book directly with the hotel.`
+    : `${where}. Book directly with the hotel.`;
+  return clip(`${lead}${body}`, 155);
+}
+
+/**
+ * "₹4,300 to ₹6,200" from the owner's own room prices as the API sends them
+ * (formatting only, no price is computed); "" without a priced room.
+ */
+export function priceRange(rooms: readonly { nightly_rate: number }[]): string {
+  const rates = rooms.map((r) => r.nightly_rate).filter((r) => Number.isInteger(r) && r > 0);
+  if (!rates.length) return "";
+  const low = Math.min(...rates);
+  const high = Math.max(...rates);
+  return low === high ? inr(low) : `${inr(low)} to ${inr(high)}`;
+}
+
 /**
  * schema.org Hotel for search engines: name, address, geo, telephone,
- * amenityFeature, url and image. Never a review, rating or price. The
- * sample hotel's placeholder phone is left out.
+ * amenityFeature, url, image and the price range, each only when the hotel's
+ * data has it. Never a review or rating. The fictional sample hotel (rule
+ * 11; its page is also noindex) is labelled "(sample)" with a description
+ * that says so, and carries no address, position, phone or email, so it
+ * cannot pass for a real place (reviews R1-5, R2-6).
  */
 export function hotelJsonLd(site: HotelSitePayload): Record<string, unknown> {
   const d = site.details;
   const url = site.url;
+  const sample = site.sample || d.sample;
   const images = site.photos.map((p) => absolute(p.url, url)).filter(Boolean);
-  const description = site.text?.description.en || site.tagline.en;
-  const telephone = d.sample ? "" : d.contact.phone || d.contact.whatsapp;
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "Hotel",
-    name: site.hotel,
+    name: sample ? `${site.hotel} (sample)` : site.hotel,
     url,
-    address: {
+  };
+  if (sample) {
+    data.description = "Sample hotel for the Seedha demo. All details are fictional.";
+  } else {
+    data.address = {
       "@type": "PostalAddress",
       ...(d.contact.address_en ? { streetAddress: d.contact.address_en } : {}),
       ...(site.location.en ? { addressLocality: site.location.en } : {}),
       addressCountry: "IN",
-    },
-  };
-  if (description) data.description = description;
+    };
+    const description = site.text?.description.en || site.tagline.en;
+    if (description) data.description = description;
+    const telephone = d.contact.phone || d.contact.whatsapp;
+    if (telephone) data.telephone = telephone;
+    if (d.contact.email) data.email = d.contact.email;
+    if (d.geo) data.geo = { "@type": "GeoCoordinates", latitude: d.geo.lat, longitude: d.geo.lng };
+    const prices = priceRange(site.rooms);
+    if (prices) data.priceRange = prices;
+  }
   if (images.length) data.image = images;
-  if (telephone) data.telephone = telephone;
-  if (d.contact.email && !d.sample) data.email = d.contact.email;
-  if (d.geo) data.geo = { "@type": "GeoCoordinates", latitude: d.geo.lat, longitude: d.geo.lng };
   if (d.amenity_labels.length) {
     data.amenityFeature = d.amenity_labels.map((a) => ({
       "@type": "LocationFeatureSpecification",

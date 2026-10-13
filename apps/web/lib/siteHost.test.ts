@@ -5,7 +5,9 @@ import {
   hotelHost,
   hotelPathAllowed,
   hotelPathSlug,
+  hotelRoute,
   legacyHotelPath,
+  publicSlug,
   movedHostUrl,
   rootDomain,
   shareMessage,
@@ -144,6 +146,22 @@ test("paths: /h/<slug> and the old /hotel/<slug>", () => {
   assert.equal(hotelPathSlug("/h/deodar-view/x"), null);
   assert.equal(hotelPathSlug("/h/%E0%A4"), null);
   assert.equal(hotelPathSlug("/home"), null);
+  assert.deepEqual(hotelRoute("/h/deodar-view"), { slug: "deodar-view", raw: "deodar-view", rest: "" });
+  assert.deepEqual(hotelRoute("/h/Deodar-View/"), { slug: "deodar-view", raw: "Deodar-View", rest: "" });
+  assert.deepEqual(hotelRoute("/h/deodar-view/opengraph-image"), {
+    slug: "deodar-view",
+    raw: "deodar-view",
+    rest: "/opengraph-image",
+  });
+  assert.deepEqual(hotelRoute("/h/X-Y/opengraph-image-1a2b"), {
+    slug: "x-y",
+    raw: "X-Y",
+    rest: "/opengraph-image-1a2b",
+  });
+  assert.equal(hotelRoute("/h/deodar-view/x"), null);
+  assert.equal(hotelRoute("/h/deodar-view/opengraph-image/x"), null);
+  assert.equal(hotelRoute("/h/%E0%A4"), null);
+  assert.equal(hotelRoute("/home"), null);
   assert.equal(legacyHotelPath("/hotel/deodar-view"), "/h/deodar-view");
   assert.equal(legacyHotelPath("/hotel/deodar-view/"), "/h/deodar-view");
   assert.equal(legacyHotelPath("/hotels"), null);
@@ -203,4 +221,12 @@ test("booking buttons go to Seedha Link on the app host", () => {
 test("the live address preview", () => {
   assert.equal(siteAddress("deodar-view", "seedha.in", "app.seedha.in"), "deodar-view.seedha.in");
   assert.equal(siteAddress("deodar-view", "", "localhost:3000"), "localhost:3000/h/deodar-view");
+});
+
+test("public hotel slugs are lower case and invalid shapes never load (R1-1)", () => {
+  assert.equal(publicSlug("deodar-view"), "deodar-view");
+  assert.equal(publicSlug("DEODAR-View"), "deodar-view");
+  for (const bad of ["", "ab", "a".repeat(41), "-x-y", "x--y", "x_y", "x y", "हिन्दी", "../x", "x.y"]) {
+    assert.equal(publicSlug(bad), null, bad);
+  }
 });

@@ -2,14 +2,20 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   HOTEL_SITES_TAG,
+  ROBOTS_RULES,
+  cardPerk,
+  clip,
   hotelJsonLd,
   hotelPageHeaders,
   hotelSiteTag,
   jsonLdText,
   langFrom,
   mapsHref,
+  metaDescription,
+  photoSources,
   pick,
-  revalidatesHotelSites,
+  priceRange,
+  hotelRevalidation,
   scanCardFrom,
   searchWithoutSrc,
   serviceWorkerScope,
@@ -132,16 +138,94 @@ test("Hindi falls back to English", () => {
   assert.equal(pick("Mall Road", "मॉल रोड", "en"), "Mall Road");
 });
 
-test("only successful owner writes mark the hotel pages stale", () => {
-  assert.ok(revalidatesHotelSites("owner", "POST", 200));
-  assert.ok(revalidatesHotelSites("owner", "PATCH", 204));
-  assert.ok(revalidatesHotelSites("owner", "DELETE", 200));
-  assert.equal(revalidatesHotelSites("owner", "GET", 200), false);
-  assert.equal(revalidatesHotelSites("owner", "POST", 422), false);
-  assert.equal(revalidatesHotelSites("public", "POST", 204), false);
-  assert.equal(revalidatesHotelSites("device", "POST", 200), false);
+test("only the hotel's own site saves mark its page stale; the reset marks all (R1-3)", () => {
+  const write = (over: Partial<Parameters<typeof hotelRevalidation>[0]> = {}) =>
+    hotelRevalidation({
+      access: "owner",
+      method: "POST",
+      status: 200,
+      path: "site/publish",
+      subject: "demo",
+      hosted: false,
+      ...over,
+    });
+  assert.equal(write(), "own");
+  assert.equal(write({ method: "PATCH", path: "site" }), "own");
+  assert.equal(write({ method: "PUT", path: "site/details" }), "own");
+  assert.equal(write({ method: "DELETE", path: "site/photos/3", status: 204 }), "own");
+  assert.equal(write({ method: "PATCH", path: "site/branding" }), "own");
+  assert.equal(write({ path: "demo/reset" }), "all");
+  // Not a site write, a read, a failure, or not an owner call.
+  for (const path of ["ask", "messages/3/approve", "desk/checkin", "statements", "rooms/x/y/slip", "sites"]) {
+    assert.equal(write({ path }), "none", path);
+  }
+  assert.equal(write({ method: "GET" }), "none");
+  assert.equal(write({ method: "HEAD" }), "none");
+  assert.equal(write({ status: 422 }), "none");
+  assert.equal(write({ access: "public", path: "public/site/x/scan", status: 204 }), "none");
+  assert.equal(write({ access: "device" }), "none");
+  // Hosted: the Direct beta demo login cannot change the locked sample page.
+  assert.equal(write({ hosted: true }), "none");
+  assert.equal(write({ hosted: true, path: "demo/reset" }), "none");
+  assert.equal(write({ hosted: true, subject: "owner-1" }), "own");
   assert.equal(HOTEL_SITES_TAG, "hotel-sites");
   assert.equal(hotelSiteTag("pine-view"), "hotel-site:pine-view");
+});
+
+test("robots: public pages and hotel photos may be crawled, the rest of the API may not (R3-4)", () => {
+  assert.deepEqual(ROBOTS_RULES.allow, ["/", "/api/public/site/"]);
+  assert.deepEqual(ROBOTS_RULES.disallow, ["/api/"]);
+});
+
+test("the card ribbon shows only the owner's own perk, never a made-up one (R1-9, R2-1)", () => {
+  assert.equal(cardPerk({}, "en"), "");
+  assert.equal(cardPerk({ card_perk_en: "  ", card_perk_hi: "" }, "hi"), "");
+  assert.equal(cardPerk({ card_perk_en: "Tea on arrival", card_perk_hi: "" }, "hi"), "Tea on arrival");
+  assert.equal(
+    cardPerk({ card_perk_en: "Tea on arrival", card_perk_hi: "पहुंचने पर चाय" }, "hi"),
+    "पहुंचने पर चाय",
+  );
+  assert.equal(withDetails({ ...site(), details: undefined } as never).details.card_perk_en, "");
+});
+
+test("photos: AVIF, WebP and JPEG at the API's widths, never wider than the photo (R3-1)", () => {
+  const url = "/api/public/site/pine-view/photos/3?v=ab";
+  const big = photoSources(url, 1024);
+  assert.ok(big);
+  assert.equal(
+    big.avif,
+    `${url}&w=480&fmt=avif 480w, ${url}&w=768&fmt=avif 768w, ${url}&w=1024&fmt=avif 1024w`,
+  );
+  assert.match(big.webp, /&w=768&fmt=webp 768w/);
+  assert.equal(big.src, `${url}&w=1024&fmt=jpeg`);
+  const small = photoSources(url, 600);
+  assert.ok(small);
+  assert.equal(small.jpeg, `${url}&w=480&fmt=jpeg 480w, ${url}&w=768&fmt=jpeg 600w`);
+  assert.equal(small.src, `${url}&w=768&fmt=jpeg`);
+  assert.equal(photoSources("/api/site/photos/3?v=ab", 1024), null);
+  assert.equal(photoSources(url, 0), null);
+});
+
+test("meta description: the owner's text, else tagline, hotel and place; samples say so (R3-9)", () => {
+  assert.equal(
+    metaDescription(site()),
+    "Quiet rooms under the deodars. Pine View in Mussoorie. Book directly with the hotel.",
+  );
+  const long = "Twelve quiet rooms ".repeat(20);
+  const own = metaDescription(
+    site({ text: { description: { en: long, hi: "" }, why_book_direct: { en: [], hi: [] } } }),
+  );
+  assert.ok(own.length <= 155, own);
+  assert.ok(own.endsWith("…"));
+  assert.match(metaDescription(site({ sample: true })), /^Sample hotel with fictional details\. /);
+  assert.equal(clip("a b c", 10), "a b c");
+});
+
+test("price range from the owner's room prices, formatting only (R3-8)", () => {
+  assert.equal(priceRange([]), "");
+  assert.equal(priceRange([{ nightly_rate: 0 }]), "");
+  assert.equal(priceRange([{ nightly_rate: 620000 }]), "₹6,200");
+  assert.equal(priceRange([{ nightly_rate: 620000 }, { nightly_rate: 430000 }]), "₹4,300 to ₹6,200");
 });
 
 test("service worker scope: the hotel host root or the page's own path", () => {
@@ -149,14 +233,17 @@ test("service worker scope: the hotel host root or the page's own path", () => {
   assert.equal(serviceWorkerScope("/h/pine-view", "pine-view"), "/h/pine-view");
 });
 
-test("Hotel JSON-LD has the facts and never a review, rating or price", () => {
-  const data = hotelJsonLd(site());
+test("Hotel JSON-LD has the facts and never a review or rating", () => {
+  const data = hotelJsonLd(
+    site({ rooms: [{ nightly_rate: 430000 } as never, { nightly_rate: 620000 } as never] }),
+  );
   assert.equal(data["@type"], "Hotel");
   assert.equal(data.name, "Pine View");
   assert.equal(data.url, "https://pine-view.example.in");
   assert.equal(data.telephone, "+91 98765 43210");
   assert.deepEqual(data.geo, { "@type": "GeoCoordinates", latitude: 30.4598, longitude: 78.0664 });
   assert.deepEqual(data.image, ["https://pine-view.example.in/api/public/site/pine-view/photos/3?v=ab"]);
+  assert.equal(data.priceRange, "₹4,300 to ₹6,200");
   assert.equal((data.amenityFeature as unknown[]).length, 2);
   assert.deepEqual(data.address, {
     "@type": "PostalAddress",
@@ -165,15 +252,22 @@ test("Hotel JSON-LD has the facts and never a review, rating or price", () => {
     addressCountry: "IN",
   });
   const text = JSON.stringify(data);
-  for (const banned of ["review", "Review", "rating", "Rating", "priceRange", "offers"]) {
+  for (const banned of ["review", "Review", "rating", "Rating", "offers"]) {
     assert.equal(text.includes(banned), false, banned);
   }
+  // No priced room, no photo: no priceRange and no image (nothing invented).
+  const bare = hotelJsonLd(site({ photos: [] }));
+  assert.equal(bare.priceRange, undefined);
+  assert.equal(bare.image, undefined);
 });
 
-test("the sample hotel's placeholder phone and email stay out of the JSON-LD", () => {
+test("the sample hotel's JSON-LD is labelled and carries no address, position, phone or email (R1-5)", () => {
   const data = hotelJsonLd(site({ sample: true, details: { ...DETAILS, sample: true } }));
-  assert.equal(data.telephone, undefined);
-  assert.equal(data.email, undefined);
+  assert.equal(data.name, "Pine View (sample)");
+  assert.match(String(data.description), /fictional/);
+  for (const key of ["telephone", "email", "address", "geo", "priceRange"]) {
+    assert.equal(data[key], undefined, key);
+  }
 });
 
 test("JSON-LD text cannot close its script tag", () => {

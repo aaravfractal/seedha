@@ -11,16 +11,44 @@
  */
 "use strict";
 
-const VERSION = "v1";
+const VERSION = "v2";
 const SLUG = new URL(self.location.href).searchParams.get("slug") || "";
 const VALID = SLUG.length >= 3 && SLUG.length <= 40 && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(SLUG);
 const CACHE = `seedha-hotel-${VERSION}-${SLUG}`;
 const DATA = `/api/public/site/${SLUG}`;
-const DAY_MS = 86400000;
+const FRESH_MS = 15 * 60 * 1000;
 
+/** True when the server says the hotel's page or data is gone (unpublished or unknown). */
+function gone(res) {
+  return res.status === 404 || res.status === 410;
+}
+
+/**
+ * The hotel is gone: delete everything this worker kept for it and
+ * unregister, so no withdrawn contact stays in the visitor's browser
+ * (security review R1-6).
+ */
+function forget() {
+  return caches
+    .keys()
+    .then((keys) =>
+      Promise.all(
+        keys
+          .filter((k) => k.startsWith("seedha-hotel-") && k.endsWith(`-${SLUG}`))
+          .map((k) => caches.delete(k)),
+      ),
+    )
+    .then(() => self.registration.unregister())
+    .catch(() => undefined);
+}
+
+/** Save the hotel's current public data (always replacing the old copy), or forget it when it is gone. */
 function saveSite() {
   return fetch(DATA, { credentials: "omit", cache: "no-store", headers: { accept: "application/json" } })
-    .then((res) => (res.ok ? caches.open(CACHE).then((cache) => cache.put(DATA, res)) : undefined))
+    .then((res) => {
+      if (gone(res)) return forget();
+      return res.ok ? caches.open(CACHE).then((cache) => cache.put(DATA, res)) : undefined;
+    })
     .catch(() => undefined);
 }
 
@@ -116,14 +144,14 @@ function offlineResponse() {
     );
 }
 
-/** Refresh the saved site once a day, after a page load that worked. */
+/** Refresh the saved site when it is older than 15 minutes, after a page load that worked. */
 function refreshIfOld() {
   return caches
     .open(CACHE)
     .then((cache) => cache.match(DATA))
     .then((res) => {
       const date = res ? Date.parse(res.headers.get("date") || "") : NaN;
-      if (!res || !(Date.now() - date < DAY_MS)) return saveSite();
+      if (!res || !(Date.now() - date < FRESH_MS)) return saveSite();
       return undefined;
     })
     .catch(() => undefined);
@@ -137,7 +165,7 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(request).then(
       (res) => {
-        event.waitUntil(refreshIfOld());
+        event.waitUntil(gone(res) ? forget() : refreshIfOld());
         return res;
       },
       () => offlineResponse(),

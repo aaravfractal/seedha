@@ -35,6 +35,13 @@ export type SiteDetailsData = {
   contact: HotelContact;
   geo: Geo | null;
   sample: boolean;
+  /**
+   * The owner's own words for a guest who scanned a printed card (0 to 100
+   * characters each; empty = no card perk). Optional: an older API does not
+   * send them, and missing means empty.
+   */
+  card_perk_en?: string;
+  card_perk_hi?: string;
 };
 
 /** The public site as the V2 hotel page reads it. */
