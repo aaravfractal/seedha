@@ -118,3 +118,68 @@ Next, when a slot frees:
   components/site/ratings/FeedbackList.tsx, Overview needs-you rendering,
   e2e/card-page.spec.ts.
 Then reviewer, fixes, gates, deploy.
+
+---
+
+# Speed addendum (saved word for word)
+
+SPEED ADDENDUM TO docs/CARD_PAGE.md. Fastest path, fewest tokens.
+Quality gates stay; only waste goes. Save this to the addendum first.
+
+AGENTS (run together, max 4 total with any still running; each gets a
+worktree and an exact non-overlapping file list from your 10-line plan)
+- F1 API: feedback model and migration (Postgres safe), submit endpoint
+  (name, WhatsApp number, booking reference optional, overall 1-5, food
+  quality 1-5, review max 500 chars, reward choice, consent unticked),
+  verification by booking reference (+ phone digits if on file), rate
+  limits and validation, reward eligibility, one-time reward code via
+  the existing perk-code system, discount recorded as a hotel-funded
+  discount line in the ledger (money code 100% covered, locked totals
+  unchanged), owner endpoints, sample feedback for CL2101 and CL3108.
+- F2 Web (hotel page): feedback form section on /h/<slug> (shown first
+  on ?src=card-*), reward picker from hotel settings, consent checkbox
+  "Send my reward code on WhatsApp. Reply STOP any time." with privacy
+  link, success state; slim top bar "Deodar View on Seedha" and footer
+  "Powered by Seedha", both linking to the main Seedha home.
+- F3 Web (owner app): Settings toggles per reward (Free breakfast
+  default on; 5% off and ₹100 code off by default) with note "Check
+  your OTA contracts before offering direct discounts"; new feedback in
+  Overview "Needs you" and on the Website screen with "Send reward code"
+  (owner approves, simulated WhatsApp send).
+
+RULES
+- Public rating only from verified stays, shown after 3; unverified
+  feedback stays private to the hotel.
+- Discounts only for verified guests, private one-time code, never a
+  public rate, never stacked, direct booking within 12 months.
+  Unverified visitors can choose Free breakfast only.
+- Phone stored only with consent; never public; erasable via
+  /data-deletion. Public pages never call AI.
+- Copy: no em dashes, no exclamation marks.
+
+TOKEN RULES (every agent)
+Read only listed files; grep and line ranges, never whole large files;
+never re-read what you wrote; small diffs, no rewrites; no new
+dependencies; run only your own tests with mocks; long commands in the
+background, read pass/fail lines only; report under 8 lines (files,
+tests, commit).
+
+LEAD
+Merge each agent as soon as it reports green; one read-only review at
+the end (under 15 lines); fix high and medium only. Gates once, stop at
+first failure: make check, e2e once, 8-step loop on demo-prod,
+Lighthouse once on /h/deodar-view?src=card-wallet. Network error: wait
+60 s, retry up to 5 times, relaunch from status file. Then continue the
+deploy step already planned (rollback on any failed live check).
+
+FINAL REPLY (under 10 lines)
+Live card link, test references, reward options shown, gate results,
+and "LIVE: deployed and verified" or "ROLLED BACK" with the reason.
+
+## Addendum plan (lead, 10 lines)
+1. Shared contract: POST /public/site/{slug}/feedback {name, whatsapp?, booking_ref?, phone_last4?, overall, food?, review?, reward, consent} -> {verified, reward, state}; rewards from GET /public site payload `rewards` and owner GET/PUT /settings/rewards {breakfast, pct5, flat100}.
+2. F1 (worktree fb1) API: models GuestFeedback + settings fields, migration 0019, services/guest_feedback.py, routers/guest_feedback.py, link.py reward-code redemption, ledger/savings discount line (money code, 100%), STOP handling and erasure, Needs you item, seed sample feedback, tests/test_guest_feedback.py.
+3. F2 (worktree fb2) hotel page: components/site/v2/CardWelcome.tsx (form replaces rate and note; Book again stays), copy.ts, SeedhaBar.tsx, HotelSiteV2.tsx footer link, lib/cardWelcome.ts (+test), e2e/card-page.spec.ts.
+4. F3 (worktree fb3) owner app: components/settings/* reward toggles, components/site/ratings/* feedback list with Send reward code, types-site-v2-owner.ts, e2e/site-details.spec.ts or a new e2e/guest-feedback.spec.ts.
+5. Rule 4 extension logged as D-106: the card page form is a second consent path with the same rules (unticked, STOP, owner approves every send, simulated, erasable).
+6. Merge each when green; one review; fix high and medium; gates once; deploy.
