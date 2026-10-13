@@ -20,6 +20,8 @@ import type {
   SiteDetailsOut,
   TravelMode,
 } from "./types-site-v2-owner.ts";
+import type { OwnerSite } from "./types-site.ts";
+import type { HotelSitePayload, SiteDetailsData } from "./types-hotel-site.ts";
 
 /** The API's limits (docs/HOTEL_SITE_V2.md). */
 export const DETAIL_LIMITS = {
@@ -33,6 +35,7 @@ export const DETAIL_LIMITS = {
   phone: 16,
   email: 120,
   address: 200,
+  cardPerk: 100,
   minutesMin: 1,
   minutesMax: 600,
 } as const;
@@ -162,6 +165,8 @@ export type DetailsDraft = {
   contact: Contact;
   lat: string;
   lng: string;
+  card_perk_en: string;
+  card_perk_hi: string;
 };
 
 /** The saved facts as an editable draft. */
@@ -183,6 +188,8 @@ export function toDraft(details: SiteDetailsIn | SiteDetailsOut): DetailsDraft {
     contact: { ...details.contact },
     lat: details.geo ? String(details.geo.lat) : "",
     lng: details.geo ? String(details.geo.lng) : "",
+    card_perk_en: details.card_perk_en,
+    card_perk_hi: details.card_perk_hi,
   };
 }
 
@@ -202,16 +209,27 @@ export function letters(value: string): number {
   return [...value.trim()].length;
 }
 
-/** A required or optional plain-text line: empty, too long or markup. Null when fine. */
+/** Control characters (line breaks, tabs) and format characters (bidi marks, zero-width spaces). */
+const HIDDEN = /[\p{Cc}\p{Cf}]/u;
+const LETTER_OR_NUMBER = /[\p{L}\p{N}]/u;
+
+/**
+ * A required or optional plain-text line: empty, too long, markup, or hidden
+ * characters (line breaks, bidi or zero-width marks), as the API refuses them.
+ * Null when fine.
+ */
 export function textError(value: string, max: number, required: boolean): string | null {
   const n = letters(value);
   if (required && n === 0) return "This cannot be empty.";
   if (n > max) return `Use ${max} letters or fewer. This has ${n}.`;
   if (value.includes("<") || value.includes(">")) return "Use plain text without < or >.";
+  if (/[\r\n]/.test(value.trim())) return "Keep this on one line.";
+  if (HIDDEN.test(value.trim())) return "Remove the hidden characters (copied text can carry them).";
+  if (required && !LETTER_OR_NUMBER.test(value)) return "Use some letters or numbers.";
   return null;
 }
 
-/** Digits, spaces and one leading +, at most 16 characters, or empty. */
+/** ASCII digits 0 to 9, spaces and one leading +, at most 16 characters, or empty. */
 export function phoneError(value: string): string | null {
   const v = value.trim();
   if (!v) return null;
@@ -220,7 +238,8 @@ export function phoneError(value: string): string | null {
   return null;
 }
 
-const EMAIL = /^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$/;
+/** The API's pattern: no ?, &, = or spaces, so a mailto: link cannot carry extra parts. */
+const EMAIL = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
 export function emailError(value: string): string | null {
   const v = value.trim();
@@ -286,6 +305,8 @@ export function validateDraft(d: DetailsDraft): Record<string, string> {
   put("contact.email", emailError(d.contact.email));
   put("contact.address_en", textError(d.contact.address_en, L.address, false));
   put("contact.address_hi", textError(d.contact.address_hi, L.address, false));
+  put("card_perk_en", textError(d.card_perk_en, L.cardPerk, false));
+  put("card_perk_hi", textError(d.card_perk_hi, L.cardPerk, false));
   const hasLat = d.lat.trim() !== "";
   const hasLng = d.lng.trim() !== "";
   if (hasLat || hasLng) {
@@ -321,6 +342,8 @@ export function fromDraft(d: DetailsDraft): SiteDetailsIn {
       address_hi: t(d.contact.address_hi),
     },
     geo: hasGeo ? { lat: Number(t(d.lat)), lng: Number(t(d.lng)) } : null,
+    card_perk_en: t(d.card_perk_en),
+    card_perk_hi: t(d.card_perk_hi),
   };
 }
 
@@ -350,6 +373,8 @@ const FIELD: Record<string, string> = {
   lat: "Latitude",
   lng: "Longitude",
   amenities: "Amenities",
+  card_perk_en: "Card perk in English",
+  card_perk_hi: "Card perk in Hindi",
 };
 
 /** "nearby.1.name_en" -> "Nearby place 2, name in English". */
@@ -414,19 +439,23 @@ export const CARD_SPECS: Record<
 > = {
   wallet: { title: "Wallet card", size: "85.6 x 54 mm (CR80)", w: 85.6, h: 54, qrMm: 18 },
   room: { title: "In-room card", size: "A6, 105 x 148 mm", w: 105, h: 148, qrMm: 25 },
-  tent: { title: "Desk tent card", size: "A5, 148 x 210 mm", w: 148, h: 210, qrMm: 40 },
+  tent: {
+    title: "Desk tent card",
+    size: "A5 landscape, 210 x 148 mm, folds to 210 x 74 mm",
+    w: 210,
+    h: 148,
+    qrMm: 40,
+  },
 };
 
-/** The address a card's QR opens: the site with ?src=card-<wallet|room|desk>. */
+/**
+ * The address a card's QR opens: the site with ?src=card-<wallet|room|desk>,
+ * built exactly as the API's `card_url` builds it, so the preview QR is the
+ * printed QR.
+ */
 export function cardUrl(siteUrl: string, card: ScanCard): string {
-  try {
-    const url = new URL(siteUrl);
-    url.searchParams.set("src", `card-${card}`);
-    return url.toString();
-  } catch {
-    const sep = siteUrl.includes("?") ? "&" : "?";
-    return `${siteUrl}${sep}src=card-${card}`;
-  }
+  const sep = siteUrl.includes("?") ? "&" : "?";
+  return `${siteUrl}${sep}src=card-${card}`;
 }
 
 /** Owner download links (through the /api proxy). */
@@ -502,4 +531,26 @@ export function qrPathData(size: number, dark: (row: number, col: number) => boo
     }
   }
   return parts.join("");
+}
+
+/* ---------- the owner's preview of the guest page ---------- */
+
+/** Owner GET /site: the site plus the hotel's facts (the same `details` guests get). */
+export type OwnerSiteWithDetails = OwnerSite & { details: SiteDetailsData };
+
+/**
+ * The guest page's payload from the owner's own view of the site, so the
+ * preview renders the same V2 page guests get: approved packages only (in the
+ * public shape, without the owner's working), `published` from `live`.
+ */
+export function ownerPreviewSite(site: OwnerSiteWithDetails, today: string): HotelSitePayload {
+  return {
+    ...site,
+    published: site.live,
+    today,
+    redirect_to: null,
+    packages: site.packages
+      .filter((p) => p.approved)
+      .map((p) => ({ key: p.key, name: p.name, includes: p.includes, nights: p.nights, price: p.price })),
+  };
 }

@@ -13,18 +13,34 @@ import { AmenitiesEditor } from "./AmenitiesEditor";
 import { ContactEditor } from "./ContactEditor";
 import { NearbyEditor } from "./NearbyEditor";
 import { NotesEditor } from "./NotesEditor";
+import { PerkEditor } from "./PerkEditor";
 import { ReachEditor } from "./ReachEditor";
 import { saveDetails } from "./detailsApi";
 import o from "../owner.module.css";
 import d from "./details.module.css";
 
+/** The toast after a save. The sample hotel's hosted public page always shows its fixed sample facts. */
+export function savedNote(live: boolean, sampleHotel: boolean): string {
+  if (sampleHotel) return "Saved. The hosted public sample page keeps its fixed sample facts.";
+  return live ? "Saved. It is on your site now." : "Saved. Only you see it until you publish.";
+}
+
 /**
  * "Hotel details" on the Website screen: amenities, nearby places, how to
- * reach, good to know, contact and map position. One Save sends the whole
- * object (PUT /site/details). Checks here mirror the API; the API's own 422
- * problems show in plain words next to each box.
+ * reach, good to know, contact, map position and the card perk. One Save
+ * sends the whole object (PUT /site/details). Checks here mirror the API; the
+ * API's own 422 problems show in plain words next to each box.
  */
-export function DetailsEditor({ live, onSaved }: { live: boolean; onSaved?: () => void }) {
+export function DetailsEditor({
+  live,
+  sampleHotel,
+  onSaved,
+}: {
+  live: boolean;
+  /** The shared sample hotel: its hosted public page is locked to the sample facts. */
+  sampleHotel: boolean;
+  onSaved?: () => void;
+}) {
   const toast = useToast();
   const loaded = useApi<SiteDetailsOut>("site/details");
   const [saved, setSaved] = useState<SiteDetailsOut | null>(null);
@@ -85,7 +101,7 @@ export function DetailsEditor({ live, onSaved }: { live: boolean; onSaved?: () =
         setDraft(null);
         setAttempted(false);
         setServerErrors({});
-        toast(live ? "Saved. It is on your site now." : "Saved. Only you see it until you publish.");
+        toast(savedNote(live, sampleHotel));
         onSaved?.();
       } else {
         setServerErrors(apiProblems(result.problems));
@@ -152,6 +168,12 @@ export function DetailsEditor({ live, onSaved }: { live: boolean; onSaved?: () =
         errors={errors}
         onContact={(patch) => edit({ contact: { ...current.contact, ...patch } })}
         onGeo={(patch) => edit(patch)}
+      />
+      <PerkEditor
+        en={current.card_perk_en}
+        hi={current.card_perk_hi}
+        errors={errors}
+        onChange={(patch) => edit(patch)}
       />
 
       <div className={d.saveBar}>

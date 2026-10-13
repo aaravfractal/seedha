@@ -44,6 +44,8 @@ const SAMPLE: SiteDetailsIn = {
   check_out: "11:00",
   contact: { phone: "+91 90000 00000", whatsapp: "", email: "", address_en: "Mall Road", address_hi: "" },
   geo: { lat: 30.4598, lng: 78.0664 },
+  card_perk_en: "Free evening tea",
+  card_perk_hi: "",
 };
 
 test("the web amenity list mirrors the API's fixed 40, ids and labels", () => {
@@ -207,7 +209,9 @@ test("nearest compass point", () => {
 });
 
 test("card QR targets carry ?src=card-wallet, card-room or card-desk", () => {
-  assert.equal(cardUrl("https://deodar.example.in", "wallet"), "https://deodar.example.in/?src=card-wallet");
+  // Exactly as the API's card_url builds it, so the preview QR is the printed QR.
+  assert.equal(cardUrl("https://deodar.example.in", "wallet"), "https://deodar.example.in?src=card-wallet");
+  assert.equal(cardUrl("https://x.in/?a=1", "room"), "https://x.in/?a=1&src=card-room");
   assert.equal(
     cardUrl("http://localhost:3000/h/deodar", CARD_SOURCE.tent),
     "http://localhost:3000/h/deodar?src=card-desk",
@@ -247,4 +251,37 @@ test("QR path: dark runs merged per row, offset by the 4-module quiet zone", () 
     qrPathData(3, (r, c) => grid[r]?.[c] === 1),
     "M4 4h2v1h-2zM4 6h1v1h-1zM6 6h1v1h-1z",
   );
+});
+
+test("text checks refuse line breaks, control, bidi and zero-width characters", () => {
+  assert.equal(textError("Mall\nRoad", 60, true), "Keep this on one line.");
+  for (const bad of ["Mall\u202eRoad", "Mall\u200bRoad", "Mall\u0000Road", "Mall\tRoad", "\u200d"])
+    assert.notEqual(textError(bad, 60, true), null, JSON.stringify(bad));
+  assert.equal(textError("...", 60, true), "Use some letters or numbers.");
+  assert.equal(textError("देवदार व्यू", 60, true), null);
+});
+
+test("phone takes ASCII digits only; email is strict like the API", () => {
+  for (const bad of ["²³⁴⁵⁶⁷", "١٢٣٤٥٦", "+91 9876+5"]) assert.notEqual(phoneError(bad), null, bad);
+  assert.equal(phoneError("+91 98765 43210"), null);
+  for (const bad of ["a@b.c?cc=x&body=hi", "a b@c.in", "a@b.c", "a@b.c1"])
+    assert.notEqual(emailError(bad), null, bad);
+  for (const ok of ["stay@deodar.example", "a.b+c_d%e-f@x-y.co.in"]) assert.equal(emailError(ok), null, ok);
+});
+
+test("card perk: optional, up to 100 letters, plain text, sent trimmed", () => {
+  const draft = toDraft(SAMPLE);
+  draft.card_perk_en = "  Free evening tea  ";
+  draft.card_perk_hi = "";
+  assert.deepEqual(validateDraft(draft), {});
+  assert.equal(fromDraft(draft).card_perk_en, "Free evening tea");
+  draft.card_perk_en = "a".repeat(101);
+  draft.card_perk_hi = "<b>";
+  const errors = validateDraft(draft);
+  assert.match(errors.card_perk_en ?? "", /100 letters or fewer/);
+  assert.equal(errors.card_perk_hi, "Use plain text without < or >.");
+  assert.equal(fieldName("card_perk_en"), "Card perk in English");
+  draft.card_perk_en = "";
+  draft.card_perk_hi = "";
+  assert.deepEqual(validateDraft(draft), {});
 });

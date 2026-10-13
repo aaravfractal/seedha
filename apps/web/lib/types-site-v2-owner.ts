@@ -48,6 +48,10 @@ export type SiteDetailsIn = {
   check_out: string;
   contact: Contact;
   geo: Geo | null;
+  /** The owner's own returning-guest perk, plain text, 0 to 100 letters; empty = no card perk.
+   * English prints on the cards; both show on the site when a guest scans a card. */
+  card_perk_en: string;
+  card_perk_hi: string;
 };
 
 /** GET and PUT /site/details response. `sample`: the fixed sample facts of the sample hotel. */

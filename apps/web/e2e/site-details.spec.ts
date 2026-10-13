@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { BrowserContext, Page } from "@playwright/test";
 import { axeViolations, resetSampleHotel, scrollsSideways, signIn } from "./helpers";
 
 /**
@@ -17,6 +17,11 @@ import { axeViolations, resetSampleHotel, scrollsSideways, signIn } from "./help
 
 test.describe.configure({ mode: "serial" });
 
+// One sign-in for the whole file (the Direct beta login is rate limited): every
+// test uses this one signed-in page.
+let context: BrowserContext;
+let page: Page;
+
 async function openTab(page: Page, name: "Hotel details" | "Print cards") {
   await page.goto("/site");
   await page.getByRole("group", { name: "Website sections" }).getByRole("button", { name }).click();
@@ -28,22 +33,19 @@ function place(page: Page, n: number) {
     .filter({ has: page.getByRole("heading", { name: `Place ${n}`, exact: true }) });
 }
 
-test.beforeAll(async ({ browser }) => {
-  const page = await browser.newPage();
+test.beforeAll(async ({ browser, baseURL }) => {
+  context = await browser.newContext({ baseURL });
+  page = await context.newPage();
   await signIn(page);
   await resetSampleHotel(page);
-  await page.close();
 });
 
-test.afterAll(async ({ browser }) => {
-  const page = await browser.newPage();
-  await signIn(page);
+test.afterAll(async () => {
   await resetSampleHotel(page);
-  await page.close();
+  await context.close();
 });
 
-test("owner edits amenities and a nearby place, saves, reloads and sees them", async ({ page }) => {
-  await signIn(page);
+test("owner edits amenities and a nearby place, saves, reloads and sees them", async () => {
   await openTab(page, "Hotel details");
   await expect(page.getByRole("heading", { name: "Hotel details", level: 2 })).toBeVisible();
   await expect(page.getByText("Sample facts")).toBeVisible();
@@ -73,7 +75,9 @@ test("owner edits amenities and a nearby place, saves, reloads and sees them", a
   ).toHaveAttribute("aria-pressed", "true");
 
   await page.getByRole("button", { name: "Save hotel details" }).click();
-  await expect(page.getByText("Saved. Only you see it until you publish.")).toBeVisible();
+  await expect(
+    page.getByText("Saved. The hosted public sample page keeps its fixed sample facts."),
+  ).toBeVisible();
   await expect(page.getByText("All changes saved")).toBeVisible();
   await expect(page.getByText("Sample facts")).toHaveCount(0);
 
@@ -111,8 +115,7 @@ test("owner edits amenities and a nearby place, saves, reloads and sees them", a
   await expect(place(page, 5).getByLabel("Degrees from north")).toHaveValue("270");
 });
 
-test("invalid input shows the error in plain words, and the API's 422 does too", async ({ page }) => {
-  await signIn(page);
+test("invalid input shows the error in plain words, and the API's 422 does too", async () => {
   await openTab(page, "Hotel details");
   const first = place(page, 1);
   await first.getByLabel("Name in English").fill("<b>Mall Road</b>");
@@ -165,8 +168,7 @@ test("invalid input shows the error in plain words, and the API's 422 does too",
   await page.unroute("**/api/site/details");
 });
 
-test("Print cards shows previews, PDF and QR downloads, and the scans empty state", async ({ page }) => {
-  await signIn(page);
+test("Print cards shows previews, PDF and QR downloads, and the scans empty state", async () => {
   await openTab(page, "Print cards");
   await expect(page.getByRole("heading", { name: "Print cards", level: 2 })).toBeVisible();
 
@@ -177,16 +179,22 @@ test("Print cards shows previews, PDF and QR downloads, and the scans empty stat
   for (const title of ["Wallet card", "In-room card", "Desk tent card"]) {
     await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
   }
-  for (const src of ["card-wallet", "card-room", "card-desk"]) {
+  // Faces as the PDF prints them: the room QR on the front, the tent's two faces on one sheet.
+  for (const [name, src] of [
+    ["Wallet card, back", "card-wallet"],
+    ["In-room card, front", "card-room"],
+    ["Desk tent card, printed sheet", "card-desk"],
+  ] as const) {
     await expect(
-      page.getByRole("img", { name: new RegExp(`QR code preview: .*\\?src=${src}$`) }),
+      page.getByRole("img", { name: new RegExp(`^${name}: .*QR code to .*\\?src=${src}`) }),
     ).toBeVisible();
   }
+  await expect(page.getByRole("img", { name: /^In-room card, back: .*Check-in from 12:00/ })).toBeVisible();
   // No prices on cards.
   await expect(page.locator("figure").filter({ hasText: "₹" })).toHaveCount(0);
 
   // At true aspect ratio: CR80 85.6 x 54 mm.
-  const wallet = page.locator("figure").filter({ hasText: "Front" }).first().locator("div").first();
+  const wallet = page.locator('svg[data-card-face="front"]').first();
   const box = await wallet.boundingBox();
   expect(box).not.toBeNull();
   if (box) expect(Math.abs(box.width / box.height - 85.6 / 54)).toBeLessThan(0.02);
@@ -215,11 +223,8 @@ test("Print cards shows previews, PDF and QR downloads, and the scans empty stat
 });
 
 test("Hotel details and Print cards fit 390 and 1440 with no sideways scroll and pass axe, light and dark", async ({
-  page,
-  context,
   baseURL,
 }) => {
-  await signIn(page);
   const found: string[] = [];
   for (const theme of ["light", "dark"] as const) {
     await context.addCookies([{ name: "seedha_theme", value: theme, url: baseURL ?? "" }]);
