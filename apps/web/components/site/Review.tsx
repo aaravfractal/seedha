@@ -5,24 +5,19 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useApi } from "@/lib/api";
 import { LIMITS } from "@/lib/siteBuild";
-import type { Lang, Mood, OwnerSite } from "@/lib/types-site";
+import { ownerPreviewSite } from "@/lib/siteDetails";
+import type { OwnerSiteWithDetails } from "@/lib/siteDetails";
+import type { Lang } from "@/lib/types-site";
 import type { BuildPatch, BuildState, GenerateResult, SitePhoto } from "@/lib/types-site-build";
-import { worldBFonts } from "@/lib/fonts-worldb";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
 import { errorText, generateSite, patchBuild } from "./buildApi";
 import { ConfirmGenerate, GenerateNote, SourceTag, allowanceText, atDailyLimit } from "./GenerateParts";
-import { HotelSite } from "./HotelSite";
+import { HotelSiteV2 } from "./v2/HotelSiteV2";
 import PublishPanel from "./PublishPanel";
 import { PhotosEditor, PointsEditor, RoomBlurbsEditor, TextPairEditor } from "./ReviewEditors";
 import b from "./build.module.css";
 import o from "./owner.module.css";
-
-const MOODS: ReadonlyArray<[Mood, string, string]> = [
-  ["pine", "Pine", "#1F4D3A"],
-  ["stone", "Stone", "#4A4540"],
-  ["sky", "Sky", "#2F6FA8"],
-];
 
 /**
  * Shows a page laid out at `width` CSS pixels, scaled to fit the frame. The
@@ -69,6 +64,45 @@ function PreviewFrame({
         >
           {children}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The page guests get (the V2 hotel page, Pine), from the owner's own view of
+ * the site, at phone and computer width. Preview mode: no scan count, no
+ * offline worker, no navigation; the frames are inert pictures that scroll.
+ */
+export function SitePreview({ site, address }: { site: OwnerSiteWithDetails; address?: string }) {
+  const today = new Date().toISOString().slice(0, 10);
+  // `preview` is FX-PAGE's HotelSiteV2 prop (no scan ping, service worker or navigation). Passed as a
+  // spread so this builds before and after that prop lands; the frame is inert either way.
+  const previewMode = { preview: true };
+  const page = <HotelSiteV2 site={ownerPreviewSite(site, today)} {...previewMode} />;
+  return (
+    <div className={o.previews}>
+      <div>
+        <div className={o.phoneMock}>
+          <PreviewFrame width={390} height={560} label="Phone preview of your site. Scroll to see more.">
+            {page}
+          </PreviewFrame>
+        </div>
+        <p className={o.previewLabel}>Phone</p>
+      </div>
+      <div>
+        <div className={o.browser}>
+          <div className={o.browserBar} aria-hidden="true">
+            <i style={{ background: "#FF5F57" }} />
+            <i style={{ background: "#FEBC2E" }} />
+            <i style={{ background: "#28C840" }} />
+            <span className={o.url}>{address || site.address}</span>
+          </div>
+          <PreviewFrame width={1280} height={560} label="Desktop preview of your site. Scroll to see more.">
+            {page}
+          </PreviewFrame>
+        </div>
+        <p className={o.previewLabel}>Computer</p>
       </div>
     </div>
   );
@@ -239,11 +273,11 @@ export function Review({
   onPackages,
   claimFocus,
 }: {
-  site: OwnerSite;
+  site: OwnerSiteWithDetails;
   busy: boolean;
   /** True once when Review was just opened from the build steps: focus its heading. */
   claimFocus?: () => boolean;
-  onLook: (patch: { mood?: Mood; lang?: Lang }) => void;
+  onLook: (patch: { lang: Lang }) => void;
   onChange: () => void;
   onSiteChanged: () => void;
   onPackages: () => void;
@@ -254,12 +288,6 @@ export function Review({
   useEffect(() => {
     if (claimFocus?.()) heading.current?.focus();
   }, [claimFocus]);
-  const today = new Date().toISOString().slice(0, 10);
-  const page = (
-    <div className={worldBFonts}>
-      <HotelSite site={site} packages={approved} lang={site.lang} mood={site.mood} today={today} preview />
-    </div>
-  );
 
   return (
     <div className={o.stack}>
@@ -273,21 +301,8 @@ export function Review({
           </p>
         </div>
         <div className={o.switches}>
-          <div className={o.seg} role="group" aria-label="Look">
-            {MOODS.map(([key, label, colour]) => (
-              <button
-                key={key}
-                type="button"
-                aria-pressed={site.mood === key}
-                disabled={busy}
-                onClick={() => onLook({ mood: key })}
-              >
-                <span className={o.dot} style={{ background: colour }} aria-hidden="true" />
-                {label}
-              </button>
-            ))}
-          </div>
-          <div className={o.seg} role="group" aria-label="Language">
+          {/* One look (Pine) for every hotel page, so there is no look to choose. */}
+          <div className={o.seg} role="group" aria-label="Language guests see first">
             <button
               type="button"
               aria-pressed={site.lang === "en"}
@@ -316,30 +331,7 @@ export function Review({
         </p>
       )}
 
-      <div className={o.previews}>
-        <div>
-          <div className={o.phoneMock}>
-            <PreviewFrame width={390} height={560} label="Phone preview of your site. Scroll to see more.">
-              {page}
-            </PreviewFrame>
-          </div>
-          <p className={o.previewLabel}>Phone</p>
-        </div>
-        <div>
-          <div className={o.browser}>
-            <div className={o.browserBar} aria-hidden="true">
-              <i style={{ background: "#FF5F57" }} />
-              <i style={{ background: "#FEBC2E" }} />
-              <i style={{ background: "#28C840" }} />
-              <span className={o.url}>{picked || site.address}</span>
-            </div>
-            <PreviewFrame width={1280} height={560} label="Desktop preview of your site. Scroll to see more.">
-              {page}
-            </PreviewFrame>
-          </div>
-          <p className={o.previewLabel}>Computer</p>
-        </div>
-      </div>
+      <SitePreview site={site} address={picked} />
 
       <BuildEditor live={site.live} onSiteChanged={onSiteChanged} onChange={onChange} />
 

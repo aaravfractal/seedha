@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { MouseEvent } from "react";
 import { useApi } from "@/lib/api";
+import { CARD_TEXT, cardFacts } from "@/lib/cardLayout";
 import { CARD_SOURCE, CARD_SPECS, cardUrl, cardsPdfHref, qrHref } from "@/lib/siteDetails";
 import type { OwnerSite } from "@/lib/types-site";
 import type { CardKind, PdfKind, SiteDetailsOut } from "@/lib/types-site-v2-owner";
 import { useToast } from "@/components/Toast";
 import { worldBFonts } from "@/lib/fonts-worldb";
 import { CardFaces } from "./CardFaces";
-import type { CardData } from "./CardFaces";
 import { ScansPanel } from "./ScansPanel";
 import { downloadFile } from "./download";
 import o from "../owner.module.css";
@@ -26,19 +26,27 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
   const toast = useToast();
   const details = useApi<SiteDetailsOut>("site/details");
   const [busy, setBusy] = useState<string | null>(null);
-  const facts = details.data;
-  const data: CardData = {
-    hotel: site.hotel,
-    hotelHi: site.hotel_hi,
-    place: site.location.en,
-    tagline: site.tagline.en,
-    phone: facts?.contact.phone ?? "",
-    whatsapp: facts?.contact.whatsapp ?? "",
-    checkIn: facts?.check_in ?? "12:00",
-    checkOut: facts?.check_out ?? "11:00",
-    showBrand: !site.hide_branding,
-    sample: site.sample || Boolean(facts?.sample),
-  };
+  const saved = details.data;
+  // The same facts the PDF prints (apps/api/app/routers/site_details.py owner_card_data).
+  const facts = useMemo(
+    () =>
+      cardFacts({
+        hotel: site.hotel,
+        url: site.url,
+        displayUrl: site.address,
+        location: site.location.en,
+        tagline: site.tagline.en,
+        contact: saved?.contact ?? { phone: "", whatsapp: "", email: "", address_en: "" },
+        checkIn: saved?.check_in ?? "",
+        checkOut: saved?.check_out ?? "",
+        nearby: saved?.nearby ?? [],
+        notes: saved?.good_to_know.map((n) => n.text_en) ?? [],
+        perk: saved?.card_perk_en ?? "",
+        sample: site.sample,
+        hideBranding: site.hide_branding,
+      }),
+    [site, saved],
+  );
   const slug = site.slug || "hotel";
 
   async function save(e: MouseEvent<HTMLAnchorElement>, key: string, name: string, type: string) {
@@ -72,7 +80,8 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
           <h2 className={o.h2}>Print cards</h2>
           <p className={o.sub}>
             Cards for the wallet, the room and the front desk. Each QR opens your site, and scans are counted
-            below. Print-ready PDFs have bleed, crop marks and a colour table for the printer.
+            below. Print-ready PDFs have bleed, crop marks and a colour table for the printer. Cards print in
+            English only.
           </p>
         </div>
         <div className={c.actions}>{pdfLink("all", "Download all cards (PDF)", true)}</div>
@@ -85,6 +94,14 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
       )}
 
       <ScansPanel />
+
+      {saved ? (
+        <p className={c.hint}>
+          {facts.perk
+            ? `Your card perk prints in gold: "${facts.perk}". Change it in Hotel details.`
+            : `No card perk is set, so the cards say "${CARD_TEXT.noPerk}". You can add one in Hotel details.`}
+        </p>
+      ) : null}
 
       <div className={`${c.cards} ${worldBFonts}`}>
         {KINDS.map((kind) => {
@@ -99,7 +116,7 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
                 </h3>
                 <span className={c.hint}>{spec.size}</span>
               </div>
-              <CardFaces kind={kind} data={data} qrText={target} />
+              <CardFaces kind={kind} facts={facts} />
               <p className={c.spec}>
                 QR opens <span style={{ overflowWrap: "anywhere" }}>{target}</span>. Printed at least{" "}
                 {spec.qrMm} mm wide.

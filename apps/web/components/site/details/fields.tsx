@@ -54,7 +54,16 @@ export function TextBox({
         </p>
       ) : null}
       {rows ? (
-        <textarea {...common} rows={rows} onChange={(e) => onChange(e.target.value)} />
+        // Every field is one line of plain text (the API refuses line breaks): the box
+        // wraps long text, Enter adds nothing and pasted line breaks become spaces.
+        <textarea
+          {...common}
+          rows={rows}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
+          onChange={(e) => onChange(e.target.value.replace(/[\r\n]+/g, " "))}
+        />
       ) : (
         <input
           {...common}

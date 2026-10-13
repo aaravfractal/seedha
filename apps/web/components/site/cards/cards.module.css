@@ -1,7 +1,6 @@
-/* Print cards and card scans on the Website screen. Card faces use the Pine
-   mood (docs/HOTEL_SITE_V2.md): pine #1F4D3A, cream #F5F1E8, stone #E6E0D4,
-   ink #1D1D1F, grey #6E6E73. They are pictures of paper, so they keep these
-   colours in dark mode too. */
+/* Print cards and card scans on the Website screen. Card faces are SVG
+   pictures of the printed PDF (lib/cardLayout.ts), in the Pine mood colours;
+   they are pictures of paper, so they keep these colours in dark mode too. */
 
 .stack {
   display: grid;
@@ -70,102 +69,14 @@
   color: var(--ink2);
 }
 .face {
-  container-type: inline-size;
-  position: relative;
-  overflow: hidden;
-  /* Paper cards have square corners; the wallet card's rounded corner is set inline.
-     (cqw on this element would measure an outer container, not the card.) */
+  display: block;
+  width: 100%;
+  height: auto;
+  /* Paper cards have square corners; the wallet card's 3.18 mm round corner is set inline. */
   border-radius: 2px;
-  background: #f5f1e8;
-  color: #1d1d1f;
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.08),
     0 8px 22px rgba(0, 0, 0, 0.12);
-  font-family:
-    var(--font-mukta-latin),
-    var(--font-mukta),
-    -apple-system,
-    "Helvetica Neue",
-    sans-serif;
-}
-.pine {
-  background: #1f4d3a;
-  color: #f5f1e8;
-}
-.inner {
-  position: absolute;
-  inset: 7cqw;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.centre {
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.name {
-  margin: 0;
-  font-family: var(--font-wb-pine), "Cormorant Garamond", Georgia, serif;
-  font-weight: 600;
-  line-height: 1.05;
-  overflow-wrap: anywhere;
-}
-.hi {
-  font-family: var(--font-deva), var(--font-mukta), "Noto Sans Devanagari", sans-serif;
-}
-.small {
-  margin: 0;
-  color: inherit;
-  opacity: 0.85;
-  line-height: 1.3;
-  overflow-wrap: anywhere;
-}
-.rule {
-  width: 18cqw;
-  height: 0.6cqw;
-  margin: 3cqw 0;
-  background: currentColor;
-  opacity: 0.35;
-  border-radius: 1cqw;
-}
-.nowrap {
-  white-space: nowrap;
-}
-.qr {
-  display: block;
-  background: #fff;
-  border-radius: 1cqw;
-}
-.qr rect {
-  fill: #fff;
-}
-.qr path {
-  fill: #1d1d1f;
-}
-.brand {
-  position: absolute;
-  right: 5cqw;
-  bottom: 4cqw;
-  font-size: max(9px, 2.6cqw);
-  /* Darker than the #6E6E73 grey: on cream at this size it needs 4.5:1. */
-  color: #545458;
-  letter-spacing: 0.02em;
-}
-.sampleTag {
-  position: absolute;
-  left: 4cqw;
-  top: 4cqw;
-  padding: 0.6cqw 2cqw;
-  border-radius: 980px;
-  background: #e6e0d4;
-  color: #1d1d1f;
-  font-size: max(10px, 2.6cqw);
-  font-weight: 600;
-}
-.pine .sampleTag {
-  background: rgba(245, 241, 232, 0.2);
-  color: #f5f1e8;
 }
 .spec {
   margin: 0;
