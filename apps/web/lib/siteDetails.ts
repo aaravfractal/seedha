@@ -12,6 +12,7 @@ import type {
   FieldProblem,
   NearbyKind,
   Note,
+  RoomDetail,
   ReachItem,
   ReachMode,
   ScanCard,
@@ -38,6 +39,14 @@ export const DETAIL_LIMITS = {
   cardPerk: 100,
   minutesMin: 1,
   minutesMax: 600,
+  rooms: 12,
+  beds: 40,
+  features: 2,
+  feature: 40,
+  sizeMin: 50,
+  sizeMax: 5000,
+  guestsMin: 1,
+  guestsMax: 12,
 } as const;
 
 export const NEARBY_KINDS: ReadonlyArray<readonly [NearbyKind, string]> = [
@@ -155,7 +164,21 @@ export type NearbyDraft = {
   bearing: string;
 };
 
+/** A room type's facts as typed: numbers stay text until saved, "" = not set. */
+export type RoomDraft = {
+  name: string;
+  size_sqft: string;
+  beds_en: string;
+  beds_hi: string;
+  max_guests: string;
+  features_en: [string, string];
+  features_hi: [string, string];
+  /** A site photo id as text, "" = no photo. */
+  photo_id: string;
+};
+
 export type DetailsDraft = {
+  rooms: RoomDraft[];
   amenities: AmenityId[];
   nearby: NearbyDraft[];
   how_to_reach: ReachItem[];
@@ -169,9 +192,43 @@ export type DetailsDraft = {
   card_perk_hi: string;
 };
 
-/** The saved facts as an editable draft. */
-export function toDraft(details: SiteDetailsIn | SiteDetailsOut): DetailsDraft {
+function pair(values: readonly string[] | undefined): [string, string] {
+  return [values?.[0] ?? "", values?.[1] ?? ""];
+}
+
+/** One room type's saved facts (or none) as a draft. */
+export function roomDraft(name: string, saved?: RoomDetail): RoomDraft {
   return {
+    name,
+    size_sqft: saved?.size_sqft != null ? String(saved.size_sqft) : "",
+    beds_en: saved?.beds_en ?? "",
+    beds_hi: saved?.beds_hi ?? "",
+    max_guests: saved?.max_guests != null ? String(saved.max_guests) : "",
+    features_en: pair(saved?.features_en),
+    features_hi: pair(saved?.features_hi),
+    photo_id: saved?.photo_id != null ? String(saved.photo_id) : "",
+  };
+}
+
+/**
+ * The saved facts as an editable draft. `roomTypes`: the room types the hotel
+ * sells, in order; each gets one entry (its saved facts or empty), and saved
+ * facts for a room type no longer sold are left out. Without it, the saved
+ * room entries are used as they are. An older API without `rooms` reads as none.
+ */
+export function toDraft(
+  details: SiteDetailsIn | SiteDetailsOut,
+  roomTypes?: readonly string[],
+): DetailsDraft {
+  const savedRooms: readonly RoomDetail[] = details.rooms ?? [];
+  const names = roomTypes ?? savedRooms.map((r) => r.name);
+  return {
+    rooms: [...new Set(names)].slice(0, DETAIL_LIMITS.rooms).map((name) =>
+      roomDraft(
+        name,
+        savedRooms.find((r) => r.name === name),
+      ),
+    ),
     amenities: AMENITY_IDS.filter((id) => details.amenities.includes(id)),
     nearby: details.nearby.map((p) => ({
       name_en: p.name_en,
@@ -272,13 +329,50 @@ export function coordError(value: string, limit: number): string | null {
   return null;
 }
 
-/** Errors keyed like the API's 422 fields ("nearby.0.name_en"). Empty when the draft can be saved. */
-export function validateDraft(d: DetailsDraft): Record<string, string> {
+/** A whole number typed as text, or empty (not set). */
+function optionalWhole(value: string, min: number, max: number, unit: string): string | null {
+  return value.trim() === "" ? null : wholeError(value, min, max, unit);
+}
+
+/**
+ * Errors keyed like the API's 422 fields ("nearby.0.name_en"). Empty when the
+ * draft can be saved. `photoIds`: the hotel's site photos, when known, so a
+ * room cannot point at a photo that is gone.
+ */
+export function validateDraft(
+  d: DetailsDraft,
+  opts: { photoIds?: readonly number[] } = {},
+): Record<string, string> {
   const errors: Record<string, string> = {};
   const put = (key: string, err: string | null) => {
     if (err) errors[key] = err;
   };
   const L = DETAIL_LIMITS;
+  if (d.rooms.length > L.rooms) put("rooms", `Up to ${L.rooms} room types.`);
+  d.rooms.forEach((r, i) => {
+    put(`rooms.${i}.size_sqft`, optionalWhole(r.size_sqft, L.sizeMin, L.sizeMax, "sq ft"));
+    put(`rooms.${i}.beds_en`, textError(r.beds_en, L.beds, false));
+    put(`rooms.${i}.beds_hi`, textError(r.beds_hi, L.beds, false));
+    put(`rooms.${i}.max_guests`, optionalWhole(r.max_guests, L.guestsMin, L.guestsMax, "guests"));
+    for (let k = 0; k < L.features; k++) {
+      const en = r.features_en[k] ?? "";
+      const hi = r.features_hi[k] ?? "";
+      put(`rooms.${i}.features_en.${k}`, textError(en, L.feature, false));
+      put(`rooms.${i}.features_hi.${k}`, textError(hi, L.feature, false));
+      if (en.trim() === "" && hi.trim() !== "")
+        put(`rooms.${i}.features_en.${k}`, "Add the English line too.");
+    }
+    // Hindi lines pair with English lines in order, so Hindi for the second needs Hindi for the first.
+    const [en0, en1] = r.features_en.map((x) => x.trim());
+    const [hi0, hi1] = r.features_hi.map((x) => x.trim());
+    if (en0 && en1 && !hi0 && hi1)
+      put(`rooms.${i}.features_hi.0`, "Add this in Hindi too, or clear the second one.");
+    if (r.photo_id !== "") {
+      const id = Number(r.photo_id);
+      if (!/^\d+$/.test(r.photo_id) || (opts.photoIds && !opts.photoIds.includes(id)))
+        put(`rooms.${i}.photo_id`, "This photo is no longer on your site. Pick another or none.");
+    }
+  });
   if (d.amenities.length > L.amenities) put("amenities", `Pick up to ${L.amenities}.`);
   if (d.amenities.some((a) => !AMENITY_IDS.includes(a))) put("amenities", "Pick from the list only.");
   if (d.nearby.length > L.nearby) put("nearby", `Add up to ${L.nearby} places.`);
@@ -320,7 +414,28 @@ export function validateDraft(d: DetailsDraft): Record<string, string> {
 export function fromDraft(d: DetailsDraft): SiteDetailsIn {
   const t = (s: string) => s.trim();
   const hasGeo = t(d.lat) !== "" && t(d.lng) !== "";
+  const num = (s: string) => (t(s) === "" ? null : Number(t(s)));
+  // Hindi lines follow their English line, so an empty English line drops both.
+  const features = (en: readonly string[], hi: readonly string[]) => {
+    const kept = en.map((e, k) => [t(e), t(hi[k] ?? "")] as const).filter(([e]) => e !== "");
+    const his = kept.map(([, h]) => h);
+    const gap = his.indexOf("");
+    return { en: kept.map(([e]) => e), hi: gap === -1 ? his : his.slice(0, gap) };
+  };
   return {
+    rooms: d.rooms.map((r) => {
+      const f = features(r.features_en, r.features_hi);
+      return {
+        name: r.name,
+        size_sqft: num(r.size_sqft),
+        beds_en: t(r.beds_en),
+        beds_hi: t(r.beds_hi),
+        max_guests: num(r.max_guests),
+        features_en: f.en,
+        features_hi: f.hi,
+        photo_id: num(r.photo_id),
+      };
+    }),
     amenities: AMENITY_IDS.filter((id) => d.amenities.includes(id)),
     nearby: d.nearby.map((p) => ({
       name_en: t(p.name_en),
@@ -350,11 +465,19 @@ export function fromDraft(d: DetailsDraft): SiteDetailsIn {
 /* ---------- the API's 422 in plain words ---------- */
 
 const SECTION: Record<string, string> = {
+  rooms: "Room",
   nearby: "Nearby place",
   how_to_reach: "How to reach",
-  good_to_know: "Good to know",
+  good_to_know: "House rules",
 };
 const FIELD: Record<string, string> = {
+  size_sqft: "size",
+  beds_en: "beds in English",
+  beds_hi: "beds in Hindi",
+  max_guests: "most guests",
+  features_en: "feature in English",
+  features_hi: "feature in Hindi",
+  photo_id: "photo",
   name_en: "name in English",
   name_hi: "name in Hindi",
   minutes: "minutes",
@@ -553,4 +676,50 @@ export function ownerPreviewSite(site: OwnerSiteWithDetails, today: string): Hot
       .filter((p) => p.approved)
       .map((p) => ({ key: p.key, name: p.name, includes: p.includes, nights: p.nights, price: p.price })),
   };
+}
+
+/* ---------- card QR ---------- */
+
+/**
+ * The page a card QR opens before ?src=: the site's own /h/<slug> address
+ * when that is its address, else the web app's /h/<slug> on `origin` (the
+ * API's card QR uses PUBLIC_BASE_URL/h/<slug>).
+ */
+export function qrBaseUrl(siteUrl: string, slug: string, origin: string): string {
+  const own = /^https?:\/\/[^/]+\/h\/[^/?#]+$/.exec(siteUrl);
+  if (own) return siteUrl;
+  return `${origin.replace(/\/+$/, "")}/h/${encodeURIComponent(slug)}`;
+}
+
+/* ---------- ratings ---------- */
+
+/** The public page shows the average and count only from this many ratings. */
+export const RATINGS_PUBLIC_FROM = 3;
+
+/** Where a rating came from, in plain words. */
+export function ratingSource(source: string): string {
+  if (source === "link" || source === "direct" || source === "seedha_link") return "Booked direct";
+  if (source === "desk") return "Checked out at the Desk";
+  return "Verified guest";
+}
+
+/** "2026-10-03T09:30:00Z" -> "3 October 2026" (the date part as stored). */
+export function ratingDate(iso: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  const name = m ? MONTHS[Number(m[2]) - 1] : undefined;
+  return m && name ? `${Number(m[3])} ${name} ${m[1]}` : iso;
+}
+
+/** "4 of 5 stars". */
+export function starsLabel(stars: number): string {
+  return `${stars} of 5 stars`;
+}
+
+/** Ratings in a sentence for the owner: how many, and whether the public page shows them yet. */
+export function ratingsSummary(count: number): string {
+  if (count === 0) return "No ratings yet.";
+  const n = `${count} ${count === 1 ? "rating" : "ratings"}`;
+  if (count < RATINGS_PUBLIC_FROM)
+    return `${n}. Your site shows the average once there are ${RATINGS_PUBLIC_FROM}.`;
+  return `${n}. Your site shows the average and the count.`;
 }

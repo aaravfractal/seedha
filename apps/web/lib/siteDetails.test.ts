@@ -22,8 +22,13 @@ import {
   nearestDirection,
   phoneError,
   plainProblem,
+  qrBaseUrl,
   qrHref,
   qrPathData,
+  ratingDate,
+  ratingSource,
+  ratingsSummary,
+  starsLabel,
   scanBars,
   textError,
   timeError,
@@ -34,6 +39,18 @@ import {
 import type { SiteDetailsIn } from "./types-site-v2-owner.ts";
 
 const SAMPLE: SiteDetailsIn = {
+  rooms: [
+    {
+      name: "Deluxe Valley View",
+      size_sqft: 280,
+      beds_en: "1 king bed",
+      beds_hi: "1 किंग बेड",
+      max_guests: 3,
+      features_en: ["Valley view balcony", "Room heater"],
+      features_hi: ["घाटी की ओर बालकनी", "रूम हीटर"],
+      photo_id: 7,
+    },
+  ],
   amenities: ["wifi", "parking", "bonfire"],
   nearby: [
     { name_en: "Mall Road", name_hi: "मॉल रोड", minutes: 5, mode: "walk", kind: "market", bearing: 200 },
@@ -284,4 +301,96 @@ test("card perk: optional, up to 100 letters, plain text, sent trimmed", () => {
   draft.card_perk_en = "";
   draft.card_perk_hi = "";
   assert.deepEqual(validateDraft(draft), {});
+});
+
+test("rooms: one draft entry per room type sold, saved facts kept, others empty", () => {
+  const draft = toDraft(SAMPLE, ["Standard", "Deluxe Valley View", "Standard"]);
+  assert.deepEqual(
+    draft.rooms.map((r) => r.name),
+    ["Standard", "Deluxe Valley View"],
+  );
+  assert.equal(draft.rooms[0]?.size_sqft, "");
+  assert.equal(draft.rooms[1]?.size_sqft, "280");
+  assert.deepEqual(validateDraft(draft, { photoIds: [7] }), {});
+  const out = fromDraft(draft);
+  assert.deepEqual(out.rooms[0], {
+    name: "Standard",
+    size_sqft: null,
+    beds_en: "",
+    beds_hi: "",
+    max_guests: null,
+    features_en: [],
+    features_hi: [],
+    photo_id: null,
+  });
+  assert.deepEqual(out.rooms[1], SAMPLE.rooms[0]);
+  // A room type no longer sold drops out; an older API without rooms reads as none.
+  assert.deepEqual(toDraft(SAMPLE, ["Standard"]).rooms.length, 1);
+  const { rooms: _gone, ...older } = SAMPLE;
+  void _gone;
+  assert.deepEqual(toDraft(older as SiteDetailsIn).rooms, []);
+});
+
+test("rooms: checks mirror the contract", () => {
+  const draft = toDraft(SAMPLE);
+  const room = draft.rooms[0]!;
+  room.size_sqft = "49";
+  room.max_guests = "13";
+  room.beds_en = "x".repeat(41);
+  room.features_en = ["", "y".repeat(41)];
+  room.features_hi = ["हिंदी", ""];
+  room.photo_id = "8";
+  const errors = validateDraft(draft, { photoIds: [7] });
+  assert.equal(errors["rooms.0.size_sqft"], "Use 50 to 5000 sq ft.");
+  assert.equal(errors["rooms.0.max_guests"], "Use 1 to 12 guests.");
+  assert.equal(errors["rooms.0.beds_en"], "Use 40 letters or fewer. This has 41.");
+  assert.equal(errors["rooms.0.features_en.0"], "Add the English line too.");
+  assert.equal(errors["rooms.0.features_en.1"], "Use 40 letters or fewer. This has 41.");
+  assert.match(errors["rooms.0.photo_id"] ?? "", /no longer on your site/);
+  room.size_sqft = "2.5";
+  assert.equal(validateDraft(draft)["rooms.0.size_sqft"], "Use a whole number of sq ft.");
+  assert.equal(fieldName("rooms.0.features_en.1"), "Room 1, feature in English");
+  assert.equal(fieldName("good_to_know.0.text_en"), "House rules 1, English text");
+});
+
+test("rooms: Hindi features pair with English ones in order", () => {
+  const draft = toDraft(SAMPLE);
+  const room = draft.rooms[0]!;
+  room.features_en = ["", "Fireplace"];
+  room.features_hi = ["", "अंगीठी"];
+  assert.deepEqual(validateDraft(draft), {});
+  assert.deepEqual(fromDraft(draft).rooms[0]?.features_en, ["Fireplace"]);
+  assert.deepEqual(fromDraft(draft).rooms[0]?.features_hi, ["अंगीठी"]);
+  room.features_en = ["Balcony", "Fireplace"];
+  room.features_hi = ["", "अंगीठी"];
+  assert.ok(validateDraft(draft)["rooms.0.features_hi.0"]);
+  room.features_hi = ["बालकनी", ""];
+  assert.deepEqual(fromDraft(draft).rooms[0]?.features_hi, ["बालकनी"]);
+});
+
+test("card QR base: the site's own /h/<slug> address, else the app's", () => {
+  assert.equal(
+    qrBaseUrl("https://seedha-demo.vercel.app/h/deodar-view", "deodar-view", "https://x.test"),
+    "https://seedha-demo.vercel.app/h/deodar-view",
+  );
+  assert.equal(
+    qrBaseUrl("https://deodar-view.seedha.in", "deodar-view", "https://seedha-demo.vercel.app/"),
+    "https://seedha-demo.vercel.app/h/deodar-view",
+  );
+  assert.equal(
+    cardUrl(qrBaseUrl("http://localhost:3000/h/deodar-view", "deodar-view", ""), "wallet"),
+    "http://localhost:3000/h/deodar-view?src=card-wallet",
+  );
+});
+
+test("ratings in plain words", () => {
+  assert.equal(ratingSource("desk"), "Checked out at the Desk");
+  assert.equal(ratingSource("link"), "Booked direct");
+  assert.equal(ratingSource("something"), "Verified guest");
+  assert.equal(ratingDate("2026-10-03T09:30:00Z"), "3 October 2026");
+  assert.equal(starsLabel(1), "1 of 5 stars");
+  assert.equal(starsLabel(4), "4 of 5 stars");
+  assert.equal(ratingsSummary(0), "No ratings yet.");
+  assert.match(ratingsSummary(2), /once there are 3/);
+  assert.match(ratingsSummary(3), /shows the average and the count/);
 });

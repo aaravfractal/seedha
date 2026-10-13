@@ -35,6 +35,29 @@ function qrSymbol(text: string): Qr | null {
   return drawn;
 }
 
+/**
+ * A QR code alone (level H, 4-module quiet zone), as the API's qr.svg draws
+ * it, for the Card QR panel. `label` names it for screen readers.
+ */
+export function QrImage({ text, label, size = 160 }: { text: string; label: string; size?: number }) {
+  const qr = qrSymbol(text);
+  if (!qr) return null;
+  const box = qr.size + 8;
+  return (
+    <svg
+      role="img"
+      aria-label={label}
+      viewBox={`0 0 ${box} ${box}`}
+      width={size}
+      height={size}
+      style={{ display: "block" }}
+    >
+      <rect width={box} height={box} fill="#FFFFFF" />
+      <path d={qr.d} fill="#000000" shapeRendering="crispEdges" />
+    </svg>
+  );
+}
+
 /** The symbol's size in modules (a version 2 size if it cannot be drawn). */
 function qrModules(text: string): number {
   return qrSymbol(text)?.size ?? 25;

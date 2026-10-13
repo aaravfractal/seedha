@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import type { MouseEvent } from "react";
 import { useApi } from "@/lib/api";
 import { CARD_TEXT, cardFacts } from "@/lib/cardLayout";
-import { CARD_SOURCE, CARD_SPECS, cardUrl, cardsPdfHref, qrHref } from "@/lib/siteDetails";
+import { CARD_SOURCE, CARD_SPECS, cardUrl, cardsPdfHref, qrBaseUrl } from "@/lib/siteDetails";
 import type { OwnerSite } from "@/lib/types-site";
 import type { CardKind, PdfKind, SiteDetailsOut } from "@/lib/types-site-v2-owner";
 import { useToast } from "@/components/Toast";
 import { worldBFonts } from "@/lib/fonts-worldb";
 import { CardFaces } from "./CardFaces";
+import { QrPanel } from "./QrPanel";
 import { ScansPanel } from "./ScansPanel";
 import { downloadFile } from "./download";
 import o from "../owner.module.css";
@@ -17,22 +18,32 @@ import c from "./cards.module.css";
 
 const KINDS: readonly CardKind[] = ["wallet", "room", "tent"];
 
+const noSubscribe = () => () => {};
+
 /**
  * "Print cards": a browser preview of each card from the hotel's own data,
- * print-ready PDFs (GET /site/cards.pdf) and the QR code as SVG and PNG
- * (GET /site/cards/qr.svg|png), plus "Card scans this month".
+ * print-ready PDFs (GET /site/cards.pdf), "Card QR" (the QR alone as SVG and
+ * PNG, GET /site/cards/qr.svg|png) and "Card scans this month".
  */
 export function CardsPanel({ site }: { site: OwnerSite }) {
   const toast = useToast();
   const details = useApi<SiteDetailsOut>("site/details");
   const [busy, setBusy] = useState<string | null>(null);
   const saved = details.data;
+  const origin = useSyncExternalStore(
+    noSubscribe,
+    () => window.location.origin,
+    () => "",
+  );
+  const slug = site.slug || "hotel";
+  // The page every card QR opens (the API's card QR: PUBLIC_BASE_URL/h/<slug>).
+  const qrBase = qrBaseUrl(site.url, slug, origin);
   // The same facts the PDF prints (apps/api/app/routers/site_details.py owner_card_data).
   const facts = useMemo(
     () =>
       cardFacts({
         hotel: site.hotel,
-        url: site.url,
+        url: qrBase,
         displayUrl: site.address,
         location: site.location.en,
         tagline: site.tagline.en,
@@ -45,9 +56,8 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
         sample: site.sample,
         hideBranding: site.hide_branding,
       }),
-    [site, saved],
+    [site, saved, qrBase],
   );
-  const slug = site.slug || "hotel";
 
   async function save(e: MouseEvent<HTMLAnchorElement>, key: string, name: string, type: string) {
     e.preventDefault();
@@ -95,6 +105,8 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
 
       <ScansPanel />
 
+      <QrPanel base={qrBase} slug={slug} />
+
       {saved ? (
         <p className={c.hint}>
           {facts.perk
@@ -107,7 +119,7 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
         {KINDS.map((kind) => {
           const spec = CARD_SPECS[kind];
           const card = CARD_SOURCE[kind];
-          const target = cardUrl(site.url, card);
+          const target = cardUrl(qrBase, card);
           return (
             <section key={kind} className={c.section} aria-labelledby={`card-${kind}`}>
               <div className={c.sectionHead}>
@@ -123,24 +135,6 @@ export function CardsPanel({ site }: { site: OwnerSite }) {
               </p>
               <div className={c.links}>
                 {pdfLink(kind, `Download ${spec.title.toLowerCase()} (PDF)`, false)}
-                <a
-                  className={c.link}
-                  href={qrHref(card, "svg")}
-                  download={`${slug}-qr-${card}.svg`}
-                  aria-label={`QR code of the ${spec.title.toLowerCase()} as SVG`}
-                  onClick={(e) => void save(e, `svg-${card}`, `${slug}-qr-${card}.svg`, "image/svg+xml")}
-                >
-                  QR as SVG
-                </a>
-                <a
-                  className={c.link}
-                  href={qrHref(card, "png")}
-                  download={`${slug}-qr-${card}.png`}
-                  aria-label={`QR code of the ${spec.title.toLowerCase()} as PNG`}
-                  onClick={(e) => void save(e, `png-${card}`, `${slug}-qr-${card}.png`, "image/png")}
-                >
-                  QR as PNG
-                </a>
               </div>
             </section>
           );

@@ -167,3 +167,42 @@
   background: var(--bg2);
   font-size: 16px;
 }
+
+/* Card QR */
+.qrs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 900px) {
+  .qrs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.qr {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-content: start;
+  min-width: 0;
+}
+.qrTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+}
+/* A white tile in both themes: a QR needs dark modules on light paper. */
+.qrBox {
+  width: max-content;
+  padding: 8px;
+  border-radius: var(--r-input);
+  border: 1px solid var(--line);
+  background: #ffffff;
+}
+.url {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}

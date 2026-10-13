@@ -11,11 +11,13 @@
  * - The land topology is a separate chunk, imported only when the globe nears
  *   the viewport, so it never weighs on the first load.
  * - Once it is in view it eases from a wide view to the hotel (EASE_MS).
- *   prefers-reduced-motion: no ease, it draws centred on the hotel at once.
+ * - It renders only when motion is allowed and a canvas 2D context exists.
+ *   With prefers-reduced-motion, or no canvas, it renders nothing, so the
+ *   static SVG LocalMap is the location view.
  * - A square box (aspect-ratio 1) reserves its space, so nothing shifts.
  * - geo null renders nothing; the caller may show its own note.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { geoOrthographic, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
@@ -34,6 +36,33 @@ import {
   type View,
 } from "@/lib/siteGlobe";
 import type { Geo, LocationProps } from "@/lib/types-site-v2";
+
+const REDUCE = "(prefers-reduced-motion: reduce)";
+let canvasOk: boolean | null = null;
+
+/** True when this browser gives a canvas a 2D context (checked once). */
+function hasCanvas2d(): boolean {
+  if (canvasOk === null) {
+    try {
+      canvasOk = Boolean(document.createElement("canvas").getContext("2d"));
+    } catch {
+      canvasOk = false;
+    }
+  }
+  return canvasOk;
+}
+
+function subscribeMotion(onChange: () => void): () => void {
+  const mq = window.matchMedia?.(REDUCE);
+  mq?.addEventListener?.("change", onChange);
+  return () => mq?.removeEventListener?.("change", onChange);
+}
+
+/** Motion allowed and a 2D canvas available; false on the server. */
+function globeAllowed(): boolean {
+  const reduced = window.matchMedia?.(REDUCE).matches ?? false;
+  return !reduced && hasCanvas2d();
+}
 
 let landCache: Promise<GeoJSON.FeatureCollection> | null = null;
 
@@ -97,8 +126,9 @@ function draw(canvas: HTMLCanvasElement, view: View, geo: Geo, land: GeoJSON.Fea
 export default function LocationGlobe({ geo, hotel, lang }: LocationProps) {
   const boxRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const lat = geo?.lat;
-  const lng = geo?.lng;
+  const allowed = useSyncExternalStore(subscribeMotion, globeAllowed, () => false);
+  const lat = allowed ? geo?.lat : undefined;
+  const lng = allowed ? geo?.lng : undefined;
 
   useEffect(() => {
     const box = boxRef.current;
@@ -122,14 +152,7 @@ export default function LocationGlobe({ geo, hotel, lang }: LocationProps) {
       draw(canvas, view, g, land);
     };
 
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-
     const play = () => {
-      if (reduced) {
-        view = to;
-        fit();
-        return;
-      }
       const t0 = performance.now();
       const step = (now: number) => {
         if (!alive) return;
@@ -141,8 +164,8 @@ export default function LocationGlobe({ geo, hotel, lang }: LocationProps) {
       raf = requestAnimationFrame(step);
     };
 
-    // Start from the wide view (or the end view when motion is reduced).
-    view = reduced ? to : from;
+    // Start from the wide view.
+    view = from;
     fit();
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(fit) : null;
     ro?.observe(box);
@@ -188,7 +211,7 @@ export default function LocationGlobe({ geo, hotel, lang }: LocationProps) {
     };
   }, [lat, lng]);
 
-  if (!geo) return null;
+  if (!geo || !allowed) return null;
 
   return (
     <div

@@ -6,6 +6,7 @@ import { useApi } from "@/lib/api";
 import { apiProblems, draftChanged, errorLines, fromDraft, toDraft, validateDraft } from "@/lib/siteDetails";
 import type { DetailsDraft } from "@/lib/siteDetails";
 import type { SiteDetailsOut } from "@/lib/types-site-v2-owner";
+import type { SitePhoto } from "@/lib/types-site";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
 import { errorText } from "../buildApi";
@@ -15,6 +16,7 @@ import { NearbyEditor } from "./NearbyEditor";
 import { NotesEditor } from "./NotesEditor";
 import { PerkEditor } from "./PerkEditor";
 import { ReachEditor } from "./ReachEditor";
+import { RoomsEditor } from "./RoomsEditor";
 import { saveDetails } from "./detailsApi";
 import o from "../owner.module.css";
 import d from "./details.module.css";
@@ -26,19 +28,25 @@ export function savedNote(live: boolean, sampleHotel: boolean): string {
 }
 
 /**
- * "Hotel details" on the Website screen: amenities, nearby places, how to
- * reach, good to know, contact, map position and the card perk. One Save
+ * "Hotel details" on the Website screen: rooms, amenities, nearby places, how
+ * to reach, house rules, contact, map position and the card perk. One Save
  * sends the whole object (PUT /site/details). Checks here mirror the API; the
  * API's own 422 problems show in plain words next to each box.
  */
 export function DetailsEditor({
   live,
   sampleHotel,
+  roomTypes,
+  photos,
   onSaved,
 }: {
   live: boolean;
   /** The shared sample hotel: its hosted public page is locked to the sample facts. */
   sampleHotel: boolean;
+  /** The room types the hotel sells, in order (the site's rooms). */
+  roomTypes: readonly string[];
+  /** The hotel's site photos, for the room photo picker. */
+  photos: readonly SitePhoto[];
   onSaved?: () => void;
 }) {
   const toast = useToast();
@@ -53,7 +61,8 @@ export function DetailsEditor({
   const [focusSummary, setFocusSummary] = useState(0);
 
   const base = saved ?? loaded.data;
-  const baseDraft = base ? toDraft(base) : null;
+  const baseDraft = base ? toDraft(base, roomTypes) : null;
+  const photoIds = photos.map((p) => p.id);
   const shown = draft ?? baseDraft;
   const dirty = Boolean(draft && baseDraft && draftChanged(draft, baseDraft));
 
@@ -75,7 +84,7 @@ export function DetailsEditor({
   if (!base || !shown) return <Loading rows={3} label="Loading your hotel details" />;
 
   const current: DetailsDraft = shown;
-  const clientErrors = attempted ? validateDraft(current) : {};
+  const clientErrors = attempted ? validateDraft(current, { photoIds }) : {};
   const errors = { ...serverErrors, ...clientErrors };
   const lines = errorLines(errors);
 
@@ -89,7 +98,7 @@ export function DetailsEditor({
     e.preventDefault();
     setAttempted(true);
     setFailure(null);
-    if (Object.keys(validateDraft(current)).length > 0) {
+    if (Object.keys(validateDraft(current, { photoIds })).length > 0) {
       setFocusSummary((n) => n + 1);
       return;
     }
@@ -124,8 +133,8 @@ export function DetailsEditor({
             Hotel details
           </h2>
           <p className={o.sub}>
-            The facts guests look for on your site: what you have, what is nearby, how to get there and how to
-            reach you.
+            The facts guests look for on your site: your rooms, what you have, what is nearby, how to get
+            there and how to reach you.
           </p>
         </div>
         {base.sample && !dirty ? <span className="tag">Sample facts</span> : null}
@@ -142,6 +151,12 @@ export function DetailsEditor({
         </div>
       ) : null}
 
+      <RoomsEditor
+        rooms={current.rooms}
+        photos={photos}
+        errors={errors}
+        onChange={(rooms) => edit({ rooms })}
+      />
       <AmenitiesEditor
         value={current.amenities}
         error={errors.amenities}
