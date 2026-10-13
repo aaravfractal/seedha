@@ -1,9 +1,11 @@
 """Two sample card-page feedbacks for the sample hotel (D-106), seeded with
 the inbox threads (demo and reset).
 
-* CL2101: verified, no consent, so no number is stored.
-* CL3108: verified, consent ticked, with the fictional number the sample
-  inbox thread already holds (+91 90000 00101, a Desk consent).
+* CL2105: verified, no consent, so no number is stored.
+* CL3201: verified, consent ticked, with the fictional number the sample
+  inbox thread already holds (+91 90000 00105, a Desk consent).
+
+CL2101 and CL3108 stay unrated so anyone can try the card page with them.
 
 Both are fictional and labelled sample data (rule 11). Each verified stay
 gives one public 'card' rating, so the hotel has 2: below 3, the site still
@@ -21,8 +23,8 @@ from app.models import Booking, Consent, GuestFeedback, Property
 from app.services.guest_feedback import WORDING_VERSION, give_rating
 
 SAMPLE_REVIEWS = {
-    "CL2101": (4, 4, "Sample feedback: quiet room and warm staff. Breakfast could start earlier."),
-    "CL3108": (5, 5, "Sample feedback: the balcony view in the morning was beautiful."),
+    "CL2105": (4, 4, "Sample feedback: quiet room and warm staff. Breakfast could start earlier."),
+    "CL3201": (5, 5, "Sample feedback: the balcony view in the morning was beautiful."),
 }
 
 

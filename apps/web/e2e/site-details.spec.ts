@@ -295,13 +295,15 @@ test("owner sets a room's size, beds, guests, features and photo, saves and sees
   ).toHaveValue("320");
 });
 
-test("Ratings explains the rules and shows the honest empty state", async () => {
+test("Ratings explains the rules and lists the two sample ratings", async () => {
   await openTab(page, "Ratings");
   await expect(page.getByRole("heading", { name: "Ratings", level: 2 })).toBeVisible();
   await expect(page.getByText("Stars cannot be edited.", { exact: false })).toBeVisible();
   await expect(page.getByText(/only from 3 ratings/)).toBeVisible();
-  // The sample hotel has zero ratings after a reset.
-  await expect(page.getByText(/^No ratings yet\./)).toBeVisible();
+  // After a reset the sample hotel has its two sample ratings (D-106), below the public 3.
+  await expect(page.getByText(/^No ratings yet\./)).toHaveCount(0);
+  await expect(page.getByText(/quiet room and warm staff/).first()).toBeVisible();
+  await expect(page.getByText(/balcony view in the morning/).first()).toBeVisible();
 });
 
 test("Hotel details, Print cards and Ratings fit 390 and 1440 with no sideways scroll and pass axe, light and dark", async ({

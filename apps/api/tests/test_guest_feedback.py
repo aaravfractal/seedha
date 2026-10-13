@@ -217,7 +217,7 @@ def test_sample_feedback_owner_list_and_needs_you(
     client: TestClient, owner: dict[str, str]
 ) -> None:
     items = client.get(LIST, headers=owner).json()
-    assert [i["booking_ref"] for i in items] == ["CL2101", "CL3108"]  # newest first
+    assert [i["booking_ref"] for i in items] == ["CL2105", "CL3201"]  # newest first
     first, second = items
     assert first["verified"] and not first["can_message"] and first["review"].startswith("Sample")
     assert second["can_message"] and second["reward_label"] == "Free breakfast"
@@ -261,7 +261,7 @@ def test_send_reward_needs_owner_and_respects_consent(
     assert out["sent"] is True and out["transport"] == "simulated"
     assert out["feedback"]["status"] == "reward_sent" and out["feedback"]["perk_code"]
     to, body = sender.sent[0]
-    assert to == "+919000000101" and out["code"] in body and body.endswith("Reply STOP to opt out.")
+    assert to == "+919000000105" and out["code"] in body and body.endswith("Reply STOP to opt out.")
     assert f"/link/{out['code']}" in body and "Free breakfast" in body
     again = client.post(url, headers=owner)
     assert again.status_code == 409 and again.json()["error"]["code"] == "already_sent"
@@ -315,9 +315,9 @@ def test_data_deletion_blanks_feedback(client: TestClient, session: Session) -> 
     assert res.status_code == 200
     row = latest(session)
     assert (row.name, row.phone, row.review) == ("", None, "") and row.withdrawn_at is not None
-    # The sample CL3108 feedback goes with its Desk consent's erasure.
-    client.post("/public/data-deletion", json={"booking_ref": "CL3108", "phone": "9000000101"})
-    sample = next(r for r in rows(session) if r.booking and r.booking.external_ref == "CL3108")
+    # The sample CL3201 feedback goes with its Desk consent's erasure.
+    client.post("/public/data-deletion", json={"booking_ref": "CL3201", "phone": "9000000105"})
+    sample = next(r for r in rows(session) if r.booking and r.booking.external_ref == "CL3201")
     assert (sample.name, sample.phone, sample.review) == ("", None, "")
 
 

@@ -46,7 +46,7 @@ def fixture_hotel(session: Session) -> Session:
     """The sample hotel as the demo and a reset load it (inbox threads too)."""
     load_sample(session, DEMO_DATE, with_statements=False, device_key=DEVICE_KEY,
                 with_inbox=True, now=T0)  # fmt: skip
-    # The two sample feedbacks (D-106) rate CL2101 and CL3108; these tests
+    # The two sample feedbacks (D-106) rate CL2105 and CL3201; these tests
     # need those stays unrated, so the sample feedback and ratings go.
     session.execute(delete(GuestFeedback))
     session.execute(delete(SiteRating))
@@ -390,8 +390,9 @@ def test_reset_clears_notes_and_card_ratings(
     # Reset restores the two sample feedbacks (D-106) and only their ratings.
     assert session.scalar(select(func.count()).select_from(GuestFeedback)) == 2
     assert session.scalar(select(func.count()).select_from(SiteRating)) == 2
-    assert verify(client, NO_PHONE) == {"state": "already_rated"}
-    # Unrated references still work after a reset.
+    # The sample stays are rated; the test references are free again.
+    assert verify(client, "CL2105") == {"state": "already_rated"}
+    assert verify(client, NO_PHONE)["state"] == "verified"
     assert verify(client, "CL2102")["state"] == "verified"
     assert verify(client, "CL3101") == {"state": "needs_phone"}
 
