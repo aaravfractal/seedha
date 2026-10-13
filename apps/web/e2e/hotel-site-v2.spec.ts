@@ -1,21 +1,26 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { axeViolations, resetSampleHotel, scrollsSideways, signIn } from "./helpers";
+import { axeViolations, resetSampleHotel, scrollsSideways, signInOnce } from "./helpers";
 
 /**
  * Hotel Site V2, the public page (docs/HOTEL_SITE_V2.md, V2-PAGE): the
  * sample hotel at /h/deodar-view and on its own host deodar-view.localhost,
  * at 390 and 1440, in English and Hindi: the sections, 12 amenities then all
  * of them, the location, honest empty reviews, Hotel JSON-LD without any
- * review or rating markup, the strict headers, the returning-guest perk with
- * ?src=card-room (one scan POST, no cookies, counted by the API), and the
- * offline page from the service worker. Sample data only.
+ * review or rating markup (labelled sample, noindex, not in the sitemap),
+ * the strict headers, the card-scan ribbon with ?src=card-room (the owner's
+ * own perk or a neutral welcome, never a made-up perk; one scan POST, no
+ * cookies, counted by the API), and the offline page from the service
+ * worker. Sample data only. Signs in once for the whole file (signInOnce),
+ * so the suite stays under the Direct beta login rate limit.
  */
 
 const SLUG = "deodar-view";
 const PAGE = `/h/${SLUG}`;
-const PERK =
-  "Thank you for staying with us. Book your next stay directly here and enjoy a returning-guest perk.";
+const WELCOME = "Welcome. Booking here goes straight to the hotel.";
+// The owner's own card perk (the sample's starts "Sample perk:"), or the neutral welcome.
+const RIBBON = /Sample perk:|Welcome\. Booking here goes straight to the hotel\./;
+let ownerState = "";
 
 test.describe.configure({ mode: "serial" });
 
@@ -24,17 +29,25 @@ function hotelOrigin(baseURL: string | undefined, slug: string): string {
   return `${url.protocol}//${slug}.localhost:${url.port}`;
 }
 
+/** A page signed in as the owner, from the file's one sign-in (the guest's page stays signed out). */
+async function ownerPage(page: Page, baseURL: string | undefined): Promise<Page> {
+  const browser = page.context().browser();
+  if (!browser) throw new Error("no browser");
+  const context = await browser.newContext({ storageState: ownerState, baseURL });
+  return context.newPage();
+}
+
 async function scansThisMonth(page: Page): Promise<{ total: number; by_card: Record<string, number> }> {
   const res = await page.request.get("/api/site/scans");
   expect(res.ok(), `scans: ${res.status()}`).toBe(true);
   return (await res.json()) as { total: number; by_card: Record<string, number> };
 }
 
-test.beforeAll(async ({ browser }) => {
-  const page = await browser.newPage();
-  await signIn(page);
-  await resetSampleHotel(page);
-  await page.close();
+test.beforeAll(async ({ browser, baseURL }) => {
+  ownerState = await signInOnce(browser);
+  const context = await browser.newContext({ storageState: ownerState, baseURL });
+  await resetSampleHotel(await context.newPage());
+  await context.close();
 });
 
 test("390 px, English: every section, amenities expand, no sideways scroll", async ({ page }) => {
@@ -59,9 +72,10 @@ test("390 px, English: every section, amenities expand, no sideways scroll", asy
   ]) {
     await expect(root.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
   }
-  // Hero: Book directly goes to Seedha Link; WhatsApp is a plain wa.me link.
+  // Hero: Book directly moves to the booking form with the date focused; WhatsApp is a plain wa.me link.
   const hero = page.locator("section").filter({ has: page.getByRole("heading", { level: 1 }) });
-  expect(await hero.getByRole("link", { name: "Book directly" }).getAttribute("href")).toMatch(/^\/link\?/);
+  const bookDirectly = hero.getByRole("link", { name: "Book directly" });
+  expect(await bookDirectly.getAttribute("href")).toMatch(/^#.+book$/);
   expect(await hero.getByRole("link", { name: "WhatsApp" }).getAttribute("href")).toBe(
     "https://wa.me/919000000000",
   );
@@ -71,8 +85,10 @@ test("390 px, English: every section, amenities expand, no sideways scroll", asy
   await expect(page.getByText("Phone and address are placeholders. Sample data.")).toBeVisible();
   await expect(page.getByText("Built with Seedha")).toBeVisible();
   await expect(page.getByRole("button", { name: /Book direct · Powered by Seedha/ })).toBeVisible();
-  // No perk without a card scan.
-  await expect(page.getByText(PERK)).toHaveCount(0);
+  // No ribbon without a card scan.
+  await expect(page.locator("[data-card]")).toHaveCount(0);
+  await bookDirectly.click();
+  await expect(page.getByLabel("Check-in")).toBeFocused();
 
   // 12 amenities, then all 20 of the sample hotel's, then 12 again.
   const amenities = page.locator("[data-amenity]");
@@ -147,8 +163,16 @@ test("SEO: title, canonical, Open Graph image and Hotel JSON-LD without reviews"
   await expect(scripts).toHaveCount(1);
   const text = (await scripts.first().textContent()) ?? "";
   const data = JSON.parse(text) as Record<string, unknown>;
-  expect(data).toMatchObject({ "@context": "https://schema.org", "@type": "Hotel", name: "Deodar View" });
-  expect(data.geo).toEqual({ "@type": "GeoCoordinates", latitude: 30.4598, longitude: 78.0664 });
+  // The fictional sample is labelled, carries no address or position, and is never indexed (rule 11).
+  expect(data).toMatchObject({
+    "@context": "https://schema.org",
+    "@type": "Hotel",
+    name: "Deodar View (sample)",
+  });
+  expect(String(data.description)).toContain("fictional");
+  expect(data.geo).toBeUndefined();
+  expect(data.address).toBeUndefined();
+  expect(await page.locator("meta[name='robots']").getAttribute("content")).toMatch(/noindex/);
   expect((data.amenityFeature as unknown[]).length).toBe(20);
   for (const banned of ["review", "Review", "aggregateRating", "ratingValue", "priceRange", "award"]) {
     expect(text.includes(banned), banned).toBe(false);
@@ -157,7 +181,16 @@ test("SEO: title, canonical, Open Graph image and Hotel JSON-LD without reviews"
   expect(data.telephone).toBeUndefined();
 
   const sitemap = await page.request.get("/sitemap.xml");
-  expect(await sitemap.text()).toContain("/h/deodar-view</loc>");
+  expect(await sitemap.text()).not.toContain("/h/deodar-view");
+  const robots = await (await page.request.get("/robots.txt")).text();
+  expect(robots).toContain("Allow: /api/public/site/");
+  // Capitals 308 to the lower-case address; an impossible or unknown slug's image is a 404.
+  const upper = await page.request.get("/h/Deodar-View", { maxRedirects: 0 });
+  expect(upper.status()).toBe(308);
+  expect(upper.headers()["location"]).toMatch(/\/h\/deodar-view$/);
+  for (const path of ["/h/no-hotel-here-x/opengraph-image", "/h/x_y/opengraph-image"]) {
+    expect((await page.request.get(path, { maxRedirects: 0 })).status(), path).toBe(404);
+  }
 });
 
 test("strict headers on the hotel page, on both addresses", async ({ page, baseURL }) => {
@@ -172,9 +205,12 @@ test("strict headers on the hotel page, on both addresses", async ({ page, baseU
   }
 });
 
-test("a card scan shows the perk and counts once, with no cookies", async ({ page, baseURL }) => {
-  await signIn(page);
-  const before = await scansThisMonth(page);
+test("a card scan shows the owner's perk or a plain welcome and counts once, with no cookies", async ({
+  page,
+  baseURL,
+}) => {
+  const owner = await ownerPage(page, baseURL);
+  const before = await scansThisMonth(owner);
 
   const scan = page.waitForRequest(
     (r) => r.method() === "POST" && r.url().endsWith(`/api/public/site/${SLUG}/scan`),
@@ -186,10 +222,23 @@ test("a card scan shows the perk and counts once, with no cookies", async ({ pag
   expect((await request.allHeaders())["cookie"]).toBeUndefined();
   expect((await request.response())?.status()).toBe(204);
 
-  const perk = page.getByRole("complementary", { name: "Returning-guest perk" });
-  await expect(perk).toBeVisible();
-  await expect(perk).toContainText(PERK);
-  expect(await perk.textContent()).not.toMatch(/₹|\d{3}/);
+  const ribbon = page.locator("[data-card]");
+  await expect(ribbon).toBeVisible();
+  await expect(ribbon).toContainText(RIBBON);
+  expect(await ribbon.textContent()).not.toMatch(/returning-guest perk|₹/);
+  if (!((await ribbon.textContent()) ?? "").includes("Sample perk:"))
+    await expect(ribbon).toHaveText(WELCOME);
+  // The ribbon never covers the "Sample photo" label (rule 11, R2-5).
+  const chip = await page.getByText("Sample photo").first().boundingBox();
+  const box = await ribbon.boundingBox();
+  if (chip && box) {
+    const apart =
+      box.x >= chip.x + chip.width ||
+      chip.x >= box.x + box.width ||
+      box.y >= chip.y + chip.height ||
+      chip.y >= box.y + box.height;
+    expect(apart).toBe(true);
+  }
   // The source leaves the address, so a reload or a shared link does not count again.
   await expect(page).toHaveURL(new RegExp(`${PAGE}$`));
   expect(await scrollsSideways(page)).toBe(false);
@@ -199,9 +248,10 @@ test("a card scan shows the perk and counts once, with no cookies", async ({ pag
   const hostScan = page.waitForRequest((r) => r.method() === "POST" && r.url().includes("/scan"));
   await page.goto(`${hotelOrigin(baseURL, SLUG)}/?src=card-desk&lang=hi`);
   expect((await (await hostScan).response())?.status()).toBe(204);
-  await expect(page.getByRole("complementary", { name: "लौटने वाले मेहमान का पर्क" })).toBeVisible();
+  await expect(page.locator("[data-card]")).toBeVisible();
+  await expect(page.locator("[data-card]")).not.toContainText("Welcome");
 
-  const after = await scansThisMonth(page);
+  const after = await scansThisMonth(owner);
   expect(after.total).toBe(before.total + 2);
   expect(after.by_card.room).toBe((before.by_card.room ?? 0) + 1);
   expect(after.by_card.desk).toBe((before.by_card.desk ?? 0) + 1);
@@ -219,6 +269,7 @@ test("a card scan shows the perk and counts once, with no cookies", async ({ pag
     },
   );
   expect(hostWrite.status()).toBe(404);
+  await owner.context().close();
 });
 
 test("offline: the service worker shows the hotel's name and contact", async ({ page, context }) => {

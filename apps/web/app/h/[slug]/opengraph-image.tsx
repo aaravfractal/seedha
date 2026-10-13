@@ -1,10 +1,14 @@
 import { ImageResponse } from "next/og";
+import { publicSlug } from "@/lib/siteHost";
 import { SAMPLE_SLUG, tryLoadPublicSite } from "./data";
 
 // Each hotel's own preview image for WhatsApp and search: the hotel's name,
 // place and tagline on Pine. Text only (no guest data, no prices), from the
 // same cached site payload as the page, so it refreshes when the page does.
 // next/og's bundled font: Devanagari is not drawn, so the English name is used.
+// A slug that cannot be a hotel, or one the API does not know, is a plain 404
+// before anything is drawn or cached (the proxy answers those first; this is
+// the second line, security review R1-1).
 export const alt = "The hotel's name and place, with a link to book directly";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -17,8 +21,10 @@ const PINE = "#1F4D3A";
 const CREAM = "#F5F1E8";
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const { site } = await tryLoadPublicSite(slug);
+  const slug = publicSlug((await params).slug);
+  if (slug === null) return new Response(null, { status: 404 });
+  const { status, site } = await tryLoadPublicSite(slug);
+  if (status === 404) return new Response(null, { status: 404 });
   const name = site?.hotel ?? "Hotel";
   const place = site?.location.en ?? "";
   const tagline = site?.tagline.en || "Book directly with the hotel.";

@@ -1,8 +1,11 @@
 /**
  * Fixed copy on the V2 hotel page, English and Hindi (Devanagari). Hotel
  * facts come from the API. No em dashes, no exclamation marks, no claims of
- * reviews, ratings or awards. Prices are never written here.
+ * reviews, ratings or awards. Prices are never written here. No perk is
+ * written here either: a card scan shows the owner's own perk text when the
+ * owner set one, else only the neutral welcome (reviews R1-9, R2-1).
  */
+import { MAP_COPY } from "@/lib/localMap";
 import type { Lang } from "@/lib/types-site";
 
 export const V2_COPY = {
@@ -13,8 +16,11 @@ export const V2_COPY = {
     whatsapp: "WhatsApp",
     call: "Call",
     askHotel: "Ask the hotel",
-    perk: "Thank you for staying with us. Book your next stay directly here and enjoy a returning-guest perk.",
-    perkLabel: "Returning-guest perk",
+    perkLabel: "A perk from the hotel",
+    welcome: "Welcome. Booking here goes straight to the hotel.",
+    welcomeLabel: "Welcome",
+    bookDirect: "Book direct",
+    powered: "Powered by Seedha",
     bookYourStay: "Book your stay",
     about: "About us",
     amenities: "Amenities",
@@ -25,7 +31,7 @@ export const V2_COPY = {
     noReviews: "No reviews yet.",
     noReviewsSub: "Have a question before you book? Ask the hotel directly.",
     location: "Location",
-    openInMaps: "Open in Maps",
+    openInMaps: MAP_COPY.en.open,
     mapsNote: "Opens Google Maps in a new tab",
     howToReach: "How to reach",
     reach: { road: "By road", rail: "By train", air: "By air" },
@@ -51,8 +57,11 @@ export const V2_COPY = {
     whatsapp: "WhatsApp",
     call: "कॉल करें",
     askHotel: "होटल से पूछें",
-    perk: "हमारे साथ ठहरने के लिए धन्यवाद। अगली बार सीधे यहीं बुक करें और लौटने वाले मेहमान का पर्क पाएं।",
-    perkLabel: "लौटने वाले मेहमान का पर्क",
+    perkLabel: "होटल की ओर से एक सुविधा",
+    welcome: "स्वागत है। यहां की बुकिंग सीधे होटल को जाती है।",
+    welcomeLabel: "स्वागत",
+    bookDirect: "सीधे बुक करें",
+    powered: "Seedha द्वारा",
     bookYourStay: "अपना ठहराव बुक करें",
     about: "हमारे बारे में",
     amenities: "सुविधाएं",
@@ -63,7 +72,7 @@ export const V2_COPY = {
     noReviews: "अभी कोई राय नहीं।",
     noReviewsSub: "बुक करने से पहले कोई सवाल हो तो सीधे होटल से पूछें।",
     location: "जगह",
-    openInMaps: "मैप में खोलें",
+    openInMaps: MAP_COPY.hi.open,
     mapsNote: "Google Maps नए टैब में खुलेगा",
     howToReach: "कैसे पहुंचें",
     reach: { road: "सड़क से", rail: "ट्रेन से", air: "हवाई जहाज़ से" },
@@ -79,7 +88,7 @@ export const V2_COPY = {
     upi: "UPI से अग्रिम भुगतान",
     sampleContact: "फ़ोन और पता नमूना हैं। नमूना डेटा।",
     sampleHotel: "नमूना होटल। सभी विवरण काल्पनिक हैं।",
-    built: "Built with Seedha",
+    built: "Seedha के साथ बना",
     quickActions: "जल्दी के काम",
   },
 } as const;

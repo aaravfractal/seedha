@@ -99,6 +99,36 @@ export function hotelPathSlug(pathname: string): string | null {
   }
 }
 
+/**
+ * A hotel page path on the app host: "/h/<slug>" or its Open Graph image
+ * "/h/<slug>/opengraph-image<suffix>". `slug` is lower case, `raw` is the
+ * decoded segment as asked for (so a mixed-case address can be redirected),
+ * and `rest` is what follows the slug ("" for the page). null for other paths.
+ */
+export type HotelRoute = { slug: string; raw: string; rest: string };
+
+export function hotelRoute(pathname: string): HotelRoute | null {
+  const match = /^\/h\/([^/]+)(\/opengraph-image[^/]*)?\/?$/.exec(pathname);
+  if (!match) return null;
+  try {
+    const raw = decodeURIComponent(match[1]!);
+    return { slug: raw.toLowerCase(), raw, rest: match[2] ?? "" };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The slug a public hotel page may load: lower case, and null when its shape
+ * can never be a hotel's address. Checked before any shared cache entry or
+ * API call is made, so odd or case-variant addresses cannot fan out into the
+ * cache (security review R1-1).
+ */
+export function publicSlug(raw: string): string | null {
+  const slug = raw.toLowerCase();
+  return slugProblem(slug) === "slug_invalid" ? null : slug;
+}
+
 /** "/hotel/deodar-view" (the old address) -> "/h/deodar-view"; null for other paths. */
 export function legacyHotelPath(pathname: string): string | null {
   const match = /^\/hotel\/([^/]+)\/?$/.exec(pathname);
