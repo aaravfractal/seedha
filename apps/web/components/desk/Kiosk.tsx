@@ -19,6 +19,7 @@ import {
 } from "@/lib/kiosk";
 import type { KioskCommand, KioskEffect, KioskState } from "@/lib/kiosk";
 import { playChime, unlockAudio } from "./kioskAudio";
+import { RatingPanel } from "./RatingPanel";
 import styles from "./Kiosk.module.css";
 
 type LinkState = "connecting" | "online" | "offline" | "paused" | "login";
@@ -57,6 +58,7 @@ export function Kiosk() {
   const [fullscreen, setFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
   const [awake, setAwake] = useState(false);
+  const [ratingUrl, setRatingUrl] = useState<string | null>(null);
 
   const state = useRef<KioskState>(INITIAL_KIOSK);
   const soundOn = useRef(false);
@@ -350,6 +352,7 @@ export function Kiosk() {
         </section>
 
         <aside className={styles.side} aria-label="Slip and staff controls">
+          {ratingUrl ? <RatingPanel url={ratingUrl} onClose={() => setRatingUrl(null)} /> : null}
           <section className={styles.slipCard} aria-labelledby="kiosk-slip-title">
             <h2 id="kiosk-slip-title" className={styles.sideTitle}>
               Slip
@@ -374,7 +377,7 @@ export function Kiosk() {
               <p className={styles.sideNote}>The checkout slip shows here when it prints.</p>
             )}
           </section>
-          <StaffPanel />
+          <StaffPanel onRating={setRatingUrl} />
         </aside>
       </div>
 
@@ -417,8 +420,11 @@ function Receipt({ text }: { text: string }) {
   );
 }
 
-/** Staff controls so a single tablet can run the desk: show a room's QR, or check out. */
-function StaffPanel() {
+/**
+ * Staff controls so a single tablet can run the desk: show a room's QR, or
+ * check out. A checkout hands the guest's rating link up to be shown.
+ */
+function StaffPanel({ onRating }: { onRating: (url: string | null) => void }) {
   const [open, setOpen] = useState(false);
   const desk = useApi<DeskState>(open ? "desk/state" : null);
   const [room, setRoom] = useState<number | null>(null);
@@ -432,7 +438,8 @@ function StaffPanel() {
     setBusy(true);
     setNote(null);
     try {
-      await postJson(path, { room: selected.room });
+      const res = await postJson<{ rating_url?: string | null }>(path, { room: selected.room });
+      if (path === "desk/checkout") onRating(res?.rating_url ?? null);
       setNote(done);
       desk.reload();
     } catch (err) {

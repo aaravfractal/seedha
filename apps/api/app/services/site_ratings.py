@@ -5,6 +5,10 @@ a rating link, made when that happens: one random token per direct booking or
 Desk checkout, stored only as its SHA-256. The raw token is returned once, for
 the confirmation screen or the checkout response; nothing is sent by message.
 
+A link opens only once the stay is over: from check-in + nights of the
+direct booking (Link), or at once for a Desk checkout. A cancelled booking
+never opens. Before that the page says when it opens.
+
 A token rates once: 1 to 5 stars and an optional plain-text comment of up to
 200 characters (the same text rules as the site facts). The owner can hide a
 comment but never change the stars, and hidden comments are never public.
@@ -17,7 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import secrets
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -25,10 +29,12 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models import SiteRating
+from app.config import Settings
+from app.models import Booking, DirectBooking, SiteRating
 from app.services.site_details import Flat, PlainText
 
 RatingSource = Literal["link", "desk"]
+RatingState = Literal["open", "used", "not_yet", "invalid"]
 MIN_PUBLIC_COUNT = 3
 MAX_PUBLIC_COMMENTS = 12
 TOKEN_BYTES = 24
@@ -69,10 +75,16 @@ def token_hash(token: str) -> str:
 
 
 def issue_token(
-    session: Session, property_id: int, source: RatingSource, source_ref: int, now: datetime
+    session: Session,
+    property_id: int,
+    source: RatingSource,
+    source_ref: int,
+    now: datetime,
+    opens_on: date,
 ) -> str | None:
     """A new one-time rating token for this direct booking or Desk checkout,
-    or None when one was already issued (the raw token is never kept)."""
+    usable from `opens_on`, or None when one was already issued (the raw
+    token is never kept)."""
     existing = session.scalar(
         select(SiteRating.id).where(
             SiteRating.source == source, SiteRating.source_ref == source_ref
@@ -85,16 +97,46 @@ def issue_token(
         with session.begin_nested():
             session.add(
                 SiteRating(property_id=property_id, token_hash=token_hash(token), source=source,
-                           source_ref=source_ref, created_at=now)
+                           source_ref=source_ref, created_at=now, opens_on=opens_on)
             )  # fmt: skip
     except IntegrityError:  # issued at the same moment by another request
         return None
     return token
 
 
+def stay_end(check_in: date, nights: int) -> date:
+    """The day a stay ends (checkout day): check-in + nights."""
+    return check_in + timedelta(days=nights)
+
+
+def guest_link_base(settings: Settings) -> str:
+    """The base for rating links: PUBLIC_BASE_URL (as for card QR codes), else
+    the web origin, where the /rate page lives."""
+    return settings.public_base_url or settings.web_origin
+
+
 def rating_url(base_url: str, token: str | None) -> str | None:
     """<PUBLIC_BASE_URL>/rate/<token>, or None without a token."""
     return f"{base_url.rstrip('/')}/rate/{token}" if token else None
+
+
+def rated_booking(session: Session, row: SiteRating) -> Booking | None:
+    """The booking a rating link was issued for (via the direct booking for Link)."""
+    if row.source == "desk":
+        return session.get(Booking, row.source_ref)
+    direct = session.get(DirectBooking, row.source_ref)
+    return direct.booking if direct is not None else None
+
+
+def rating_state(session: Session, row: SiteRating, today: date) -> RatingState:
+    """used, open, not_yet (before `opens_on`), or invalid when the booking is
+    gone, cancelled or not a stay (such a link never opens)."""
+    if row.used_at is not None:
+        return "used"
+    booking = rated_booking(session, row)
+    if booking is None or booking.status != "stay":
+        return "invalid"
+    return "not_yet" if today < row.opens_on else "open"
 
 
 def find_token(session: Session, token: str) -> SiteRating | None:
@@ -159,3 +201,19 @@ def set_hidden(
     row.hidden = hidden
     session.flush()
     return row
+
+
+def erase_guest_comments(session: Session, guest_id: int) -> None:
+    """Guest erasure: blank the comments of ratings for this guest's bookings
+    (Desk) or direct bookings (Link). The stars stay; no text remains."""
+    bookings = select(Booking.id).where(Booking.guest_id == guest_id)
+    directs = select(DirectBooking.id).where(DirectBooking.booking_id.in_(bookings))
+    session.execute(
+        update(SiteRating)
+        .where(
+            ((SiteRating.source == "desk") & SiteRating.source_ref.in_(bookings))
+            | ((SiteRating.source == "link") & SiteRating.source_ref.in_(directs))
+        )
+        .values(comment="")
+        .execution_options(synchronize_session=False)
+    )

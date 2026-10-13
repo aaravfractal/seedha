@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 import pytest
@@ -18,12 +18,14 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import Settings
 from app.main import create_app
-from app.models import Property, SiteRating
+from app.models import Booking, Consent, DirectBooking, Property, SiteRating
 from app.routers.public_site import public_site
 from app.services import site_gen as gen
+from app.services.proof import erase_consent
 from app.services.site_cards import qr_matrix
 from app.services.site_details import SAMPLE_DETAILS, RoomDetail, SiteDetailsIn
 from app.services.site_ratings import (
+    guest_link_base,
     issue_token,
     one_decimal_average,
     summary,
@@ -34,6 +36,7 @@ from tests.test_site_v2_cards import ec_level, png_matrix
 
 SAMPLE = "/public/site/deodar-view"
 NOW = datetime(2026, 10, 13, 9, 0, tzinfo=UTC)
+PAST = date(2020, 1, 1)
 
 
 def sample_prop(session: Session) -> Property:
@@ -54,9 +57,15 @@ def link_book(client: TestClient, room_type: str = "Standard", day: int = 0) -> 
     })  # fmt: skip
 
 
+def stay_id(session: Session, index: int = 0) -> int:
+    """A stored stay booking's id (a Desk rating link needs a real stay)."""
+    ids = session.scalars(select(Booking.id).where(Booking.status == "stay").order_by(Booking.id))
+    return list(ids)[index]
+
+
 def give(session: Session, prop_id: int, ref: int, stars: int, comment: str = "") -> SiteRating:
     """A given rating (as if the guest used the link)."""
-    issue_token(session, prop_id, "desk", ref, NOW)
+    issue_token(session, prop_id, "desk", ref, NOW, PAST)
     row = session.scalars(select(SiteRating).where(SiteRating.source_ref == ref)).one()
     row.stars, row.comment, row.used_at = stars, comment, NOW
     session.commit()
@@ -181,8 +190,19 @@ def test_link_booking_gives_a_one_time_rating_link(
     row = session.scalars(select(SiteRating)).one()
     assert row.token_hash == token_hash(token) and token not in row.token_hash
     assert (row.source, row.stars, row.used_at) == ("link", None, None)
+    stay = session.get_one(DirectBooking, row.source_ref).booking
+    ends = stay.check_in + timedelta(days=stay.nights)
+    assert row.opens_on == ends  # MR-1/MR-2: only once the stay is over
     page = client.get(f"/public/rate/{token}").json()
-    assert page == {"hotel": "Deodar View", "slug": "deodar-view", "state": "open"}
+    assert page == {"hotel": "Deodar View", "slug": "deodar-view", "state": "not_yet",
+                    "opens_on": ends.isoformat()}  # fmt: skip
+    early = client.post(f"/public/rate/{token}", json={"stars": 5})
+    assert (early.status_code, early.json()["error"]["code"]) == (409, "not_open_yet")
+    row.opens_on = PAST  # the stay is over
+    session.commit()
+    page = client.get(f"/public/rate/{token}").json()
+    assert page == {"hotel": "Deodar View", "slug": "deodar-view", "state": "open",
+                    "opens_on": None}  # fmt: skip
     res = client.post(f"/public/rate/{token}", json={"stars": 5, "comment": "Lovely\nstay"})
     assert res.status_code == 204
     again = client.post(f"/public/rate/{token}", json={"stars": 1})
@@ -203,15 +223,62 @@ def test_desk_checkout_gives_one_rating_link_per_stay(
     assert again["rating_url"] is None and again["slip"] == first["slip"]
     rows = session.scalars(select(SiteRating)).all()
     assert [(r.source, r.source_ref) for r in rows] == [("desk", first["booking_id"])]
+    token = first["rating_url"].rsplit("/", 1)[1]
+    assert client.get(f"/public/rate/{token}").json()["state"] == "open"  # checkout: stay over
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_cancelled_booking_never_opens_a_rating(client: TestClient, session: Session) -> None:
+    prop = sample_prop(session)
+    ref = stay_id(session)
+    token = issue_token(session, prop.id, "desk", ref, NOW, PAST)
+    assert token is not None
+    session.get_one(Booking, ref).status = "cancelled"
+    session.commit()
+    assert client.get(f"/public/rate/{token}").json()["state"] == "invalid"
+    assert client.post(f"/public/rate/{token}", json={"stars": 5}).status_code == 404
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_rating_links_use_the_card_base_url(settings: Settings) -> None:
+    assert guest_link_base(replace(settings, public_base_url="https://x.example")) == (
+        "https://x.example"
+    )
+    assert guest_link_base(replace(settings, public_base_url="")) == settings.web_origin
+
+
+@pytest.mark.usefixtures("base_sample")
+def test_erasure_blanks_rating_comments_but_keeps_stars(session: Session) -> None:
+    prop = sample_prop(session)
+    booking = session.scalars(
+        select(Booking).where(Booking.status == "stay", Booking.guest_id.is_not(None))
+    ).first()
+    assert booking is not None and booking.guest_id is not None
+    consent = Consent(guest_id=booking.guest_id, booking_id=booking.id, wording_version="v1",
+                      given_at=NOW, salt="cd" * 16, fingerprint="ab" * 32)  # fmt: skip
+    session.add(consent)
+    session.flush()
+    other_id = session.scalars(
+        select(Booking.id).where(Booking.status == "stay", Booking.guest_id != consent.guest_id)
+    ).first()
+    assert other_id is not None
+    row = give(session, prop.id, booking.id, 4, "Asha from room 104")
+    other = give(session, prop.id, other_id, 5, "Kept")
+    erase_consent(session, consent, NOW)
+    session.commit()
+    session.expire_all()
+    assert (row.stars, row.comment) == (4, "")
+    assert (other.stars, other.comment) == (5, "Kept")
 
 
 @pytest.mark.usefixtures("base_sample")
 def test_rating_input_rules(client: TestClient, session: Session) -> None:
     prop = sample_prop(session)
-    token = issue_token(session, prop.id, "link", 1, NOW)
+    ref = stay_id(session)
+    token = issue_token(session, prop.id, "desk", ref, NOW, PAST)
     session.commit()
     assert token is not None
-    assert issue_token(session, prop.id, "link", 1, NOW) is None  # idempotent
+    assert issue_token(session, prop.id, "desk", ref, NOW, PAST) is None  # idempotent
     bodies: list[dict[str, Any]] = [
         {"stars": 0}, {"stars": 6}, {"stars": 3, "comment": "x" * 201},
         {"stars": 3, "comment": "<script>"}, {"stars": 3, "name": "Asha"}, {},
@@ -219,8 +286,9 @@ def test_rating_input_rules(client: TestClient, session: Session) -> None:
     for body in bodies:
         assert client.post(f"/public/rate/{token}", json=body).status_code == 422
     for bad in ("nope", "x" * 65):
-        assert client.get(f"/public/rate/{bad}").json() == {"hotel": "", "slug": "",
-                                                            "state": "invalid"}  # fmt: skip
+        assert client.get(f"/public/rate/{bad}").json() == {
+            "hotel": "", "slug": "", "state": "invalid", "opens_on": None,
+        }  # fmt: skip
         assert client.post(f"/public/rate/{bad}", json={"stars": 4}).status_code == 404
     assert client.post(f"/public/rate/{token}", json={"stars": 4}).status_code == 204
 
@@ -246,7 +314,7 @@ def test_public_summary_needs_three_and_never_shows_hidden_comments(
     give(session, prop.id, 1, 5, "Warm staff")
     give(session, prop.id, 2, 4, "")
     assert summary(session, prop.id).model_dump() == {"count": 2, "average": None, "comments": []}
-    issue_token(session, prop.id, "desk", 9, NOW)  # issued, never used: does not count
+    issue_token(session, prop.id, "desk", 9, NOW, PAST)  # issued, never used: does not count
     rude = give(session, prop.id, 3, 1, "Rude words")
     body = client.get(SAMPLE).json()["ratings"]
     assert body["count"] == 3 and body["average"] == 3.3

@@ -53,7 +53,7 @@ test.afterAll(async () => {
 test("owner edits amenities and a nearby place, saves, reloads and sees them", async () => {
   await openTab(page, "Hotel details");
   await expect(page.getByRole("heading", { name: "Hotel details", level: 2 })).toBeVisible();
-  await expect(page.getByText("Sample facts")).toBeVisible();
+  await expect(page.getByText("Sample facts", { exact: true })).toBeVisible();
   await expect(page.getByText("20 of 40 chosen")).toBeVisible();
   await expect(page.getByText("All changes saved")).toBeVisible();
 
@@ -84,7 +84,8 @@ test("owner edits amenities and a nearby place, saves, reloads and sees them", a
     page.getByText("Saved. The hosted public sample page keeps its fixed sample facts."),
   ).toBeVisible();
   await expect(page.getByText("All changes saved")).toBeVisible();
-  await expect(page.getByText("Sample facts")).toHaveCount(0);
+  // Exact: the toast above keeps its text ("...fixed sample facts.") in its live region.
+  await expect(page.getByText("Sample facts", { exact: true })).toHaveCount(0);
 
   const saved = (await (await page.request.get("/api/site/details")).json()) as {
     amenities: string[];

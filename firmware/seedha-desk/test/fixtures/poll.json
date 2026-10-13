@@ -50,7 +50,7 @@
       "id": 7,
       "kind": "print_slip",
       "payload": {
-        "text": "DEODAR VIEW, MUSSOORIE\nNeha Gupta - Room 104\n--------------------------------\nRoom (via Booking.com)  Rs 4,000\nDiscount                 -Rs 600\nCommission               -Rs 612\nGST on commission        -Rs 110\nHotel kept              Rs 2,678\n--------------------------------\nBook direct next time and the hotel keeps it all.\nFree breakfast with code\nDEODAR-NG26"
+        "text": "DEODAR VIEW, MUSSOORIE\nNeha Gupta - Room 104\n--------------------------------\nRoom (via Booking.com)  Rs 4,000\nDiscount                 -Rs 600\nCommission               -Rs 612\nGST on commission        -Rs 110\nHotel kept              Rs 2,678\n--------------------------------\nBook direct next time and the hotel keeps it all.\nFree breakfast with code\nDEODAR-NG26\nRate your stay: http://localhost:3000/rate/TOKEN"
       }
     },
     {

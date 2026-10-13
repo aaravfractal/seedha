@@ -169,9 +169,10 @@ def check_in(
 
 
 def check_out(
-    session: Session, prop: Property, stay: InHouse, now: datetime
+    session: Session, prop: Property, stay: InHouse, now: datetime, rating_link: str | None = None
 ) -> tuple[Slip, PerkCode]:
-    """Issue the perk code, mark the stay checked out and print the slip."""
+    """Issue the perk code, mark the stay checked out and print the slip (with
+    the guest's one-time rating link under it, when there is one)."""
     perk = issue_perk(
         session, prop.code_prefix, prop.perk_text, stay.guest, stay.booking, now,
         sample_property=prop.is_sample,
@@ -193,7 +194,8 @@ def check_out(
     enqueue(
         session, device, "show_text", {"text": "Printing slip", "sub": "Please take your receipt"}
     )
-    enqueue(session, device, "print_slip", {"text": slip.as_text()})
+    text = slip.as_text() + (f"\nRate your stay: {rating_link}" if rating_link else "")
+    enqueue(session, device, "print_slip", {"text": text})
     enqueue(session, device, "show_idle", {})
     session.flush()
     return slip, perk

@@ -866,8 +866,8 @@ class SiteRating(Base):
     Seedha Link direct booking or Desk checkout, made when that happens, with
     only the SHA-256 of the one-time token. `source_ref` is the direct_booking
     id ('link') or the booking id ('desk'): never a guest name or phone.
-    `stars` is null until the guest uses the link; the owner can hide a
-    comment but never change the stars."""
+    `stars` is null until the guest uses the link (from `opens_on`, once the
+    stay is over); the owner can hide a comment but never change the stars."""
 
     __tablename__ = "site_rating"
     __table_args__ = (
@@ -882,6 +882,9 @@ class SiteRating(Base):
     source: Mapped[str] = mapped_column(String(8))
     source_ref: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    # The hotel business date from which the guest can rate: the day the stay
+    # ends (check-in + nights) for a Link booking, the checkout day at the Desk.
+    opens_on: Mapped[date] = mapped_column(Date)
     used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     stars: Mapped[int | None] = mapped_column(Integer, nullable=True)
     comment: Mapped[str] = mapped_column(String(200), default="")

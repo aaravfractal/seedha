@@ -51,7 +51,13 @@ export type RatingComment = { stars: number; comment: string; month: string };
 export type RatingSummary = { count: number; average: number | null; comments: RatingComment[] };
 
 /** GET /public/rate/{token}. */
-export type RatePage = { hotel: string; slug: string; state: "open" | "used" | "invalid" };
+/** GET /public/rate/{token}. `opens_on` (YYYY-MM-DD, the day the stay ends) only when not_yet. */
+export type RatePage = {
+  hotel: string;
+  slug: string;
+  state: "open" | "used" | "not_yet" | "invalid";
+  opens_on?: string | null;
+};
 
 /** GET /public/site/{slug} `details`. `sample` marks the sample hotel's fixed facts. */
 export type SiteDetailsData = {

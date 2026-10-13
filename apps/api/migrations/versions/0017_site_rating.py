@@ -29,6 +29,7 @@ def upgrade() -> None:
         sa.Column("source", sa.String(length=8), nullable=False),
         sa.Column("source_ref", sa.Integer(), nullable=False),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("opens_on", sa.Date(), nullable=False),
         sa.Column("used_at", sa.DateTime(timezone=True), nullable=True),
         sa.Column("stars", sa.Integer(), nullable=True),
         sa.Column("comment", sa.String(length=200), nullable=False),

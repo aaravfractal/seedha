@@ -26,7 +26,7 @@ from app.services.savings import (
     perk_split,
     season_review,
 )
-from app.services.site_ratings import issue_token, rating_url
+from app.services.site_ratings import guest_link_base, issue_token, rating_url, stay_end
 
 public_router = APIRouter(prefix="/public/link", tags=["link"])
 savings_router = APIRouter(prefix="/savings", tags=["savings"])
@@ -146,9 +146,18 @@ def link_book(
         guest_short_name=(
             done.booking.guest.short_name if done.perk_applied and done.booking.guest else None
         ),
+        # Rating opens once the stay is over (check-in + nights).
         rating_url=rating_url(
-            settings.web_origin, issue_token(session, prop.id, "link", done.direct.id, now)
-        ),
+            guest_link_base(settings),
+            issue_token(
+                session,
+                prop.id,
+                "link",
+                done.direct.id,
+                now,
+                stay_end(done.booking.check_in, done.booking.nights),
+            ),
+        ),  # fmt: skip
     )
 
 

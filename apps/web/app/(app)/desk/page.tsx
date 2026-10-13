@@ -6,6 +6,7 @@ import { ApiError, postJson, useApi } from "@/lib/api";
 import { roomParam } from "@/lib/rooms";
 import type { DeskState, PropertyInfo, Slip } from "@/lib/types";
 import { DeskDevice } from "@/components/DeskDevice";
+import { RatingPanel } from "@/components/desk/RatingPanel";
 import type { DeskHandle } from "@/components/DeskDevice";
 import { ErrorState, Loading } from "@/components/States";
 import { useToast } from "@/components/Toast";
@@ -30,6 +31,7 @@ export default function DeskPage() {
   const [noPaper, setNoPaper] = useState(false);
   const [simOnline, setSimOnline] = useState<boolean | null>(null);
   const [slips, setSlips] = useState<Slip[]>([]);
+  const [ratingUrl, setRatingUrl] = useState<string | null>(null);
 
   const guests = useMemo(() => desk.data?.guests ?? [], [desk.data]);
   const selected = guests.find((g) => g.room === room) ?? guests[0];
@@ -161,11 +163,16 @@ export default function DeskPage() {
               disabled={busy || !selected || !canCheckout}
               aria-describedby="checkoutHint"
               onClick={() =>
-                act<{ perk_code: string; slip: Slip }>("desk/checkout", { room: selected?.room }, (r) => {
-                  remember(r.slip);
-                  toast(`Slip printed with ${r.perk_code}. A draft is waiting in Approvals.`);
-                  desk.reload();
-                })
+                act<{ perk_code: string; slip: Slip; rating_url?: string | null }>(
+                  "desk/checkout",
+                  { room: selected?.room },
+                  (r) => {
+                    remember(r.slip);
+                    setRatingUrl(r.rating_url ?? null);
+                    toast(`Slip printed with ${r.perk_code}. A draft is waiting in Approvals.`);
+                    desk.reload();
+                  },
+                )
               }
             >
               Check out and print
@@ -207,6 +214,7 @@ export default function DeskPage() {
                   ? `${selected.name} said yes to offers. Check out prints the slip with their perk code.`
                   : `${selected.name} · ${selected.channel}. No yes to offers yet: the slip still prints, and no messages will be sent.`}
           </p>
+          {ratingUrl ? <RatingPanel url={ratingUrl} onClose={() => setRatingUrl(null)} /> : null}
         </div>
 
         <div className={styles.phone} role="region" aria-label="Guest phone">

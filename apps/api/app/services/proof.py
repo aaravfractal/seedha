@@ -32,6 +32,7 @@ from app.models import (
 )
 from app.services.chain import CONFIRM_WAIT_S, RPC_TIMEOUT_S, Confirmation, WriteResult
 from app.services.consent import as_utc, fingerprint
+from app.services.site_ratings import erase_guest_comments
 
 
 class ProofError(ValueError):
@@ -288,6 +289,8 @@ def erase_consent(session: Session, consent: Consent, now: datetime) -> None:
     session.execute(delete(InboxMessage).where(InboxMessage.consent_id == consent.id))
     # What Seedha remembered about the guest (preferences, notes) goes too.
     session.execute(delete(GuestMemory).where(GuestMemory.guest_id == consent.guest_id))
+    # A mini-site rating comment may hold the guest's words: blanked, stars stay.
+    erase_guest_comments(session, consent.guest_id)
     for message in session.scalars(select(Message).where(Message.consent_id == consent.id)):
         message.body = "[erased at the guest's request]"
         if message.status == "draft":
