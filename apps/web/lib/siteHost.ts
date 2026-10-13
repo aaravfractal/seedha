@@ -78,9 +78,9 @@ export const HOTEL_SW_PATH = "/h-sw.js";
  * offline service worker, GET requests to its own public site API (the page,
  * availability and photos) and only these writes, POSTs to its own card
  * routes: `/scan` (a printed card's QR count) and `/card/verify`,
- * `/card/rate`, `/card/feedback` (the card page). The BFF still checks the Origin.
+ * `/card/rate`, `/card/feedback` and `/feedback` (the card page). The BFF still checks the Origin.
  */
-const HOTEL_HOST_WRITES = ["scan", "card/verify", "card/rate", "card/feedback"];
+const HOTEL_HOST_WRITES = ["scan", "feedback", "card/verify", "card/rate", "card/feedback"];
 
 export function hotelPathAllowed(pathname: string, method: string, slug: string): boolean {
   if (pathname === "/" || pathname.startsWith("/_next/") || pathname.startsWith("/__nextjs")) return true;

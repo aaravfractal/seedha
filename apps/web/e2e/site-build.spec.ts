@@ -305,7 +305,7 @@ test("build, generate, edit, regenerate and publish the site", async ({
       await expect(page.getByRole("heading", { name: room.name }).first()).toBeVisible();
       await expect(page.getByText(room.shown).first()).toBeVisible();
     }
-    await expect(page.getByText("Built with Seedha")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Powered by Seedha", exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /Book direct · Powered by Seedha/ })).toBeVisible();
     const photos = page.locator(`img[src*="/api/public/site/${SLUG}/photos/"]`);
     expect(await photos.count(), url).toBeGreaterThanOrEqual(4);
@@ -344,7 +344,7 @@ test("build, generate, edit, regenerate and publish the site", async ({
   await expect(brand).toBeChecked();
   await page.goto(`/h/${SLUG}`);
   await expect(page.getByText(EDITED).first()).toBeVisible();
-  await expect(page.getByText("Built with Seedha")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Powered by Seedha", exact: true })).toHaveCount(0);
   await expect(page.getByText("Powered by Seedha")).toHaveCount(0);
   await page.goto("/site");
   await expect(brand).toBeChecked();
@@ -352,7 +352,7 @@ test("build, generate, edit, regenerate and publish the site", async ({
   await expect(page.getByText("Seedha branding shown")).toBeVisible();
   await expect(brand).not.toBeChecked();
   await page.goto(`/h/${SLUG}`);
-  await expect(page.getByText("Built with Seedha")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Powered by Seedha", exact: true })).toBeVisible();
 
   await resetSampleHotel(page);
 });

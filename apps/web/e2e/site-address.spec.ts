@@ -67,7 +67,7 @@ test("publish under a chosen address, then open, share and protect it", async ({
   const live = await page.goto(`/h/${SLUG}`);
   expect(live?.status()).toBe(200);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByText("Built with Seedha")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Powered by Seedha", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /Book direct · Powered by Seedha/ })).toBeVisible();
   expect(await axeViolations(page)).toEqual([]);
 
@@ -82,7 +82,7 @@ test("publish under a chosen address, then open, share and protect it", async ({
   const host = hotelOrigin(baseURL, SLUG);
   const onHost = await page.goto(`${host}/`);
   expect(onHost?.status()).toBe(200);
-  await expect(page.getByText("Built with Seedha")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Powered by Seedha", exact: true })).toBeVisible();
   for (const path of ["/login", "/home", "/site", "/settings", `/h/${SLUG}`]) {
     const res = await page.goto(`${host}${path}`);
     expect(res?.status(), path).toBe(404);
@@ -101,7 +101,7 @@ test("publish under a chosen address, then open, share and protect it", async ({
   expect((await apiCall(page, "PATCH", "site/branding", { hide_branding: true })).ok()).toBe(true);
   await page.goto(`/h/${SLUG}`);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByText("Built with Seedha")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Powered by Seedha", exact: true })).toHaveCount(0);
   await expect(page.getByText("Powered by Seedha")).toHaveCount(0);
   expect((await apiCall(page, "PATCH", "site/branding", { hide_branding: false })).ok()).toBe(true);
 

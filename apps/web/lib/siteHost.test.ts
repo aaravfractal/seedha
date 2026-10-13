@@ -116,7 +116,7 @@ test("hotel hosts serve only the page and their own public API", () => {
 
 test("hotel hosts allow only their own card writes: scan count, verify, rate, feedback", () => {
   const allowed = (path: string, method = "GET") => hotelPathAllowed(path, method, "deodar-view");
-  for (const w of ["scan", "card/verify", "card/rate", "card/feedback"]) {
+  for (const w of ["scan", "feedback", "card/verify", "card/rate", "card/feedback"]) {
     assert.ok(allowed(`/api/public/site/deodar-view/${w}`, "POST"), w);
     assert.equal(allowed(`/api/public/site/other-hotel/${w}`, "POST"), false, `other hotel ${w}`);
   }
