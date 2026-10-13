@@ -2,18 +2,33 @@
 (docs/HOTEL_SITE_V2.md). Owner-only like routers/site.py.
 
 The facts are plain text validated by app.services.site_details; nothing here
-is a price. Scan counts are only counts per card type per hotel day.
+is a price. Scan counts are only counts per card type per hotel day. The
+printable cards and their QR codes are built from the same site data and
+carry no prices (app.services.site_cards).
 """
 
 from __future__ import annotations
 
 from datetime import date
+from typing import Annotated, Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query, Response
 from pydantic import BaseModel
 
-from app.deps import OwnerDep, PropertyDep, SessionDep
+from app.deps import OwnerDep, PropertyDep, SessionDep, SettingsDep
+from app.routers.site import site_content
 from app.services.desk import business_date, utc_now
+from app.services.site import get_config
+from app.services.site_cards import (
+    CardData,
+    CardKind,
+    QrCard,
+    card_data,
+    card_url,
+    cards_pdf,
+    qr_png,
+    qr_svg,
+)
 from app.services.site_details import (
     SCAN_CARDS,
     SiteDetailsIn,
@@ -77,3 +92,99 @@ def get_scans(_owner: OwnerDep, session: SessionDep, prop: PropertyDep) -> Scans
         by_card=by_card,
         by_day=sorted(days.values(), key=lambda d: d.day),
     )
+
+
+PDF_RESPONSE: dict[int | str, dict[str, Any]] = {200: {"content": {"application/pdf": {}}}}
+
+
+def owner_site(session: SessionDep, prop: PropertyDep, settings: SettingsDep) -> dict[str, Any]:
+    """The owner's view of the site (what the cards and QR codes are built from)."""
+    return site_content(session, prop, get_config(session, prop.id), settings, public=False)
+
+
+def owner_card_data(site: dict[str, Any], prop: PropertyDep) -> CardData:
+    """The cards' text from the owner's view of the site (English only)."""
+    details = site["details"]
+    contact = details.contact
+    return card_data(
+        hotel=site["hotel"],
+        url=site["url"],
+        display_url=site["address"],
+        location=site["location"]["en"],
+        tagline=site["tagline"]["en"],
+        contact={"phone": contact.phone, "whatsapp": contact.whatsapp,
+                 "email": contact.email, "address": contact.address_en},
+        times=(details.check_in, details.check_out),
+        nearby=[(p.name_en, p.minutes, p.mode) for p in details.nearby],
+        notes=[n.text_en for n in details.good_to_know],
+        sample=prop.is_sample,
+        hide_branding=site["hide_branding"],
+    )  # fmt: skip
+
+
+@router.get("/cards.pdf", response_class=Response, responses=PDF_RESPONSE)
+def get_cards_pdf(
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
+    kind: Annotated[CardKind, Query()] = "all",
+) -> Response:
+    """Printable cards (wallet, room, tent or all) with bleed, crop marks and
+    a CMYK colour page."""
+    site = owner_site(session, prop, settings)
+    return Response(
+        content=cards_pdf(owner_card_data(site, prop), kind),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{site["slug"]}-cards-{kind}.pdf"',
+            "Cache-Control": "no-store",
+        },
+    )
+
+
+def qr_target(session: SessionDep, prop: PropertyDep, settings: SettingsDep, card: QrCard) -> str:
+    """The site address with ?src=card-<type>."""
+    return card_url(owner_site(session, prop, settings)["url"], card)
+
+
+@router.get(
+    "/cards/qr.svg",
+    response_class=Response,
+    responses={200: {"content": {"image/svg+xml": {}}}},
+)
+def get_card_qr_svg(
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
+    card: Annotated[QrCard, Query()],
+) -> Response:
+    """The card's QR (level H, 4-module quiet zone) as SVG."""
+    return Response(
+        content=qr_svg(qr_target(session, prop, settings, card)),
+        media_type="image/svg+xml",
+        headers={"Content-Disposition": f'attachment; filename="qr-card-{card}.svg"',
+                 "Cache-Control": "no-store"},
+    )  # fmt: skip
+
+
+@router.get(
+    "/cards/qr.png",
+    response_class=Response,
+    responses={200: {"content": {"image/png": {}}}},
+)
+def get_card_qr_png(
+    _owner: OwnerDep,
+    session: SessionDep,
+    prop: PropertyDep,
+    settings: SettingsDep,
+    card: Annotated[QrCard, Query()],
+) -> Response:
+    """The card's QR (level H, 4-module quiet zone) as a PNG of at least 1024 px."""
+    return Response(
+        content=qr_png(qr_target(session, prop, settings, card)),
+        media_type="image/png",
+        headers={"Content-Disposition": f'attachment; filename="qr-card-{card}.png"',
+                 "Cache-Control": "no-store"},
+    )  # fmt: skip
